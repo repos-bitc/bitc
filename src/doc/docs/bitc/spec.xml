@@ -674,7 +674,7 @@ float double quad</literallayout>
 	    A character literal may be written as
 	  </p>
 	  <literallayout>
-#\<em>printable-character</em></literallayout>
+'<em>printable-character</em>'</literallayout>
 	  <p>
 	    Where <progident><em>printable-character</em></progident>
             is any character specified in the Unicode 4.1.0 standard
@@ -682,24 +682,21 @@ float double quad</literallayout>
             (control codes) "Cf" (format controls), "Cs" (surrogates),
             "Cn" (unassigned), or "Z" (separators).  That is, any
             printable character, excluding spaces.  Notwithstanding
-            the listed Unicode categories, the characters ``{''
-            (U+007B, left curly brace) and ``}'' (U+007D, right curly
-            brace) are excluded for use in character literal escaping.
-            Notwithstanding the previously listed Unicode categories,
-            the following characters are considered printable
-            characters as well:
+            the listed Unicode categories, the characters ``\''
+            (U+005C) and single quote (U+0027) are excluded, and the
+            character ``space'' (U+0020) is considered printable.
 	  </p>
-	  <literallayout>
-! " # $ % &amp; ' ( ) * + , - . / :
-{ } ; &lt; = &gt; ? @ [ \ ] ^ _ ` | ~</literallayout>
 	  <p>
-            A character may also be specified by its unicode code
-	    point:
+            An arbitrary character may also be specified numerically
+	    in one of the following forms:
 	  </p>
 	  <literallayout>
-#\U+<em>digits</em></literallayout>
+'\U+<em>hex digits</em>'  // unicode code point
+'\0x<em>hex digits</em>'  // unicode code point expressed in hexadecimal
+'\0b<em>binary digits</em>'  // unicode code point expressed in binary
+'\0<em>binary digits</em>'  // unicode code point expressed in octal</literallayout>
 	  <p indent="no">
-	    Where <em>digits</em> are hexidecimal. The value supplied
+	    The value supplied
 	    must be a valid unicode code point, which is a value in
 	    the range 0..10FFFF hexadecimal.
 	  </p>
@@ -708,32 +705,32 @@ float double quad</literallayout>
 	    convenience representations as character literals:
 	  </p>
 	  <literallayout>
-#\space
-#\linefeed
-#\return
-#\tab
-#\backspace
-#\lbrace
-#\rbrace</literallayout>
+'\space', '\s'
+'\linefeed', '\n'
+'\return', '\r'
+'\tab', '\t'
+'\backspace', '\b'
+'\formfeed', '\f'
+'\backslask', '\\'
+'\squote', '\''
+'\dquote', '\"'</literallayout>
 	</sect3>
 	<sect3 id="stringlit">
 	  <title>String Literals</title>
 	  <p>
 	    BitC strings are written within double quotes, and may
 	    contain the previously listed ``printable characters''
-	    <em>excluding</em> backslash (``\''), but
-	    <em>including</em> (``{'') and (``}''). They may also
-	    contain spaces (U+0020), left curly brace (U+007B) and
-	    right curly brace (U+007D).
+	    <em>excluding</em> backslash ``\'' (U+005C), or the double quote
+	    character.
 	  </p>
 	  <p>
-	    Within a string, the backslash character (``\'') is
-	    interpreted as beginning an encoding of a specially
-	    embedded character. The character following the ``\'' is
-	    either a single-character embedding or a curly brace
-	    character ``{'' identifying the start of a Unicode
-	    character embedding. The legal forms and their meanings
-	    are:
+	    Within a string, the backslash character ``\'' (U+005C) is
+	    interpreted as beginning an encoding of an escaped
+	    character. The character following the ``\'' (U+005C) is
+	    either a single-character embedding from the list given
+	    above, or a curly brace character ``{'' (U+007B)
+	    identifying the start of a numeric or named embedding that
+	    is terminated by ``}'' (U+007D).
           </p>
           <table>
             <tbody>

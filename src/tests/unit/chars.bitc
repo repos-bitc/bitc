@@ -41,9 +41,9 @@
 
 (define (id x) x)
 
-(define a #\a)
-(define s #\space)
-(define d #\U+1ab)
+(define a 'a')
+(define s '\space')
+(define d '\U+1ab')
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

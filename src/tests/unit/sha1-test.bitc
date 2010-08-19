@@ -63,18 +63,18 @@
 		   (stdio.write_string stdio.stdout mesg)
 		   (stdio.write_string stdio.stdout ": ")
 		   (stdio.write_string stdio.stdout (sha1.shaResultAsString res))
-		   (stdio.write_char stdio.stdout #\linefeed))))
+		   (stdio.write_char stdio.stdout '\linefeed'))))
     
     (examine (sha1.sha1Reset sha) "Reset")
     (examine (sha1.sha1Input sha input) "Input")
     (examine (sha1.sha1Result sha digest) "Result")
     
-    (stdio.write_char stdio.stdout #\tab)
+    (stdio.write_char stdio.stdout '\tab')
     (do ((i:word 0 (+ i 1)))
 	((>= i 20) ())
 	(stdio.write_int stdio.stdout (nth digest i) 16)
-	(stdio.write_char stdio.stdout #\space))
-    (stdio.write_char stdio.stdout #\linefeed)
+	(stdio.write_char stdio.stdout '\space'))
+    (stdio.write_char stdio.stdout '\linefeed')
     
     0))
   

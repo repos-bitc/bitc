@@ -43,5 +43,5 @@
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (stdio.write_char stdio.stdout (stdio.read_char stdio.stdin))
-    (stdio.write_char stdio.stdout #\linefeed)
+    (stdio.write_char stdio.stdout '\linefeed')
     0))

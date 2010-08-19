@@ -45,7 +45,7 @@
 (define (TS str ts)
   (stdio.write_string stdio.stdout str)
   (stdio.write_int stdio.stdout ts 10)  
-  (stdio.write_char stdio.stdout #\linefeed))  
+  (stdio.write_char stdio.stdout '\linefeed'))  
 
 (define (zero x) 0)
 

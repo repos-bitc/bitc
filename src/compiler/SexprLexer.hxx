@@ -41,8 +41,7 @@
 #include <iostream>
 
 #include "ParseType.hxx"
-
-typedef long ucs4_t;
+#include "ucs.hxx"
 
 /** @brief Hand-crafted S-expression lexer.
  *

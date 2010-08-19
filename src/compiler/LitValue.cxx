@@ -45,168 +45,348 @@
 #include <string>
 #include <sstream>
 
+#include <unicode/uchar.h>
+
 #include <libsherpa/utf8.hxx>
 
 #include "LitValue.hxx"
 
-uint32_t
+#define DEBUG_DECODE false
+
+long 
+LitValue::digitValue(ucs4_t ucs4, unsigned radix)
+{
+  long l = -1;
+
+  if (ucs4 >= '0' && ucs4 <= '9')
+    l = ucs4 - '0';
+  if (ucs4 >= 'a' && ucs4 <= 'f')
+    l = ucs4 - 'a' + 10;
+  if (ucs4 >= 'A' && ucs4 <= 'F')
+    l = ucs4 - 'A' + 10;
+
+  if (l > radix)
+    l = -1;
+  return l;
+}
+
+bool
+LitValue::valid_char_printable(ucs4_t ucs4)
+{
+  switch (ucs4) {
+  case '_':
+    return true;
+
+    // This should match the list TransitionLexer::valid_ident_punct():
+  case '!':
+  case '$':
+  case '%':
+  case '&':
+  case '|':
+  case '*':
+  case '+':
+  case '-':
+  case '/':
+  case '<':
+  case '>':
+  case '=':
+  case '?':
+  case '@':
+  case '~':
+    return true;
+
+    // Other characters that can appear "naked" in a character constant:
+  case '^':
+  case '.':
+  case ',':
+  case ':':
+  case ';':
+  case '[':
+  case ']':
+  case '\'':
+  case '#':
+  case '`':
+  case '(':
+  case ')':
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool
+LitValue::valid_charpoint(ucs4_t ucs4)
+{
+  if (valid_char_printable(ucs4))
+    return true;
+
+  return u_isgraph(ucs4);
+}
+
+bool
+LitValue::valid_charpunct(ucs4_t ucs4)
+{
+  if (strchr("!\"#$%&'()*+,-./:;{}<=>?@[\\]^_`|~", ucs4))
+    return true;
+  return false;
+}
+
+unsigned
+LitValue::validate_string(const char *s)
+{
+  const char *spos = s;
+  ucs4_t c;
+
+  assert(*spos == '"');
+  spos++;
+
+  while (*spos != '"') {
+    const char *snext;
+    c = DecodeStringCharacter(spos, &snext); //&OK
+    if (c < 0)
+      return spos - s;
+
+    spos = snext;
+  }
+
+  return 0;
+}
+
+/// @brief Map from all of the named, escaped literals to the
+/// corresponding code points.
+///
+/// There were getting to be too many of these to keep in sync, so I
+/// wanted one place to maintain them.
+///
+/// This table is only used to validate lexically well-formed
+/// escapes. The format for in-string, sexpr-char, and block-char
+/// escapes are mutually non-overlapping, so we just stick them all in
+/// a single table.
+///
+/// The multi-character literals appear in three forms:
+///
+/// S-expression: #\formfeed
+/// Block character escape: '\formfeed'
+/// Embedded in a string: "...\{formfeed}..."
+///
+/// The single character versions do not have short-form S-expression
+/// character variants, because this would interfere with the normal
+/// S-expression character syntax.
+
+#define ESCAPED_LITERAL(s, cp)  \
+  { "\\{" s "}" , cp },         \
+  { "'\\" s "'", cp }
+#define SINGLE_LITERAL(s, cp)  \
+  { "\\" s , cp },             \
+  { "'\\" s "'", cp }
+
+LitValue::EscapedLiteral
+LitValue::EscapedLiteralMap[] = {
+  ESCAPED_LITERAL("space", ' '),
+  ESCAPED_LITERAL("linefeed", '\n'),
+  SINGLE_LITERAL("n", '\n' ),
+  ESCAPED_LITERAL("return", '\r'),
+  SINGLE_LITERAL("r", '\r' ),
+  ESCAPED_LITERAL("tab", '\t'),
+  SINGLE_LITERAL("t", '\t' ),
+  ESCAPED_LITERAL("backspace", '\b'),
+  SINGLE_LITERAL("b", '\b' ),
+  ESCAPED_LITERAL("formfeed", '\f'),
+  SINGLE_LITERAL("f", '\f' ),
+  SINGLE_LITERAL("s", ' ' ),
+  ESCAPED_LITERAL("backslash", '\\'),
+  SINGLE_LITERAL("\\", '\\' ),
+  ESCAPED_LITERAL("dquote", '\"'),
+  SINGLE_LITERAL("\"", '\"' ),
+  ESCAPED_LITERAL("squote", '\''),
+  SINGLE_LITERAL("\'", '\'' )
+};
+const size_t LitValue::EscapedLiteralMapLength = 
+  (sizeof(LitValue::EscapedLiteralMap) /
+   sizeof(LitValue::EscapedLiteralMap[0]));
+
+ucs4_t
+LitValue::GetEscapedCodePoint(const char *escapedLiteral)
+{
+  for (size_t i = 0; i < EscapedLiteralMapLength; i++) {
+    if (strcmp(EscapedLiteralMap[i].s, escapedLiteral) == 0) {
+      return EscapedLiteralMap[i].codePoint;
+    }
+  }
+
+  return -1;
+}
+
+ucs4_t
+LitValue::DecodeNumericCharacter(const char *s, const char **snext)
+{
+  ucs4_t codePoint = 0;
+  unsigned radix = 10;
+
+  // Could be unicode escape:
+  if (s[0] == 'U' && s[1] == '+') {
+    s = s + 2;
+    radix = 16;
+  }
+  else if ((s[0] == '0') && (s[1] == 'x')) { // hexadecimal
+    s = s + 2;
+    radix = 16;
+  }
+  else if ((s[0] == '0') && (s[1] == 'o')) { // octal
+    s = s + 2;
+    radix = 8;
+  }
+  else if ((s[0] == '0') && (s[1] == 'b')) { // binary
+    s = s + 2;
+    radix = 2;
+  }
+  else if (s[0] == '0') {       // C-style octal
+    s = s + 1;
+    radix = 8;
+  }
+  else if (!isdigit(s[0])) {
+    if (snext) *snext = s;
+    return -1;
+  }
+
+  for (;;) {
+    long dv = digitValue(*s, 16);
+    if (dv < 0)                 // exits on NUL, ', or }
+      break;
+
+    codePoint *= 16;
+    codePoint += dv;
+
+    if (codePoint > UCHAR_MAX_VALUE) {
+      if (snext) *snext = s;
+      return -1;
+    }
+    s++;
+  }
+
+  if (snext) *snext = s;
+  return codePoint;
+}
+
+ucs4_t
 LitValue::DecodeStringCharacter(const char *s, const char **next)
 {
-  unsigned long codePoint;
+  const char *sBegin = s;
+  const char *snext = s + 1;
 
-  if (*s != '\\') {
-    const char *snext;
-    codePoint = sherpa::utf8_decode(s, &snext); // &OK
+  ucs4_t c = sherpa::utf8_decode(s, &snext);
+
+  if (c == ' ') {
+    if (next) *next = snext;
+    if (DEBUG_DECODE)
+      std::cerr << "DecodeStringChar handles { } giving "
+                << (ucs4_t)' '
+                << std::endl;
+    return ' ';
+  }
+  else if (c != '\\') {
+    if (!u_isgraph(c)) {
+      if (DEBUG_DECODE)
+        std::cerr << "DecodeStringChar handles {"
+                  << (char) c
+                  << "} giving -1"
+                  << std::endl;
+      return -1;
+    }
+
+    if (DEBUG_DECODE)
+      std::cerr << "DecodeStringChar handles {"
+                << (char) c
+                << "} giving "
+                << (ucs4_t)c
+                << std::endl;
+
+    if (next) *next = snext;
+    return c;
+  }
+  else {
     s = snext;
-  }
-  else {
-    // Initial character was '\\', so this is either \<char> or it is
-    // encoded somehow.  Next thing is *probably* a left curly
-    // brace, but might be a normal char.
-    s++;
-    switch(*s++) {
-    case '{':
-      {
-        // Okay, could be either a natural number or one of the special
-        // character expansions.
-        if (isdigit(*s)) {
-          char *snext;
-          unsigned long radix = strtoul(s, &snext, 10); //&OK
+    c = sherpa::utf8_decode(s, &snext);
 
-          // Okay, this is pretty disgusting. If there actually WAS a
-          // radix prefix, then *snext is now 'r'. If not, then either
-          // /radix/ holds the actual numerical code point or something
-          // went horribly wrong.
-
-          if (*snext == 'r') {
-            s = snext+1;
-            codePoint = strtoul(s, &snext, radix); //&OK
-          }
-          else {
-            codePoint = radix;
-            s = snext;
-          }
-        }
-        else if (s[0] == 'U' && s[1] == '+') {
-          char *snext;
-          s += 2;
-          codePoint = strtoul(s, &snext, 16); //&OK
-          s = snext;
-        }
-        else
-          assert(false);
-
-        assert (*s == '}');
-
-        s++;
-
-        break;
-      }
-    case 'n':
-      {
-        codePoint = '\n';        // newline
-        break;
-      }
-    case 'r':
-      {
-        codePoint = '\r';        // return
-        break;
-      }
-    case 't':
-      {
-        codePoint = '\t';        // tab
-        break;
-      }
-    case 'b':
-      {
-        codePoint = '\010';        // backspace
-        break;
-      }
-    case 's':
-      {
-        codePoint = ' ';        // space
-        break;
-      }
-    case 'f':
-      {
-        codePoint = '\f';        // formfeed
-        break;
-      }
-    case '"':
-      {
-        codePoint = '"';        // double quote
-        break;
-      }
-    case '\\':
-      {
-        codePoint = '\\';        // backslash
-        break;
-      }
-    default:
-      {
-        assert(false);
-        break;
-      }
+    if (c == '{' ) {
+      while (c != '}')
+        c = sherpa::utf8_decode(s, &snext);
     }
-  }
 
-  if (next) *next = s;
-  return codePoint;
+    std::string theEscape(sBegin, snext - sBegin);
+    ucs4_t codePoint = GetEscapedCodePoint(theEscape.c_str());
+    if (codePoint < 0) {
+      if (DEBUG_DECODE)
+        std::cerr << "DecodeStringChar handles {"
+                  << theEscape
+                  << "} giving -1"
+                  << std::endl;
+      return -1;
+    }
+
+    if (DEBUG_DECODE)
+      std::cerr << "DecodeStringChar handles {"
+                << theEscape
+                << "} giving "
+                << (ucs4_t)codePoint
+                << std::endl;
+
+    if (next) *next = snext;
+    return codePoint;
+  }
 }
 
-// FIX: the current implementation assumes that the input stream
-// consists of ASCII characters, which is most definitely a bug.
-uint32_t
-LitValue::DecodeRawCharacter(const char *s, const char **next)
+ucs4_t
+LitValue::DecodeBlockCharacter(const char *s)
 {
-  unsigned long codePoint;
+  const char *snext;
 
-  if (*s != '\\') {
-    codePoint = *s++;
+  ucs4_t codePoint = GetEscapedCodePoint(s);
+  if (codePoint >= 0)
+    return codePoint;
+
+  if (s[1] == '\\') {
+    // Any remaining escape must be numeric:
+
+    s = s + 2;
+    codePoint = DecodeNumericCharacter(s, &snext);
+    if (codePoint < 0)
+      return codePoint;
+
+    if (snext == s) {
+      // It wasn't a numeric escape:
+      return -1;
+    }
+
+    return codePoint;
   }
+
   else {
-    // Initial character was '\\', so this is either \<char> or it is
-    // encoded somehow.  Next thing is *probably* a left curly
-    // brace, but might be a normal char.
-    s++;
-    if (strcmp(s, "space") == 0) {
-      codePoint = ' ';
-      s+= 5;
-    }
-    else if (strcmp(s, "tab") == 0) {
-      codePoint = '\t';
-      s += 3;
-    }
-    else if (strcmp(s, "linefeed") == 0) {
-      codePoint = '\n';
-      s += 8;
-    }
-    else if (strcmp(s, "return") == 0) {
-      codePoint = '\r';
-      s += 6;
-    }
-    else if (strcmp(s, "lbrace") == 0) {
-      codePoint = '{';
-      s += 6;
-    }
-    else if (strcmp(s, "rbrace") == 0) {
-      codePoint = '}';
-      s += 6;
-    }
-    else
-      codePoint = *s++;
+    s = s + 1;                  // skip the '\'
+
+    // This is a non-escaped character:
+    codePoint = sherpa::utf8_decode(s, &snext); //&OK
+    if (codePoint < 0 || snext == s)
+      return -1;
+
+    if (valid_charpoint(codePoint) || valid_charpunct(codePoint))
+      return codePoint;
   }
 
-  if (next) *next = s;
-  return codePoint;
+  return -1;
 }
 
-uint32_t
+ucs4_t
 LitValue::DecodeCharacter(const std::string& s)
 {
   const char *str = s.c_str();
 
-  assert(*str == '#');
+  ucs4_t codePoint = DecodeBlockCharacter(str);
 
-  return DecodeRawCharacter(str + 1, 0);
+#if 0
+  std::cerr << "Decoding character {" << s << "} gives " 
+            << codePoint << std::endl;
+#endif
+
+  return codePoint;
 }

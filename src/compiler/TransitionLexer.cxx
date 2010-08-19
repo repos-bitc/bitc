@@ -44,57 +44,13 @@
 
 #include <libsherpa/utf8.hxx>
 #include <libsherpa/LexLoc.hxx>
-#include <libsherpa/utf8.hxx>
 
 #include "BUILD/TransitionParser.hxx"
 
 using namespace sherpa;
 
 #include "TransitionLexer.hxx"
-
-bool
-TransitionLexer::valid_char_printable(ucs4_t ucs4)
-{
-  switch (ucs4) {
-  case '_':
-    return true;
-
-    // This should match the list above in valid_ident_punct:
-  case '!':
-  case '$':
-  case '%':
-  case '&':
-  case '|':
-  case '*':
-  case '+':
-  case '-':
-  case '/':
-  case '<':
-  case '>':
-  case '=':
-  case '?':
-  case '@':
-  case '~':
-    return true;
-
-    // Other characters that can appear "naked" in a character constant:
-  case '^':
-  case '.':
-  case ',':
-  case ':':
-  case ';':
-  case '[':
-  case ']':
-  case '\'':
-  case '#':
-  case '`':
-  case '(':
-  case ')':
-    return true;
-  default:
-    return false;
-  }
-}
+#include "LitValue.hxx"
 
 bool
 TransitionLexer::valid_ident_start(ucs4_t ucs4)
@@ -189,86 +145,6 @@ TransitionLexer::valid_tv_ident_continue(ucs4_t ucs4)
 {
   return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE) ||
           ucs4 == '_');
-}
-bool
-TransitionLexer::valid_charpoint(ucs4_t ucs4)
-{
-  if (valid_char_printable(ucs4))
-    return true;
-
-  return u_isgraph(ucs4);
-}
-
-bool
-TransitionLexer::valid_charpunct(ucs4_t ucs4)
-{
-  if (strchr("!\"#$%&'()*+,-./:;{}<=>?@[\\]^_`|~", ucs4))
-    return true;
-  return false;
-}
-
-unsigned
-TransitionLexer::validate_string(const char *s)
-{
-  const char *spos = s;
-  uint32_t c;
-
-  while (*spos) {
-    const char *snext;
-    c = sherpa::utf8_decode(spos, &snext); //&OK
-
-    if (c == ' ') {                /* spaces are explicitly legal */
-      spos = snext;
-    }
-    else if (c == '\\') {        /* escaped characters are legal */
-      const char *escStart = spos;
-      spos++;
-      switch (*spos) {
-      case 'n':
-      case 't':
-      case 'r':
-      case 'b':
-      case 's':
-      case 'f':
-      case '"':
-      case '\\':
-        {
-          spos++;
-          break;
-        }
-      case '{':
-        {
-          if (*++spos != 'U')
-            return (spos - s);
-          if (*++spos != '+')
-            return (spos - s);
-          {
-            uint32_t codePoint = 0;
-
-            while (*++spos != '}') {
-              if (!isxdigit(*spos))
-                return (spos - s);
-              codePoint *= 16;
-              codePoint += TransitionLexer::digitValue(*spos, 16);
-              if (codePoint > UCHAR_MAX_VALUE)
-                return (spos - s);
-            }
-          }
-        }
-        spos++;
-        break;
-      default:
-        // Bad escape sequence
-        return (escStart - s);
-      }
-    }
-    else if (u_isgraph(c)) {
-      spos = snext;
-    }
-    else return (spos - s);
-  }
-
-  return 0;
 }
 
 TransitionLexer::KeyWord::KeyWord(const char *_nm, LangFlags _whichLang, int _tokValue)
@@ -580,23 +456,6 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
   nModules = 0;
 }
 
-long 
-TransitionLexer::digitValue(ucs4_t ucs4, unsigned radix)
-{
-  long l = -1;
-
-  if (ucs4 >= '0' && ucs4 <= '9')
-    l = ucs4 - '0';
-  if (ucs4 >= 'a' && ucs4 <= 'f')
-    l = ucs4 - 'a' + 10;
-  if (ucs4 >= 'A' && ucs4 <= 'F')
-    l = ucs4 - 'A' + 10;
-
-  if (l > radix)
-    l = -1;
-  return l;
-}
-
 ucs4_t
 TransitionLexer::getChar()
 {
@@ -893,9 +752,9 @@ TransitionLexer::do_lex(ParseType *lvalp)
         if (c == '\\') {
           (void) getChar();        // just ignore it -- will validate later
         }
-      }        while (c != '"');
+      } while (c != '"');
       
-      unsigned badpos = validate_string(thisToken.c_str());
+      unsigned badpos = LitValue::validate_string(thisToken.c_str());
 
       if (badpos) {
         LexLoc badHere = here;
@@ -933,87 +792,87 @@ TransitionLexer::do_lex(ParseType *lvalp)
           here.updateWith(thisToken);
           RETURN_TOKEN(tk_FALSE);
         }
-      case '\\':
-        {
-          c = getChar();
 
-          if (valid_charpunct(c)) {
-            lvalp->tok = LToken(here, thisToken);
-            here.updateWith(thisToken);
-            RETURN_TOKEN(tk_Char);
-          }
-          else if (c == 'U') {
-            uint32_t codePoint = 0;
-
-            c = getChar();
-            if (c == '+') {
-              for(;;) {
-                c = getChar();
-                long dv = digitValue(c, 16);
-                if (dv < 0)
-                  break;
-                codePoint *= 16;
-                codePoint += dv;
-                if (codePoint > UCHAR_MAX_VALUE)
-                  RETURN_TOKEN(EOF);
-              }
-              
-              if (!isCharDelimiter(c)) {
-                ungetChar(c);
-                RETURN_TOKEN(EOF);
-              }
-            }
-            ungetChar(c);
-
-            lvalp->tok = LToken(here, thisToken);
-            here.updateWith(thisToken);
-            RETURN_TOKEN(tk_Char);
-          }
-          else if (valid_charpoint(c)) {
-            // Collect more characters in case this is a named character
-            // literal.
-            do {
-              c = getChar();
-            } while (isalpha(c));
-            ungetChar(c);
-
-            if (thisToken.size() == 3 || // '#' '\' CHAR
-                thisToken == "#\\space" ||
-                thisToken == "#\\linefeed" ||
-                thisToken == "#\\return" ||
-                thisToken == "#\\tab" ||
-                thisToken == "#\\backspace" ||
-                thisToken == "#\\lbrace" ||
-                thisToken == "#\\rbrace") {
-              lvalp->tok = LToken(here, thisToken);
-              here.updateWith(thisToken);
-              RETURN_TOKEN(tk_Char);
-            }
-          }
-
-          // FIX: this is bad input
-          RETURN_TOKEN(EOF);
-        }
       default:
         // FIX: this is bad input
         RETURN_TOKEN(EOF);
       }
     }
 
-  case '\'':                        // Type variables
+  case '\'':                        // Type variable or character literal.
     {
+      // This can signal a type variable or a UCS4 codepoint literal,
+      // depending on whether a close-single-quote is present.
       int tokType = tk_TypeVar;
 
-      c = getChar();
+      int c1 = getChar();       // first character after '
+      int c2 = getChar();       // second character after '
 
-      if (c == '%') {
-        tokType = tk_EffectVar;
-        c = getChar();
+      if (c1 == EOF || c2 == EOF)
+        RETURN_TOKEN(EOF);
+
+      // Check for simple, one-codepoint character:
+      if (c2 == '\'') {
+        /* This is of the form '??', where ?? is a single character
+           that is not "'" or "\": */
+        switch (c1) {
+        case '\'':
+        case '\\':
+          {
+            // These are valid_charpunct() but not actually legal in
+            // non-escaped characters:
+            ungetChar(c2);
+            ungetChar(c1);
+            RETURN_TOKEN(EOF);
+          }
+        default:
+          {
+            if (LitValue::DecodeCharacter(thisToken) >= 0) {
+              lvalp->tok = LToken(here, thisToken);
+              here.updateWith(thisToken);
+              RETURN_TOKEN(tk_Char);
+            }
+
+            ungetChar(c2);
+            ungetChar(c1);
+            RETURN_TOKEN(EOF);
+          }          
+        }
+      }
+      else if (c1 == '\\') {
+        // Escaped character. We have already consumed the next
+        // character into c2. Scan forward to the matching '\''
+        // and then test the result by calling DecodeCharacter to
+        // validate it:
+        do {
+          c = getChar();
+          if (c == EOF)
+            RETURN_TOKEN(EOF);
+        } while (c != '\'');
+
+        if (LitValue::DecodeCharacter(thisToken) >= 0) {
+          lvalp->tok = LToken(here, thisToken);
+          here.updateWith(thisToken);
+          RETURN_TOKEN(tk_Char);
+        }
+
+        RETURN_TOKEN(EOF);
       }
 
-      if (!valid_tv_ident_start(c)) {
+      // Otherwise it is a type variable.
+
+      // It must be a type variable:
+
+      ungetChar(c2);
+
+      if (c1 == '%') {
+        tokType = tk_EffectVar;
+        c1 = getChar();
+      }
+
+      if (!valid_tv_ident_start(c1)) {
         // FIX: this is bad input
-        ungetChar(c);
+        ungetChar(c1);
         RETURN_TOKEN(EOF);
       }
 
@@ -1041,7 +900,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
     c = getChar();
 
-    if (digitValue(c, 10) < 0) {
+    if (LitValue::digitValue(c, 10) < 0) {
       ungetChar(c);
       ungetChar('-');
       goto identifier_or_operator;
@@ -1063,7 +922,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
       do {
         c = getChar();
-      } while (digitValue(c, 10) >= 0);
+      } while (LitValue::digitValue(c, 10) >= 0);
 
       /* At this point we could either discover a radix marker 'r', or
          a decimal point (indicating a floating poing literal or a
@@ -1078,7 +937,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
         do {
           c = getChar();
           count++;
-        } while (digitValue(c, radix) >= 0);
+        } while (LitValue::digitValue(c, radix) >= 0);
         count--;
         /* FIX: if count is 0, number is malformed */
       }
@@ -1103,7 +962,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
         do {
           c = getChar();
           count++;
-        } while (digitValue(c, 10) >= 0);
+        } while (LitValue::digitValue(c, 10) >= 0);
         count--;
         ungetChar(c);
         lvalp->tok = LToken(here, thisToken);
@@ -1117,7 +976,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
         do {
           c = getChar();
           count++;
-        } while (digitValue(c, radix) >= 0);
+        } while (LitValue::digitValue(c, radix) >= 0);
         count--;
         /* FIX: if count is 0, number is malformed */
       }
@@ -1136,13 +995,13 @@ TransitionLexer::do_lex(ParseType *lvalp)
       c = getChar();
       radix = 10;
 
-      if (c != '-' && digitValue(c, radix) < 0) {
+      if (c != '-' && LitValue::digitValue(c, radix) < 0) {
         // FIX: Malformed token
       }
 
       do {
         c = getChar();
-      } while (digitValue(c, 10) >= 0);
+      } while (LitValue::digitValue(c, 10) >= 0);
 
       /* Check for radix marker on exponent */
       if (c == 'r') {
@@ -1153,7 +1012,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
         do {
           c = getChar();
           count++;
-        } while (digitValue(c, radix) >= 0);
+        } while (LitValue::digitValue(c, radix) >= 0);
         count--;
         /* FIX: if count is 0, number is malformed */
       }

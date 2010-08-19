@@ -47,5 +47,5 @@
 	((== i argvec.length) ())
 	(begin
 	  (stdio.write_string stdio.stdout (nth argvec i))
-	  (stdio.write_char stdio.stdout #\linefeed)))
+	  (stdio.write_char stdio.stdout '\linefeed')))
     0))

@@ -48,6 +48,6 @@
 (provide bitc.main main)
 (define main.main:(fn (vector string) -> int32)
   (lambda (argv)
-    (lv_m (cons #\a nil:(list (mutable char))))
-    (lv_nm (cons #\a nil))
+    (lv_m (cons 'a' nil:(list (mutable char))))
+    (lv_nm (cons 'a' nil))
     0))

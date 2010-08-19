@@ -1,9 +1,10 @@
-#ifndef LITVALUE_HXX
-#define LITVALUE_HXX
+#ifndef UCS_HXX
+#define UCS_HXX
 
 /**************************************************************************
  *
- * Copyright (C) 2008, Johns Hopkins University.
+ * Copyright (C) 2010, Jonathan S. Shapiro
+ * Portions Copyright (C) 2008, Johns Hopkins University
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,60 +39,6 @@
  *
  **************************************************************************/
 
-#include <inttypes.h>
-#include <string>
-#include <libsherpa/BigNum.hxx>
+typedef long ucs4_t;
 
-#include "ucs.hxx"
-
-enum LitRepr {
-  lr_none,
-  lr_bool,
-  lr_char,
-  lr_int,
-  lr_float,
-  lr_string
-};
-
-struct LitValue {
-  LitRepr lr;
-
-  bool   b;                        /* boolean Values */
-  unsigned long c;                 /* utf32 code points */
-  sherpa::BigNum i;                /* large precision integers */
-  double d;                        /* doubles, floats          */
-
-  static bool valid_char_printable(ucs4_t ucs4);
-  static bool valid_charpoint(ucs4_t ucs4);
-  static bool valid_charpunct(ucs4_t ucs4);
-  static unsigned validate_string(const char *s);
-
-  /** @brief If @p c is a digit character in radix @p radix, return
-   * its decimal value */
-  static long digitValue(ucs4_t, unsigned radix);
-
-  // FIX: (shap) the original input is being saved in AST.s for replay
-  // purposes. String literals need to be stored here as a vector of
-  // character representations.
-  std::string s;                /* String Literals          */
-
-  struct EscapedLiteral {
-    const char *s;
-    ucs4_t codePoint;
-  };
-
-  static EscapedLiteral EscapedLiteralMap[];
-  static const size_t EscapedLiteralMapLength;
-  static ucs4_t GetEscapedCodePoint(const char *escapedLiteral);
-
-  static ucs4_t DecodeNumericCharacter(const char *s, const char **next);
-  static ucs4_t DecodeBlockCharacter(const char *s);
-  static ucs4_t DecodeStringCharacter(const char *s, const char **next);
-  static ucs4_t DecodeCharacter(const std::string&);
-
-  LitValue() {
-    lr = lr_none;
-  }
-};
-
-#endif /* LITVALUE_HXX */
+#endif /* UCS_HXX */

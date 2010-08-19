@@ -63,7 +63,7 @@
 	       (the uint32 0))
 	   (== (the uint64 0)
 	       (the uint64 0))
-	   (== #\a #\a)
+	   (== 'a' 'a')
 	   (== #t #t)
 	   (== "abc" "abc")
 	   (> "abc" "abc")

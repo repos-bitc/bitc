@@ -158,10 +158,6 @@ struct TransitionLexer {
 
   PushBack pushBackStack;
 
-  /** @brief If @p c is a digit character in radix @p radix, return
-   * its decimal value */
-  static long digitValue(ucs4_t c, unsigned radix);
-
   /** @brief Fetch next character from input stream. */
   ucs4_t getChar();
   /** @brief Push a lookahead character back onto the input stream. */
@@ -178,10 +174,6 @@ struct TransitionLexer {
   bool valid_ifident_continue(ucs4_t ucs4);
   bool valid_tv_ident_start(ucs4_t ucs4);
   bool valid_tv_ident_continue(ucs4_t ucs4);
-  bool valid_char_printable(ucs4_t ucs4);
-  bool valid_charpoint(ucs4_t ucs4);
-  bool valid_charpunct(ucs4_t ucs4);
-  unsigned validate_string(const char *s);
 
   /** @brief Constructor
    *

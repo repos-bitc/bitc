@@ -43,7 +43,7 @@
   (lambda (argvec)
     (let ((id (lambda (x) x)))
       (id #t)
-      (id #\t)
+      (id '\t')
       ;;(set! id id);; must not work
       (let ((idid (id, id)))
 	;; Only ONE of the following two lines must work!
