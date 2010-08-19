@@ -877,7 +877,7 @@ use</literallayout>
           </p>
         </sect3>
       </sect2>
-      <sect2>
+      <sect2 id="layout">
 	<title>Layout</title>
         <p>
           The goal of the layout system is to provide programmer
@@ -890,7 +890,7 @@ use</literallayout>
           tokens and also based on the indentation level of the curren
           tline.
         </p>
-        <sect3>
+        <sect3 id="layout:concept">
           <title>Concept</title>
           <p>
             The ``trick'' to the layout scheme is in two parts:
@@ -945,7 +945,7 @@ let { x = { 5 } } in <em>body</em></literallayout>
             under-indent lines capriciously.
           </p>
         </sect3>
-        <sect3>
+        <sect3 id="layout:specification">
           <title>Specification</title>
           <ul>
             <li>
