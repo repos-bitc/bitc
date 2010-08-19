@@ -711,7 +711,7 @@ float double quad</literallayout>
 '\tab', '\t'
 '\backspace', '\b'
 '\formfeed', '\f'
-'\backslask', '\\'
+'\backslash', '\\'
 '\squote', '\''
 '\dquote', '\"'</literallayout>
 	</sect3>
