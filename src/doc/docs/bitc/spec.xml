@@ -732,48 +732,6 @@ float double quad</literallayout>
 	    identifying the start of a numeric or named embedding that
 	    is terminated by ``}'' (U+007D).
           </p>
-          <table>
-            <tbody>
-              <tr>
-                <td><b>\n</b></td>
-                <td>Linefeed</td>
-              </tr>
-              <tr>
-                <td><b>\r</b></td>
-                <td>Carriage Return</td>
-              </tr>
-            </tbody>
-            <tbody>
-              <tr>
-                <td><b>\t</b></td>
-                <td>Horizontal Tab</td>
-              </tr>
-              <tr>
-                <td><b>\b</b></td>
-                <td>Backspace</td>
-              </tr>
-              <tr>
-                <td><b>\s</b></td>
-                <td>Space</td>
-              </tr>
-              <tr>
-                <td><b>\f</b></td>
-                <td>Formfeed</td>
-              </tr>
-              <tr>
-                <td><b>\"</b></td>
-                <td>Double quote</td>
-              </tr>
-              <tr>
-                <td><b>\\</b></td>
-                <td>Backslash</td>
-              </tr>
-              <tr>
-                <td><b>\{U+<em>digits</em>}</b></td>
-                <td>Unicode code point, hexidecimal <em>digits</em>.</td>
-              </tr>
-            </tbody>
-          </table>
 	</sect3>
       </sect2>
       <sect2>
