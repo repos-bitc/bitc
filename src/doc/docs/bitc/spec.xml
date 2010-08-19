@@ -858,7 +858,7 @@ use</literallayout>
               <p>
                 There are several sequencing constructs in the language whose
                 general form is a semicolon-separated sequence of things
-                surrounded by semicolons. This lets us use the same layout rules
+                surrounded by curly braces. This lets us use the same layout rules
                 for multiple purposes.
               </p>
             </li>
