@@ -5,105 +5,197 @@
 /// Layout processing is handled by a cooperation between the lexer
 /// and the parser. This page describes how that works.
 ///
-/// <h1>Objective</h1>
+/// <h1>Objective and Overview</h1>
 ///
-/// The general idea is to automatically insert curly braces at any
-/// point where they are missing, and to automatically insert
-/// statement termination semicolons at well-defined points if the
-/// user has not already inserted them.
+/// The goal of the layout system is to provide programmer
+/// convenience by automatically inserting curly braces and
+/// semicolons wherever they have not been inserted by the
+/// programmer.
+/// Left curly braces are conditionally inserted after certain
+/// preceding tokens. Semicolons are conditionally inserted
+/// based on the indentation level of each line. Right curly
+/// braces are conditionally 
+/// inserted before certain tokens and also based on the
+/// indentation level of the curren tline.
 ///
-/// <h2>General Rules</h2>
+/// The ``trick'' to the layout scheme is in two parts:
+/// <ol>
+/// <li>
+/// <p>
+/// There are several sequencing constructs in the language whose
+/// general form is a semicolon-separated sequence of things
+/// surrounded by semicolons. This lets us use the same layout rules
+/// for multiple purposes.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// At each point where a left curly brace might be automatically
+/// inserted, a preceding token (one of <tt>let</tt>, <tt>do</tt>, or
+/// ``<tt>=</tt>'') signals unambiguously that a left curly brace must
+/// follow:
+/// </p>
+/// <pre>
+/// def f x y = <b>{</b> ...
+/// def x = <b>{</b> 5 <b>}</b>
+/// struct S 'a 'b = <b>{</b> a : int; ...
+/// let <b>{</b> x = <b>{</b> 5 <b>}</b> <b>}</b> in <b>{</b> ...
+/// while (<em>expr</em>) do <b>{</b> ...
+/// do <b>{</b> ... <b>}</b> while (<em>expr</em>)</pre>
+/// </li>
+/// </ol>
+/// <p>
+///
+/// We rely on the fact that (a) knowing the preceding and
+/// current token is enough to know whether to insert a curly brace
+/// (b) because blocks are values, all binding expressions can safely
+/// be wrapped in blocks, (c) because such wrapping is always safe, it
+/// can be done in a way that is invisible to the programmer In fact,
+/// the parser insists that this be true. While it is nearly universal
+/// practice in Bitc to write code without semicolons in many places,
+/// most notably:
+///
+/// <pre>
+/// let x = 5 in <em>body</em></pre>
+///
+/// What the compiler actually <em>sees</em> is:
+///
+/// <pre>
+/// let { x = { 5 } } in <em>body</em></pre>
+///
+/// <h2>Specification</h2>
 ///
 /// <ul>
 /// <li>
 /// <p>
-/// The term <em>column number</em>, as used here, is defined as the
-/// number of preceding UCS4 code points that occur to the left of the
-/// token on the same line, without regard to comments.
+/// The term <em>offset</em>, as used here, is defined as the number
+/// of preceding UCS4 code points that occur to the left of the token
+/// on the same line. The first code point on a line is deemed to have
+/// offset zero. Offsets are determined without regard to
+/// comments. That is, in:
+///
+/// <pre>
+/// a b c /@@
+///  @@/ x</pre>
+///
+/// the token <tt>x</tt> appears at offset 5 and is the first token on
+/// its line.  Here, @@ is used for illustration instead of * because
+/// doxygen has no means to incorporate embedded comments.
+/// </li>
+/// <li>
+/// <p>
+/// The term <em>layout item sequence</em> is a sequence of layout
+/// items that are separated by semicolons and surrounded (bracketed)
+/// by curly braces. An opening '{' signals the beginning of a
+/// layout item sequence.
 /// </p>
 /// </li>
 /// <li>
 /// <p>
-/// An opening '{' signals the beginning of a <em>layout item
-/// sequence</em>, which is a sequence of layout items separated by
-/// semicolons (';').
+/// A left curly brace will be automatically inserted after the
+/// keywords <tt>let</tt>, <tt>do</tt>, and ``<tt>=</tt>'' (binding) if none
+/// appears explicitly in the input. Note that a left curly brace is
+/// required by the grammar at each of these positions.
 /// </p>
 /// </li>
 /// <li>
 /// <p>
-/// At any point where a left curly brace is required by the
-/// grammar, one will be inserted by the lexer if the required '{'
-/// is missing. A '{' inserted in this fashion is said to be
-/// <em>implicit</em>. A '{' obtained from the input stream is said to
-/// <em>explicit</em>.
+/// The lexer maintains a record of every left curly brace (whether or
+/// not inserted), in a stack of layout contexts. Each entry
+/// records the preceding keyword (<tt>let</tt>, <tt>do</tt>, or ``<tt>=</tt>''),
+/// whether the left curly brace in question was automatically
+/// inserted or not, and the offset of that layout context. The most
+/// recent entry on the layout context stack 
+/// is ``popped'' whenever an implicit or explicit '}' is encountered.
 /// </p>
-/// <p>
-/// "Required", in this context, means that the only token that may
-/// appear next in a legal input stream is '{'.
 /// </li>
 /// <li>
 /// <p>
-/// At any <em>implied close brace position</em>:
+/// On encountering the <tt>in</tt> token, the lexer will insert
+/// implicit close braces ('}'), popping layout contexts as it goes,
+/// until one of the following conditions holds:
 /// </p>
+/// <ol>
+/// <li>
+/// <p>
+/// The last layout context popped was associated with the <tt>let</tt>
+/// keyword. That is: curly braces inserted before <tt>in</tt> will only
+/// balance up to the nearest preceding <tt>let</tt>.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// The top entry on the context stack was explicit. That is: implicit
+/// closing curly braces will only balance implicit open curly braces.
+/// </p>
+/// </li>
+/// </ol>
+/// </li>
+/// <li>
+/// <p>
+/// On encountering end-of-file, the lexer will insert
+/// implicit close braces ('}'), popping layout contexts as it goes,
+/// until the top entry on the context stack is explicit.
+/// </p>
+/// </li>
+/// <li>
+/// <p>
+/// Every (implicit or explicit) '{' begins a layout item
+/// sequence. After processing the '{', the lexer examines 
+/// the next token. If it is end-of-file or <tt>in</b>, processing
+/// proceeds as described above. Otherwise:
 /// <ul>
 /// <li>
 /// <p>
-/// If the current open brace was implicit, a '}' is inserted.
+/// If the offset of the token is <em>greater than</em> the current
+/// sequence offset, it becomes the current sequence
+/// offset and is recorded in the top (most recent) layout context
+/// stack entry. Regardless of offset, no implicit semicolon will be 
+/// inserted before this token.
 /// </p>
 /// </li>
 /// <li>
 /// <p>
-/// If the current open brace was explicit and the last token
-/// processed was not '}', an error is signalled.
+/// If the offset of the token is <em>less than or equal to</em> the current
+/// sequence offset, and the most recent open brace was implicit, an
+/// implicit close brace is immediately inserted.
 /// </p>
 /// </li>
 /// </ul>
-/// <li>
-/// <p>
-/// After an opening '{', if the following token is <em>not</em>
-/// preceded by an implied close brace position, it starts a layout item.
-/// The column number of this token
-/// defines the <em>layout item sequence indent level</em> for the
-/// containing layout item sequence. A stack of such indent levels
-/// associated with the opening and closing of curly braces is
-/// maintained by the lexer.
-/// </p>
-/// </li>
-/// <li>
-/// <p>Lines consisting entirely of white
-/// space and lines whose first non-whitespace token occurs at an
-/// indentation <em>greater than</em> the current item indent level
-/// are treated as continuation lines; no special processing for these
-/// lines occurs.
-/// </p>
 /// </li>
 /// <li>
 /// <p>
-/// Lines whose first non-whitespace token occurs at a column
-/// <em>equal to</em> the current layout item, and whose first token
-/// is not ';' or '}', will have a
-/// semicolon inserted <em>unless</em> the previously encountered
-/// token was a semicolon, this has the effect of terminating the
-/// current layout item and starting a new one.
+/// Provided it does not follow an opening brace, the offset of the
+/// first token on every line is used to determine whether a closing
+/// curly brace '}' or a semicolon should be conditionally inserted as follows:
+/// </p>
+/// <ul>
+/// <li>
+/// <p>
+/// If the offset of the token is <em>greater than</em> the current
+/// sequence offset,
+/// or if the
+/// last character on the preceding line is ``\''
+/// (signalling that the line is continued),
+/// nothing is inserted.
 /// </p>
 /// </li>
 /// <li>
 /// <p>
-/// Lines whose first non-whitespace token occurs at a column <em>less
-/// than</em> the
-/// current item indent level, and whose first token is not '}', are
-/// deemed to be preceded by an implied close brace 
-/// position for as long as the current indent level is greater than
-/// that of the token. The implied close brace processing occurs
-/// before this token is consumed.
+/// If the offset of the token is <em>less than</em> the current
+/// sequence offset, and the most recent open brace was implicit, an
+/// implicit close brace is immediately inserted.
 /// </p>
 /// </li>
 /// <li>
 /// <p>
-/// When a '}' (whether or not inserted) is encountered, the current
-/// item indent level reverts to the item indent level that was in
-/// effect prior to the matching '{'
+/// If the offset of the token is <em>equal to</em> the current
+/// sequence offset, is not a semicolon (';'), and the most recently
+/// returned token was not a semicolon, a semicolon is automatically
+/// inserted.
 /// </p>
+/// </li>
+/// </ul>
 /// </li>
 /// <li>
 /// <p>
@@ -113,52 +205,3 @@
 /// </p>
 /// </li>
 /// </ul>
-/// <p>
-/// These rules are applied iteratively until no action is taken. For
-/// example, an out-dented line can potentially cause multiple
-/// implicit '}' insertions and a ';' insertion.
-/// </p>
-/// <h2>Syntactically Implied Close Brace Positions</h2>
-/// <p>
-/// We have a few syntactic constructs that use curly bracketing which
-/// do not, strictly speaking, need them at all. They do this for the
-/// sake of the layout rule. Example:
-/// </p>
-/// <pre>
-/// let x = 5 ; y = 6 in <em>expr</em></pre>
-/// <p>
-/// is really parsed as:
-/// </p>
-/// <pre>
-/// let <b>{</b> x = 5 ; y = 6 <b>}</b> in <em>expr</em></pre>
-/// <p>
-/// The problem with the layout rule as stated in its basic form above
-/// is
-/// that it would require the <tt>in</tt> to appear on a new line, as
-/// in:
-/// </p>
-/// <pre>
-/// let x = 5 ; y = 6
-/// in <em>expr</em></pre>
-/// <p>
-/// While there is nothing wrong with doing this, it's a case where
-/// inserting an implied closing brace before <tt>in</tt> probably
-/// makes the programming experience more pleasant. We resolve this by
-/// ruling that <tt>in</tt> is preceded by an implied close brace
-/// position. This enables:
-/// </p>
-/// <pre>
-/// let x = 5 in <em>expr</em></pre>
-/// <p>
-/// Haskell handles this in an <em>ad hoc</em> way, by declaring that
-/// an unexpected token at any point where a closing curly brace would
-/// be legal triggers close brace insertion. I prefer to specify those
-/// positions explicitly.
-/// </p>
-/// <p>
-/// I'm still working out the details on where such implied closing
-/// braces should occur. This may turn out to be the only example,
-/// because we do <em>not</em> want it in, say:
-/// </p>
-/// <pre>
-/// if <em>e<sub>test</sub></em> then <em>expr<sub>true</sub></em> else <em>expr<sub>false</sub></em></pre>

@@ -877,6 +877,233 @@ use</literallayout>
           </p>
         </sect3>
       </sect2>
+      <sect2>
+	<title>Layout</title>
+        <p>
+          The goal of the layout system is to provide programmer
+          convenience by automatically inserting curly braces and
+          semicolons wherever they have not been inserted by the
+          programmer.  Left curly braces are conditionally inserted
+          after certain preceding tokens. Semicolons are conditionally
+          inserted based on the indentation level of each line. Right
+          curly braces are conditionally inserted before certain
+          tokens and also based on the indentation level of the curren
+          tline.
+        </p>
+        <sect3>
+          <title>Concept</title>
+          <p>
+            The ``trick'' to the layout scheme is in two parts:
+          </p>
+          <ol>
+            <li>
+              <p>
+                There are several sequencing constructs in the language whose
+                general form is a semicolon-separated sequence of things
+                surrounded by semicolons. This lets us use the same layout rules
+                for multiple purposes.
+              </p>
+            </li>
+            <li>
+              <p>
+                At each point where a left curly brace  might be automatically
+                inserted, a preceding token (one of
+                <progident>let</progident>,
+                <progident>do</progident>, or
+                ``<progident>=</progident>'')
+                signals unambiguously that a left
+                curly brace must follow:
+              </p>
+              <literallayout>
+def f x y = <b>{</b> ...
+def x = <b>{</b> 5 <b>}</b>
+struct S 'a 'b = <b>{</b> a : int; ...
+let <b>{</b> x = <b>{</b> 5 <b>}</b> <b>}</b> in <b>{</b> ...
+while (<em>expr</em>) do <b>{</b> ...
+do <b>{</b> ... <b>}</b> while (<em>expr</em>)</literallayout>
+            </li>
+          </ol>
+          <p>
+            We rely on the fact that (a) knowing the preceding and
+            current token is enough to know whether to insert a curly
+            brace (b) because blocks are values, all binding expressions
+            can safely be wrapped in blocks, (c) because such wrapping
+            is always safe, it can be done in a way that is invisible to
+            the programmer In fact, the parser insists that this be
+            true. While it is nearly universal practice in Bitc to write
+            code without semicolons in many places, most notably:
+          </p>
+          <literallayout>
+let x = 5 in <em>body</em></literallayout>
+          <p indent="no">
+            But what the compiler actually <em>sees</em> is:
+          </p>
+          <literallayout>
+let { x = { 5 } } in <em>body</em></literallayout>
+          <p>
+            We also rely on the fact that correct programs do not
+            under-indent lines capriciously.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Specification</title>
+          <ul>
+            <li>
+              <p>
+                The term <em>offset</em>, as used here, is defined as
+                the number of preceding UCS4 code points that occur to
+                the left of the token on the same line. The first code
+                point on a line is deemed to have offset zero. Offsets
+                are determined without regard to comments. That is,
+                in:
+              </p>
+              <literallayout>
+a b c /*
+ */ x</literallayout>
+              <p indent="no">
+                the token <tt>x</tt> appears at offset 5 and is the
+                first token on
+                its line.
+              </p>
+            </li>
+            <li>
+              <p>
+                The term <em>layout item sequence</em> is a sequence
+                of layout items that are separated by semicolons and
+                surrounded (bracketed) by curly braces. An opening '{'
+                signals the beginning of a layout item sequence.
+              </p>
+            </li>
+            <li>
+              <p>
+                A left curly brace will be automatically inserted
+                after the keywords <b>let</b>, <b>do</b>, and <b>=</b>
+                (binding) if none appears explicitly in the
+                input. Note that a left curly brace is required by the
+                grammar at each of these positions.
+              </p>
+            </li>
+            <li>
+              <p>
+                The lexer maintains a record of every left curly brace
+                (whether or not inserted), in a stack of layout
+                contexts. Each entry records the preceding keyword
+                (<b>let</b>, <b>do</b>, or <b>=</b>), whether the left
+                curly brace in question was automatically inserted or
+                not, and the offset of that layout context. The most
+                recent entry on the layout context stack is ``popped''
+                whenever an implicit or explicit '}' is encountered.
+              </p>
+            </li>
+            <li>
+              <p>
+                On encountering the <b>in</b> token, the lexer will
+                insert implicit close braces ('}'), popping layout
+                contexts as it goes, until one of the following
+                conditions holds:
+              </p>
+              <ol>
+                <li>
+                  <p>
+                    The last layout context popped was associated with
+                    the <b>let</b> keyword. That is: curly braces
+                    inserted before <b>in</b> will only balance up to
+                    the nearest preceding <b>let</b>.
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    The top entry on the context stack was
+                    explicit. That is: implicit closing curly braces
+                    will only balance implicit open curly braces.
+                  </p>
+                </li>
+              </ol>
+            </li>
+            <li>
+              <p>
+                On encountering end-of-file, the lexer will insert
+                implicit close braces ('}'), popping layout contexts
+                as it goes, until the top entry on the context stack
+                is explicit.
+              </p>
+            </li>
+            <li>
+              <p>
+                Every (implicit or explicit) '{' begins a layout item
+                sequence. After processing the '{', the lexer examines
+                the next token. If it is end-of-file or <b>in</b>,
+                processing proceeds as described above. Otherwise:
+              </p>
+              <ul>
+                <li>
+                  <p>
+                    If the offset of the token is <em>greater
+                    than</em> the current sequence offset, it becomes
+                    the current sequence offset and is recorded in the
+                    top (most recent) layout context stack
+                    entry. Regardless of offset, no implicit semicolon
+                    will be inserted before this token.
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    If the offset of the token is <em>less than or
+                    equal to</em> the current sequence offset, and the
+                    most recent open brace was implicit, an implicit
+                    close brace is immediately inserted.
+                  </p>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <p>
+                Provided it does not follow an opening brace, the
+                offset of the first token on every line is used to
+                determine whether a closing curly brace '}' or a
+                semicolon should be conditionally inserted as follows:
+              </p>
+              <ul>
+                <li>
+                  <p>
+                    If the offset of the token is <em>greater
+                    than</em> the current sequence offset,
+                    or if the
+                    last character on the preceding line is ``\''
+                    (signalling that the line is continued),
+                    nothing is inserted.
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    If the offset of the token is <em>less than</em>
+                    the current sequence offset, and the most recent
+                    open brace was implicit, an implicit close brace
+                    is immediately inserted.
+                  </p>
+                </li>
+                <li>
+                  <p>
+                    If the offset of the token is <em>equal to</em>
+                    the current sequence offset, is not a semicolon
+                    (';'), and the most recently returned token was
+                    not a semicolon, a semicolon is automatically
+                    inserted.
+                  </p>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <p>
+                An implicit '{' must be matched by an implicit
+                '}'. Similarly, an explicit '{' must be matched by an
+                explicit '}'. If this requirement is violated, an
+                error is signalled.
+              </p>
+            </li>
+          </ul>
+        </sect3>
+      </sect2>
     </sect1>
     <sect1>
       <title>Types</title>
