@@ -46,6 +46,7 @@
 #include <stdlib.h>  // for strtoul()
 
 #include <libsherpa/LexLoc.hxx>
+#include <libsherpa/utf8.hxx>
 
 namespace sherpa {
   std::string
@@ -67,15 +68,17 @@ namespace sherpa {
     return asString().c_str();
   }
 
-  // Implementation of this lives in LTokString.cxx, along with all of
-  // the other decoding logic.
   void
-  LexLoc::updateWith(const std::string& s)
+  LexLoc::updateWith(const std::string& str)
   {
-    size_t i = 0;
+    const char *s = str.c_str();
+    const char *snext = s;
 
-    for (i = 0; i < s.size(); i++) {
-      switch(s[i]) {
+    while (*s) {
+      uint32_t c = utf8_decode(s, &snext);
+      s = snext;
+
+      switch(c) {
       case '\n':
 	{
 	  line++;
@@ -87,8 +90,10 @@ namespace sherpa {
 	  line++;
 	  offset = 0;
 	  // Check for CR LF:
-	  if ((i + 1) < s.size() && s[i+1] == '\n')
-	    i++;
+          if (*snext && *snext == '\n') {
+            uint32_t c = utf8_decode(s, &snext);
+            s = snext;
+          }
 	  break;
 	}
       default:
@@ -99,4 +104,44 @@ namespace sherpa {
     }
   }
 
+  LexLoc
+  LexLoc::with(const std::string& str)
+  {
+    const char *s = str.c_str();
+    const char *snext = s;
+
+    unsigned theLine = line;
+    unsigned theOffset = offset;
+
+    while (*s) {
+      uint32_t c = utf8_decode(s, &snext);
+      s = snext;
+
+      switch(c) {
+      case '\n':
+	{
+	  theLine++;
+	  theOffset = 0;
+	  break;
+	}
+      case '\r':
+	{
+	  theLine++;
+	  theOffset = 0;
+	  // Check for CR LF:
+          if (*snext && *snext == '\n') {
+            uint32_t c = utf8_decode(s, &snext);
+            s = snext;
+          }
+	  break;
+	}
+      default:
+	{
+	  theOffset++;
+	}
+      }
+    }
+
+    return LexLoc(origin, theLine, theOffset);
+  }
 } /* namespace sherpa */

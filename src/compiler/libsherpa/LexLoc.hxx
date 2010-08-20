@@ -103,6 +103,8 @@ namespace sherpa {
     }
 
     void updateWith(const std::string& s);
+
+    LexLoc with(const std::string& s);
   };
 
   inline
