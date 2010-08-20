@@ -540,6 +540,31 @@ TransitionLexer::ungetChar(ucs4_t c)
   thisToken.erase( thisToken.length() - len);
 }
 
+void
+TransitionLexer::ungetThisToken()
+{
+  ucs4_t ucsToken[8];
+  const char *s = thisToken.c_str();
+  const char *snext = s;
+  size_t i = 0;
+
+  for( ; *snext && i < 8; i++) {
+    ucsToken[i] = utf8_decode(s, &snext);
+    s = snext;
+  }
+
+  // If the following assert fails, we are backing out something
+  // excessively large...
+  assert(*snext == 0);
+
+  for (; i > 0; i--) {
+    ucs4_t c = ucsToken[i-1];
+    pushBackStack.push(c);
+  }
+
+  thisToken.erase();
+}
+
 static bool
 isWhiteSpace(ucs4_t c)
 {
@@ -614,12 +639,12 @@ TransitionLexer::endBlock(bool implicit)
 }
 
 void
-TransitionLexer::closeToToken(int precedingToken)
+TransitionLexer::closeToOpeningToken(int closingToken)
 {
-  /// closeToToken is always followed by multiple, serially reentrant
-  /// calls to TrimLayoutStack. If we are currently in the trimming
-  /// state, then we have already done the work that closeToToken was
-  /// supposed to do, and we should just return.
+  /// closeToOpeningToken is always followed by multiple, serially
+  /// reentrant calls to TrimLayoutStack. If we are currently in the
+  /// trimming state, then we have already done the work that
+  /// closeToOpeningToken was supposed to do, and we should just return.
   if (layoutFlags & TRIMMING_LAYOUT_STACK)
     return;
 
@@ -627,14 +652,29 @@ TransitionLexer::closeToToken(int precedingToken)
 
   while (ls && ls->implicit) {
     ls->dead = true;
-    if (ls->precedingToken == precedingToken)
-      return;
 
-    ls = ls->next;
+    bool foundOpeningToken = false;
+
+    switch(closingToken) {
+    case EOF:
+      if (ls->precedingToken == EOF)
+        foundOpeningToken = true;
+      break;
+
+    case tk_IN:
+      if (   ls->precedingToken == tk_LET
+          || ls->precedingToken == tk_LETREC
+          || ls->precedingToken == tk_CASE)
+        foundOpeningToken = true;
+      break;
+    }
+
+    if (foundOpeningToken)
+      break;
   }
 
-  if (layoutFlags |= TRIMMING_LAYOUT_STACK)
-    return;
+  layoutFlags |= TRIMMING_LAYOUT_STACK;
+  return;
 }
 
 bool
@@ -1147,7 +1187,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
   case EOF:
 #ifdef LAYOUT_RULES
-    closeToToken(EOF);
+    closeToOpeningToken(EOF);
     if (trimLayoutStack()) {
       lvalp->tok = LToken(here, "}");
       RETURN_TOKEN('}');
@@ -1183,6 +1223,30 @@ TransitionLexer::do_lex(ParseType *lvalp)
     if (thisToken != "set!")
       ungetChar(c);
 
+#ifdef LAYOUT_RULES
+    if (currentLang & lf_block) {
+      // LAYOUT: Implicit close is required before certain tokens:
+      if (thisToken == "in") {
+
+        closeToOpeningToken(tk_IN);
+        if (trimLayoutStack()) {
+          ungetThisToken();
+          lvalp->tok = LToken(here, "}");
+          RETURN_TOKEN('}');
+        }
+      }
+
+      // LAYOUT: '{' is required to appear after certain tokens:
+#if 0
+      if (thisToken == "do" || thisToken == "let" || thisToken == "in")
+        layoutFlags |= LayoutFlags(NEED_LBRACE);
+#endif
+      if (   thisToken == "case" 
+          || thisToken == "let" 
+          || thisToken == "letrec" )
+        layoutFlags |= LayoutFlags(NEED_LBRACE);
+    }
+#endif
   ident_done:
     lvalp->tok = LToken(here, thisToken);
     int tok = kwCheck(thisToken.c_str(), tk_BlkIdent);

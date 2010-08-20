@@ -148,8 +148,9 @@ struct TransitionLexer {
   void endBlock(bool implicit);
 
   /// @brief Mark layout stack frames dead until (a) we reach one that
-  /// was explicit, or (b) we reach one preceded by the indicated token.
-  void closeToToken(int precedingToken);
+  /// was explicit, or (b) we reach one preceded by a bracketing match
+  /// for the indicated token.
+  void closeToOpeningToken(int closingToken);
 
   /// @brief If the top layout stack entry is dead, drop it, update
   /// the layout context accordingly, and return true.
@@ -223,6 +224,7 @@ struct TransitionLexer {
   ucs4_t getChar();
   /** @brief Push a lookahead character back onto the input stream. */
   void ungetChar(ucs4_t);
+  void ungetThisToken();
 
   bool valid_ascii_symbol(ucs4_t ucs4);
 

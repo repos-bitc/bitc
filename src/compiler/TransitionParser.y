@@ -3819,9 +3819,9 @@ blk_sw_legs: blk_sw_leg {
   SHOWPARSE("blk_sw_legs -> blk_sw_leg");
   $$ = AST::make(at_usw_legs, $1->loc, $1);
 }
-blk_sw_leg: tk_CASE blk_ident tk_AS blk_switch_match tk_IN blk_stmt {
-  SHOWPARSE("blk_sw_leg -> CASE blk_ident AS blk_type IN blk_stmt");
-  $$ = AST::make(at_usw_leg, $1.loc, $2, $6, $4);
+blk_sw_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_stmt {
+  SHOWPARSE("blk_sw_leg -> CASE { blk_ident AS blk_type } IN blk_stmt");
+  $$ = AST::make(at_usw_leg, $1.loc, $3, $8, $5);
 }
 
 sxp_sw_leg: '(' sxp_switch_match sxp_block ')'  {
@@ -3980,10 +3980,10 @@ blk_stmt: tk_TRY blk_expr blk_otherwise {
 //  $$ = AST::make(at_kennedy_try, $1.loc, bindings, $4);
 //}
 
-blk_catch_leg: tk_CASE blk_ident tk_AS blk_switch_match tk_IN blk_stmt {
-  SHOWPARSE("blk_catch_leg -> CATCH blk_ident AS blk_type IN blk_stmt");
+blk_catch_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_stmt {
+  SHOWPARSE("blk_catch_leg -> CATCH { blk_ident AS blk_type } IN blk_stmt");
   //  $$ = AST::make(at_catchleg, $1.loc, $2, $4, $6);
-  $$ = AST::make(at_usw_leg, $1.loc, $2, $4, $6);
+  $$ = AST::make(at_usw_leg, $1.loc, $3, $5, $8);
 }
 
 blk_catch_legs: blk_catch_legs blk_catch_leg {
@@ -4043,11 +4043,10 @@ sxp_unqual_expr: sxp_let_eform {
 };
 
 // LET [5.3.1]                 
-blk_stmt: tk_LET blk_letbinding tk_IN blk_stmt {
-  SHOWPARSE("blk_stmt -> LET blk_letbinding IN blk_stmt");
+blk_stmt: tk_LET ILCB blk_letbindings IRCB tk_IN blk_stmt {
+  SHOWPARSE("blk_stmt -> LET { blk_letbindings } IN blk_stmt");
 
-  shared_ptr<AST> bindings = AST::make(at_letbindings, $2->loc, $2);
-  $$ = AST::make(at_let, $1.loc, bindings, $4);
+  $$ = AST::make(at_let, $1.loc, $3, $6);
   $$->addChild(AST::make(at_constraints));
 }
 blk_letbinding: blk_bindingpattern '=' blk_expr {
@@ -4087,10 +4086,10 @@ sxp_letbinding: '(' sxp_bindingpattern sxp_expr ')' {
 };
 
 // LETREC [5.3.2]              
-blk_stmt: tk_LETREC blk_letbindings tk_IN blk_stmt {
-  SHOWPARSE("blk_stmt -> LET blk_letbinding IN blk_stmt");
+blk_stmt: tk_LETREC ILCB blk_letbindings IRCB tk_IN blk_stmt {
+  SHOWPARSE("blk_stmt -> LETREC { blk_letbindings } IN blk_stmt");
 
-  $$ = AST::make(at_letrec, $1.loc, $2, $4);
+  $$ = AST::make(at_letrec, $1.loc, $3, $6);
   $$->addChild(AST::make(at_constraints));
 }
 sxp_let_eform: '(' tk_LETREC '(' sxp_letbindings ')' sxp_block ')' {
