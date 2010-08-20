@@ -38,13 +38,16 @@
 
 %include {
 #include <stdint.h>
+
+#include "libsherpa/EnumSet.hxx"
+
 #include "FQName.hxx"
 #include "LitValue.hxx"
 #include "Environment.hxx"
 #include "debug.hxx"
-#include <libsherpa/EnumSet.hxx>
-
 #include "shared_ptr.hxx"
+
+
 #define AST_SMART_PTR boost::shared_ptr
 #define AST_SUPERCLASS boost::enable_shared_from_this<AST>
 }
