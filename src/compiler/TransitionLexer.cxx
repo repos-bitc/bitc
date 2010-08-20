@@ -918,6 +918,10 @@ TransitionLexer::do_lex(ParseType *lvalp)
   case '8':
   case '9':
     {
+      /// @bug Need to remove the legacy radix syntax here. When I do
+      /// so, I should add support to accept and ignore '_' in decimal
+      /// numbers as a placeholder for commas, e.g. 1_000_000
+
       int radix = 10;
 
       do {
