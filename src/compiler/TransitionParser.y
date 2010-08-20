@@ -4106,7 +4106,7 @@ sxp_let_eform: '(' tk_LETREC '(' sxp_letbindings ')' sxp_block ')' {
 };
 
 blk_stmt: tk_DO blk_dobindings tk_UNTIL blk_expr blk_giving blk_block {
-  SHOWPARSE("blk_stmt -> DO blk_dobindings UNTIL blk_expr OTHERWISE blk_expr blk_block");
+  SHOWPARSE("blk_stmt -> DO blk_dobindings UNTIL blk_expr blk_giving blk_block");
 
   // In the block syntax, I didn't fabricate the test AST in a
   // separate production:
