@@ -47,7 +47,9 @@
 typedef long ucs4_t;
 
 class PushBack {
-  enum { maxPushBack = 4 };
+  // Needs to be the size of the largest token that we might have to
+  // push back due to layout, but not less than four.
+  enum { maxPushBack = 8 };
 
   long stack[maxPushBack];
   unsigned depth;
@@ -71,6 +73,47 @@ public:
   }
 };
 
+#define LAYOUT_RULES
+
+enum LayoutFlagValues {
+  /// @brief A left brace is required as the next token, and we should
+  /// insert one if not found.
+  NEED_LBRACE = 0x1u,
+
+  /// @brief We have taken a newline and might need to insert a
+  /// right brace[s] and or a semicolon before the next token
+  /// according to its indent level.
+  CHECK_FIRST_TOKEN = 0x2u,
+
+  /// @brief Set iff we are currently unwinding the layout stack.
+  TRIMMING_LAYOUT_STACK = 0x4u,
+};
+typedef sherpa::EnumSet<LayoutFlagValues> LayoutFlags;
+
+
+#ifdef LAYOUT_RULES
+struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
+  bool implicit;              // true IFF left curly was implicit
+  unsigned column;            // column of first token after '{'
+  int precedingToken;         // token that preceded this '{'
+  bool dead;
+
+  boost::shared_ptr<LayoutFrame> next;
+
+  static inline boost::shared_ptr<LayoutFrame>
+  make(int _precedingToken, bool _implicit, unsigned _column = 0) {
+    LayoutFrame *lf = new LayoutFrame;
+
+    lf->implicit = _implicit;
+    lf->precedingToken = _precedingToken;
+    lf->column = _column;
+    lf->dead = false;
+
+    return boost::shared_ptr<LayoutFrame>(lf);
+  }
+};
+#endif /* LAYOUT_RULES */
+
 /** @brief Hand-crafted transitional syntax lexer.
  *
  * TransitionLexer is yet another variant of shap's generic hand-crafted
@@ -93,6 +136,24 @@ struct TransitionLexer {
   };
 
   int lispParenDepth;
+
+  int lastToken;
+
+#ifdef LAYOUT_RULES
+  boost::shared_ptr<LayoutFrame> layoutStack;
+  LayoutFlags layoutFlags;
+#endif
+
+  void beginBlock(bool implicit);
+  void endBlock(bool implicit);
+
+  /// @brief Mark layout stack frames dead until (a) we reach one that
+  /// was explicit, or (b) we reach one preceded by the indicated token.
+  void closeToToken(int precedingToken);
+
+  /// @brief If the top layout stack entry is dead, drop it, update
+  /// the layout context accordingly, and return true.
+  bool trimLayoutStack();
 
   typedef sherpa::EnumSet<LangFlagsValues> LangFlags;
 

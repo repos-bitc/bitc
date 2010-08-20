@@ -459,18 +459,18 @@ static unsigned VersionMinor(const std::string s)
 // This definition of start must be changed as it ignores
 // junk after the body.
 
-start: sxp_version sxp_uoc_body {
+start: ILCB sxp_version sxp_uoc_body IRCB {
   SHOWPARSE("start -> sxp_version sxp_uoc_body");
   return 0;
 };
 
-start: sxp_uoc_body {
+start: ILCB sxp_uoc_body IRCB {
   SHOWPARSE("start -> sxp_uoc_body");
   return 0;
 };
 
-start: blk_version trn_uoc_body {
-  SHOWPARSE("start -> blk_version trn_uoc_body");
+start: ILCB blk_version trn_uoc_body IRCB {
+  SHOWPARSE("start -> ILCB blk_version trn_uoc_body IRCB}");
   return 0;
 };
 
@@ -4478,6 +4478,12 @@ strLit: tk_String {
   SHOWPARSE("strLit -> <String=" + $1.str +">");
   $$ = AST::makeStringLit($1);
 };
+
+// These are for transitional documentation purposes:
+ILCB: '{' {
+}
+IRCB: '}' {
+}
 
 // TRANSITIONAL SUPPORT FOR MIXED-MODE PARSING
 LP: '(' {

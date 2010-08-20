@@ -454,6 +454,11 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
   isCommandLineInput = commandLineInput;
   debug = false;
   nModules = 0;
+
+  lastToken = EOF;
+
+  // Start of file is an implicit open block:
+  layoutFlags = NEED_LBRACE;
 }
 
 ucs4_t
@@ -569,7 +574,82 @@ TransitionLexer::lex(ParseType *lvalp)
   return tokType;
 }
 
-#define RETURN_TOKEN(_tok) return (_tok)
+void
+TransitionLexer::beginBlock(bool implicit)
+{
+#ifdef LAYOUT_RULES
+#ifdef LAYOUT_BLOCK_DEBUG
+  errStream << (implicit ? "implicit " : "explicit ")
+            << "beginBlock() at " << here << '\n';
+#endif
+
+  boost::shared_ptr<LayoutFrame> lf = 
+    LayoutFrame::make(lastToken, implicit, 0);
+
+  //  expectingLeftBrace = false; // we're about to return it.
+  //  learnBlockIndent = true;
+
+  lf->next = layoutStack;
+  layoutStack = lf;
+#endif /* LAYOUT_RULES */
+}
+
+void
+TransitionLexer::endBlock(bool implicit)
+{
+#ifdef LAYOUT_RULES
+#ifdef LAYOUT_BLOCK_DEBUG
+  errStream << (implicit ? "implicit " : "explicit ")
+            << "endBlock() at " << here << '\n';
+#endif
+
+  if (implicit && ! layoutStack->implicit)
+    ReportParseError(here, "Implicit close brace balances explicit open brace.");
+  else if (!implicit && layoutStack->implicit) 
+    ReportParseError(here, "Explicit close brace balances implicit open brace.");
+
+  // considerLineStart = false; // we've done it
+  layoutStack = layoutStack->next;
+#endif /* LAYOUT_RULES */
+}
+
+void
+TransitionLexer::closeToToken(int precedingToken)
+{
+  /// closeToToken is always followed by multiple, serially reentrant
+  /// calls to TrimLayoutStack. If we are currently in the trimming
+  /// state, then we have already done the work that closeToToken was
+  /// supposed to do, and we should just return.
+  if (layoutFlags & TRIMMING_LAYOUT_STACK)
+    return;
+
+  boost::shared_ptr<LayoutFrame> ls = layoutStack;
+
+  while (ls && ls->implicit) {
+    ls->dead = true;
+    if (ls->precedingToken == precedingToken)
+      return;
+
+    ls = ls->next;
+  }
+
+  if (layoutFlags |= TRIMMING_LAYOUT_STACK)
+    return;
+}
+
+bool
+TransitionLexer::trimLayoutStack()
+{
+  if (layoutStack && layoutStack->dead) {
+    endBlock(true);
+    return true;
+  }
+
+  layoutFlags &= ~LayoutFlags(TRIMMING_LAYOUT_STACK);
+  return false;
+}
+
+#define RETURN_TOKEN(_tok) return (lastToken = _tok)
 
 int
 TransitionLexer::do_lex(ParseType *lvalp)
@@ -580,6 +660,19 @@ TransitionLexer::do_lex(ParseType *lvalp)
   thisToken.erase();
 
   c = getChar();
+
+  if (c == ';' && (currentLang & lf_LispComments)) {
+    // Process a LISP-style comment:
+    do {
+      c = getChar();
+    } while (c != '\n' && c != '\r');
+
+    // Back out the EOL. We'll handle that with white space
+    // processing below to simplify layout processing.
+    ungetChar(c);
+    here.updateWith(thisToken);
+    goto startOver;
+  }
 
   if (c == '/') {
     c = getChar();
@@ -628,6 +721,19 @@ TransitionLexer::do_lex(ParseType *lvalp)
     here.updateWith(thisToken);
     goto startOver;
   }
+
+#ifdef LAYOUT_RULES
+  if ((c != '{') && (layoutFlags & NEED_LBRACE)) {
+    ungetChar(c);
+
+    layoutFlags &= ~LayoutFlags(NEED_LBRACE);
+    beginBlock(true);
+    
+    lvalp->tok = LToken(here, "{");
+    // INSERTED! No position update.
+    RETURN_TOKEN('{');
+  }
+#endif
 
   switch (c) {
 #ifdef OBSOLETE
@@ -731,7 +837,23 @@ TransitionLexer::do_lex(ParseType *lvalp)
     }
 
   case '{':
+    {
+      layoutFlags &= ~LayoutFlags(NEED_LBRACE);
+      beginBlock(false);
+
+      lvalp->tok = LToken(here, thisToken);
+      here.updateWith(thisToken);
+      RETURN_TOKEN(c);
+    }
   case '}':
+    {
+      endBlock(false);
+
+      lvalp->tok = LToken(here, thisToken);
+      here.updateWith(thisToken);
+      RETURN_TOKEN(c);
+    }
+
   case '.':                        // Single character tokens
   case ',':
   case '[':
@@ -1024,7 +1146,15 @@ TransitionLexer::do_lex(ParseType *lvalp)
     }
 
   case EOF:
-    RETURN_TOKEN(EOF);
+#ifdef LAYOUT_RULES
+    closeToToken(EOF);
+    if (trimLayoutStack()) {
+      lvalp->tok = LToken(here, "}");
+      RETURN_TOKEN('}');
+    }
+    else
+#endif
+      RETURN_TOKEN(EOF);
 
   default:
     if (valid_ident_start(c) || valid_operator_start(c)) {
@@ -1055,8 +1185,9 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
   ident_done:
     lvalp->tok = LToken(here, thisToken);
+    int tok = kwCheck(thisToken.c_str(), tk_BlkIdent);
     here.updateWith(thisToken);
-    RETURN_TOKEN(kwCheck(thisToken.c_str(), tk_BlkIdent));
+    RETURN_TOKEN(tok);
   }
   else if (valid_operator_start(c)) {
     do {
@@ -1065,7 +1196,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
     ungetChar(c);
 
     lvalp->tok = LToken(here, thisToken);
+    int tok = kwCheck(thisToken.c_str(), tk_MixIdent);
     here.updateWith(thisToken);
-    RETURN_TOKEN(kwCheck(thisToken.c_str(), tk_MixIdent));
+    RETURN_TOKEN(tok);
   }
 }
