@@ -151,6 +151,8 @@ struct TransitionLexer {
   /// was explicit, or (b) we reach one preceded by a bracketing match
   /// for the indicated token.
   void closeToOpeningToken(int closingToken);
+  void closeToOffset(unsigned offset);
+  void conditionallyInsertSemicolon();
 
   /// @brief If the top layout stack entry is dead, drop it, update
   /// the layout context accordingly, and return true.

@@ -677,6 +677,16 @@ TransitionLexer::closeToOpeningToken(int closingToken)
   return;
 }
 
+void
+TransitionLexer::closeToOffset(unsigned offset)
+{
+}
+
+void
+TransitionLexer::conditionallyInsertSemicolon()
+{
+}
+
 bool
 TransitionLexer::trimLayoutStack()
 {
@@ -739,6 +749,13 @@ TransitionLexer::do_lex(ParseType *lvalp)
           else
             ungetChar(c);
         }
+#ifdef LAYOUT_RULES
+        else if (c == '\n' || c == '\r') {
+          /* If a multi-line comment spans lines, the next token after
+             the comment is the first token on that line */
+          layoutFlags |= LayoutFlags(CHECK_FIRST_TOKEN);
+#endif
+        }
         else if (c == EOF)
           RETURN_TOKEN(EOF);
       }
@@ -754,6 +771,11 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
   if (isWhiteSpace(c)) {
     while (isWhiteSpace(c)) {
+#ifdef LAYOUT_RULES
+      if (c == '\n' || c == '\r')
+        layoutFlags |= LayoutFlags(CHECK_FIRST_TOKEN);
+#endif /* LAYOUT_RULES */
+
       c = getChar();
     }
     ungetChar(c);
@@ -772,6 +794,18 @@ TransitionLexer::do_lex(ParseType *lvalp)
     lvalp->tok = LToken(here, "{");
     // INSERTED! No position update.
     RETURN_TOKEN('{');
+  }
+
+  if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
+    // Consider possible right curly insertion and/or semicolon
+    // insertion.
+
+    closeToOffset(here.offset);
+    trimLayoutStack();
+
+    conditionallyInsertSemicolon();
+
+    layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
   }
 #endif
 
