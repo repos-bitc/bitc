@@ -66,6 +66,7 @@ namespace sherpa {
 
   struct LToken {
     LexLoc loc;
+    LexLoc endLoc;
     std::string str;
 
     char operator[](size_t pos) const
@@ -81,24 +82,35 @@ namespace sherpa {
     LToken(const LexLoc& loc, const std::string& s)
     {
       this->loc = loc;
+      this->endLoc = LexLoc();
+      this->str = s;
+    }
+
+    LToken(const LexLoc& loc, const LexLoc& endLoc, const std::string& s)
+    {
+      this->loc = loc;
+      this->endLoc = endLoc;
       this->str = s;
     }
 
     LToken(const LToken& that)
     {
       this->loc = that.loc;
+      this->endLoc = that.endLoc;
       this->str = that.str;
     }
 
     LToken(const std::string& that)
     {
       this->loc = LexLoc();
+      this->endLoc = LexLoc();
       this->str = that;
     }
 
     LToken& operator=(const LToken& that)
     {
       this->loc = that.loc;
+      this->endLoc = that.endLoc;
       this->str = that.str;
       return *this;
     }
