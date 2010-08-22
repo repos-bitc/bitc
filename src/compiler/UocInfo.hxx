@@ -190,10 +190,6 @@ public:
   // Parse a file, admitting source and/or interface units of
   // compilation into the ifList or the srcList as a side effect.
   static bool 
-  CompileFromSexprFile(const boost::filesystem::path& src, bool fromCmdLine);
-  static bool 
-  CompileFromTransitionFile(const boost::filesystem::path& src, bool fromCmdLine);
-  static bool 
   CompileFromFile(const boost::filesystem::path& src, bool fromCmdLine);
 
   // Individual passes:
