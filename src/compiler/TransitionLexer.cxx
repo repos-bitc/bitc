@@ -599,17 +599,23 @@ TransitionLexer::lex(ParseType *lvalp)
   return tokType;
 }
 
+// #define LAYOUT_BLOCK_DEBUG
 void
 TransitionLexer::beginBlock(bool implicit)
 {
 #ifdef LAYOUT_RULES
 #ifdef LAYOUT_BLOCK_DEBUG
-  errStream << (implicit ? "implicit " : "explicit ")
-            << "beginBlock() at " << here << '\n';
+  errStream << "  LAYOUT: " << here 
+            << (implicit ? ": implicit " : ": explicit ")
+            << "beginBlock()" << std::endl;
 #endif
 
+  // Until we find the first token and update it, the semicolon
+  // comment for a new block is the same as it's parent.
+  unsigned column = layoutStack ? layoutStack->column : 0;
+
   boost::shared_ptr<LayoutFrame> lf = 
-    LayoutFrame::make(lastToken, implicit, 0);
+    LayoutFrame::make(lastToken, implicit, column);
 
   //  expectingLeftBrace = false; // we're about to return it.
   //  learnBlockIndent = true;
@@ -624,8 +630,9 @@ TransitionLexer::endBlock(bool implicit)
 {
 #ifdef LAYOUT_RULES
 #ifdef LAYOUT_BLOCK_DEBUG
-  errStream << (implicit ? "implicit " : "explicit ")
-            << "endBlock() at " << here << '\n';
+  errStream << "  LAYOUT: " << here 
+            << (implicit ? ": implicit " : ": explicit ")
+            << "endBlock()" << std::endl;
 #endif
 
   if (implicit && ! layoutStack->implicit)
@@ -671,6 +678,8 @@ TransitionLexer::closeToOpeningToken(int closingToken)
 
     if (foundOpeningToken)
       break;
+
+    ls = ls->next;
   }
 
   layoutFlags |= TRIMMING_LAYOUT_STACK;
@@ -680,11 +689,51 @@ TransitionLexer::closeToOpeningToken(int closingToken)
 void
 TransitionLexer::closeToOffset(unsigned offset)
 {
+  // Note that in contrast to closeToOpeningToken, this can safely
+  // (and usefully) be called multiple times.
+
+  // It is possible for us to be called on the first token in the
+  // file, or on junk tokens after end of module. In both cases we
+  // won't have a layout stack yet.
+  if (!layoutStack)
+    return;
+
+#ifdef LAYOUT_BLOCK_DEBUG
+  unsigned count = 0;
+
+  errStream << "  LAYOUT: " << here 
+            << ": closeToOffsetToken called: ";
+#endif
+
+  boost::shared_ptr<LayoutFrame> ls = layoutStack;
+
+  // Make sure we don't do this at top level, where there *isn't* a
+  // containing offset.
+  while (ls && ls->implicit && (offset < ls->column)) {
+    ls->dead = true;
+    ls = ls->next;
+#ifdef LAYOUT_BLOCK_DEBUG
+    count++;
+#endif
+  }
+    
+#ifdef LAYOUT_BLOCK_DEBUG
+  errStream << count << " frames closed" << std::endl;
+#endif
+
+  layoutFlags |= TRIMMING_LAYOUT_STACK;
+  return;
 }
 
-void
-TransitionLexer::conditionallyInsertSemicolon()
+bool
+TransitionLexer::conditionallyInsertSemicolon(unsigned offset)
 {
+#if 0
+  assert(layoutStack);
+  if (here.offset <= layoutStack->column)
+    return true;
+#endif
+  return false;
 }
 
 bool
@@ -796,18 +845,85 @@ TransitionLexer::do_lex(ParseType *lvalp)
     RETURN_TOKEN('{');
   }
 
-  if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
+#ifdef LAYOUT_BLOCK_DEBUG
+  if (lastToken < 256 && isprint(lastToken)) {
+    errStream << "  LAYOUT: " << here 
+              << ": last token was '" << (char)lastToken << "'." << std::endl;
+  }
+  else {
+    errStream << "  LAYOUT: " << here 
+              << ": last token was " << lastToken << "." << std::endl;
+  }
+#endif
+
+  if (lastToken == '{') {
+    assert(layoutStack);
+
+#ifdef LAYOUT_BLOCK_DEBUG
+    errStream << "  LAYOUT: " << here 
+              << ": Processing post-{..." << std::endl;
+#endif
+
+    if ((here.offset > layoutStack->column) ||
+        // Top-level context needs special handling if the curly brace
+        // was implicitly inserted:
+        (layoutStack->implicit && !layoutStack->next)) {
+      // Valid indent. Establish indent level for new block:
+      layoutStack->column = here.offset;
+#ifdef LAYOUT_BLOCK_DEBUG
+      errStream << "  LAYOUT: " << here 
+                << ": set indent to "
+                << here.offset
+                << ", disable check first token." << std::endl;
+#endif
+      layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
+    }
+    else if (layoutStack->implicit && layoutStack->next) {
+#ifdef LAYOUT_BLOCK_DEBUG
+      errStream << "  LAYOUT: " << here 
+                << " : close empty implicit block." << std::endl;
+#endif
+      // First token after '{' is at the previous (or earlier) indent
+      // level, and it was an implicit open block. Close it immediately:
+      ungetChar(c);
+      endBlock(true);
+
+      lvalp->tok = LToken(here, "}");
+      RETURN_TOKEN('}');
+    }
+  }
+
+  if ((c != EOF) && (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN))) {
     // Consider possible right curly insertion and/or semicolon
     // insertion.
 
-    closeToOffset(here.offset);
-    trimLayoutStack();
+#ifdef LAYOUT_BLOCK_DEBUG
+    errStream << "  LAYOUT: " << here 
+              << ": processing first token..." << std::endl;
+#endif
 
-    conditionallyInsertSemicolon();
+    closeToOffset(here.offset);
+    if (trimLayoutStack()) {
+      ungetChar(c);
+      lvalp->tok = LToken(here, "}");
+      RETURN_TOKEN('}');
+    }
+
+    if ((lastToken != ';') && (c != ';') && (c != '}')) {
+      if (conditionallyInsertSemicolon(here.offset)) {
+#ifdef LAYOUT_BLOCK_DEBUG
+      errStream << "  LAYOUT: " << here 
+                << ": semicolon inserted:" << std::endl;
+#endif
+        ungetChar(c);
+        lvalp->tok = LToken(here, ";");
+        RETURN_TOKEN(';');
+      }
+    }
 
     layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
   }
-#endif
+#endif /* LAYOUT_RULES */
 
   switch (c) {
 #ifdef OBSOLETE
@@ -1281,6 +1397,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
 #endif
       if (   thisToken == "case" 
           || thisToken == "let" 
+          || thisToken == "in" 
           || thisToken == "letrec" )
         layoutFlags |= LayoutFlags(NEED_LBRACE);
     }

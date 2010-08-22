@@ -94,9 +94,8 @@ interface bitc.prelude {
   }
 
   unboxed union nullable('a)
-  where 
-    RefTypes('a)
-  {
+   where 
+    RefTypes('a) {
       null
       not_null { ptr: 'a }
   }

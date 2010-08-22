@@ -39,9 +39,9 @@ bitc version 0.11
 
 interface bitc.sets.bit {
   boxed struct bitset {
-    nElem : mutable word;
-    nWords : mutable word;
-    bits : mutable (mutable uint32)[];
+    nElem : mutable word
+    nWords : mutable word
+    bits : mutable (mutable uint32)[]
   }
 
   def make() = bitset(0, 0, vector(0))
@@ -49,14 +49,15 @@ interface bitc.sets.bit {
   def isEmpty(s:bitset) = s.nElem == 0;
 
   def contains(s:bitset, n:word) = {
-    if s.nWords*32 > n then {
-      let w = (n+1)/32 in
-      let bit = 1 << (n % 32) in
-        (s.bits[w] & bit) != 0
-    }
-    else {
-      return false
-    }
+    if s.nWords*32 > n
+      then {
+        let w = (n+1)/32 in
+          let bit = 1 << (n % 32) in
+            (s.bits[w] & bit) != 0
+      }
+      else {
+        return false
+      }
   }
 
   def set(s: bitset, n:word, on) = {
@@ -71,13 +72,14 @@ interface bitc.sets.bit {
         }
 
     let w = (n+1)/32 in
-    let bit = 1 << (n % 32) in
-    let want = { if (on) then s.bits[w] | bit
-    	       	         else s.bits[w] & ~bit } in
-      if s.bits[w] != want then {
-        s.bits[w] := want;
-	s.nElem := if (on) then s.nElem + 1 else s.nElem - 1;
-      }
+      let bit = 1 << (n % 32) in
+        let want = { if (on) then s.bits[w] | bit
+                             else s.bits[w] & ~bit } in
+          if s.bits[w] != want
+            then {
+              s.bits[w] := want;
+              s.nElem := if (on) then s.nElem + 1 else s.nElem - 1
+            }
   }
 
   def insert(s, n) = set(s, n, true)

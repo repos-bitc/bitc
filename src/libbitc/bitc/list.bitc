@@ -75,10 +75,10 @@ interface bitc.list {
   def list_length(lst)
     "Return length of list."
     = {
-        def length_helper(lst, count)
-        = if isNull(lst) 
-          then count 
-          else length_helper(cdr(lst), 1 + count)
+        def length_helper(lst, count) =
+          if isNull(lst) 
+            then count 
+            else length_helper(cdr(lst), 1 + count)
 
         length_helper(lst, 0:word)
       }
@@ -90,16 +90,16 @@ interface bitc.list {
   def append(l1, l2) 
     "Append two lists."
     = if isNull(l1)
-      then l2
-      else cons(car(l1), append(cdr(l1), l2))
+        then l2
+        else cons(car(l1), append(cdr(l1), l2))
 
   def reverse(lst)
     "Reverse the argument list."
     = {
-        def do_reverse(l1, l2)
-        = if isNull(l1)
-          then l2
-          else do_reverse(cdr(l1), cons(car(l1), l2))
+        def do_reverse(l1, l2) =
+          if isNull(l1)
+            then l2
+            else do_reverse(cdr(l1), cons(car(l1), l2))
 
         do_reverse(lst, nil)
       }

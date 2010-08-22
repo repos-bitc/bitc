@@ -61,7 +61,9 @@ using namespace sherpa;
 /// This simplification pass was originally intended to locate all
 /// cases where a BEGIN wraps a single expression and replaces this
 /// with the single expression. The transform has no semantic effect,
-/// but improves the readability of dumped ASTs.
+/// but improves the readability of dumped ASTs. This is okay even in
+/// the block syntax, because in any context where the block is
+/// mandatory it will be re-inserted by layout.
 ///
 /// Later, functionality was added by which local DEFINE forms are
 /// converted to the corresponding LET and LETREC forms. After this

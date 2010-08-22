@@ -450,6 +450,8 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_ident blk_defident blk_useident
 %type <ast> intLit natLit floatLit charLit strLit boolLit
 
+%type <tok> ILCB IRCB
+
 %%
 
 // Parser built for version 10.0
@@ -469,8 +471,8 @@ start: ILCB sxp_uoc_body IRCB {
   return 0;
 };
 
-start: ILCB blk_version trn_uoc_body IRCB {
-  SHOWPARSE("start -> ILCB blk_version trn_uoc_body IRCB}");
+start: ILCB blk_version SC trn_uoc_body IRCB {
+  SHOWPARSE("start -> ILCB blk_version SC trn_uoc_body IRCB}");
   return 0;
 };
 
@@ -862,10 +864,10 @@ trn_if_definitions: trn_if_definition {
   $$ = AST::make(at_Null, $1->loc, $1);
 };
 
-trn_if_definitions: trn_if_definitions trn_if_definition {
-  SHOWPARSE("trn_if_definitions -> trn_if_definitions trn_if_definition");
+trn_if_definitions: trn_if_definitions SC trn_if_definition {
+  SHOWPARSE("trn_if_definitions -> trn_if_definitions SC trn_if_definition");
   $$ = $1;
-  $$->addChild($2); 
+  $$->addChild($3); 
 };
 
 trn_if_definition: sxp_common_definition {
@@ -873,8 +875,8 @@ trn_if_definition: sxp_common_definition {
   $$ = $1;
 };
 
-trn_if_definition: blk_common_definition SC {
-  SHOWPARSE("trn_if_definition -> blk_common_definition SC");
+trn_if_definition: blk_common_definition {
+  SHOWPARSE("trn_if_definition -> blk_common_definition");
   $$ = $1;
 };
 
@@ -917,10 +919,10 @@ trn_mod_definitions: trn_mod_definition {
   $$ = AST::make(at_Null, $1->loc, $1);
 };
 
-trn_mod_definitions: trn_mod_definitions trn_mod_definition {
-  SHOWPARSE("trn_mod_definitions -> trn_mod_definitions trn_mod_definition");
+trn_mod_definitions: trn_mod_definitions SC trn_mod_definition {
+  SHOWPARSE("trn_mod_definitions -> trn_mod_definitions SC trn_mod_definition");
   $$ = $1;
-  $$->addChild($2); 
+  $$->addChild($3); 
 };
 
 trn_mod_definition: sxp_mod_definition {
@@ -1305,14 +1307,14 @@ blk_repr_constructors: blk_repr_constructor {
   $$ = AST::make(at_reprctrs, $1->loc, $1);
 }
 
-blk_repr_constructors: blk_repr_constructors blk_repr_constructor {
-  SHOWPARSE("blk_repr_constructors -> blk_repr_constructors blk_repr_constructor");
+blk_repr_constructors: blk_repr_constructors SC blk_repr_constructor {
+  SHOWPARSE("blk_repr_constructors -> blk_repr_constructors SC blk_repr_constructor");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 }
 
-blk_repr_constructor: blk_ident '{' blk_fields '}' tk_WHERE blk_repr_reprs SC {
-  SHOWPARSE("blk_repr_constructor ->  blk_ident '{ sxp_fields '}' WHERE blk_repr_reprs SC");
+blk_repr_constructor: blk_ident '{' blk_fields '}' tk_WHERE blk_repr_reprs {
+  SHOWPARSE("blk_repr_constructor ->  blk_ident '{ sxp_fields '}' WHERE blk_repr_reprs");
   $1->flags |= (ID_IS_GLOBAL);
   shared_ptr<AST> ctr = AST::make(at_constructor, $1->loc, $1);
   ctr->addChildrenFrom($3);
@@ -1639,10 +1641,10 @@ blk_method_decls: /* Nothing */ {
   $$ = AST::make(at_method_decls, loc);
 };
 
-blk_method_decls: blk_method_decls blk_method_decl {
-  SHOWPARSE("blk_method_decls -> blk_method_decls blk_method_decl");
+blk_method_decls: blk_method_decls SC blk_method_decl {
+  SHOWPARSE("blk_method_decls -> blk_method_decls SC blk_method_decl");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 };
 sxp_method_decls: /* Nothing */ {
   SHOWPARSE("sxp_method_decls -> ");
@@ -1697,10 +1699,10 @@ blk_method_bindings: blk_method_binding {
   SHOWPARSE("blk_method_bindings -> blk_method_binding");
   $$ = AST::make(at_tcmethods, $1->loc, $1);
 };
-blk_method_bindings: blk_method_bindings blk_method_binding {
-  SHOWPARSE("blk_method_bindings -> blk_method_bindings blk_method_binding");
+blk_method_bindings: blk_method_bindings SC blk_method_binding {
+  SHOWPARSE("blk_method_bindings -> blk_method_bindings SC blk_method_binding");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 };
 
 blk_method_binding: blk_ident '=' blk_stmt {
@@ -2064,10 +2066,10 @@ blk_constructors: blk_constructor {
   SHOWPARSE("blk_constructors -> blk_constructor");
   $$ = AST::make(at_constructors, $1->loc, $1);
 };
-blk_constructors: blk_constructors blk_constructor {
-  SHOWPARSE("blk_constructors -> blk_constructors blk_constructor");
+blk_constructors: blk_constructors SC blk_constructor {
+  SHOWPARSE("blk_constructors -> blk_constructors SC blk_constructor");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 };
 sxp_constructors: sxp_constructor {
   SHOWPARSE("sxp_constructors -> sxp_constructor");
@@ -2079,12 +2081,12 @@ sxp_constructors: sxp_constructors sxp_constructor {
   $$->addChild($2);
 };
 
-blk_constructor: blk_ident SC {                          /* simple constructor */
+blk_constructor: blk_ident {                          /* simple constructor */
   SHOWPARSE("blk_constructor -> blk_ident");
   $1->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $1->loc, $1);
 };
-blk_constructor: blk_ident '{' blk_fields '}' SC {  /* compound constructor */
+blk_constructor: blk_ident '{' blk_fields '}' { /* compound constructor */
   SHOWPARSE("blk_constructor ->  blk_ident { blk_fields }");
   $1->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $1->loc, $1);
@@ -2170,14 +2172,14 @@ sxp_fields: sxp_fields sxp_field {
   $$->addChild($2);
 };
 
-blk_field: blk_ident ':' blk_field_type  SC {
-  SHOWPARSE("blk_field -> blk_ident : blk_field_type SC");
+blk_field: blk_ident ':' blk_field_type {
+  SHOWPARSE("blk_field -> blk_ident : blk_field_type");
   $$ = AST::make(at_field, $1->loc, $1, $3);
 };
 // FIX: Not clear why this is just bitfieldtype. Why can't it be any
 // field type at all? I think it can.
-blk_field: tk_FILL ':' blk_bitfieldtype  SC {
-  SHOWPARSE("blk_field -> FILL : blk_bitfieldtype SC");
+blk_field: tk_FILL ':' blk_bitfieldtype {
+  SHOWPARSE("blk_field -> FILL : blk_bitfieldtype");
   $$ = AST::make(at_fill, $1.loc, $3);
 };
 
@@ -2208,14 +2210,14 @@ blk_methods_only: blk_methdecl  {
   $$ = AST::make(at_fields, $1->loc, $1);
 };
 
-blk_methods_only: blk_methods_only blk_methdecl  {
-  SHOWPARSE("blk_methods_only -> blk_methods_only blk_methdecl");
+blk_methods_only: blk_methods_only SC blk_methdecl  {
+  SHOWPARSE("blk_methods_only -> blk_methods_only SC blk_methdecl");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 };
 
-blk_methdecl: blk_ident ':' blk_method_type SC{
-  SHOWPARSE("blk_methdecl -> blk_ident : blk_method_type SC");
+blk_methdecl: blk_ident ':' blk_method_type {
+  SHOWPARSE("blk_methdecl -> blk_ident : blk_method_type");
   $$ = AST::make(at_methdecl, $1->loc, $1, $3);
 };
 
@@ -2230,7 +2232,7 @@ sxp_methods_only: sxp_methods_only sxp_methdecl  {
   $$->addChild($2);
 };
 
-sxp_methdecl: sxp_ident ':' sxp_method_type SC {
+sxp_methdecl: sxp_ident ':' sxp_method_type {
   SHOWPARSE("sxp_methdecl -> sxp_ident : sxp_method_type");
   $$ = AST::make(at_methdecl, $1->loc, $1, $3);
 };
@@ -2255,10 +2257,10 @@ sxp_fields_and_methods: sxp_field  {
   $$ = AST::make(at_fields, $1->loc, $1);
 };
 
-blk_fields_and_methods: blk_fields_and_methods blk_methdecl {
-  SHOWPARSE("blk_fields_and_methods -> blk_fields_and_methods blk_methdecl ");
+blk_fields_and_methods: blk_fields_and_methods SC blk_methdecl {
+  SHOWPARSE("blk_fields_and_methods -> blk_fields_and_methods SC blk_methdecl ");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 };
 
 sxp_fields_and_methods: sxp_fields_and_methods sxp_methdecl {
@@ -2267,10 +2269,10 @@ sxp_fields_and_methods: sxp_fields_and_methods sxp_methdecl {
   $$->addChild($2);
 };
 
-blk_fields_and_methods: blk_fields_and_methods blk_field {
-  SHOWPARSE("blk_fields_and_methods -> blk_fields_and_methods blk_field ");
+blk_fields_and_methods: blk_fields_and_methods SC blk_field {
+  SHOWPARSE("blk_fields_and_methods -> blk_fields_and_methods SC blk_field ");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 };
 
 sxp_fields_and_methods: sxp_fields_and_methods sxp_field {
@@ -3080,18 +3082,23 @@ blk_stmt: blk_expr {
   $$ = $1;
 }
 
-blk_block: '{' blk_stmt_seq '}' {
+blk_block: ILCB IRCB {
+  SHOWPARSE("blk_block -> { }");
+  // Empty blocks are okay:
+  $$ = AST::make(at_begin, $1.loc);
+}
+blk_block: ILCB blk_stmt_seq IRCB {
   SHOWPARSE("blk_block -> { blk_stmt_seq }");
   // Remove redundant blocks eagerly:
   if ($2->children.size() == 1 && $2->child(0)->astType == at_begin)
     $2 = $2->child(0);
   $$ = $2;
 }
-blk_stmt_seq: blk_stmt SC {
+blk_stmt_seq: blk_stmt {
   SHOWPARSE("blk_stmt_seq -> blk_stmt");
   $$ = AST::make(at_begin, $1->loc, $1);
 };
-blk_stmt_seq: blk_value_definition SC {
+blk_stmt_seq: blk_value_definition {
   SHOWPARSE("blk_stmt_seq -> blk_value_definition");
   $$ = AST::make(at_begin, $1->loc, $1);
 };
@@ -3100,20 +3107,20 @@ blk_stmt_seq: blk_value_definition SC {
   $$ = $1;
   $$->addChild($2);
 };
-blk_stmt_seq: blk_stmt_seq blk_value_definition {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq blk_value_definition");
+blk_stmt_seq: blk_stmt_seq SC blk_value_definition {
+  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq SC blk_value_definition");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
   };*/
-blk_stmt_seq: blk_stmt_seq blk_stmt SC {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq blk_stmt SC");
+blk_stmt_seq: blk_stmt_seq SC blk_stmt {
+  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq SC blk_stmt");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 };
-blk_stmt_seq: blk_stmt_seq blk_value_definition SC {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq blk_value_definition SC");
+blk_stmt_seq: blk_stmt_seq SC blk_value_definition {
+  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq SC blk_value_definition");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 };
 
 sxp_block: sxp_block_exprs {
@@ -3810,17 +3817,17 @@ sxp_sw_legs: sxp_sw_legs sxp_sw_leg {
   $$->addChild($2);
 };
 
-blk_sw_legs: blk_sw_legs blk_sw_leg {
-  SHOWPARSE("blk_sw_legs -> blk_sw_legs blk_sw_leg");
+blk_sw_legs: blk_sw_legs SC blk_sw_leg {
+  SHOWPARSE("blk_sw_legs -> blk_sw_legs SC blk_sw_leg");
   $$ = $1;
-  $1->addChild($2);
+  $1->addChild($3);
 }
 blk_sw_legs: blk_sw_leg {
   SHOWPARSE("blk_sw_legs -> blk_sw_leg");
   $$ = AST::make(at_usw_legs, $1->loc, $1);
 }
-blk_sw_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_stmt {
-  SHOWPARSE("blk_sw_leg -> CASE { blk_ident AS blk_type } IN blk_stmt");
+blk_sw_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_block {
+  SHOWPARSE("blk_sw_leg -> CASE { blk_ident AS blk_type } blk_block");
   $$ = AST::make(at_usw_leg, $1.loc, $3, $8, $5);
 }
 
@@ -3980,8 +3987,8 @@ blk_stmt: tk_TRY blk_expr blk_otherwise {
 //  $$ = AST::make(at_kennedy_try, $1.loc, bindings, $4);
 //}
 
-blk_catch_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_stmt {
-  SHOWPARSE("blk_catch_leg -> CATCH { blk_ident AS blk_type } IN blk_stmt");
+blk_catch_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_block {
+  SHOWPARSE("blk_catch_leg -> CATCH { blk_ident AS blk_type } IN blk_block");
   //  $$ = AST::make(at_catchleg, $1.loc, $2, $4, $6);
   $$ = AST::make(at_usw_leg, $1.loc, $3, $5, $8);
 }
@@ -4043,8 +4050,8 @@ sxp_unqual_expr: sxp_let_eform {
 };
 
 // LET [5.3.1]                 
-blk_stmt: tk_LET ILCB blk_letbindings IRCB tk_IN blk_stmt {
-  SHOWPARSE("blk_stmt -> LET { blk_letbindings } IN blk_stmt");
+blk_stmt: tk_LET ILCB blk_letbindings IRCB tk_IN blk_block {
+  SHOWPARSE("blk_stmt -> LET { blk_letbindings } IN blk_block");
 
   $$ = AST::make(at_let, $1.loc, $3, $6);
   $$->addChild(AST::make(at_constraints));
@@ -4086,8 +4093,8 @@ sxp_letbinding: '(' sxp_bindingpattern sxp_expr ')' {
 };
 
 // LETREC [5.3.2]              
-blk_stmt: tk_LETREC ILCB blk_letbindings IRCB tk_IN blk_stmt {
-  SHOWPARSE("blk_stmt -> LETREC { blk_letbindings } IN blk_stmt");
+blk_stmt: tk_LETREC ILCB blk_letbindings IRCB tk_IN blk_block {
+  SHOWPARSE("blk_stmt -> LETREC { blk_letbindings } IN blk_block");
 
   $$ = AST::make(at_letrec, $1.loc, $3, $6);
   $$->addChild(AST::make(at_constraints));

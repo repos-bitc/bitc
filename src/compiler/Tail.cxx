@@ -238,7 +238,8 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
     {
       //     for (size_t i = 0; i < ast->children.size() - 1; i++)
       //       markTail(ast->child(i), fn, bps, false);
-      markTail(ast->child(ast->children.size() - 1), fn, bps, isTail);
+      if (ast->children.size())
+        markTail(ast->child(ast->children.size() - 1), fn, bps, isTail);
       break;
     }
 

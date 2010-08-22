@@ -2084,7 +2084,7 @@ resolve(std::ostream& errStream,
 
   case at_begin:
     {
-      // match agt_expr+
+      // match agt_expr*
       for (size_t c = 0; c < ast->children.size(); c++)
         RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
                 currLB, flags);
@@ -2776,7 +2776,7 @@ initEnv(std::ostream& errStream,
   
   if (!preenv) {
     // GCFIX: Why does this return on error instead of exiting? This
-    // is a FATAL compiler errors!
+    // is a FATAL compiler error!
     errStream << ast->loc << ": "
               << "Internal Compiler Error. "
               << " Prelude's environment is NULL "

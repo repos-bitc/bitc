@@ -2012,12 +2012,18 @@ toc(std::ostream& errStream,
 
   case at_begin:
     {
-      // out++;
-      for (size_t c = 0; c < ast->children.size(); c++) {
-        TOC(errStream, uoc, ast->child(c), out, IDname, decls,
-            ast, c, flags);
+      if (ast->children.size()) {
+        // out++;
+        for (size_t c = 0; c < ast->children.size(); c++) {
+          TOC(errStream, uoc, ast->child(c), out, IDname, decls,
+              ast, c, flags);
         
-        out << ";" << endl;
+          out << ";" << endl;
+        }
+      }
+      else {
+        // Empty block emits unit:
+        out << 0;
       }
       // out--;
 

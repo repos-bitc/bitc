@@ -396,50 +396,49 @@ module sha1_impl {
   //////////////////////////////////////////////////////////
 
 
-  def sha1PadMessage(context:ByRef sha1.sha1Context)
+  def sha1PadMessage(context:ByRef sha1.sha1Context) = {
     // Check to see if the current message block is too small to hold
     // the initial padding bits and length. If so, we will pad the
     // block, process it, and then continue padding into a second block.
-  = {
-      if context.messNdx > 55   
-      then {
-      	context.message[context.messNdx] := 16r80
-	context.messNdx := context.messNdx + 1
-	  
-      	do until context.messNdx >= 64 {
-	  context.message[context.messNdx] := 0
-	  context.messNdx := context.messNdx + 1
-        }
-	
-        sha1ProcessMessageBlock(context)
+    if context.messNdx > 55   
+    then {
+      context.message[context.messNdx] := 16r80
+      context.messNdx := context.messNdx + 1
 
-	// Will reset context.messNdx to 0
- 
-      	do until context.messNdx >= 56 {
-	  context.message[context.messNdx] := 0
-	  context.messNdx := context.messNdx + 1
-        }
-      }
-      else {
-      	context.message[context.messNdx] := 16r80
-	context.messNdx := context.messNdx + 1
-
-      	do until context.messNdx >= 56 {
-	  context.message[context.messNdx] := 0
-	  context.messNdx := context.messNdx + 1
-        }
+      do until context.messNdx >= 64 {
+        context.message[context.messNdx] := 0
+        context.messNdx := context.messNdx + 1
       }
 
-      // Store the message length as the last 8 octets
-      context.message[56] := Truncate(context.lenHigh >> 24);
-      context.message[57] := Truncate(context.lenHigh >> 16);
-      context.message[58] := Truncate(context.lenHigh >> 8);
-      context.message[59] := Truncate(context.lenHigh);
-      context.message[60] := Truncate(context.lenLow >> 24);
-      context.message[61] := Truncate(context.lenLow >> 16);
-      context.message[62] := Truncate(context.lenLow >> 8);
-      context.message[63] := Truncate(context.lenLow);
+      sha1ProcessMessageBlock(context)
 
-      sha1ProcessMessageBlock(context);
+      // Will reset context.messNdx to 0
+
+      do until context.messNdx >= 56 {
+        context.message[context.messNdx] := 0
+        context.messNdx := context.messNdx + 1
+      }
     }
+    else {
+      context.message[context.messNdx] := 16r80
+      context.messNdx := context.messNdx + 1
+
+      do until context.messNdx >= 56 {
+        context.message[context.messNdx] := 0
+        context.messNdx := context.messNdx + 1
+      }
+    }
+
+    // Store the message length as the last 8 octets
+    context.message[56] := Truncate(context.lenHigh >> 24);
+    context.message[57] := Truncate(context.lenHigh >> 16);
+    context.message[58] := Truncate(context.lenHigh >> 8);
+    context.message[59] := Truncate(context.lenHigh);
+    context.message[60] := Truncate(context.lenLow >> 24);
+    context.message[61] := Truncate(context.lenLow >> 16);
+    context.message[62] := Truncate(context.lenLow >> 8);
+    context.message[63] := Truncate(context.lenLow);
+
+    sha1ProcessMessageBlock(context)
+  }
 }

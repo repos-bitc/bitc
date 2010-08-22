@@ -146,23 +146,23 @@ warnTmp(std::ostream &errStream, shared_ptr<AST> ast)
 }
 #endif
 
-#define SETGL(exp, gl)                           \
-  do {                                           \
-    if ((gl)->child(0)->children.size()) \
-      (exp) = (gl);                           \
+#define SETGL(exp, gl)                     \
+  do {                                     \
+    if ((gl)->child(0)->children.size())   \
+      (exp) = (gl);                        \
     else                                   \
       (exp) = FEXPR(gl);                   \
-  }while (0)
+  } while (0)
  
 //WARNING: **REQUIRES** answer and errorFree.
-#define SSA(errStream, uoc, ast, grandLet, identList,        \
-               parent, chno,  flags)                                \
-  do {                                                                \
-    answer = ssa((errStream), (uoc), (ast), (grandLet),        \
-                    (identList), (parent), (chno), (flags));        \
-    if (answer == false)                                                \
-      errorFree = false;                                        \
-  }while (0)
+#define SSA(errStream, uoc, ast, grandLet, identList,      \
+            parent, chno,  flags)                          \
+  do {                                                     \
+    answer = ssa((errStream), (uoc), (ast), (grandLet),    \
+                 (identList), (parent), (chno), (flags));  \
+    if (answer == false)                                   \
+      errorFree = false;                                   \
+  } while (0)
 
 
 bool

@@ -3710,14 +3710,22 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
           _________________________________________
              A |- (begin e1 ... en): tn
 
+
+             (empty)
+          _________________________________________
+             A |- (begin): ()
+
        ------------------------------------------------*/
-      // match agt_expr+
+      // match agt_expr*
       for (size_t c = 0; c < ast->children.size(); c++)
         TYPEINFER(ast->child(c), gamma, instEnv, impTypes, tcc,
                   trail,  USE_MODE, TI_EXPRESSION);
       
       
-      ast->symType = ast->child(ast->children.size()-1)->symType;
+      if (ast->children.size())
+        ast->symType = ast->child(ast->children.size()-1)->symType;
+      else
+        ast->symType = Type::make(ty_unit);
       break;
     }
 

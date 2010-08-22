@@ -102,21 +102,21 @@ interface bitc.stdio {
     def digits = array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
                        'a', 'b', 'c', 'd', 'e', 'f')
     if x < 0
-    then { write_char(ostream, '-')
-           x := -x }
+      then { write_char(ostream, '-')
+             x := -x }
 
     def log = 1
 
     do y = x then y / base
-    until (y / base) == 0 {
-      log := log * base
-    }
+      until (y / base) == 0 {
+        log := log * base
+      }
   
     do x = x then x - ((x / log) * log)
        log = log then log / base
-    until log == 0 {
-      write_char(ostream, digits[convert(x/log)])
-    }
+      until log == 0 {
+        write_char(ostream, digits[convert(x/log)])
+      }
   }
 
   // Read a string from an input stream.

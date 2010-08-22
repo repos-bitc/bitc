@@ -101,7 +101,7 @@ struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
   boost::shared_ptr<LayoutFrame> next;
 
   static inline boost::shared_ptr<LayoutFrame>
-  make(int _precedingToken, bool _implicit, unsigned _column = 0) {
+  make(int _precedingToken, bool _implicit, unsigned _column) {
     LayoutFrame *lf = new LayoutFrame;
 
     lf->implicit = _implicit;
@@ -152,7 +152,7 @@ struct TransitionLexer {
   /// for the indicated token.
   void closeToOpeningToken(int closingToken);
   void closeToOffset(unsigned offset);
-  void conditionallyInsertSemicolon();
+  bool conditionallyInsertSemicolon(unsigned offset);
 
   /// @brief If the top layout stack entry is dead, drop it, update
   /// the layout context accordingly, and return true.

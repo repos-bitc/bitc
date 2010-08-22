@@ -767,10 +767,7 @@ cl_convert_ast(shared_ptr<AST> ast,
         }
       }
 
-      if (expr->astType == at_begin)
-        ccs->addChildrenFrom(expr);
-      else
-        ccs->addChild(expr);
+      ccs->addChild(expr);
 
       ast->child(1) = ccs;
       //ast->astType = at_let;

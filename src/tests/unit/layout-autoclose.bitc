@@ -1,6 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2006, Johns Hopkins University.
 // Copyright (C) 2010, Jonathan S. Shapiro
 // All rights reserved.
 //
@@ -38,29 +37,17 @@
 
 bitc version 0.11
 
-interface bitc.string {
-  import bitc.list as lst
-  import bitc.vector as vec
+import bitc.main as main
+provide bitc.main main
 
-  def string_length : fn (string) -> word external bitc_string_length
-  def string_nth : fn (string, word) -> char external bitc_string_nth
+def main.main(argv: string[]) = {
+  let a = 'a' in
+    a;
+    let b = 'b' in {
+      b;
+      let c = 'c' in
+        let d = 'd' in
+    } // This one should auto-close "let c" and "let d"
 
-  def string_map : fn (string, fn (char) -> ()) -> () external bitc_string_map
-
-  def stringToList(s) =
-    let lst : mutable list(char) = nil in
-      do pos = string_length(s) then pos - 1
-        until pos == 0 giving lst {
-          lst := cons(string_nth(s, pos-1), lst)
-        }
-
-  def listToString: fn (list(char)) -> string 
-    external bitc_list_string
-
-  def vectorToString: fn (char[]) -> string external bitc_vector_string
-  
-  // This generates unfortunate intermediate garbage, but it lets me
-  // do the C implementation more easily.
-  def listToString(lst : list(char)) = 
-    vectorToString(vec.listToVector(lst))
+  0:int32
 }

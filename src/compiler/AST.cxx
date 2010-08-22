@@ -3333,16 +3333,7 @@ AST::isValid() const
     break;
 
   case at_begin: // normal AST:
-    // match agt_expr_or_define+
-    if(c >= children.size()) {
-      astChNumError(*this, c+1, children.size());
-      errorsPresent = true;
-      break;
-    }
-    if (!ISSET(astMembers[agt_expr_or_define], child(c)->astType)) {
-      astChTypeError(*this, agt_expr_or_define, child(c)->astType, 0);
-      errorsPresent = true;
-    }
+    // match agt_expr_or_define*
     while (c < children.size()) {
       if (!ISSET(astMembers[agt_expr_or_define], child(c)->astType))
         astChTypeError(*this, agt_expr_or_define, child(c)->astType, c);

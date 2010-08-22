@@ -1133,7 +1133,7 @@ AST vector = expr+;
 AST array = expr+;
 
 // BEGIN [7.5]
-AST begin = expr_or_define+;
+AST begin = expr_or_define*;
 
 // MEMBER [7.7]
 AST select = expr ident;
