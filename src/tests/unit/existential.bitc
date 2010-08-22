@@ -1,39 +1,39 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; Copyright (C) 2009, Johns Hopkins University.
-;; All rights reserved.
-;;
-;; Redistribution and use in source and binary forms, with or
-;; without modification, are permitted provided that the following
-;; conditions are met:
-;;
-;;   - Redistributions of source code must contain the above 
-;;     copyright notice, this list of conditions, and the following
-;;     disclaimer. 
-;;
-;;   - Redistributions in binary form must reproduce the above
-;;     copyright notice, this list of conditions, and the following
-;;     disclaimer in the documentation and/or other materials 
-;;     provided with the distribution.
-;;
-;;   - Neither the names of the copyright holders nor the names of any
-;;     of any contributors may be used to endorse or promote products
-;;     derived from this software without specific prior written
-;;     permission. 
-;;
-;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+//////////////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2009, Johns Hopkins University.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted provided that the following
+// conditions are met:
+//
+//   - Redistributions of source code must contain the above 
+//     copyright notice, this list of conditions, and the following
+//     disclaimer. 
+//
+//   - Redistributions in binary form must reproduce the above
+//     copyright notice, this list of conditions, and the following
+//     disclaimer in the documentation and/or other materials 
+//     provided with the distribution.
+//
+//   - Neither the names of the copyright holders nor the names of any
+//     of any contributors may be used to endorse or promote products
+//     derived from this software without specific prior written
+//     permission. 
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
 
 (bitc version 0.10)
 (import bitc.main as main)
@@ -51,34 +51,34 @@
 (define main.main:(fn (vector string) -> int32)
   (lambda (argVec)
 
-    ;; An object with encapsulated integer state
+    // An object with encapsulated integer state
     (define obji
       (begin
-	(define i 10:int32)               ;state
-	(define (inc_i) (set! i (+ i 1))) ;methods
+	(define i 10:int32)               //state
+	(define (inc_i) (set! i (+ i 1))) //methods
 	(define (odd_i) (!= (% i 2) 0))
 	(Obj inc_i odd_i)))
     
-    ;; An object with encapsulated float state
+    // An object with encapsulated float state
     (define objf 
       (begin
 	(define f 10.0:float)
 	(define (inc_f) (set! f (+ f 1.0)))
-	(define (odd_f) #f) ; :)
+	(define (odd_f) #f) // :)
 	(Obj inc_f odd_f)))
 	
-    ;; An object with encapsulated boolean state
+    // An object with encapsulated boolean state
     (define objb
       (begin
 	(define b #t)
-	(define (inc_b) (set! b #t))  ; :)
-	(define (odd_b) #t)           ; :)
+	(define (inc_b) (set! b #t))  // :)
+	(define (odd_b) #t)           // :)
 	(Obj inc_b odd_b)))
 
-    ;; All objects have the same type Obj, no way to recover the inner
-    ;; hidden state.
+    // All objects have the same type Obj, no way to recover the inner
+    // hidden state.
     (define objList (cons obji (cons objf (cons objb nil))))
     
-    ;; Operation on list of objects
+    // Operation on list of objects
     (if (hasOdd objList) 0:int32 1:int32)
     ))

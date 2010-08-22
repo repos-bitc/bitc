@@ -446,7 +446,7 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
 
   // Don't accept block syntax keywords until we see the new version syntax,
   // which is accepted under lf_version
-  currentLang = lf_sexpr | lf_version | lf_LispComments;
+  currentLang = lf_sexpr | lf_version;
   lispParenDepth = 0;
   num_errors = 0;
   isRuntimeUoc = false;
@@ -599,7 +599,7 @@ TransitionLexer::lex(ParseType *lvalp)
   return tokType;
 }
 
-// #define LAYOUT_BLOCK_DEBUG
+//#define LAYOUT_BLOCK_DEBUG
 void
 TransitionLexer::beginBlock(bool implicit)
 {
@@ -759,19 +759,6 @@ TransitionLexer::do_lex(ParseType *lvalp)
   thisToken.erase();
 
   c = getChar();
-
-  if (c == ';' && (currentLang & lf_LispComments)) {
-    // Process a LISP-style comment:
-    do {
-      c = getChar();
-    } while (c != '\n' && c != '\r');
-
-    // Back out the EOL. We'll handle that with white space
-    // processing below to simplify layout processing.
-    ungetChar(c);
-    here.updateWith(thisToken);
-    goto startOver;
-  }
 
   if (c == '/') {
     c = getChar();
@@ -980,22 +967,9 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
   case ';':                        // Comments
     {
-      if ((currentLang & lf_LispComments) == 0) {
-        lvalp->tok = LToken(here, thisToken);
-        here.updateWith(thisToken);
-        RETURN_TOKEN(c);
-      }
-
-      // Otherwise, process a LISP-style comment:
-      do {
-        c = getChar();
-      } while (c != '\n' && c != '\r');
-      // Back out the NL or CR, so that we can do start of line
-      // processing. We'll pick it up when we handle it as white space
-      // later.
-      ungetChar(c);
+      lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
-      goto startOver;
+      RETURN_TOKEN(c);
     }
 
 #ifdef OBSOLETE

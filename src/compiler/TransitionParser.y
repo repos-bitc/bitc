@@ -519,7 +519,6 @@ sxp_version: LP tk_BITC {
 };
 
 blk_version: tk_BITC {
-    lexer->currentLang &= ~TransitionLexer::lf_LispComments; 
     lexer->currentLang |= TransitionLexer::lf_version; 
 } tk_VERSION {
     lexer->currentLang |= TransitionLexer::lf_version; 
@@ -534,7 +533,6 @@ blk_version: tk_BITC {
 
   lexer->currentLang |= TransitionLexer::lf_block; 
   lexer->currentLang &= ~TransitionLexer::lf_sexpr; 
-  lexer->currentLang &= ~TransitionLexer::lf_LispComments;
 };
 
 // Documentation comments. These are added only in productions where
@@ -1850,8 +1848,6 @@ blk_import_definition: tk_IMPORT blk_ifident tk_AS blk_ident {
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $2);
   UocInfo::importInterface(lexer->errStream, $2.loc, $2.str);
   $$ = AST::make(at_importAs, $1.loc, ifIdent, $4);
-  if (lexer->currentLang & TransitionLexer::lf_LispComments)
-    SHOWPARSE("!!Current lang allows lisp comments");
 }
 
 sxp_import_definition: LP tk_IMPORT sxp_ifident tk_AS sxp_ident RP {
@@ -1866,8 +1862,6 @@ blk_import_definition: tk_IMPORT blk_ifident {
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $2);
   UocInfo::importInterface(lexer->errStream, $2.loc, $2.str);
   $$ = AST::make(at_import, $1.loc, ifIdent);
-  if (lexer->currentLang & TransitionLexer::lf_LispComments)
-    SHOWPARSE("!!Current lang allows lisp comments");
 };
 
 sxp_import_definition: LP tk_IMPORT sxp_ifident RP {
@@ -1945,8 +1939,6 @@ blk_provide_definition: tk_PROVIDE blk_ifident blk_provideList {
   UocInfo::importInterface(lexer->errStream, $2.loc, $2.str);
   $$ = AST::make(at_provide, $1.loc, ifIdent);
   $$->addChildrenFrom($3);
-  if (lexer->currentLang & TransitionLexer::lf_LispComments)
-    SHOWPARSE("!!Current lang allows lisp comments");
 };
 
 blk_provideList: blk_ident {

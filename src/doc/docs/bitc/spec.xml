@@ -201,15 +201,6 @@ bitc version 0.11</literallayout>
       <ul>
         <li>
           <p>
-            The lisp-style comment syntax beginning with a semicolon
-            is no longer accepted after the initial
-            <progident>bitc</progident> keyword is seen. Note that the
-            semicolon at the end of this declaration is <em>not</em>
-            the beginning of a comment.
-          </p>
-        </li>
-        <li>
-          <p>
             Top-level forms will be accepted in either the new syntax
             or the s-expression syntax. The two may be intermingled at
             the granularity of top-level forms. A given top level form
@@ -373,24 +364,36 @@ def fact x =
         Input lines are terminated by a linefeed character (U+000A), a
         carriage return (U+000D) or by the two character sequence
         consisting of a carriage return followed by a line feed.  This
-        is primarily significant for comment processing and diagnostic
-        purposes, as the rest of the language treats linefeeds as
-        white space without further significance.
+        is primarily significant for comment processing, layout
+        processing, and diagnostic purposes, as the rest of the
+        language treats linefeeds carriage returns as white space
+        without further significance.
       </p>
       <sect2>
 	<title>Comments</title>
 	<p>
-	  A comment is introduced by a semicolon and extends up to but
-	  not including the trailing newline and/or carriage return of
-	  the current line (the end of line markers are significant for
-	  purposes of line numbering). This implies that the comment
-	  syntax cannot be successfully exploited for identifier
-	  splicing as in early C preprocessors.
+          A comment introduced by the two-character sequence "//"
+	  extends up to but not including the trailing newline and/or
+	  carriage return of the current line (the end of line markers
+	  are significant for purposes of line numbering).
+        </p>
+        <p>
+          A comment introduced by the two-character sequence "/*"
+          extends up to the following two-character sequence "*/".
+          If an end-of-line sequence is encountered within the
+          comment, the next token encountered after the comment is
+          considered the first token on a new line.
+        </p>
+        <p>
+          For lexical purposes, comments are considered white space.
+          This implies that the comment syntax cannot be successfully
+          exploited for identifier splicing as in early C
+          preprocessors.
 	</p>
-	<p>
-	  Notwithstanding the preceding, a semicolon appearing within a
-	  string or character literal does not begin a comment.
-	</p>
+        <p>
+          Characters within comments are processed only to determine
+          where the comment ends. Nested comments are not supported.
+        </p>
       </sect2>
       <sect2 id="identifiers">
 	<title>Identifiers</title>
@@ -3922,7 +3925,7 @@ bitsizeof(<em>T</em>)</literallayout>
           constructor for a named constructed type.
         </p>
       </sect2>
-      <sect2 id="conditional-execution>
+      <sect2 id="conditional-execution">
 	<title>Conditional Execution</title>
         <sect3 id="condexec:if">
           <title>if</title>

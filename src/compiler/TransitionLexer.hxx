@@ -131,8 +131,7 @@ struct TransitionLexer {
     lf_sexpr = 0x1u,
     lf_block = 0x2u,
     lf_transition = 0x3u,
-    lf_version = 0x4u,
-    lf_LispComments = 0x10u
+    lf_version = 0x4u
   };
 
   int lispParenDepth;

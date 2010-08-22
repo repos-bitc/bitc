@@ -1,39 +1,39 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; Copyright (C) 2006, Johns Hopkins University.
-;; All rights reserved.
-;;
-;; Redistribution and use in source and binary forms, with or
-;; without modification, are permitted provided that the following
-;; conditions are met:
-;;
-;;   - Redistributions of source code must contain the above 
-;;     copyright notice, this list of conditions, and the following
-;;     disclaimer. 
-;;
-;;   - Redistributions in binary form must reproduce the above
-;;     copyright notice, this list of conditions, and the following
-;;     disclaimer in the documentation and/or other materials 
-;;     provided with the distribution.
-;;
-;;   - Neither the names of the copyright holders nor the names of any
-;;     of any contributors may be used to endorse or promote products
-;;     derived from this software without specific prior written
-;;     permission. 
-;;
-;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+//////////////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2006, Johns Hopkins University.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted provided that the following
+// conditions are met:
+//
+//   - Redistributions of source code must contain the above 
+//     copyright notice, this list of conditions, and the following
+//     disclaimer. 
+//
+//   - Redistributions in binary form must reproduce the above
+//     copyright notice, this list of conditions, and the following
+//     disclaimer in the documentation and/or other materials 
+//     provided with the distribution.
+//
+//   - Neither the names of the copyright holders nor the names of any
+//     of any contributors may be used to endorse or promote products
+//     derived from this software without specific prior written
+//     permission. 
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
 
 (bitc version 0.10)
 (import bitc.stdio as stdio)
@@ -54,7 +54,7 @@
   (lambda (argvec)
     (define start:(mutable uint64) 0)
     (define stop:(mutable uint64) 0)
-; (define start (stdlib.getTimeStamp))
+// (define start (stdlib.getTimeStamp))
     (define sha (sha1.sha1Context
 		 (array 0 0 0 0 0) 0 0 
 		 (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
@@ -65,25 +65,25 @@
     (define digest:(array (mutable uint8) 20)
       (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
     (define len:word (convert (stdlib.atoi (nth argvec 2))))
- ;(define stop (stdlib.getTimeStamp)) 
- ;(TS "Initialization: " (- stop start))
+ //(define stop (stdlib.getTimeStamp)) 
+ //(TS "Initialization: " (- stop start))
     
- ;(set! start (stdlib.getTimeStamp))
+ //(set! start (stdlib.getTimeStamp))
     (define iStream (stdio.open (nth argvec 1) "r"))
     (define input:(vector (mutable uint8)) 
       (MakeVector (convert len)
 		   (lambda (i) 
 		     (if (not (stdio.isEOF iStream))
 			 (stdio.read_byte iStream) 0))))
-  ;(do ((i 0 (+ i 1)))
-  ;    ((>= i len) ())
-  ;    (set! (nth input i) 
-  ;	    (if (not (stdio.isEOF iStream))
-  ;		(stdio.read_byte iStream) 0)))  
+  //(do ((i 0 (+ i 1)))
+  //    ((>= i len) ())
+  //    (set! (nth input i) 
+  //	    (if (not (stdio.isEOF iStream))
+  //		(stdio.read_byte iStream) 0)))  
     (stdio.close iStream)
     
- ;(set! stop (stdlib.getTimeStamp)) 
- ;(TS "Input: " (- stop start))
+ //(set! stop (stdlib.getTimeStamp)) 
+ //(TS "Input: " (- stop start))
     
     (define (examine res mesg)
       (switch x res
@@ -101,9 +101,9 @@
 	(examine (sha1.sha1Input sha input) "Input")
 	(examine (sha1.sha1Result sha digest) "Result"))
     (set! stop (stdlib.getTimeStamp)) 
-; (TS "SHA1: " (- stop start))
+// (TS "SHA1: " (- stop start))
     
- ;(set! start (stdlib.getTimeStamp))
+//(set! start (stdlib.getTimeStamp))
     (do ((i 0 (+ i 1)))
 	((>= i 20) ())
 	(if (> i 0)
@@ -112,8 +112,8 @@
 	(stdio.write_int stdio.stdout (nth digest i) 16))
     (stdio.write_char stdio.stdout '\linefeed')
     
- ;(set! stop (stdlib.getTimeStamp)) 
- ;(TS "Output: " (- stop start))
+//(set! stop (stdlib.getTimeStamp)) 
+//(TS "Output: " (- stop start))
     0))
   
   
