@@ -65,8 +65,9 @@ interface bitc.sets.bit {
       if (s.nWords < needWords) then
         let v = s.bits in {
           s.bits := MakeVector(needWords, lambda(n) {
-	    if (n < s.nWords) then v[n]
-	    else 0
+            if n < s.nWords
+              then v[n]
+              else 0
 	  })
 	  s.nWords := needWords
         }

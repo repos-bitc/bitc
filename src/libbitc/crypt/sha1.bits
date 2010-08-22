@@ -191,27 +191,27 @@ module sha1_impl {
   def sha1.sha1Result(context:ByRef sha1.sha1Context,
 		      digest:ByRef((mutable uint8)[20])) = {
     if context.corrupted.sha_Success
-    then {
-      if not context.computed
       then {
-	sha1PadMessage(context)
-	do i = 0 then i + 1
-	until i >= 64 {
-	  context.message[i] := 0
-        }
-	context.lenLow := 0
-	context.lenHigh := 0
-	context.computed := true
-      }
-      else ()
+        if not context.computed
+          then {
+            sha1PadMessage(context)
+            do i = 0 then i + 1
+              until i >= 64 {
+                context.message[i] := 0
+              }
+            context.lenLow := 0
+            context.lenHigh := 0
+            context.computed := true
+          }
+          else ()
 
-      do i = 0 then i + 1
-      until i >= 20 {
-        digest[i] := Truncate(context.digest[i >> 2] >> (8 * (3 - i & 16r03)))
+        do i = 0 then i + 1
+          until i >= 20 {
+            digest[i] := Truncate(context.digest[i >> 2] >> (8 * (3 - i & 16r03)))
+          }
+        sha1.sha_Success
       }
-      sha1.sha_Success
-    }
-    else context.corrupted
+      else context.corrupted
   }
 
 
@@ -233,41 +233,40 @@ module sha1_impl {
   //      sha Error Code.
   //////////////////////////////////////////////////////////
 
-  def sha1.sha1Input(context:ByRef sha1.sha1Context, message:(mutable uint8)[]) =
-  {
+  def sha1.sha1Input(context:ByRef sha1.sha1Context, message:(mutable uint8)[]) = {
     if message.length == 0
-    then sha1.sha_Success
-    else {
-      if context.computed
-      then {
-        context.corrupted := sha1.sha_StateError
-        sha1.sha_StateError
-      }
+      then sha1.sha_Success
       else {
-        if context.corrupted.sha_Success
-	then {
-	  do i = 0 then i + 1
-    	  until (i >= message.length) && context.corrupted.sha_Success {
-	    context.message[context.messNdx] := message[i] & 16rff
-	    context.messNdx := context.messNdx + 1
-	    context.lenLow := context.lenLow + 8
-
-	    if context.lenLow == 0
-	    then {
-	      context.lenHigh := context.lenHigh + 1
-	      if context.lenHigh == 0
-	      then context.corrupted := sha1.sha_InputTooLong
-	    }
-
-	    if context.messNdx == 64
-	    then sha1ProcessMessageBlock(context)
+        if context.computed
+          then {
+            context.corrupted := sha1.sha_StateError
+            sha1.sha_StateError
           }
+          else {
+            if context.corrupted.sha_Success
+              then {
+                do i = 0 then i + 1
+                  until (i >= message.length) && context.corrupted.sha_Success {
+                    context.message[context.messNdx] := message[i] & 16rff
+                    context.messNdx := context.messNdx + 1
+                    context.lenLow := context.lenLow + 8
 
-	  sha1.sha_Success
-        }
-        else context.corrupted
+                    if context.lenLow == 0
+                      then {
+                        context.lenHigh := context.lenHigh + 1
+                        if context.lenHigh == 0
+                          then context.corrupted := sha1.sha_InputTooLong
+                      }
+
+                    if context.messNdx == 64
+                      then sha1ProcessMessageBlock(context)
+                  }
+
+                sha1.sha_Success
+              }
+              else context.corrupted
+          }
       }
-    }
   }
 
   //////////////////////////////////////////////////////////
@@ -290,8 +289,7 @@ module sha1_impl {
   //      names used in the publication.
   //////////////////////////////////////////////////////////
 
-  def sha1ProcessMessageBlock(context : ByRef sha1.sha1Context) = 
-  {
+  def sha1ProcessMessageBlock(context : ByRef sha1.sha1Context) = {
     // Constants defined in SHA-1 
     def K = array(16r5A827999, 16r6ED9EBA1, 16r8F1BBCDC, 16rCA62C1D6)
     
@@ -302,17 +300,17 @@ module sha1_impl {
 	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     
     do t = 0 then t + 1
-    until t >= 16 {
-      W[t] := ZeroExtend(context.message[t*4]) << 24
-      W[t] := W[t] | ZeroExtend(context.message[t*4 + 1]) << 16
-      W[t] := W[t] | ZeroExtend(context.message[t*4 + 2]) << 8
-      W[t] := W[t] | ZeroExtend(context.message[t*4 + 3])
-    }
+      until t >= 16 {
+        W[t] := ZeroExtend(context.message[t*4]) << 24
+        W[t] := W[t] | ZeroExtend(context.message[t*4 + 1]) << 16
+        W[t] := W[t] | ZeroExtend(context.message[t*4 + 2]) << 8
+        W[t] := W[t] | ZeroExtend(context.message[t*4 + 3])
+      }
 
     do t = 16 then t + 1
-    until t >= 80 {
-      W[t] := circShift(1, W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16])
-    }
+      until t >= 80 {
+        W[t] := circShift(1, W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16])
+      }
 
     def A = context.digest[0]
     def B = context.digest[1]
@@ -321,48 +319,48 @@ module sha1_impl {
     def E = context.digest[4]
 
     do t = 0 then t + 1
-    until t >= 20 {
-      def temp = circShift(5, A) + ((B&C) | (~B & D)) + E + W[t] + K[0]
+      until t >= 20 {
+        def temp = circShift(5, A) + ((B&C) | (~B & D)) + E + W[t] + K[0]
 
-      E := D
-      D := C
-      C := circShift(30, B)
-      B := A
-      A := temp
-    }
+        E := D
+        D := C
+        C := circShift(30, B)
+        B := A
+        A := temp
+      }
 
     do t = 20 then t + 1
-    until t >= 40 {
-      def temp = circShift(5, A) + (B^(C^D)) + E + W[t] + K[1]
+      until t >= 40 {
+        def temp = circShift(5, A) + (B^(C^D)) + E + W[t] + K[1]
 
-      E := D
-      D := C
-      C := circShift(30, B)
-      B := A
-      A := temp
-    }
+        E := D
+        D := C
+        C := circShift(30, B)
+        B := A
+        A := temp
+      }
 
     do t = 40 then t + 1
-    until t >= 60 {
-      def temp = circShift(5, A) + ((B&C)|(B&D)|(C&D)) + E + W[t] + K[2]
+      until t >= 60 {
+        def temp = circShift(5, A) + ((B&C)|(B&D)|(C&D)) + E + W[t] + K[2]
 
-      E := D
-      D := C
-      C := circShift(30, B)
-      B := A
-      A := temp
-    }
+        E := D
+        D := C
+        C := circShift(30, B)
+        B := A
+        A := temp
+      }
 
     do t = 60 then t + 1
-    until t >= 80 {
-      def temp = circShift(5, A) + (B^(C^D)) + E + W[t] + K[3]
+      until t >= 80 {
+        def temp = circShift(5, A) + (B^(C^D)) + E + W[t] + K[3]
 
-      E := D
-      D := C
-      C := circShift(30, B)
-      B := A
-      A := temp
-    }
+        E := D
+        D := C
+        C := circShift(30, B)
+        B := A
+        A := temp
+      }
 
     context.digest[0] := context.digest[0] + A
     context.digest[1] := context.digest[1] + B
@@ -401,33 +399,33 @@ module sha1_impl {
     // the initial padding bits and length. If so, we will pad the
     // block, process it, and then continue padding into a second block.
     if context.messNdx > 55   
-    then {
-      context.message[context.messNdx] := 16r80
-      context.messNdx := context.messNdx + 1
-
-      do until context.messNdx >= 64 {
-        context.message[context.messNdx] := 0
+      then {
+        context.message[context.messNdx] := 16r80
         context.messNdx := context.messNdx + 1
+
+        do until context.messNdx >= 64 {
+          context.message[context.messNdx] := 0
+          context.messNdx := context.messNdx + 1
+        }
+
+        sha1ProcessMessageBlock(context)
+
+        // Will reset context.messNdx to 0
+
+        do until context.messNdx >= 56 {
+          context.message[context.messNdx] := 0
+          context.messNdx := context.messNdx + 1
+        }
       }
-
-      sha1ProcessMessageBlock(context)
-
-      // Will reset context.messNdx to 0
-
-      do until context.messNdx >= 56 {
-        context.message[context.messNdx] := 0
+      else {
+        context.message[context.messNdx] := 16r80
         context.messNdx := context.messNdx + 1
-      }
-    }
-    else {
-      context.message[context.messNdx] := 16r80
-      context.messNdx := context.messNdx + 1
 
-      do until context.messNdx >= 56 {
-        context.message[context.messNdx] := 0
-        context.messNdx := context.messNdx + 1
+        do until context.messNdx >= 56 {
+          context.message[context.messNdx] := 0
+          context.messNdx := context.messNdx + 1
+        }
       }
-    }
 
     // Store the message length as the last 8 octets
     context.message[56] := Truncate(context.lenHigh >> 24);

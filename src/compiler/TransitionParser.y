@@ -461,8 +461,8 @@ static unsigned VersionMinor(const std::string s)
 // This definition of start must be changed as it ignores
 // junk after the body.
 
-start: ILCB sxp_version sxp_uoc_body IRCB {
-  SHOWPARSE("start -> sxp_version sxp_uoc_body");
+start: ILCB sxp_version SC sxp_uoc_body IRCB {
+  SHOWPARSE("start -> sxp_version SC sxp_uoc_body");
   return 0;
 };
 
@@ -716,8 +716,8 @@ trn_module_seq: trn_module {
  SHOWPARSE("trn_module_seq -> trn_module");
 }
 
-trn_module_seq: trn_module_seq trn_module {
- SHOWPARSE("trn_module_seq -> trn_module_seq trn_module");
+trn_module_seq: trn_module_seq SC trn_module {
+ SHOWPARSE("trn_module_seq -> trn_module_seq SC trn_module");
 }
 
 trn_implicit_module: trn_mod_definitions  {
@@ -852,8 +852,8 @@ sxp_module_seq: sxp_module {
  SHOWPARSE("sxp_module_seq -> sxp_module");
 }
 
-sxp_module_seq: sxp_module_seq sxp_module {
- SHOWPARSE("sxp_module_seq -> sxp_module_seq sxp_module");
+sxp_module_seq: sxp_module_seq SC sxp_module {
+ SHOWPARSE("sxp_module_seq -> sxp_module_seq SC sxp_module");
 }
 
 // INTERFACE TOP LEVEL DEFINITIONS
@@ -883,10 +883,10 @@ sxp_if_definitions: sxp_if_definition {
   $$ = AST::make(at_Null, $1->loc, $1);
 };
 
-sxp_if_definitions: sxp_if_definitions sxp_if_definition {
-  SHOWPARSE("sxp_if_definitions -> sxp_if_definitions sxp_if_definition");
+sxp_if_definitions: sxp_if_definitions SC sxp_if_definition {
+  SHOWPARSE("sxp_if_definitions -> sxp_if_definitions SC sxp_if_definition");
   $$ = $1;
-  $$->addChild($2); 
+  $$->addChild($3); 
 };
 
 sxp_if_definition: sxp_common_definition {
@@ -938,10 +938,10 @@ sxp_mod_definitions: sxp_mod_definition {
   $$ = AST::make(at_Null, $1->loc, $1);
 };
 
-sxp_mod_definitions: sxp_mod_definitions sxp_mod_definition {
-  SHOWPARSE("sxp_mod_definitions -> sxp_mod_definitions sxp_mod_definition");
+sxp_mod_definitions: sxp_mod_definitions SC sxp_mod_definition {
+  SHOWPARSE("sxp_mod_definitions -> sxp_mod_definitions SC sxp_mod_definition");
   $$ = $1;
-  $$->addChild($2); 
+  $$->addChild($3); 
 };
 
 blk_mod_definition: blk_provide_definition {

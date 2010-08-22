@@ -71,8 +71,8 @@ def main.main(argv: string[]) = {
     stdio.write_string(stdio.stdout, "\n")
 
     if bitset.contains(s, 5)
-    then stdio.write_string(stdio.stdout, "Contains 5 (and shouldn't)\n")
-    else stdio.write_string(stdio.stdout, "!Contains 5 (and shouldn't)\n")
+      then stdio.write_string(stdio.stdout, "Contains 5 (and shouldn't)\n")
+      else stdio.write_string(stdio.stdout, "!Contains 5 (and shouldn't)\n")
 
     0:int32
   }

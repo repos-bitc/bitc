@@ -599,7 +599,7 @@ TransitionLexer::lex(ParseType *lvalp)
   return tokType;
 }
 
-//#define LAYOUT_BLOCK_DEBUG
+// #define LAYOUT_BLOCK_DEBUG
 void
 TransitionLexer::beginBlock(bool implicit)
 {
@@ -629,12 +629,6 @@ void
 TransitionLexer::endBlock(bool implicit)
 {
 #ifdef LAYOUT_RULES
-#ifdef LAYOUT_BLOCK_DEBUG
-  errStream << "  LAYOUT: " << here 
-            << (implicit ? ": implicit " : ": explicit ")
-            << "endBlock()" << std::endl;
-#endif
-
   if (implicit && ! layoutStack->implicit)
     ReportParseError(here, "Implicit close brace balances explicit open brace.");
   else if (!implicit && layoutStack->implicit) 
@@ -642,6 +636,16 @@ TransitionLexer::endBlock(bool implicit)
 
   // considerLineStart = false; // we've done it
   layoutStack = layoutStack->next;
+
+#ifdef LAYOUT_BLOCK_DEBUG
+  errStream << "  LAYOUT: " << here 
+            << (implicit ? ": implicit " : ": explicit ")
+            << "endBlock()";
+  if (layoutStack)
+    errStream << " leaving indent at " << layoutStack->column;
+  errStream << std::endl;
+#endif
+
 #endif /* LAYOUT_RULES */
 }
 
@@ -728,11 +732,15 @@ TransitionLexer::closeToOffset(unsigned offset)
 bool
 TransitionLexer::conditionallyInsertSemicolon(unsigned offset)
 {
-#if 0
+  // It is possible for us to be called on the first token in the
+  // file, or on junk tokens after end of module. In both cases we
+  // won't have a layout stack yet.
+  if (!layoutStack)
+    return false;
+
   assert(layoutStack);
   if (here.offset <= layoutStack->column)
     return true;
-#endif
   return false;
 }
 
@@ -863,7 +871,6 @@ TransitionLexer::do_lex(ParseType *lvalp)
                 << here.offset
                 << ", disable check first token." << std::endl;
 #endif
-      layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
     }
     else if (layoutStack->implicit && layoutStack->next) {
 #ifdef LAYOUT_BLOCK_DEBUG
@@ -878,6 +885,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
       lvalp->tok = LToken(here, "}");
       RETURN_TOKEN('}');
     }
+
+    layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
   }
 
   if ((c != EOF) && (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN))) {
@@ -900,7 +909,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
       if (conditionallyInsertSemicolon(here.offset)) {
 #ifdef LAYOUT_BLOCK_DEBUG
       errStream << "  LAYOUT: " << here 
-                << ": semicolon inserted:" << std::endl;
+                << ": semicolon inserted at offset " 
+                << here.offset << std::endl;
 #endif
         ungetChar(c);
         lvalp->tok = LToken(here, ";");
