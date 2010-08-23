@@ -73,8 +73,6 @@ public:
   }
 };
 
-#define LAYOUT_RULES
-
 enum LayoutFlagValues {
   /// @brief A left brace is required as the next token, and we should
   /// insert one if not found.
@@ -91,7 +89,6 @@ enum LayoutFlagValues {
 typedef sherpa::EnumSet<LayoutFlagValues> LayoutFlags;
 
 
-#ifdef LAYOUT_RULES
 struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
   bool implicit;              // true IFF left curly was implicit
   unsigned column;            // column of first token after '{'
@@ -112,7 +109,6 @@ struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
     return boost::shared_ptr<LayoutFrame>(lf);
   }
 };
-#endif /* LAYOUT_RULES */
 
 /** @brief Hand-crafted transitional syntax lexer.
  *
@@ -130,10 +126,8 @@ struct TransitionLexer {
 private:
   int lastToken;
 
-#ifdef LAYOUT_RULES
   boost::shared_ptr<LayoutFrame> layoutStack;
   LayoutFlags layoutFlags;
-#endif
 
   void beginBlock(bool implicit);
   void endBlock(bool implicit);

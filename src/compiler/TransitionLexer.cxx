@@ -591,7 +591,8 @@ isCharDelimiter(ucs4_t c)
 int
 TransitionLexer::lex(ParseType *lvalp)
 {
-  here = skipWhiteSpaceAndComments();
+  if (!havePushbackToken)
+    here = skipWhiteSpaceAndComments();
 
   LToken tok = getNextToken();
   if (debug) {
@@ -609,7 +610,6 @@ TransitionLexer::lex(ParseType *lvalp)
 void
 TransitionLexer::beginBlock(bool implicit)
 {
-#ifdef LAYOUT_RULES
 #ifdef LAYOUT_BLOCK_DEBUG
   errStream << "  LAYOUT: " << here 
             << (implicit ? ": implicit " : ": explicit ")
@@ -628,13 +628,11 @@ TransitionLexer::beginBlock(bool implicit)
 
   lf->next = layoutStack;
   layoutStack = lf;
-#endif /* LAYOUT_RULES */
 }
 
 void
 TransitionLexer::endBlock(bool implicit)
 {
-#ifdef LAYOUT_RULES
   if (implicit && ! layoutStack->implicit)
     ReportParseError(here, "Implicit close brace balances explicit open brace.");
   else if (!implicit && layoutStack->implicit) 
@@ -651,8 +649,6 @@ TransitionLexer::endBlock(bool implicit)
     errStream << " leaving indent at " << layoutStack->column;
   errStream << std::endl;
 #endif
-
-#endif /* LAYOUT_RULES */
 }
 
 void
@@ -801,12 +797,10 @@ TransitionLexer::skipWhiteSpaceAndComments()
           else
             ungetChar(c);
         }
-#ifdef LAYOUT_RULES
         else if (c == '\n' || c == '\r') {
           /* If a multi-line comment spans lines, the next token after
              the comment is the first token on that line */
           layoutFlags |= LayoutFlags(CHECK_FIRST_TOKEN);
-#endif
         }
         else if (c == EOF) {
           pos.updateWith(thisToken);
@@ -825,10 +819,8 @@ TransitionLexer::skipWhiteSpaceAndComments()
 
   if (isWhiteSpace(c)) {
     while (isWhiteSpace(c)) {
-#ifdef LAYOUT_RULES
       if (c == '\n' || c == '\r')
         layoutFlags |= LayoutFlags(CHECK_FIRST_TOKEN);
-#endif /* LAYOUT_RULES */
 
       c = getChar();
     }
@@ -843,14 +835,6 @@ TransitionLexer::skipWhiteSpaceAndComments()
   return pos;
 }
 
-LToken
-TransitionLexer::getNextToken()
-{
-  LToken tok = getNextInputToken();
-
-  return tok;
-}
-
 void
 TransitionLexer::pushTokenBack(LToken& tok)
 {
@@ -859,33 +843,21 @@ TransitionLexer::pushTokenBack(LToken& tok)
 }
 
 LToken
-TransitionLexer::getNextInputToken()
+TransitionLexer::getNextToken()
 {
-  if (havePushbackToken) {
-    havePushbackToken = false;
-    return pushbackToken;
-  }
+  LToken tok = getNextInputToken();
 
-  thisToken.erase();
-
-  ucs4_t c = getChar();
-
-  /////////////////////////////////////////////////////////
-  // We've now eaten comments and white space, so whatver
-  // location this is, this is where the new token starts:
-  /////////////////////////////////////////////////////////
   LexLoc startLoc = here;
   LexLoc endLoc = here;
 
-#ifdef LAYOUT_RULES
-  if ((c != '{') && (layoutFlags & NEED_LBRACE)) {
-    ungetChar(c);
+  if ((layoutFlags & NEED_LBRACE) && (tok.tokType != '{')) {
+    pushTokenBack(tok);
 
     layoutFlags &= ~LayoutFlags(NEED_LBRACE);
     beginBlock(true);
     
     // INSERTED! No position update.
-    return  LToken('{', startLoc, endLoc, "{");
+    return LToken('{', startLoc, endLoc, "{");
   }
 
 #ifdef LAYOUT_BLOCK_DEBUG
@@ -927,7 +899,7 @@ TransitionLexer::getNextInputToken()
 #endif
       // First token after '{' is at the previous (or earlier) indent
       // level, and it was an implicit open block. Close it immediately:
-      ungetChar(c);
+      pushTokenBack(tok);
       endBlock(true);
 
       return LToken('}', startLoc, endLoc, "}");
@@ -936,7 +908,14 @@ TransitionLexer::getNextInputToken()
     layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
   }
 
-  if ((c != EOF) && (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN))) {
+  if (tok.tokType == EOF) {
+    closeToOpeningToken(EOF);
+    if (trimLayoutStack()) {
+      pushTokenBack(tok);
+      return LToken('}', startLoc, endLoc, "}");
+    }
+  }
+  else if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
     // Consider possible right curly insertion and/or semicolon
     // insertion.
 
@@ -947,25 +926,74 @@ TransitionLexer::getNextInputToken()
 
     closeToOffset(startLoc.offset);
     if (trimLayoutStack()) {
-      ungetChar(c);
+      pushTokenBack(tok);
       return LToken('}', startLoc, endLoc, "}");
     }
 
-    if ((lastToken != ';') && (c != ';') && (c != '}')) {
+    if ((lastToken != ';') && (tok.tokType != ';') && (tok.tokType != '}')) {
       if (conditionallyInsertSemicolon(startLoc.offset)) {
 #ifdef LAYOUT_BLOCK_DEBUG
-      errStream << "  LAYOUT: " << startLoc 
-                << ": semicolon inserted at offset " 
-                << startLoc.offset << std::endl;
+        errStream << "  LAYOUT: " << startLoc 
+                  << ": semicolon inserted at offset " 
+                  << startLoc.offset << std::endl;
 #endif
-        ungetChar(c);
+        pushTokenBack(tok);
         return LToken(';', startLoc, endLoc, ";");
       }
     }
 
     layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
   }
-#endif /* LAYOUT_RULES */
+
+  if (tok.tokType == '{') {
+    layoutFlags &= ~LayoutFlags(NEED_LBRACE);
+    beginBlock(false);
+  }
+
+  if (tok.tokType == '}') {
+    endBlock(false);
+  }
+
+  if (currentLang & lf_block) {
+    if (tok.tokType == tk_IN) {
+      closeToOpeningToken(tk_IN);
+      if (trimLayoutStack()) {
+        pushTokenBack(tok);
+        return LToken('}', startLoc, endLoc, "}");
+      }
+    }
+
+    switch(tok.tokType) {
+    case tk_CASE:
+    case tk_LET:
+    case tk_LETREC:
+    case tk_IN:
+      layoutFlags |= LayoutFlags(NEED_LBRACE);
+      break;
+    }
+  }
+
+  return tok;
+}
+
+LToken
+TransitionLexer::getNextInputToken()
+{
+  if (havePushbackToken) {
+    havePushbackToken = false;
+    return pushbackToken;
+  }
+
+  thisToken.erase();
+
+  ucs4_t c = getChar();
+
+  /////////////////////////////////////////////////////////
+  // We've now eaten comments and white space, so whatver
+  // location this is, this is where the new token starts:
+  /////////////////////////////////////////////////////////
+  LexLoc startLoc = here;
+  LexLoc endLoc = here;
 
   switch (c) {
   case '`':
@@ -1005,16 +1033,11 @@ TransitionLexer::getNextInputToken()
 
   case '{':
     {
-      layoutFlags &= ~LayoutFlags(NEED_LBRACE);
-      beginBlock(false);
-
       endLoc.updateWith(thisToken);
       return LToken(c, startLoc, endLoc, thisToken);
     }
   case '}':
     {
-      endBlock(false);
-
       endLoc.updateWith(thisToken);
       return LToken(c, startLoc, endLoc, thisToken);
     }
@@ -1321,17 +1344,10 @@ TransitionLexer::getNextInputToken()
     }
 
   case EOF:
-#ifdef LAYOUT_RULES
-    closeToOpeningToken(EOF);
-    if (trimLayoutStack()) {
-      return LToken('}', startLoc, endLoc, "}");
+    {
+      endLoc.updateWith(thisToken);
+      return LToken(EOF, startLoc, endLoc, "");
     }
-    else
-#endif
-      {
-        endLoc.updateWith(thisToken);
-        return LToken(EOF, startLoc, endLoc, "");
-      }
 
   default:
     if (valid_ident_start(c) || valid_operator_start(c)) {
@@ -1361,30 +1377,6 @@ TransitionLexer::getNextInputToken()
     if (thisToken != "set!")
       ungetChar(c);
 
-#ifdef LAYOUT_RULES
-    if (currentLang & lf_block) {
-      // LAYOUT: Implicit close is required before certain tokens:
-      if (thisToken == "in") {
-
-        closeToOpeningToken(tk_IN);
-        if (trimLayoutStack()) {
-          ungetThisToken();
-          return LToken('}', startLoc, endLoc, "}");
-        }
-      }
-
-      // LAYOUT: '{' is required to appear after certain tokens:
-#if 0
-      if (thisToken == "do" || thisToken == "let" || thisToken == "in")
-        layoutFlags |= LayoutFlags(NEED_LBRACE);
-#endif
-      if (   thisToken == "case" 
-          || thisToken == "let" 
-          || thisToken == "in" 
-          || thisToken == "letrec" )
-        layoutFlags |= LayoutFlags(NEED_LBRACE);
-    }
-#endif
   ident_done:
     int tokType = kwCheck(thisToken.c_str(), tk_BlkIdent);
     endLoc.updateWith(thisToken);
