@@ -39,6 +39,7 @@
  *
  **************************************************************************/
 
+#include <stdio.h>
 #include <libsherpa/LexLoc.hxx>
 
 /// @brief A lexically indivisible unit of text with an associated
@@ -65,6 +66,8 @@
 namespace sherpa {
 
   struct LToken {
+    int tokNo;                  // as decided by Bison
+
     LexLoc loc;
     LexLoc endLoc;
     std::string str;
@@ -75,33 +78,41 @@ namespace sherpa {
     }
 
     LToken()
-      :loc(), str()
+      :loc(), endLoc(), str()
     {
+      tokNo = EOF;
     }
 
-    LToken(const LexLoc& loc, const std::string& s)
+#if 0
+    LToken(int tokNo, const LexLoc& loc, const std::string& s)
     {
+      this->tokNo = tokNo;
       this->loc = loc;
       this->endLoc = LexLoc();
       this->str = s;
     }
+#endif
 
-    LToken(const LexLoc& loc, const LexLoc& endLoc, const std::string& s)
+    LToken(int tokNo, const LexLoc& loc, const LexLoc& endLoc, 
+           const std::string& s)
     {
+      this->tokNo = tokNo;
       this->loc = loc;
       this->endLoc = endLoc;
       this->str = s;
     }
 
-    LToken(const LToken& that)
+    LToken(int tokNo, const LToken& that)
     {
+      this->tokNo = that.tokNo;
       this->loc = that.loc;
       this->endLoc = that.endLoc;
       this->str = that.str;
     }
 
-    LToken(const std::string& that)
+    LToken(int tokNo, const std::string& that)
     {
+      this->tokNo = tokNo;
       this->loc = LexLoc();
       this->endLoc = LexLoc();
       this->str = that;
@@ -109,6 +120,7 @@ namespace sherpa {
 
     LToken& operator=(const LToken& that)
     {
+      this->tokNo = that.tokNo;
       this->loc = that.loc;
       this->endLoc = that.endLoc;
       this->str = that.str;

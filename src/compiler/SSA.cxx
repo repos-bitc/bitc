@@ -48,6 +48,8 @@
 #include "Special.hxx"
 #include "Instantiate.hxx"
 
+#include "BUILD/TransitionParser.hxx"
+
 using namespace boost;
 using namespace sherpa;
 
@@ -657,7 +659,7 @@ ssa(std::ostream& errStream,
                                       UseCase(expr));
 #else
       shared_ptr<AST> lengthIdent = 
-        AST::make(at_ident, LToken(ast->loc, "length"));
+        AST::make(at_ident, LToken(tk_BlkIdent, "length"));
       shared_ptr<AST> len = AST::make(at_select, ast->loc,
                                       UseCase(expr), lengthIdent);
 #endif
@@ -909,7 +911,7 @@ ssa(std::ostream& errStream,
       std::string resultName = ss.str();
 
       shared_ptr<AST> res = 
-        AST::make(at_ident, LToken(resultName));
+        AST::make(at_ident, LToken(tk_BlkIdent, resultName));
       res->flags = ast->flags | ID_IS_GENSYM;
       res->identType = id_value;
       res->symType = ast->symType;
@@ -935,7 +937,7 @@ ssa(std::ostream& errStream,
       std::string resultName = ss.str();
 
       shared_ptr<AST> res = 
-        AST::make(at_ident, LToken(resultName));
+        AST::make(at_ident, LToken(tk_BlkIdent, resultName));
       res->flags = ast->flags | ID_IS_GENSYM;
       res->identType = id_value;
       res->symType = ast->symType;

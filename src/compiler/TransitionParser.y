@@ -689,26 +689,26 @@ blk_ifident: {
     lexer->setIfIdentMode(true);
   } blk_ident {
   lexer->setIfIdentMode(false);
-  $$ = LToken($2->loc, $2->s);
+  $$ = LToken(tk_BlkIdent, $2->loc, $2->endLoc(), $2->s);
 };
 blk_ifident: blk_ifident '.' {
     lexer->setIfIdentMode(true);
   } tk_BlkIdent {
   lexer->setIfIdentMode(false);
-  $$ = LToken($1.loc, $1.str + "." + $4.str);
+  $$ = LToken(tk_BlkIdent, $1.loc, $4.endLoc, $1.str + "." + $4.str);
 };
 
 sxp_ifident: {
     lexer->setIfIdentMode(true);
   } sxp_ident {
   lexer->setIfIdentMode(false);
-  $$ = LToken($2->loc, $2->s);
+  $$ = LToken(tk_SxpIdent, $2->loc, $2->endLoc(), $2->s);
 };
 sxp_ifident: sxp_ifident '.' {
     lexer->setIfIdentMode(true);
   } tk_SxpIdent {
   lexer->setIfIdentMode(false);
-  $$ = LToken($1.loc, $1.str + "." + $4.str);
+  $$ = LToken(tk_SxpIdent, $1.loc, $4.endLoc, $1.str + "." + $4.str);
 };
 
 // MODULES [2.5]
@@ -1390,7 +1390,8 @@ blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints trn_optdocstring b
             "trn_optdocstring blk_declares blk_methods_only )");
 
   // For the moment, all objects are value types:
-  shared_ptr<AST> valCat = AST::make(at_valCat, LToken($1.loc, "val"));
+  shared_ptr<AST> valCat = 
+    AST::make(at_valCat, LToken(tk_VAL, "val"));
 
   $$ = AST::make(at_defobject, $1.loc, $2->child(0), $2->child(1),
                  valCat,
@@ -1403,7 +1404,8 @@ sxp_type_definition: LP tk_DEFOBJECT sxp_ptype_name trn_optdocstring sxp_declare
             "trn_optdocstring sxp_declares sxp_methods_only )");
 
   // For the moment, all objects are value types:
-  shared_ptr<AST> valCat = AST::make(at_valCat, LToken($2.loc, "val"));
+  shared_ptr<AST> valCat = 
+    AST::make(at_valCat, LToken(tk_VAL, "val"));
 
   $$ = AST::make(at_defobject, $2.loc, $3->child(0), $3->child(1),
                  valCat,
@@ -1754,7 +1756,8 @@ blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstri
   SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_stmt");
   // $5 = stripDocString($5);
   shared_ptr<AST> iRetBlock =
-    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $8);
+    AST::make(at_block, $1.loc, 
+              AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $8);
   shared_ptr<AST> iLambda =
     AST::make(at_lambda, $1.loc, AST::make(at_argVec, $3.loc), iRetBlock);
   iLambda->printVariant = pf_IMPLIED;
@@ -1766,7 +1769,8 @@ blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constra
   SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_stmt");
   // $5 = stripDocString($5);
   shared_ptr<AST> iRetBlock =
-    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $9);
+    AST::make(at_block, $1.loc, 
+              AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $9);
   shared_ptr<AST> iLambda = AST::make(at_lambda, $1.loc, $4, iRetBlock);
   iLambda->printVariant = pf_IMPLIED;
   shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
@@ -1779,7 +1783,8 @@ sxp_value_definition: LP tk_DEFINE '(' sxp_defident ')' sxp_block RP {
   SHOWPARSE("sxp_value_definition -> ( DEFINE  ( sxp_defident ) [docstring] sxp_block )");
   $6 = stripDocString($6);
   shared_ptr<AST> iRetBlock =
-    AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $6);
+    AST::make(at_block, $2.loc, 
+              AST::make(at_ident, LToken(tk_SxpIdent, "__return")), $6);
   shared_ptr<AST> iLambda =
     AST::make(at_lambda, $2.loc, AST::make(at_argVec, $3.loc), iRetBlock);
   iLambda->printVariant = pf_IMPLIED;
@@ -1796,7 +1801,8 @@ sxp_value_definition: LP tk_DEFINE '(' sxp_defident sxp_lambdapatterns ')'
             "[docstring] sxp_block )");
   $7 = stripDocString($7);
   shared_ptr<AST> iRetBlock =
-    AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $7);
+    AST::make(at_block, $2.loc, 
+              AST::make(at_ident, LToken(tk_SxpIdent, "__return")), $7);
   shared_ptr<AST> iLambda = AST::make(at_lambda, $2.loc, $5, iRetBlock);
   iLambda->printVariant = pf_IMPLIED;
   shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
@@ -2538,7 +2544,7 @@ sxp_type: sxp_fntype {
 
 trn_fneffect: {
   SHOWPARSE("trn_fneffect -> <empty>");
-  $$ = AST::make(at_ident, LToken("impure"));
+  $$ = AST::make(at_ident, LToken(tk_IMPURE, "impure"));
 };
 
 trn_fneffect: tk_PURE {
@@ -2649,30 +2655,30 @@ sxp_method_type: '(' trn_fneffect tk_METHOD sxp_type_args_pl_byref tk_FNARROW sx
 blk_type_cpair: blk_type ',' blk_type {
   SHOWPARSE("blk_type_cpair -> blk_type ',' blk_type");
   $$ = AST::make(at_typeapp, $2.loc,
-               AST::make(at_ident, LToken($2.loc, "pair")),
-               $1, $3);
+                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
+                 $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 blk_type_cpair: blk_type ',' blk_type_cpair {
   SHOWPARSE("blk_type_cpair -> blk_type ',' blk_type_cpair");
   $$ = AST::make(at_typeapp, $2.loc,
-               AST::make(at_ident, LToken($2.loc, "pair")),
-               $1, $3);
+                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
+                 $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 
 sxp_type_cpair: sxp_type ',' sxp_type {
   SHOWPARSE("sxp_type_cpair -> sxp_type ',' sxp_type");
   $$ = AST::make(at_typeapp, $2.loc,
-               AST::make(at_ident, LToken($2.loc, "pair")),
-               $1, $3);
+                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
+                 $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 sxp_type_cpair: sxp_type ',' sxp_type_cpair {
   SHOWPARSE("sxp_type_cpair -> sxp_type ',' sxp_type_cpair");
   $$ = AST::make(at_typeapp, $2.loc,
-               AST::make(at_ident, LToken($2.loc, "pair")),
-               $1, $3);
+                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
+                 $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 
@@ -3392,30 +3398,30 @@ sxp_unqual_expr: '(' tk_DEREF sxp_expr ')' {
 blk_expr_cpair: blk_expr ',' blk_expr {
   SHOWPARSE("blk_expr_cpair -> blk_expr ',' blk_expr");
   $$ = AST::make(at_apply, $2.loc,
-               AST::make(at_ident, LToken($2.loc, "pair")),
-               $1, $3);
+                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
+                 $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 blk_expr_cpair: blk_expr ',' blk_expr_cpair {
   SHOWPARSE("blk_expr_cpair -> blk_expr ',' blk_expr_cpair");
   $$ = AST::make(at_apply, $2.loc,
-               AST::make(at_ident, LToken($2.loc, "pair")),
-               $1, $3);
+                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
+                 $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 
 sxp_unqual_expr_cpair: sxp_expr ',' sxp_expr {
   SHOWPARSE("sxp_unqual_expr_cpair -> sxp_expr ',' sxp_expr");
   $$ = AST::make(at_apply, $2.loc,
-               AST::make(at_ident, LToken($2.loc, "pair")),
-               $1, $3);
+                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
+                 $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 sxp_unqual_expr_cpair: sxp_expr ',' sxp_unqual_expr_cpair {
   SHOWPARSE("sxp_unqual_expr_cpair -> sxp_expr ',' sxp_unqual_expr_cpair");
   $$ = AST::make(at_apply, $2.loc,
-               AST::make(at_ident, LToken($2.loc, "pair")),
-               $1, $3);
+                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
+                 $1, $3);
   $$->printVariant = pf_IMPLIED;
 };
 
@@ -3436,15 +3442,15 @@ blk_primary_expr: '(' '[' blk_list_elements ']' ')' {
 blk_list_elements: blk_expr {
   SHOWPARSE("blk_list_elements -> blk_expr");
   $$ = AST::make(at_apply, $1->loc,
-                 AST::make(at_ident, LToken($1->loc, "cons")),
+                 AST::make(at_ident, LToken(tk_BlkIdent, $1->loc, $1->loc,"cons")),
                  $1, 
-                 AST::make(at_ident, LToken($1->loc, "nil")));
+                 AST::make(at_ident, LToken(tk_BlkIdent, $1->loc, $1->loc, "nil")));
 }
 
 blk_list_elements: blk_expr ',' blk_list_elements {
   SHOWPARSE("blk_list_elements -> blk_expr");
   $$ = AST::make(at_apply, $1->loc,
-                 AST::make(at_ident, LToken($1->loc, "cons")),
+                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "cons")),
                  $1, $3);
 
 }
@@ -3542,14 +3548,16 @@ blk_expr: tk_LAMBDA '(' ')' blk_stmt {
   SHOWPARSE("blk_expr -> LAMBDA () blk_stmt )");
   shared_ptr<AST> argVec = AST::make(at_argVec, $2.loc);
   shared_ptr<AST> iRetBlock =
-    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $4);
+    AST::make(at_block, $1.loc, 
+              AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $4);
   $$ = AST::make(at_lambda, $1.loc, argVec, iRetBlock);
 };
 
 blk_expr: tk_LAMBDA '(' blk_lambdapatterns ')' blk_stmt {
   SHOWPARSE("blk_expr -> LAMBDA (blk_lambdapatterns) blk_stmt");
   shared_ptr<AST> iRetBlock =
-    AST::make(at_block, $1.loc, AST::make(at_ident, LToken("__return")), $5);
+    AST::make(at_block, $1.loc, 
+              AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $5);
   $$ = AST::make(at_lambda, $1.loc, $3, iRetBlock);
 };
 
@@ -3557,14 +3565,16 @@ sxp_unqual_expr: '(' tk_LAMBDA '(' ')' sxp_block ')'  {
   SHOWPARSE("lambda -> ( LAMBDA () sxp_block )");
   shared_ptr<AST> argVec = AST::make(at_argVec, $3.loc);
   shared_ptr<AST> iRetBlock =
-    AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $5);
+    AST::make(at_block, $2.loc, 
+              AST::make(at_ident, LToken(tk_SxpIdent, "__return")), $5);
   $$ = AST::make(at_lambda, $2.loc, argVec, iRetBlock);
 };
 
 sxp_unqual_expr: '(' tk_LAMBDA '(' sxp_lambdapatterns ')' sxp_block ')'  {
   SHOWPARSE("lambda -> ( LAMBDA (sxp_lambdapatterns) sxp_block )");
   shared_ptr<AST> iRetBlock =
-    AST::make(at_block, $2.loc, AST::make(at_ident, LToken("__return")), $6);
+    AST::make(at_block, $2.loc, 
+              AST::make(at_ident, LToken(tk_SxpIdent, "__return")), $6);
   $$ = AST::make(at_lambda, $2.loc, $4, iRetBlock);
 };
 
@@ -3572,12 +3582,12 @@ sxp_unqual_expr: '(' tk_LAMBDA '(' sxp_lambdapatterns ')' sxp_block ')'  {
 blk_stmt: tk_RETURN blk_stmt {
   SHOWPARSE("blk_stmt -> RETURN blk_stmt");
   $$ = AST::make(at_return_from, $1.loc,
-                 AST::make(at_ident, LToken("__return")), $2);
+                 AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $2);
 }
 sxp_unqual_expr: '(' tk_RETURN sxp_expr ')' {
   SHOWPARSE("sxp_unqual_expr -> (RETURN sxp_expr)");
   $$ = AST::make(at_return_from, $2.loc,
-                 AST::make(at_ident, LToken("__return")), $3);
+                 AST::make(at_ident, LToken(tk_SxpIdent, "__return")), $3);
 }
 
 // APPLICATION [7.14]         
@@ -3620,7 +3630,8 @@ sxp_unqual_expr: '(' tk_WHEN sxp_expr sxp_block ')' {
 blk_prefix_expr: '-' blk_prefix_expr  {
   SHOWPARSE("blk_prefix_expr -> - blk_prefix_expr");
   $$ = AST::make(at_apply, $1.loc, 
-                 AST::make(at_ident, LToken($1.loc, "negate")), $2);
+                 AST::make(at_ident, 
+                           LToken(tk_BlkIdent, $1.loc, $1.endLoc, "negate")), $2);
 };
 
 // Bitwise negation - block syntax only:
@@ -3629,7 +3640,8 @@ blk_prefix_expr: '~' blk_prefix_expr  {
   //$$ = AST::make(at_apply, $1.loc, 
   //                 AST::make(at_ident, $1), $2);
   $$ = AST::make(at_apply, $1.loc, 
-                 AST::make(at_ident, LToken($1.loc, "bit_not")), $2);
+                 AST::make(at_ident, 
+                           LToken(tk_BlkIdent, $1.loc, $1.endLoc, "bit_not")), $2);
 };
 
 // NOT [7.15.3]
@@ -3671,17 +3683,20 @@ sxp_unqual_expr: '(' tk_OR sxp_nonempty_params ')'  {
 blk_infix_expr: blk_infix_expr '|' blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr | blk_infix_expr");
   // $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, LToken($2.loc, "bit_or")), $1, $3);
+  $$ = AST::make(at_apply, $2.loc, 
+                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "bit_or")), $1, $3);
 };
 blk_infix_expr: blk_infix_expr '^' blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr ^ blk_infix_expr");
   //$$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, LToken($2.loc, "bit_xor")), $1, $3);
+  $$ = AST::make(at_apply, $2.loc, 
+                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "bit_xor")), $1, $3);
 };
 blk_infix_expr: blk_infix_expr '&' blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr & blk_infix_expr");
   //$$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, LToken($2.loc, "bit_and")), $1, $3);
+  $$ = AST::make(at_apply, $2.loc, 
+                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "bit_and")), $1, $3);
 };
 blk_infix_expr: blk_infix_expr tk_EQUALS blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr == blk_infix_expr");
@@ -3780,7 +3795,7 @@ sxp_unqual_expr: '(' tk_SET sxp_expr sxp_expr ')' {
 blk_stmt: tk_SWITCH blk_expr '{' blk_sw_legs blk_opt_otherwise '}' {
   SHOWPARSE("blk_stmt -> SWITCH blk_expr blk_sw_legs blk_opt_otherwise");
   $$ = AST::make(at_uswitch, $1.loc, 
-                 AST::make(at_ident, LToken("__dummy")),
+                 AST::make(at_ident, LToken(tk_BlkIdent, "__dummy")),
                  $2, $4, $5);
 }
 
@@ -3940,7 +3955,7 @@ typecase_leg: '(' sxp_bindingpattern sxp_expr ')'  {
 blk_stmt: tk_TRY blk_expr tk_HANDLE '{' blk_catch_legs blk_opt_otherwise '}' {
   SHOWPARSE("blk_stmt -> TRY blk_expr blk_catch_legs blk_opt_otherwise");
   $$ = AST::make(at_try, $1.loc, $2, 
-                 AST::make(at_ident, LToken("__dummy")),
+                 AST::make(at_ident, LToken(tk_BlkIdent, "__dummy")),
                  $5, $6);
 
   // In the S-expr syntax, there is a loop here that inserts the ident
@@ -3950,9 +3965,9 @@ blk_stmt: tk_TRY blk_expr tk_HANDLE '{' blk_catch_legs blk_opt_otherwise '}' {
 }
 blk_stmt: tk_TRY blk_expr blk_otherwise {
   SHOWPARSE("blk_stmt -> TRY blk_expr blk_catch_legs blk_otherwise");
-  shared_ptr<AST> dummyID = AST::make(at_ident, LToken("__dummy"));
-  $$ = AST::make(at_try, $1.loc, $2,
-                 AST::make(at_ident, LToken("__dummy")),
+  shared_ptr<AST> dummyID = 
+    AST::make(at_ident, LToken(tk_BlkIdent, "__dummy"));
+  $$ = AST::make(at_try, $1.loc, $2, dummyID,
                  AST::make(at_usw_legs, $3->loc), $3);
 
   // In the S-expr syntax, there is a loop here that inserts the ident
@@ -4119,7 +4134,7 @@ blk_stmt: tk_DO blk_dobindings tk_UNTIL blk_expr blk_giving blk_block {
 
   shared_ptr<AST> iContinueBlock =
     AST::make(at_block, $1.loc,
-              AST::make(at_ident, LToken("__continue")),
+              AST::make(at_ident, LToken(tk_BlkIdent, "__continue")),
               $6);
   $$ = AST::make(at_do, $1.loc, $2, iDoTest, iContinueBlock);
 }
@@ -4165,7 +4180,7 @@ sxp_unqual_expr: '(' tk_DO '(' sxp_dobindings ')' sxp_dotest sxp_block ')' {
 
   shared_ptr<AST> iContinueBlock =
     AST::make(at_block, $2.loc,
-              AST::make(at_ident, LToken("__continue")),
+              AST::make(at_ident, LToken(tk_SxpIdent, "__continue")),
               $7);
   $$ = AST::make(at_do, $2.loc, $4, $6, iContinueBlock);
 };
@@ -4200,7 +4215,7 @@ sxp_dotest: '(' sxp_expr sxp_expr ')' {
 sxp_unqual_expr: '(' tk_CONTINUE ')' {
   SHOWPARSE("sxp_unqual_expr -> (CONTINUE)");
   $$ = AST::make(at_return_from, $2.loc,
-                 AST::make(at_ident, LToken("__continue")),
+                 AST::make(at_ident, LToken(tk_SxpIdent, "__continue")),
                  AST::make(at_unit, $2.loc));
 }
 

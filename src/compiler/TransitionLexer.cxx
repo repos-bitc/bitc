@@ -788,8 +788,11 @@ TransitionLexer::do_lex(ParseType *lvalp)
           if (c == '/') {
             break;
           }
-          else if (c == EOF)
+          else if (c == EOF) {
+            here.updateWith(thisToken);
+            lvalp->tok = LToken(EOF, here, here, "");
             RETURN_TOKEN(EOF);
+          }
           else
             ungetChar(c);
         }
@@ -800,8 +803,11 @@ TransitionLexer::do_lex(ParseType *lvalp)
           layoutFlags |= LayoutFlags(CHECK_FIRST_TOKEN);
 #endif
         }
-        else if (c == EOF)
+        else if (c == EOF) {
+          here.updateWith(thisToken);
+          lvalp->tok = LToken(EOF, here, here, "");
           RETURN_TOKEN(EOF);
+        }
       }
 
       here.updateWith(thisToken);
@@ -828,6 +834,12 @@ TransitionLexer::do_lex(ParseType *lvalp)
     goto startOver;
   }
 
+  /////////////////////////////////////////////////////////
+  // We've now eaten comments and white space, so whatver
+  // location this is, this is where the new token starts:
+  /////////////////////////////////////////////////////////
+  LexLoc startLoc = here;
+
 #ifdef LAYOUT_RULES
   if ((c != '{') && (layoutFlags & NEED_LBRACE)) {
     ungetChar(c);
@@ -835,7 +847,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
     layoutFlags &= ~LayoutFlags(NEED_LBRACE);
     beginBlock(true);
     
-    lvalp->tok = LToken(here, "{");
+    lvalp->tok = LToken('{', startLoc, here, "{");
     // INSERTED! No position update.
     RETURN_TOKEN('{');
   }
@@ -882,7 +894,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
       ungetChar(c);
       endBlock(true);
 
-      lvalp->tok = LToken(here, "}");
+      lvalp->tok = LToken('}', startLoc, here, "}");
       RETURN_TOKEN('}');
     }
 
@@ -901,7 +913,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
     closeToOffset(here.offset);
     if (trimLayoutStack()) {
       ungetChar(c);
-      lvalp->tok = LToken(here, "}");
+      lvalp->tok = LToken('}', startLoc, here, "}");
       RETURN_TOKEN('}');
     }
 
@@ -913,7 +925,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
                 << here.offset << std::endl;
 #endif
         ungetChar(c);
-        lvalp->tok = LToken(here, ";");
+        lvalp->tok = LToken(';', startLoc, here, ";");
         RETURN_TOKEN(';');
       }
     }
@@ -944,13 +956,19 @@ TransitionLexer::do_lex(ParseType *lvalp)
           if (c == '/') {
             break;
           }
-          else if (c == EOF)
+          else if (c == EOF) {
+            here.updateWith(thisToken);
+            lvalp->tok = LToken(EOF, here, here, "");
             RETURN_TOKEN(EOF);
+          }
           else
             ungetChar(c);
         }
-        else if (c == EOF)
+        else if (c == EOF) {
+          here.updateWith(thisToken);
+          lvalp->tok = LToken(EOF, here, here, "");
           RETURN_TOKEN(EOF);
+        }
       }
 
       here.updateWith(thisToken);
@@ -967,18 +985,21 @@ TransitionLexer::do_lex(ParseType *lvalp)
     {
       // back-tick should never appear in any context where a sexpr is
       // legal:
-      if (currentLang & lf_sexpr)
+      if (currentLang & lf_sexpr) {
+        here.updateWith(thisToken);
+        lvalp->tok = LToken(EOF, here, here, "");
         RETURN_TOKEN(EOF);
+      }
 
-      lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
+      lvalp->tok = LToken(c, startLoc, here, thisToken);
       RETURN_TOKEN(c);
     }
 
-  case ';':                        // Comments
+  case ';':
     {
-      lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
+      lvalp->tok = LToken(c, startLoc, here, thisToken);
       RETURN_TOKEN(c);
     }
 
@@ -1005,8 +1026,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
       else
         ungetChar(c2);
 
-      lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
+      lvalp->tok = LToken(tokID, startLoc, here, thisToken);
       RETURN_TOKEN(tokID);
     }
 
@@ -1015,16 +1036,16 @@ TransitionLexer::do_lex(ParseType *lvalp)
       layoutFlags &= ~LayoutFlags(NEED_LBRACE);
       beginBlock(false);
 
-      lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
+      lvalp->tok = LToken(c, startLoc, here, thisToken);
       RETURN_TOKEN(c);
     }
   case '}':
     {
       endBlock(false);
 
-      lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
+      lvalp->tok = LToken(c, startLoc, here, thisToken);
       RETURN_TOKEN(c);
     }
 
@@ -1035,8 +1056,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
   case '(':
   case ')':
     {
-      lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
+      lvalp->tok = LToken(c, startLoc, here, thisToken);
       RETURN_TOKEN(c);
     }
 
@@ -1063,7 +1084,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
 
       LexLoc tokStart = here;
       here.updateWith(thisToken);
-      lvalp->tok = LToken(here, thisToken.substr(1, thisToken.size()-2));
+      lvalp->tok = LToken(tk_String, startLoc, here, 
+                          thisToken.substr(1, thisToken.size()-2));
       RETURN_TOKEN(tk_String);
     }
 
@@ -1074,24 +1096,31 @@ TransitionLexer::do_lex(ParseType *lvalp)
       switch(c) {
       case 't':
         {
-          if ((currentLang & lf_sexpr) == 0)
+          if ((currentLang & lf_sexpr) == 0) {
+            here.updateWith(thisToken);
+            lvalp->tok = LToken(EOF, here, here, "");
             RETURN_TOKEN(EOF);
-          lvalp->tok = LToken(here, thisToken);
+          }
           here.updateWith(thisToken);
+          lvalp->tok = LToken(tk_TRUE, startLoc, here, thisToken);
           RETURN_TOKEN(tk_TRUE);
         }
       case 'f':
         {
           if ((currentLang & lf_sexpr) == 0)
             RETURN_TOKEN(EOF);
-          lvalp->tok = LToken(here, thisToken);
           here.updateWith(thisToken);
+          lvalp->tok = LToken(tk_FALSE, startLoc, here, thisToken);
           RETURN_TOKEN(tk_FALSE);
         }
 
       default:
         // FIX: this is bad input
-        RETURN_TOKEN(EOF);
+        {
+          here.updateWith(thisToken);
+          lvalp->tok = LToken(EOF, here, here, "");
+          RETURN_TOKEN(EOF);
+        }
       }
     }
 
@@ -1104,8 +1133,11 @@ TransitionLexer::do_lex(ParseType *lvalp)
       int c1 = getChar();       // first character after '
       int c2 = getChar();       // second character after '
 
-      if (c1 == EOF || c2 == EOF)
+      if (c1 == EOF || c2 == EOF) {
+        here.updateWith(thisToken);
+        lvalp->tok = LToken(EOF, here, here, "");
         RETURN_TOKEN(EOF);
+      }
 
       // Check for simple, one-codepoint character:
       if (c2 == '\'') {
@@ -1119,18 +1151,22 @@ TransitionLexer::do_lex(ParseType *lvalp)
             // non-escaped characters:
             ungetChar(c2);
             ungetChar(c1);
+            here.updateWith(thisToken);
+            lvalp->tok = LToken(EOF, here, here, "");
             RETURN_TOKEN(EOF);
           }
         default:
           {
             if (LitValue::DecodeCharacter(thisToken) >= 0) {
-              lvalp->tok = LToken(here, thisToken);
               here.updateWith(thisToken);
+              lvalp->tok = LToken(tk_Char, startLoc, here, thisToken);
               RETURN_TOKEN(tk_Char);
             }
 
             ungetChar(c2);
             ungetChar(c1);
+            here.updateWith(thisToken);
+            lvalp->tok = LToken(EOF, here, here, "");
             RETURN_TOKEN(EOF);
           }          
         }
@@ -1142,16 +1178,21 @@ TransitionLexer::do_lex(ParseType *lvalp)
         // validate it:
         do {
           c = getChar();
-          if (c == EOF)
+          if (c == EOF) {
+            here.updateWith(thisToken);
+            lvalp->tok = LToken(EOF, here, here, "");
             RETURN_TOKEN(EOF);
+          }
         } while (c != '\'');
 
         if (LitValue::DecodeCharacter(thisToken) >= 0) {
-          lvalp->tok = LToken(here, thisToken);
           here.updateWith(thisToken);
+          lvalp->tok = LToken(tk_Char, startLoc, here, thisToken);
           RETURN_TOKEN(tk_Char);
         }
 
+        here.updateWith(thisToken);
+        lvalp->tok = LToken(EOF, here, here, "");
         RETURN_TOKEN(EOF);
       }
 
@@ -1169,6 +1210,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
       if (!valid_tv_ident_start(c1)) {
         // FIX: this is bad input
         ungetChar(c1);
+        here.updateWith(thisToken);
+        lvalp->tok = LToken(EOF, here, here, "");
         RETURN_TOKEN(EOF);
       }
 
@@ -1178,7 +1221,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
       ungetChar(c);
 
       here.updateWith(thisToken);
-      lvalp->tok = LToken(here, thisToken);
+      lvalp->tok = LToken(tokType, startLoc, here, thisToken);
       RETURN_TOKEN(tokType);
     }
 
@@ -1248,12 +1291,11 @@ TransitionLexer::do_lex(ParseType *lvalp)
          language version. */
       if (c != '.') {
         ungetChar(c);
-        lvalp->tok = LToken(here, thisToken);
+        int tokType = (thisToken[0] == '-') ? tk_NegativeInt : tk_Nat;
+
         here.updateWith(thisToken);
-        if (thisToken[0] == '-')
-          RETURN_TOKEN(tk_NegativeInt);
-        else
-          RETURN_TOKEN(tk_Nat);
+        lvalp->tok = LToken(tokType, startLoc, here, thisToken);
+        RETURN_TOKEN(tokType);
       }
 
       if (currentLang & lf_version) {
@@ -1265,8 +1307,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
         } while (LitValue::digitValue(c, 10) >= 0);
         count--;
         ungetChar(c);
-        lvalp->tok = LToken(here, thisToken);
         here.updateWith(thisToken);
+        lvalp->tok = LToken(tk_VersionNumber, startLoc, here, thisToken);
         RETURN_TOKEN(tk_VersionNumber);
       }
       else {
@@ -1285,8 +1327,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
          indicating start of an exponent. */
       if (c != '^') {
         ungetChar(c);
-        lvalp->tok = LToken(here, thisToken);
         here.updateWith(thisToken);
+        lvalp->tok = LToken(tk_Float, startLoc, here, thisToken);
         RETURN_TOKEN(tk_Float);
       }
 
@@ -1318,8 +1360,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
       }
 
       ungetChar(c);
-      lvalp->tok = LToken(here, thisToken);
       here.updateWith(thisToken);
+      lvalp->tok = LToken(tk_Float, startLoc, here, thisToken);
       RETURN_TOKEN(tk_Float);
     }
 
@@ -1327,12 +1369,16 @@ TransitionLexer::do_lex(ParseType *lvalp)
 #ifdef LAYOUT_RULES
     closeToOpeningToken(EOF);
     if (trimLayoutStack()) {
-      lvalp->tok = LToken(here, "}");
+      lvalp->tok = LToken('}', startLoc, here, "}");
       RETURN_TOKEN('}');
     }
     else
 #endif
-      RETURN_TOKEN(EOF);
+      {
+        here.updateWith(thisToken);
+        lvalp->tok = LToken(EOF, here, here, "");
+        RETURN_TOKEN(EOF);
+      }
 
   default:
     if (valid_ident_start(c) || valid_operator_start(c)) {
@@ -1341,6 +1387,8 @@ TransitionLexer::do_lex(ParseType *lvalp)
     }
 
     // FIX: Malformed token
+    here.updateWith(thisToken);
+    lvalp->tok = LToken(EOF, here, here, "");
     RETURN_TOKEN(EOF);
   }
 
@@ -1369,7 +1417,7 @@ TransitionLexer::do_lex(ParseType *lvalp)
         closeToOpeningToken(tk_IN);
         if (trimLayoutStack()) {
           ungetThisToken();
-          lvalp->tok = LToken(here, "}");
+          lvalp->tok = LToken('}', startLoc, here, "}");
           RETURN_TOKEN('}');
         }
       }
@@ -1387,10 +1435,10 @@ TransitionLexer::do_lex(ParseType *lvalp)
     }
 #endif
   ident_done:
-    lvalp->tok = LToken(here, thisToken);
-    int tok = kwCheck(thisToken.c_str(), tk_BlkIdent);
+    int tokType = kwCheck(thisToken.c_str(), tk_BlkIdent);
     here.updateWith(thisToken);
-    RETURN_TOKEN(tok);
+    lvalp->tok = LToken(tokType, startLoc, here, thisToken);
+    RETURN_TOKEN(tokType);
   }
   else if (valid_operator_start(c)) {
     do {
@@ -1398,9 +1446,9 @@ TransitionLexer::do_lex(ParseType *lvalp)
     } while (valid_operator_continue(c));
     ungetChar(c);
 
-    lvalp->tok = LToken(here, thisToken);
-    int tok = kwCheck(thisToken.c_str(), tk_MixIdent);
+    int tokType = kwCheck(thisToken.c_str(), tk_MixIdent);
     here.updateWith(thisToken);
-    RETURN_TOKEN(tok);
+    lvalp->tok = LToken(tokType, startLoc, here, thisToken);
+    RETURN_TOKEN(tokType);
   }
 }

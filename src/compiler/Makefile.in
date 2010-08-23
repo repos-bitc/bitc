@@ -166,6 +166,7 @@ doxygen: AST.hxx AST.cxx
 # containing token numbers gets generated before we try to compile
 # TransitionLexer.cxx
 TransitionLexer.cxx: BUILD/TransitionParser.hxx
+SSA.cxx: BUILD/TransitionParser.hxx
 
 -include BUILD/*.m
 
