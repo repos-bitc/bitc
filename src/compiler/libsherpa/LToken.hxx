@@ -66,7 +66,7 @@
 namespace sherpa {
 
   struct LToken {
-    int tokNo;                  // as decided by Bison
+    int tokType;                // as decided by Bison
 
     LexLoc loc;
     LexLoc endLoc;
@@ -80,39 +80,39 @@ namespace sherpa {
     LToken()
       :loc(), endLoc(), str()
     {
-      tokNo = EOF;
+      tokType = EOF;
     }
 
 #if 0
-    LToken(int tokNo, const LexLoc& loc, const std::string& s)
+    LToken(int tokType, const LexLoc& loc, const std::string& s)
     {
-      this->tokNo = tokNo;
+      this->tokType = tokType;
       this->loc = loc;
       this->endLoc = LexLoc();
       this->str = s;
     }
 #endif
 
-    LToken(int tokNo, const LexLoc& loc, const LexLoc& endLoc, 
+    LToken(int tokType, const LexLoc& loc, const LexLoc& endLoc, 
            const std::string& s)
     {
-      this->tokNo = tokNo;
+      this->tokType = tokType;
       this->loc = loc;
       this->endLoc = endLoc;
       this->str = s;
     }
 
-    LToken(int tokNo, const LToken& that)
+    LToken(int tokType, const LToken& that)
     {
-      this->tokNo = that.tokNo;
+      this->tokType = that.tokType;
       this->loc = that.loc;
       this->endLoc = that.endLoc;
       this->str = that.str;
     }
 
-    LToken(int tokNo, const std::string& that)
+    LToken(int tokType, const std::string& that)
     {
-      this->tokNo = tokNo;
+      this->tokType = tokType;
       this->loc = LexLoc();
       this->endLoc = LexLoc();
       this->str = that;
@@ -120,7 +120,7 @@ namespace sherpa {
 
     LToken& operator=(const LToken& that)
     {
-      this->tokNo = that.tokNo;
+      this->tokType = that.tokType;
       this->loc = that.loc;
       this->endLoc = that.endLoc;
       this->str = that.str;
