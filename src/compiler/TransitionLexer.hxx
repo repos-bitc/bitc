@@ -127,15 +127,7 @@ struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
  * it is processing.
  */
 struct TransitionLexer {
-  enum LangFlagsValues {
-    lf_sexpr = 0x1u,
-    lf_block = 0x2u,
-    lf_transition = 0x3u,
-    lf_version = 0x4u
-  };
-
-  int lispParenDepth;
-
+private:
   int lastToken;
 
 #ifdef LAYOUT_RULES
@@ -156,6 +148,16 @@ struct TransitionLexer {
   /// @brief If the top layout stack entry is dead, drop it, update
   /// the layout context accordingly, and return true.
   bool trimLayoutStack();
+
+public:
+  enum LangFlagsValues {
+    lf_sexpr = 0x1u,
+    lf_block = 0x2u,
+    lf_transition = 0x3u,
+    lf_version = 0x4u
+  };
+
+  int lispParenDepth;
 
   typedef sherpa::EnumSet<LangFlagsValues> LangFlags;
 
@@ -214,6 +216,7 @@ struct TransitionLexer {
    */
   unsigned nModules;
 
+private:
   /** @brief Collected characters for current token.
    *
    * These are accumulated by getChar() and released (if appropriate)
@@ -239,6 +242,7 @@ struct TransitionLexer {
   bool valid_ifident_continue(ucs4_t ucs4);
   bool valid_tv_ident_start(ucs4_t ucs4);
   bool valid_tv_ident_continue(ucs4_t ucs4);
+public:
 
   /** @brief Constructor
    *
@@ -284,21 +288,6 @@ struct TransitionLexer {
     ifIdentMode = arg;
   }
 
-  /** @brief Consume any comments and white space that precede the
-   * next token.
-   *
-   * This can have the side effect of setting the CHECK_FIRST_TOKEN
-   * flag in the LayoutFlags, because it handles newline processing.
-   */
-  sherpa::LexLoc skipWhiteSpaceAndComments();
-
-  /** @brief Fetch next token, return result via @p yylvalp.
-   *
-   * This is the actual work-horse procedure. The one below is a
-   * wrapper for debugging purposes.
-   */
-  sherpa::LToken do_lex();
-
   /** @brief Fetch next token, return result via @p yylvalp. */
   int lex(ParseType *yylvalp);
 
@@ -334,6 +323,38 @@ private:
    * identifier.
    */
   int kwCheck(const char *s, int identType);
+
+  /** @brief Consume any comments and white space that precede the
+   * next token.
+   *
+   * This can have the side effect of setting the CHECK_FIRST_TOKEN
+   * flag in the LayoutFlags, because it handles newline processing.
+   */
+  sherpa::LexLoc skipWhiteSpaceAndComments();
+
+  bool havePushbackToken;
+  sherpa::LToken pushbackToken;
+
+  /** @brief Fetch next token to hand to the parser.
+   *
+   * This calls getNextInputToken(), applies layout rules, and either
+   * returns the results or pushes the input token back and
+   * substitutes a token generated according to the layout rules.
+   */
+  sherpa::LToken getNextToken();
+
+  /** @brief Push a token back onto the input stream.
+   *
+   * Used in some cases by layout processing.
+   */
+  void pushTokenBack(sherpa::LToken& tok);
+
+  /** @brief Fetch next token from the input stream.
+   *
+   * This is the actual work-horse procedure. The one below is a
+   * wrapper for debugging purposes.
+   */
+  sherpa::LToken getNextInputToken();
 };
 
 #endif /* TRANSITIONLEXER_HXX */

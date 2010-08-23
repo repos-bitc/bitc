@@ -455,6 +455,7 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
   debug = false;
   nModules = 0;
 
+  havePushbackToken = false;
   lastToken = EOF;
 
   // Start of file is an implicit open block:
@@ -592,7 +593,7 @@ TransitionLexer::lex(ParseType *lvalp)
 {
   here = skipWhiteSpaceAndComments();
 
-  LToken tok = do_lex();
+  LToken tok = getNextToken();
   if (debug) {
     errStream << "TOKEN " << tok.tokType << ": " << tok.loc << ' '
               << '"' << tok.str << '"' << '\n';
@@ -843,8 +844,28 @@ TransitionLexer::skipWhiteSpaceAndComments()
 }
 
 LToken
-TransitionLexer::do_lex()
+TransitionLexer::getNextToken()
 {
+  LToken tok = getNextInputToken();
+
+  return tok;
+}
+
+void
+TransitionLexer::pushTokenBack(LToken& tok)
+{
+  pushbackToken = tok;
+  havePushbackToken = true;
+}
+
+LToken
+TransitionLexer::getNextInputToken()
+{
+  if (havePushbackToken) {
+    havePushbackToken = false;
+    return pushbackToken;
+  }
+
   thisToken.erase();
 
   ucs4_t c = getChar();
