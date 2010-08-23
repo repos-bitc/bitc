@@ -82,8 +82,8 @@ namespace sherpa {
     inline bool operator==(const LexLoc& ll)
     {
       return ((origin == ll.origin) &&
-              (line = ll.line) &&
-              (offset = ll.offset));
+              (line == ll.line) &&
+              (offset == ll.offset));
     }
 
     inline bool operator!=(const LexLoc& ll)
