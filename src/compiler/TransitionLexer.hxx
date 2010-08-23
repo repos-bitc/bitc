@@ -163,6 +163,7 @@ struct TransitionLexer {
 
   /** @brief Start position of current token. */
   sherpa::LexLoc here;
+
   /** @brief Number of parse errors incurred.
    *
    * The current parser is not particularly good at context recovery,
@@ -283,12 +284,20 @@ struct TransitionLexer {
     ifIdentMode = arg;
   }
 
+  /** @brief Consume any comments and white space that precede the
+   * next token.
+   *
+   * This can have the side effect of setting the CHECK_FIRST_TOKEN
+   * flag in the LayoutFlags, because it handles newline processing.
+   */
+  sherpa::LexLoc skipWhiteSpaceAndComments();
+
   /** @brief Fetch next token, return result via @p yylvalp.
    *
    * This is the actual work-horse procedure. The one below is a
    * wrapper for debugging purposes.
    */
-  int do_lex(ParseType *yylvalp);
+  sherpa::LToken do_lex();
 
   /** @brief Fetch next token, return result via @p yylvalp. */
   int lex(ParseType *yylvalp);
