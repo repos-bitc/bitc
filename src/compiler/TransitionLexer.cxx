@@ -457,9 +457,6 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
 
   havePushbackToken = false;
   lastToken = EOF;
-
-  // Start of file is an implicit open block:
-  layoutFlags = NEED_LBRACE;
 }
 
 ucs4_t
@@ -847,16 +844,35 @@ TransitionLexer::getNextToken()
 {
   LToken tok = getNextInputToken();
 
+#if 1
+  // The transitional syntax requires curly brace insertion at start
+  // and end of file, but otherwise we don't want to do layout
+  // processing when we are handling the S-expression syntax:
+  if (((currentLang & lf_block) == 0) &&
+      (lastToken != EOF) &&     // beginning of file
+      (tok.tokType != EOF))     // end of file
+    return tok;
+#endif
+
   LexLoc startLoc = here;
   LexLoc endLoc = here;
 
-  if ((layoutFlags & NEED_LBRACE) && (tok.tokType != '{')) {
-    pushTokenBack(tok);
+  // Rule 1: A left curly-brace is automatically inserted after
+  // certain tokens:
+  //
+  // FIX: Once I clean up the surface syntax, this should also be done
+  // for tk_DO.
+  bool curlyRequired = ((lastToken == EOF)        // beginning of file
+                        || (lastToken == tk_CASE)
+                        || (lastToken == tk_LET)
+                        || (lastToken == tk_LETREC)
+                        || (lastToken == tk_IN));
 
-    layoutFlags &= ~LayoutFlags(NEED_LBRACE);
+  if (curlyRequired && (tok.tokType != '{')) {
+    pushTokenBack(tok);
     beginBlock(true);
     
-    // INSERTED! No position update.
+    // No position update for inserted token.
     return LToken('{', startLoc, endLoc, "{");
   }
 
@@ -871,6 +887,15 @@ TransitionLexer::getNextToken()
   }
 #endif
 
+  // Rule 2: If the last token was a '{', then the next token is
+  // processed specially. Either:
+  //
+  //   a) The next token is more indented than the prevailing indent
+  //      level, in which case it establishes the indent level for the
+  //      newly introduced block, OR
+  //   b) The next token is NOT more indented, in which case the
+  //      block is presumed to have been empty and a '} is immediately
+  //      inserted. 
   if (lastToken == '{') {
     assert(layoutStack);
 
@@ -908,14 +933,21 @@ TransitionLexer::getNextToken()
     layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
   }
 
+  // Rule 3: At end of file, any outstanding implicit blocks are closed.
   if (tok.tokType == EOF) {
     closeToOpeningToken(EOF);
     if (trimLayoutStack()) {
       pushTokenBack(tok);
       return LToken('}', startLoc, endLoc, "}");
     }
+
+    return tok;
   }
-  else if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
+
+  // Rule 4: If this is the first token on a line, then WHILE the
+  // current indent level is less than the prevailing indent level,
+  // close implicit blocks.
+  if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
     // Consider possible right curly insertion and/or semicolon
     // insertion.
 
@@ -924,13 +956,27 @@ TransitionLexer::getNextToken()
               << ": processing first token..." << std::endl;
 #endif
 
+    // FIX: Consider NOT doing start of line processing in various cases:
+
     closeToOffset(startLoc.offset);
     if (trimLayoutStack()) {
       pushTokenBack(tok);
       return LToken('}', startLoc, endLoc, "}");
     }
+  }
 
-    if ((lastToken != ';') && (tok.tokType != ';') && (tok.tokType != '}')) {
+  // Rule 5: If this is the first token on a line, and the indent
+  // level is the SAME as the prevailing indent level, insert a
+  // semicolon UNLESS:
+  //   a) we just saw one, or
+  //   b) we are closing the block explicitly.
+
+  if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
+    bool wantAutoSemi = !(lastToken == ';' ||
+                          tok.tokType == ';' ||
+                          tok.tokType == '}');
+
+    if (wantAutoSemi) {
       if (conditionallyInsertSemicolon(startLoc.offset)) {
 #ifdef LAYOUT_BLOCK_DEBUG
         errStream << "  LAYOUT: " << startLoc 
@@ -945,33 +991,28 @@ TransitionLexer::getNextToken()
     layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
   }
 
-  if (tok.tokType == '{') {
-    layoutFlags &= ~LayoutFlags(NEED_LBRACE);
+  // Rule 6: When we see IN, close implicit braces up to the
+  // appropriate preceding keyword. This is special-cased because IN
+  // frequently appears as a de-facto close-bracket token on the same
+  // line as the corresponding open-bracket token.
+  //
+  // FIX: Once I clean up the surface syntax, this should also be done
+  // for tk_DO.
+  if (tok.tokType == tk_IN) {
+    closeToOpeningToken(tk_IN);
+    if (trimLayoutStack()) {
+      pushTokenBack(tok);
+      return LToken('}', startLoc, endLoc, "}");
+    }
+  }
+
+  // Open and close layout contexts when we see explicit open/close
+  // curly braces:
+  if (tok.tokType == '{')
     beginBlock(false);
-  }
 
-  if (tok.tokType == '}') {
+  if (tok.tokType == '}')
     endBlock(false);
-  }
-
-  if (currentLang & lf_block) {
-    if (tok.tokType == tk_IN) {
-      closeToOpeningToken(tk_IN);
-      if (trimLayoutStack()) {
-        pushTokenBack(tok);
-        return LToken('}', startLoc, endLoc, "}");
-      }
-    }
-
-    switch(tok.tokType) {
-    case tk_CASE:
-    case tk_LET:
-    case tk_LETREC:
-    case tk_IN:
-      layoutFlags |= LayoutFlags(NEED_LBRACE);
-      break;
-    }
-  }
 
   return tok;
 }

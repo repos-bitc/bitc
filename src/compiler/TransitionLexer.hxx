@@ -74,17 +74,13 @@ public:
 };
 
 enum LayoutFlagValues {
-  /// @brief A left brace is required as the next token, and we should
-  /// insert one if not found.
-  NEED_LBRACE = 0x1u,
-
   /// @brief We have taken a newline and might need to insert a
   /// right brace[s] and or a semicolon before the next token
   /// according to its indent level.
-  CHECK_FIRST_TOKEN = 0x2u,
+  CHECK_FIRST_TOKEN = 0x1u,
 
   /// @brief Set iff we are currently unwinding the layout stack.
-  TRIMMING_LAYOUT_STACK = 0x4u,
+  TRIMMING_LAYOUT_STACK = 0x2u,
 };
 typedef sherpa::EnumSet<LayoutFlagValues> LayoutFlags;
 
