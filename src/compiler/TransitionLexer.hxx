@@ -120,6 +120,7 @@ struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
  */
 struct TransitionLexer {
 private:
+  sherpa::LexLoc lastTokenPosition;
   int lastToken;
 
   boost::shared_ptr<LayoutFrame> layoutStack;
@@ -257,12 +258,12 @@ public:
   /** @brief Report parse error @p msg attributed to current input location. */
   void ReportParseError(std::string msg)
   {
-    ReportParseError(here, msg);
+    ReportParseError(lastTokenPosition, msg);
   }
   /** @brief Report parse warning @p msg attributed to current input location. */
   inline void ReportParseWarning(std::string msg)
   {
-    ReportParseWarning(here, msg);
+    ReportParseWarning(lastTokenPosition, msg);
   }
 
   /** @brief Issue debugging output on iff @p showlex is true */

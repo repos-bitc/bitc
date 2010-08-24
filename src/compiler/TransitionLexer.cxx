@@ -407,7 +407,7 @@ TransitionLexer::kwCheck(const char *s, int identType)
 void
 TransitionLexer::ReportParseError()
 {
-  errStream << here
+  errStream << lastTokenPosition
             << ": syntax error (via yyerror)" << '\n';
   num_errors++;
 }
@@ -600,6 +600,7 @@ TransitionLexer::lex(ParseType *lvalp)
   lvalp->tok = tok;
   here = tok.endLoc;
   lastToken = tok.tokType;
+  lastTokenPosition = tok.loc;
   return lastToken;
 }
 
@@ -866,7 +867,9 @@ TransitionLexer::getNextToken()
                         || (lastToken == tk_CASE)
                         || (lastToken == tk_LET)
                         || (lastToken == tk_LETREC)
-                        || (lastToken == tk_IN));
+                        || (lastToken == tk_IN)
+                        /* || (lastToken == tk_DO) */
+                        || false);
 
   if (curlyRequired && (tok.tokType != '{')) {
     pushTokenBack(tok);
@@ -933,18 +936,7 @@ TransitionLexer::getNextToken()
     layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
   }
 
-  // Rule 3: At end of file, any outstanding implicit blocks are closed.
-  if (tok.tokType == EOF) {
-    closeToOpeningToken(EOF);
-    if (trimLayoutStack()) {
-      pushTokenBack(tok);
-      return LToken('}', startLoc, endLoc, "}");
-    }
-
-    return tok;
-  }
-
-  // Rule 4: If this is the first token on a line, then WHILE the
+  // Rule 3: If this is the first token on a line, then WHILE the
   // current indent level is less than the prevailing indent level,
   // close implicit blocks.
   if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
@@ -965,6 +957,17 @@ TransitionLexer::getNextToken()
     }
   }
 
+  // Rule 4: At end of file, any outstanding implicit blocks are closed.
+  if (tok.tokType == EOF) {
+    closeToOpeningToken(EOF);
+    if (trimLayoutStack()) {
+      pushTokenBack(tok);
+      return LToken('}', startLoc, endLoc, "}");
+    }
+
+    return tok;
+  }
+
   // Rule 5: If this is the first token on a line, and the indent
   // level is the SAME as the prevailing indent level, insert a
   // semicolon UNLESS:
@@ -974,7 +977,12 @@ TransitionLexer::getNextToken()
   if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
     bool wantAutoSemi = !(lastToken == ';' ||
                           tok.tokType == ';' ||
-                          tok.tokType == '}');
+                          tok.tokType == '}' ||
+                          tok.tokType == tk_THEN ||
+                          tok.tokType == tk_ELSE ||
+                          tok.tokType == tk_IN ||
+                          /* tok.tokType == tk_DO || */
+                          false);
 
     if (wantAutoSemi) {
       if (conditionallyInsertSemicolon(startLoc.offset)) {
