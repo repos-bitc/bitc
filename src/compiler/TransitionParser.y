@@ -67,22 +67,33 @@ using namespace std;
 
 #define YYSTYPE ParseType
 #define YYLEX_PARAM (TransitionLexer *)lexer
+
+// We disable yyerror entirely, because it emits whenever "error" is
+// shifted, and we're going to take over error handling for ourselves
+// (entirely). Unfortunately we cannot use YYRECOVERING() to make
+// error printing decisions, because that's already set by the time
+// the error action is being run (which is where we print our
+// message). We therefore use a scheme by which yyerror signals to us
+// that the next error message should be printed.
 #undef yyerror
-#define yyerror(lexer, s) lexer->ReportParseError(s)
+#define yyerror(lexer, s) lexer->showNextError = true
 
 #include "TransitionLexer.hxx"
 
-#define SHOWPARSE(s) \
-  do { \
-    if (Options::showParse) \
-      lexer->errStream << (s) << std::endl;                \
-  } while (false);
-#define SHOWPARSE1(s,x) \
-  do { \
-    if (Options::showParse) \
-      lexer->errStream << (s) << " " << (x) << std::endl;        \
+#define SHOWPARSE(s)                           \
+  do {                                         \
+    if (Options::showParse)                    \
+      lexer->errStream << (s) << std::endl;    \
   } while (false);
 
+#define SHOWPARSE1(s,x)                                    \
+  do {                                                     \
+    if (Options::showParse)                                \
+      lexer->errStream << (s) << " " << (x) << std::endl;  \
+  } while (false);
+
+static void PrintSyntaxError(TransitionLexer *lexer, const char *s);
+#define syntaxError(s) PrintSyntaxError(lexer, (s))
 
 inline int
 transition_lex(YYSTYPE *lvalp, TransitionLexer *lexer)
@@ -476,6 +487,11 @@ start: ILCB blk_version SC trn_uoc_body IRCB {
   SHOWPARSE("start -> ILCB blk_version SC trn_uoc_body IRCB}");
   return 0;
 };
+
+start: error {
+  syntaxError("input");
+  return -1;
+}
 
 sxp_uoc_body: sxp_interface {
   SHOWPARSE("sxp_uoc_body -> sxp_interface");
@@ -4059,7 +4075,7 @@ sxp_unqual_expr: sxp_let_eform {
 
 // LET [5.3.1]                 
 blk_stmt: tk_LET ILCB blk_letbindings IRCB tk_IN blk_block {
-  SHOWPARSE("blk_stmt -> LET { blk_letbindings } IN blk_block");
+  SHOWPARSE("blk_stmt -> LET { blk_letbindings } IN  blk_block");
 
   $$ = AST::make(at_let, $1.loc, $3, $6);
   $$->addChild(AST::make(at_constraints));
@@ -4524,3 +4540,38 @@ SC: ';' {
   SHOWPARSE("SC -> ;");
 }
 %%
+static void
+PrintSyntaxError(TransitionLexer *lexer, const char *s)
+{
+  std::stringstream ss;
+  LToken tok = lexer->getLastToken();
+
+  if (!lexer->showNextError)
+    return;
+
+  ss << "Syntax error in " << s << ": unexpected ";
+
+  switch(tok.tokType) {
+  case '{':
+  case '}':
+  case ':':
+    {
+      ss << '\'' << tok.str << '\'' << " (possibly inserted by layout)";
+      break;
+    }
+  case tk_TypeVar:
+    ss << "type variable '" << tok.str;
+    break;
+
+  case EOF:
+    ss << tok.str;
+    break;
+
+  default:
+    ss << '"' << tok.str << '"';
+    break;
+  }
+
+  lexer->ReportParseError(ss.str());
+  lexer->showNextError = false;
+}

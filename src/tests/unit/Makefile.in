@@ -195,6 +195,9 @@ array-byref.test: EXPECT_STATUS=6
 vec-badly-typed.test: TEST_MODE=compile
 BUILD/vec-badly-typed: TEST_MODE=compile
 BUILD/vec-badly-typed: EXPECT_STATUS=1
+badsyntax.test: TEST_MODE=compile
+BUILD/badsyntax: TEST_MODE=compile
+BUILD/badsyntax: EXPECT_STATUS=1
 
 BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | BUILD
 	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME)

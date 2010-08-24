@@ -121,8 +121,16 @@ struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
 struct TransitionLexer {
 private:
   sherpa::LexLoc lastTokenPosition;
-  int lastToken;
+  sherpa::LToken lastToken;
+public:
+  sherpa::LToken getLastToken()
+  { return lastToken; }
 
+  // Hack to work around crappy Bison/Yacc error handling strategy:
+  bool showNextError;
+
+
+private:
   boost::shared_ptr<LayoutFrame> layoutStack;
   LayoutFlags layoutFlags;
 

@@ -456,8 +456,10 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
   debug = false;
   nModules = 0;
 
+  showNextError = true;
+
   havePushbackToken = false;
-  lastToken = EOF;
+  lastToken = LToken(EOF, "end of file");
 }
 
 ucs4_t
@@ -600,9 +602,9 @@ TransitionLexer::lex(ParseType *lvalp)
 
   lvalp->tok = tok;
   here = tok.endLoc;
-  lastToken = tok.tokType;
+  lastToken = tok;
   lastTokenPosition = tok.loc;
-  return lastToken;
+  return lastToken.tokType;
 }
 
 // #define LAYOUT_BLOCK_DEBUG
@@ -620,7 +622,7 @@ TransitionLexer::beginBlock(bool implicit)
   unsigned column = layoutStack ? layoutStack->column : 0;
 
   boost::shared_ptr<LayoutFrame> lf = 
-    LayoutFrame::make(lastToken, implicit, column);
+    LayoutFrame::make(lastToken.tokType, implicit, column);
 
   //  expectingLeftBrace = false; // we're about to return it.
   //  learnBlockIndent = true;
@@ -851,7 +853,7 @@ TransitionLexer::getNextToken()
   // and end of file, but otherwise we don't want to do layout
   // processing when we are handling the S-expression syntax:
   if (((currentLang & lf_block) == 0) &&
-      (lastToken != EOF) &&     // beginning of file
+      (lastToken.tokType != EOF) &&     // beginning of file
       (tok.tokType != EOF))     // end of file
     return tok;
 #endif
@@ -864,12 +866,12 @@ TransitionLexer::getNextToken()
   //
   // FIX: Once I clean up the surface syntax, this should also be done
   // for tk_DO.
-  bool curlyRequired = ((lastToken == EOF)        // beginning of file
-                        || (lastToken == tk_CASE)
-                        || (lastToken == tk_LET)
-                        || (lastToken == tk_LETREC)
-                        || (lastToken == tk_IN)
-                        || (lastToken == tk_DO)
+  bool curlyRequired = ((lastToken.tokType == EOF)        // beginning of file
+                        || (lastToken.tokType == tk_CASE)
+                        || (lastToken.tokType == tk_LET)
+                        || (lastToken.tokType == tk_LETREC)
+                        || (lastToken.tokType == tk_IN)
+                        || (lastToken.tokType == tk_DO)
                         || false);
 
   if (curlyRequired && (tok.tokType != '{')) {
@@ -900,7 +902,7 @@ TransitionLexer::getNextToken()
   //   b) The next token is NOT more indented, in which case the
   //      block is presumed to have been empty and a '} is immediately
   //      inserted. 
-  if (lastToken == '{') {
+  if (lastToken.tokType == '{') {
     assert(layoutStack);
 
 #ifdef LAYOUT_BLOCK_DEBUG
@@ -976,7 +978,7 @@ TransitionLexer::getNextToken()
   //   b) we are closing the block explicitly.
 
   if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
-    bool wantAutoSemi = !(lastToken == ';' ||
+    bool wantAutoSemi = !(lastToken.tokType == ';' ||
                           tok.tokType == ';' ||
                           tok.tokType == '}' ||
                           tok.tokType == tk_THEN ||
@@ -1052,7 +1054,7 @@ TransitionLexer::getNextInputToken()
       // legal:
       if (currentLang & lf_sexpr) {
         endLoc.updateWith(thisToken);
-        return LToken(EOF, startLoc, endLoc, "");
+        return LToken(EOF, startLoc, endLoc, "end of file");
       }
 
       endLoc.updateWith(thisToken);
@@ -1139,7 +1141,7 @@ TransitionLexer::getNextInputToken()
           if ((currentLang & lf_sexpr) == 0) {
             ungetChar('t');
             ungetChar('#');
-            return LToken(EOF, startLoc, endLoc, "");
+            return LToken(EOF, startLoc, endLoc, "end of file");
           }
           endLoc.updateWith(thisToken);
           return LToken(tk_TRUE, startLoc, endLoc, thisToken);
@@ -1149,7 +1151,7 @@ TransitionLexer::getNextInputToken()
           if ((currentLang & lf_sexpr) == 0) {
             ungetChar('f');
             ungetChar('#');
-            return LToken(EOF, startLoc, endLoc, "");
+            return LToken(EOF, startLoc, endLoc, "end of file");
           }
 
           endLoc.updateWith(thisToken);
@@ -1160,7 +1162,7 @@ TransitionLexer::getNextInputToken()
         // FIX: this is bad input
         {
           endLoc.updateWith(thisToken);
-          return LToken(EOF, startLoc, endLoc, "");
+          return LToken(EOF, startLoc, endLoc, "end of file");
         }
       }
     }
@@ -1176,7 +1178,7 @@ TransitionLexer::getNextInputToken()
 
       if (c1 == EOF || c2 == EOF) {
         endLoc.updateWith(thisToken);
-        return LToken(EOF, startLoc, endLoc, "");
+        return LToken(EOF, startLoc, endLoc, "end of file");
       }
 
       // Check for simple, one-codepoint character:
@@ -1192,7 +1194,7 @@ TransitionLexer::getNextInputToken()
             ungetChar(c2);
             ungetChar(c1);
             endLoc.updateWith(thisToken);
-            return LToken(EOF, startLoc, endLoc, "");
+            return LToken(EOF, startLoc, endLoc, "end of file");
           }
         default:
           {
@@ -1204,7 +1206,7 @@ TransitionLexer::getNextInputToken()
             ungetChar(c2);
             ungetChar(c1);
             endLoc.updateWith(thisToken);
-            return LToken(EOF, startLoc, endLoc, "");
+            return LToken(EOF, startLoc, endLoc, "end of file");
           }          
         }
       }
@@ -1217,7 +1219,7 @@ TransitionLexer::getNextInputToken()
           c = getChar();
           if (c == EOF) {
             endLoc.updateWith(thisToken);
-            return LToken(EOF, startLoc, endLoc, "");
+            return LToken(EOF, startLoc, endLoc, "end of file");
           }
         } while (c != '\'');
 
@@ -1227,7 +1229,7 @@ TransitionLexer::getNextInputToken()
         }
 
         endLoc.updateWith(thisToken);
-        return LToken(EOF, startLoc, endLoc, "");
+        return LToken(EOF, startLoc, endLoc, "end of file");
       }
 
       // Otherwise it is a type variable.
@@ -1245,7 +1247,7 @@ TransitionLexer::getNextInputToken()
         // FIX: this is bad input
         ungetChar(c1);
         endLoc.updateWith(thisToken);
-        return LToken(EOF, startLoc, endLoc, "");
+        return LToken(EOF, startLoc, endLoc, "end of file");
       }
 
       do {
@@ -1396,7 +1398,7 @@ TransitionLexer::getNextInputToken()
   case EOF:
     {
       endLoc.updateWith(thisToken);
-      return LToken(EOF, startLoc, endLoc, "");
+      return LToken(EOF, startLoc, endLoc, "end of file");
     }
 
   default:
@@ -1407,7 +1409,7 @@ TransitionLexer::getNextInputToken()
 
     // FIX: Malformed token
     endLoc.updateWith(thisToken);
-    return LToken(EOF, startLoc, endLoc, "");
+    return LToken(EOF, startLoc, endLoc, "end of file");
   }
 
  identifier_or_operator:
