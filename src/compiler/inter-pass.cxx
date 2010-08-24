@@ -230,13 +230,13 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       break;
     }
 
-  case at_do:
+  case at_loop:
     {
       local = ast;
       break;
     }
 
-  case at_dobindings:
+  case at_loopbindings:
     {
       assert(local != top);
       MARKDEF(ast, local);
@@ -244,7 +244,7 @@ UocInfo::findDefForms(shared_ptr<AST> ast, shared_ptr<AST> local, shared_ptr<AST
       break;
     }
 
-  case at_dobinding:
+  case at_loopbinding:
     {
       MARKDEF(ast, local);
       shared_ptr<AST> id = ast->child(0)->child(0);

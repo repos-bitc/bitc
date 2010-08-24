@@ -312,6 +312,7 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_FN
 %token <tok> tk_FNARROW
 %token <tok> tk_BEGIN
+%token <tok> tk_LOOP
 %token <tok> tk_DO
 %token <tok> tk_UNTIL
 %token <tok> tk_GIVING
@@ -439,8 +440,8 @@ static unsigned VersionMinor(const std::string s)
 //%type <ast> catchclauses catchclause
 %type <ast> sxp_letbindings sxp_letbinding
 %type <ast> blk_letbindings blk_letbinding
-%type <ast> sxp_dobindings sxp_nonempty_dobindings sxp_dobinding sxp_dotest
-%type <ast> blk_dobindings blk_nonempty_dobindings blk_dobinding
+%type <ast> sxp_loopbindings sxp_nonempty_loopbindings sxp_loopbinding sxp_looptest
+%type <ast> blk_loopbindings blk_nonempty_loopbindings blk_loopbinding
 %type <ast> blk_giving
 %type <ast> sxp_let_eform
 %type <ast> sxp_type_val_definition blk_type_val_definition
@@ -4118,12 +4119,12 @@ sxp_let_eform: '(' tk_LETREC '(' sxp_letbindings ')' sxp_block ')' {
   $$->addChild(AST::make(at_constraints));
 };
 
-blk_stmt: tk_DO blk_dobindings tk_UNTIL blk_expr blk_giving blk_block {
-  SHOWPARSE("blk_stmt -> DO blk_dobindings UNTIL blk_expr blk_giving blk_block");
+blk_stmt: tk_LOOP blk_loopbindings tk_UNTIL blk_expr blk_giving blk_block {
+  SHOWPARSE("blk_stmt -> LOOP blk_loopbindings UNTIL blk_expr blk_giving blk_block");
 
   // In the block syntax, I didn't fabricate the test AST in a
   // separate production:
-  shared_ptr<AST> iDoTest = AST::make(at_dotest, $3.loc, $4, $5);
+  shared_ptr<AST> iLoopTest = AST::make(at_looptest, $3.loc, $4, $5);
 
   // The body is executed for side effects. We need to know its result
   // type so that the CONTINUE block will be properly typed. Since we
@@ -4136,29 +4137,29 @@ blk_stmt: tk_DO blk_dobindings tk_UNTIL blk_expr blk_giving blk_block {
     AST::make(at_block, $1.loc,
               AST::make(at_ident, LToken(tk_BlkIdent, "__continue")),
               $6);
-  $$ = AST::make(at_do, $1.loc, $2, iDoTest, iContinueBlock);
+  $$ = AST::make(at_loop, $1.loc, $2, iLoopTest, iContinueBlock);
 }
 
-blk_dobindings: {
-  SHOWPARSE("sxp_dobindings -> <empty>");
-  $$ = AST::make(at_dobindings);
+blk_loopbindings: {
+  SHOWPARSE("blk_loopbindings -> <empty>");
+  $$ = AST::make(at_loopbindings);
 };
-blk_dobindings: blk_nonempty_dobindings {
-  SHOWPARSE("blk_dobindings -> blk_nonempty_dobindings");
+blk_loopbindings: blk_nonempty_loopbindings {
+  SHOWPARSE("blk_loopbindings -> blk_nonempty_loopbindings");
   $$ = $1;
 };
-blk_nonempty_dobindings: blk_dobinding {
-  SHOWPARSE("blk_nonempty_dobindings -> blk_dobinding");
-  $$ = AST::make(at_dobindings, $1->loc, $1);
+blk_nonempty_loopbindings: blk_loopbinding {
+  SHOWPARSE("blk_nonempty_loopbindings -> blk_loopbinding");
+  $$ = AST::make(at_loopbindings, $1->loc, $1);
 };
-blk_nonempty_dobindings: blk_nonempty_dobindings blk_dobinding {
-  SHOWPARSE("blk_nonempty_dobindings -> blk_nonempty_dobindings blk_dobinding");
+blk_nonempty_loopbindings: blk_nonempty_loopbindings blk_loopbinding {
+  SHOWPARSE("blk_nonempty_loopbindings -> blk_nonempty_loopbindings blk_loopbinding");
   $$ = $1;
   $$->addChild($2);
 };
-blk_dobinding: blk_bindingpattern '=' blk_expr tk_THEN blk_expr {
-  SHOWPARSE("blk_dobinding -> blk_bindingpattern = blk_expr THEN blk_expr");
-  $$ = AST::make(at_dobinding, $1->loc, $1, $3, $5);
+blk_loopbinding: blk_bindingpattern '=' blk_expr tk_THEN blk_expr {
+  SHOWPARSE("blk_loopbinding -> blk_bindingpattern = blk_expr THEN blk_expr");
+  $$ = AST::make(at_loopbinding, $1->loc, $1, $3, $5);
 };
 
 blk_giving: {
@@ -4168,8 +4169,8 @@ blk_giving: tk_GIVING blk_expr {
   $$ = $2;
 }
 
-sxp_unqual_expr: '(' tk_DO '(' sxp_dobindings ')' sxp_dotest sxp_block ')' {
-  SHOWPARSE("sxp_unqual_expr -> (DO (dobindings) sxp_dotest sxp_block)");
+sxp_unqual_expr: '(' tk_LOOP '(' sxp_loopbindings ')' sxp_looptest sxp_block ')' {
+  SHOWPARSE("sxp_unqual_expr -> (DO (dobindings) sxp_looptest sxp_block)");
 
   // The body is executed for side effects. We need to know its result
   // type so that the CONTINUE block will be properly typed. Since we
@@ -4182,34 +4183,34 @@ sxp_unqual_expr: '(' tk_DO '(' sxp_dobindings ')' sxp_dotest sxp_block ')' {
     AST::make(at_block, $2.loc,
               AST::make(at_ident, LToken(tk_SxpIdent, "__continue")),
               $7);
-  $$ = AST::make(at_do, $2.loc, $4, $6, iContinueBlock);
+  $$ = AST::make(at_loop, $2.loc, $4, $6, iContinueBlock);
 };
 
 
-sxp_dobindings: {
-  SHOWPARSE("sxp_dobindings -> <empty>");
-  $$ = AST::make(at_dobindings);
+sxp_loopbindings: {
+  SHOWPARSE("sxp_loopbindings -> <empty>");
+  $$ = AST::make(at_loopbindings);
 };
-sxp_dobindings: sxp_nonempty_dobindings {
-  SHOWPARSE("sxp_dobindings -> sxp_nonempty_dobindings");
+sxp_loopbindings: sxp_nonempty_loopbindings {
+  SHOWPARSE("sxp_loopbindings -> sxp_nonempty_loopbindings");
   $$ = $1;
 };
-sxp_nonempty_dobindings: sxp_dobinding {
-  SHOWPARSE("sxp_nonempty_dobindings -> sxp_dobinding");
-  $$ = AST::make(at_dobindings, $1->loc, $1);
+sxp_nonempty_loopbindings: sxp_loopbinding {
+  SHOWPARSE("sxp_nonempty_loopbindings -> sxp_loopbinding");
+  $$ = AST::make(at_loopbindings, $1->loc, $1);
 };
-sxp_nonempty_dobindings: sxp_nonempty_dobindings sxp_dobinding {
-  SHOWPARSE("sxp_nonempty_dobindings -> sxp_nonempty_dobindings sxp_dobinding");
+sxp_nonempty_loopbindings: sxp_nonempty_loopbindings sxp_loopbinding {
+  SHOWPARSE("sxp_nonempty_loopbindings -> sxp_nonempty_loopbindings sxp_loopbinding");
   $$ = $1;
   $$->addChild($2);
 };
-sxp_dobinding: '(' sxp_bindingpattern sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_dobinding -> ( sxp_bindingpattern sxp_expr sxp_expr )");
-  $$ = AST::make(at_dobinding, $2->loc, $2, $3, $4);
+sxp_loopbinding: '(' sxp_bindingpattern sxp_expr sxp_expr ')' {
+  SHOWPARSE("sxp_loopbinding -> ( sxp_bindingpattern sxp_expr sxp_expr )");
+  $$ = AST::make(at_loopbinding, $2->loc, $2, $3, $4);
 };
-sxp_dotest: '(' sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_dobinding -> ( sxp_expr sxp_expr )");
-  $$ = AST::make(at_dotest, $2->loc, $2, $3); 
+sxp_looptest: '(' sxp_expr sxp_expr ')' {
+  SHOWPARSE("sxp_loopbinding -> ( sxp_expr sxp_expr )");
+  $$ = AST::make(at_looptest, $2->loc, $2, $3); 
 };
 
 sxp_unqual_expr: '(' tk_CONTINUE ')' {

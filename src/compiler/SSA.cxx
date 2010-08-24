@@ -246,9 +246,9 @@ ssa(std::ostream& errStream,
   case agt_openclosed:
   case at_letbindings:
   case at_letbinding:
-  case at_dobindings:
-  case at_dobinding:
-  case at_dotest:
+  case at_loopbindings:
+  case at_loopbinding:
+  case at_looptest:
   case agt_CompilationUnit:
   case agt_tc_definition:
   case agt_if_definition:
@@ -1017,52 +1017,52 @@ ssa(std::ostream& errStream,
       break;
     }
  
-  case at_do:
+  case at_loop:
     {
       shared_ptr<AST> res = AST::genSym(ast, "t");
       shared_ptr<AST> gl;
       shared_ptr<AST> theIdent;
 
-      shared_ptr<AST> dbs = ast->child(0);     
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);
-        assert(db->child(0)->astType == at_identPattern);        
-        shared_ptr<AST> ident = db->child(0)->child(0);
+      shared_ptr<AST> lbs = ast->child(0);     
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);
+        assert(lb->child(0)->astType == at_identPattern);        
+        shared_ptr<AST> ident = lb->child(0)->child(0);
         addIL(identList, ident);
          
-        shared_ptr<AST> init = db->child(1);
+        shared_ptr<AST> init = lb->child(1);
         gl = newGrandLet(ast);      
-        SSA(errStream, uoc, init, gl, identList, db, 1, flags);
+        SSA(errStream, uoc, init, gl, identList, lb, 1, flags);
         theIdent = UseCase(ident);
         FEXPR(gl) = addLB(gl, identList, FEXPR(gl),
                           NO_FLAGS, theIdent, false);
-        SETGL(db->child(1), gl);
-        db->flags |= LB_IS_DUMMY; 
+        SETGL(lb->child(1), gl);
+        lb->flags |= LB_IS_DUMMY; 
          
-        shared_ptr<AST> step = db->child(2);
+        shared_ptr<AST> step = lb->child(2);
         gl = newGrandLet(ast);      
-        SSA(errStream, uoc, step, gl, identList, db, 2, flags);
+        SSA(errStream, uoc, step, gl, identList, lb, 2, flags);
         theIdent = UseCase(ident);
         FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
                           NO_FLAGS, theIdent, false);
-        SETGL(db->child(2), gl);
+        SETGL(lb->child(2), gl);
       }
 
       // The test
       // test
-      shared_ptr<AST> dotest = ast->child(1);
+      shared_ptr<AST> loopTest = ast->child(1);
       gl = newGrandLet(ast);
-      SSA(errStream, uoc, dotest->child(0), gl, identList, 
-             dotest, 0, flags);
-      SETGL(dotest->child(0), gl);
+      SSA(errStream, uoc, loopTest->child(0), gl, identList, 
+             loopTest, 0, flags);
+      SETGL(loopTest->child(0), gl);
 
       // result
-      gl = newGrandLet(dotest);
-      SSA(errStream, uoc, dotest->child(1), gl, identList, 
-             dotest, 1, flags);
+      gl = newGrandLet(loopTest);
+      SSA(errStream, uoc, loopTest->child(1), gl, identList, 
+             loopTest, 1, flags);
       FEXPR(gl) = addLB(gl, identList, FEXPR(gl), 
                         NO_FLAGS, res, true);
-      SETGL(dotest->child(1), gl);
+      SETGL(loopTest->child(1), gl);
       
       
       // The expression

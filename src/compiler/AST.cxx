@@ -667,14 +667,14 @@ AST::tagName(const AstType at)
     return "at_letbinding";
   case at_letrec:
     return "at_letrec";
-  case at_do:
-    return "at_do";
-  case at_dobindings:
-    return "at_dobindings";
-  case at_dobinding:
-    return "at_dobinding";
-  case at_dotest:
-    return "at_dotest";
+  case at_loop:
+    return "at_loop";
+  case at_loopbindings:
+    return "at_loopbindings";
+  case at_loopbinding:
+    return "at_loopbinding";
+  case at_looptest:
+    return "at_looptest";
   case at_localFrame:
     return "at_localFrame";
   case at_frameBindings:
@@ -994,14 +994,14 @@ AST::astName() const
     return "letbinding";
   case at_letrec:
     return "letrec";
-  case at_do:
-    return "do";
-  case at_dobindings:
-    return "dobindings";
-  case at_dobinding:
-    return "dobinding";
-  case at_dotest:
-    return "dotest";
+  case at_loop:
+    return "loop";
+  case at_loopbindings:
+    return "loopbindings";
+  case at_loopbinding:
+    return "loopbinding";
+  case at_looptest:
+    return "looptest";
   case at_localFrame:
     return "localFrame";
   case at_frameBindings:
@@ -1209,10 +1209,10 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00", // at_letbindings
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00", // at_letbinding
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00", // at_letrec
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00", // at_do
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00", // at_dobindings
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00", // at_dobinding
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00", // at_dotest
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00", // at_loop
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00", // at_loopbindings
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00", // at_loopbinding
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00", // at_looptest
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00", // at_localFrame
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00", // at_frameBindings
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00", // at_letStar
@@ -4620,27 +4620,27 @@ AST::isValid() const
     }
     break;
 
-  case at_do: // normal AST:
-    // match at_dobindings
+  case at_loop: // normal AST:
+    // match at_loopbindings
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
-    if (!ISSET(astMembers[at_dobindings], child(c)->astType)) {
-      astChTypeError(*this, at_dobindings, child(c)->astType, c);
+    if (!ISSET(astMembers[at_loopbindings], child(c)->astType)) {
+      astChTypeError(*this, at_loopbindings, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;
 
-    // match at_dotest
+    // match at_looptest
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
-    if (!ISSET(astMembers[at_dotest], child(c)->astType)) {
-      astChTypeError(*this, at_dotest, child(c)->astType, c);
+    if (!ISSET(astMembers[at_looptest], child(c)->astType)) {
+      astChTypeError(*this, at_looptest, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;
@@ -4663,11 +4663,11 @@ AST::isValid() const
     }
     break;
 
-  case at_dobindings: // normal AST:
-    // match at_dobinding*
+  case at_loopbindings: // normal AST:
+    // match at_loopbinding*
     while (c < children.size()) {
-      if (!ISSET(astMembers[at_dobinding], child(c)->astType))
-        astChTypeError(*this, at_dobinding, child(c)->astType, c);
+      if (!ISSET(astMembers[at_loopbinding], child(c)->astType))
+        astChTypeError(*this, at_loopbinding, child(c)->astType, c);
       c++;
     }
 
@@ -4677,7 +4677,7 @@ AST::isValid() const
     }
     break;
 
-  case at_dobinding: // normal AST:
+  case at_loopbinding: // normal AST:
     // match at_identPattern
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
@@ -4720,7 +4720,7 @@ AST::isValid() const
     }
     break;
 
-  case at_dotest: // normal AST:
+  case at_looptest: // normal AST:
     // match agt_expr
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());

@@ -82,8 +82,8 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case agt_uselhs:
   case at_letbindings:
   case at_letbinding:
-  case at_dobindings:
-  case at_dobinding:
+  case at_loopbindings:
+  case at_loopbinding:
   case agt_CompilationUnit:
   case at_ifident:
   case at_localFrame:
@@ -243,13 +243,13 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
       break;
     }
 
-  case at_do:
+  case at_loop:
     {
       markTail(ast->child(1), fn, bps, isTail);
       break;
     }
     
-  case at_dotest:
+  case at_looptest:
     {
       markTail(ast->child(1), fn, bps, isTail);
       break;

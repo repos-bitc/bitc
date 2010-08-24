@@ -505,7 +505,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 #endif
   case at_localFrame:
   case at_frameBindings:
-  case at_do:
+  case at_loop:
   case at_dup:
   case at_inner_ref:
   case at_suspend:
@@ -910,9 +910,9 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     // The following are all done in the style of apply --
     // a parenthesized list of children
   case at_letbinding:
-  case at_dobindings:
-  case at_dobinding:
-  case at_dotest:
+  case at_loopbindings:
+  case at_loopbinding:
+  case at_looptest:
   case at_cond_leg:
   case at_typeapp:
     //  case at_catchclause:

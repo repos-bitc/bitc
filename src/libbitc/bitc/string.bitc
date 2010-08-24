@@ -49,7 +49,7 @@ interface bitc.string {
 
   def stringToList(s) =
     let lst : mutable list(char) = nil in
-      do pos = string_length(s) then pos - 1
+      loop pos = string_length(s) then pos - 1
         until pos == 0 giving lst {
           lst := cons(string_nth(s, pos-1), lst)
         }

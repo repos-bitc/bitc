@@ -43,8 +43,8 @@
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (do ((i:word 0 (+ i 1)))
-	((== i argvec.length) ())
+    (loop ((i:word 0 (+ i 1)))
+  	((== i argvec.length) ())
 	(begin
 	  (stdio.write_string stdio.stdout (nth argvec i))
 	  (stdio.write_char stdio.stdout '\linefeed')))

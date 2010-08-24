@@ -126,8 +126,8 @@ findusedef(std::ostream &errStream,
   case agt_openclosed:
   case at_letbindings:
   case at_letbinding:
-  case at_dobindings:
-  case at_dobinding:
+  case at_loopbindings:
+  case at_loopbinding:
   case agt_CompilationUnit:
   case at_ifident:
   case at_localFrame:
@@ -563,26 +563,26 @@ findusedef(std::ostream &errStream,
       break;
     }
 
-  case at_do:
+  case at_loop:
     {
-      shared_ptr<AST> dbs = ast->child(0);
+      shared_ptr<AST> lbs = ast->child(0);
       // Initializers
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);
-        CHKERR(errFree, findusedef(errStream, topAst, db->child(1),
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);
+        CHKERR(errFree, findusedef(errStream, topAst, lb->child(1),
                                    USE_MODE, boundVars, freeVars));
       }
 
       // Binding
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);
-        CHKERR(errFree, findusedef(errStream, topAst, db->child(0),
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);
+        CHKERR(errFree, findusedef(errStream, topAst, lb->child(0),
                                    LOCAL_MODE, boundVars, freeVars));
       }
 
       //Step-wise update
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);
         CHKERR(errFree, findusedef(errStream, topAst, ast->child(2),
                                    USE_MODE, boundVars, freeVars));
       }
@@ -596,7 +596,7 @@ findusedef(std::ostream &errStream,
       break;
     }
 
-  case at_dotest:
+  case at_looptest:
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0),
                                  USE_MODE, boundVars, freeVars));

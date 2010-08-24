@@ -369,10 +369,10 @@ TopInit(std::ostream& errStream,
   case at_letrec:    
   case at_letStar:
   case at_letbindings:
-  case at_do:
-  case at_dotest:
-  case at_dobindings:
-  case at_dobinding:
+  case at_loop:
+  case at_looptest:
+  case at_loopbindings:
+  case at_loopbinding:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
         TOPINIT(ast->child(c), flags);

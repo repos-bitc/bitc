@@ -451,8 +451,8 @@ resolve(std::ostream& errStream,
   case agt_value_definition:
   case agt_uselhs:
   case at_letbindings:
-  case at_dobindings:
-  case at_dobinding:
+  case at_loopbindings:
+  case at_loopbinding:
   case agt_CompilationUnit:
   case agt_tc_definition:
   case agt_if_definition:
@@ -2496,56 +2496,56 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_do:
+  case at_loop:
     {
       // NOTE: Do is re-written in the parser
-      shared_ptr<ASTEnvironment > doEnv = env->newScope();
-      ast->envs.env = doEnv;
+      shared_ptr<ASTEnvironment > loopEnv = env->newScope();
+      ast->envs.env = loopEnv;
 
-      shared_ptr<AST> dbs = ast->child(0);
+      shared_ptr<AST> lbs = ast->child(0);
       
-      // match at_dobindings
+      // match at_loopbindings
       // First process the initializers.
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);        
-        shared_ptr<AST> init = db->child(1);
-        RESOLVE(init, doEnv, lamLevel, USE_MODE, idc_value, 
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);        
+        shared_ptr<AST> init = lb->child(1);
+        RESOLVE(init, loopEnv, lamLevel, USE_MODE, idc_value, 
                 currLB, flags);
       }
             
       // First add the definitions.
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);        
-        shared_ptr<AST> localDef = db->child(0);
-        //shared_ptr<AST> init = db->child(1);
-        RESOLVE(localDef, doEnv, lamLevel, DEF_MODE, 
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);        
+        shared_ptr<AST> localDef = lb->child(0);
+        //shared_ptr<AST> init = lb->child(1);
+        RESOLVE(localDef, loopEnv, lamLevel, DEF_MODE, 
                 id_value, currLB, flags);        
       }
 
       // Make them complete
-      markComplete(doEnv);
+      markComplete(loopEnv);
       
       // Then process all the next step initializers
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);        
-        shared_ptr<AST> step = db->child(2);
-        RESOLVE(step, doEnv, lamLevel, USE_MODE, 
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);        
+        shared_ptr<AST> step = lb->child(2);
+        RESOLVE(step, loopEnv, lamLevel, USE_MODE, 
                 idc_value, currLB, flags);        
       }
       
       // Process the condition/result
-      // match at_dotest
-      RESOLVE(ast->child(1), doEnv, lamLevel, USE_MODE, 
+      // match at_looptest
+      RESOLVE(ast->child(1), loopEnv, lamLevel, USE_MODE, 
               idc_value, currLB, flags);      
       
       // And finally process the body with a rich environment
       // match agt_expr, with my Parent's Incompleteness restrictions
-      RESOLVE(ast->child(2), doEnv, lamLevel, USE_MODE, 
+      RESOLVE(ast->child(2), loopEnv, lamLevel, USE_MODE, 
               idc_value, currLB, flags);    
       break;
     }
     
-  case at_dotest:
+  case at_looptest:
     {
       for (size_t c = 0; c < ast->children.size(); c++)
         RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 

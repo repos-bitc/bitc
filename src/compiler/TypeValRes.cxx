@@ -141,7 +141,7 @@ isExpansive(std::ostream& errStream,
   case at_copyREF:
   case at_setClosure:
   case at_letbindings:
-  case at_dobindings:
+  case at_loopbindings:
     {
       for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)
         CHKEXP(itsExpansive, isExpansive(errStream, gamma,
@@ -156,7 +156,7 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
-  case at_dobinding:
+  case at_loopbinding:
     {
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
                                        ast->child(1)));
@@ -175,8 +175,8 @@ isExpansive(std::ostream& errStream,
       break;
     }
 #endif
-  case at_do:
-  case at_dotest:
+  case at_loop:
+  case at_looptest:
   case at_begin:
     {
       for (size_t i=0; !itsExpansive && i < ast->children.size(); i++)

@@ -1461,7 +1461,7 @@ UocInfo::recInstantiate(ostream &errStream,
       break;
     }
 
-  case at_dobinding:
+  case at_loopbinding:
     {
       // init and update
       for (size_t c = 1; c < ast->children.size(); c++)
@@ -1471,27 +1471,27 @@ UocInfo::recInstantiate(ostream &errStream,
       break;
     }
 
-  case at_do:
+  case at_loop:
     {
-      shared_ptr<AST> doBds = ast->child(0);
-      shared_ptr<AST> doTest = ast->child(1);
-      shared_ptr<AST> doExprs = ast->child(2);
+      shared_ptr<AST> loopBds = ast->child(0);
+      shared_ptr<AST> loopTest = ast->child(1);
+      shared_ptr<AST> loopExprs = ast->child(2);
 
-      for (size_t c = 0; c < doBds->children.size(); c++) {
-        shared_ptr<AST> doBd = doBds->child(c);
-        shared_ptr<AST> local = doBd->child(0)->child(0);
+      for (size_t c = 0; c < loopBds->children.size(); c++) {
+        shared_ptr<AST> loopBd = loopBds->child(c);
+        shared_ptr<AST> local = loopBd->child(0)->child(0);
 
         string oldName = local->s;
         local->flags |= LOCAL_NOGEN_VAR;
         NAMKARAN(local, getInstName(local, local->symType));
         ast->envs.updateKey(oldName, local->s);
 
-        for (size_t d = 0; d < doBds->children.size(); d++) {
-          shared_ptr<AST> update = doBds->child(d)->child(2);
+        for (size_t d = 0; d < loopBds->children.size(); d++) {
+          shared_ptr<AST> update = loopBds->child(d)->child(2);
           substitute(update, local, local);
         }
-        substitute(doTest, local, local);
-        substitute(doExprs, local, local);
+        substitute(loopTest, local, local);
+        substitute(loopExprs, local, local);
       }
 
       for (size_t c = 0; c < ast->children.size(); c++)

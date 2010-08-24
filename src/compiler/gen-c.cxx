@@ -1043,9 +1043,9 @@ toc(std::ostream& errStream,
   case at_argVec:
   case at_and:
   case at_or:
-  case at_dobindings:
-  case at_dobinding:
-  case at_dotest:
+  case at_loopbindings:
+  case at_loopbinding:
+  case at_looptest:
 
   case at_docString:
 
@@ -1914,14 +1914,14 @@ toc(std::ostream& errStream,
       break;
     }
 
-  case at_do:
+  case at_loop:
     {
-      shared_ptr<AST> dbs = ast->child(0);
+      shared_ptr<AST> lbs = ast->child(0);
 
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);
-        shared_ptr<AST> init = db->child(1);
-        TOC(errStream, uoc, init, out, IDname, decls, db, 1, flags);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);
+        shared_ptr<AST> init = lb->child(1);
+        TOC(errStream, uoc, init, out, IDname, decls, lb, 1, flags);
       }
 
       out << "loop_" << ast->ID << ":" << endl;
@@ -1961,10 +1961,10 @@ toc(std::ostream& errStream,
       if (body->astType != at_letStar)
         out << ";" << endl;
 
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);
-        shared_ptr<AST> step = db->child(2);
-        TOC(errStream, uoc, step, out, IDname, decls, db, 2, flags);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);
+        shared_ptr<AST> step = lb->child(2);
+        TOC(errStream, uoc, step, out, IDname, decls, lb, 2, flags);
       }
 
       out << "goto " << "loop_" << ast->ID << ";" << endl;

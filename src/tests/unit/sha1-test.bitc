@@ -70,7 +70,7 @@
     (examine (sha1.sha1Result sha digest) "Result")
     
     (stdio.write_char stdio.stdout '\tab')
-    (do ((i:word 0 (+ i 1)))
+    (loop ((i:word 0 (+ i 1)))
 	((>= i 20) ())
 	(stdio.write_int stdio.stdout (nth digest i) 16)
 	(stdio.write_char stdio.stdout '\space'))

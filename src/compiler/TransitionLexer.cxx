@@ -279,6 +279,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "let*",             lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "letrec",           lf_transition,        tk_LETREC ),
   TransitionLexer::KeyWord( "location",         lf_transition,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "loop",             lf_transition,        tk_LOOP ),
   TransitionLexer::KeyWord( "MakeVector",       lf_transition,        tk_MAKE_VECTOR ),
   TransitionLexer::KeyWord( "member",           lf_transition,        tk_MEMBER ),   /* REDUNDANT */
   TransitionLexer::KeyWord( "method",           lf_transition,        tk_METHOD ),
@@ -868,7 +869,7 @@ TransitionLexer::getNextToken()
                         || (lastToken == tk_LET)
                         || (lastToken == tk_LETREC)
                         || (lastToken == tk_IN)
-                        /* || (lastToken == tk_DO) */
+                        || (lastToken == tk_DO)
                         || false);
 
   if (curlyRequired && (tok.tokType != '{')) {
@@ -981,7 +982,7 @@ TransitionLexer::getNextToken()
                           tok.tokType == tk_THEN ||
                           tok.tokType == tk_ELSE ||
                           tok.tokType == tk_IN ||
-                          /* tok.tokType == tk_DO || */
+                          tok.tokType == tk_DO ||
                           false);
 
     if (wantAutoSemi) {

@@ -3576,13 +3576,13 @@ bitsizeof(<em>T</em>)</literallayout>
         </p>
         <p>
           BitC provides the looping construct
-          <progident>do</progident>, which conditionally evaluates its body
+          <progident>loop</progident>, which conditionally evaluates its body
           multiple times.
         </p>
         <literallayout>
-(do ((<em>bp<sub>1</sub></em> <em>e<sub>init-1</sub></em> <em>e<sub>step-1</sub></em>)
-     ...
-     (<em>bp<sub>n</sub></em> <em>e<sub>init-n</sub></em> <em>e<sub>step-n</sub></em>))
+(loop ((<em>bp<sub>1</sub></em> <em>e<sub>init-1</sub></em> <em>e<sub>step-1</sub></em>)
+       ...
+       (<em>bp<sub>n</sub></em> <em>e<sub>init-n</sub></em> <em>e<sub>step-n</sub></em>))
     (<em>e<sub>test</sub></em> <em>e<sub>result</sub></em>)
    <em>e<sub>body-1</sub></em>
    ...
@@ -3592,7 +3592,7 @@ bitsizeof(<em>T</em>)</literallayout>
           ref="kelsey1998r5rs"/>. It specifies a set of variables to
           be bound along with an initializer expression and an update
           expression for each variable. Evaluation of the
-          <progident>do</progident> form proceeds as follows:
+          <progident>loop</progident> form proceeds as follows:
         </p>
         <p>
           The <progident><em>e<sub>init-i</sub></em></progident>
@@ -3601,9 +3601,9 @@ bitsizeof(<em>T</em>)</literallayout>
           context, the variables bound by the loop have not yet been
           bound. All other expressions are evaluated within an inner
           lexical context that includes the
-          <progident>do</progident>-bound variables.  After all of the
+          <progident>loop</progident>-bound variables.  After all of the
           initialization values are computed in order, the
-          <progident>do</progident>-bound variables are bound to the
+          <progident>loop</progident>-bound variables are bound to the
           initial results in parallel, and body processing begins.
         </p>
         <p>
@@ -3619,7 +3619,7 @@ bitsizeof(<em>T</em>)</literallayout>
           <progident><em>e<sub>step-i</sub></em></progident> expressions
           are evaluated in sequence. Once all of the expression values
           have been evaluated, the 
-          <progident>do</progident>-bound variables are bound to the
+          <progident>loop</progident>-bound variables are bound to the
           newly computed results in parallel and a new pass is
           initiated over the loop body as previously described.
         </p>
@@ -3636,7 +3636,7 @@ bitsizeof(<em>T</em>)</literallayout>
           <em>not</em> part of the loop body.
         </p>
         <p>
-          The <progident>do</progident> form is not
+          The <progident>loop</progident> form is not
           let-polymorphic. In consequence, the binding patterns bound
           within the <progident>do</progident> form are not
           polymorphic bindings.

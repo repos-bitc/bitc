@@ -81,21 +81,21 @@
   //(TS "Read 1 Byte from file: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (do ((i 0 (+ i 1)))
+    (loop ((i 0 (+ i 1)))
 	((>= i len) ())
 	(set! (nth vec i) (stdio.read_byte iStream)))  
     (set! stop (stdlib.getTimeStamp)) 
   //(TS "Input from File: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (do ((i 0 (+ i 1)))
+    (loop ((i 0 (+ i 1)))
 	((>= i len) ())
 	(stdio.write_byte stdio.stdout (nth vec i)))  
     (set! stop (stdlib.getTimeStamp)) 
   //(TS "Write to stdout: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (do ((i 0 (+ i 1)))
+    (loop ((i 0 (+ i 1)))
 	((>= i len) ())
 	(set!  (nth vec i)
 	       (if (not (stdio.isEOF iStream))
@@ -104,7 +104,7 @@
   //(TS "Checked Input From file: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (do ((i 0 (+ i 1)))
+    (loop ((i 0 (+ i 1)))
 	((>= i len) ())
 	(stdio.write_byte oStream (nth vec i)))  
     (set! stop (stdlib.getTimeStamp)) 

@@ -1925,8 +1925,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case agt_value_definition:
   case agt_type:
   case at_letbindings:
-  case at_dobindings:
-  case at_dobinding:
+  case at_loopbindings:
+  case at_loopbinding:
   case agt_CompilationUnit:
   case agt_tc_definition:
   case agt_if_definition:
@@ -5194,7 +5194,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }    
 
-  case at_do:
+  case at_loop:
     {      
       /*------------------------------------------------
                A |- ei1: t1 ... A |- ein: tn
@@ -5207,49 +5207,49 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
            A, x1:'a1|'b1, ... xn:'an|'bn |- (et er): tr
            A, x1:'a1|'b1, ... xn:'an|'bn |- eb: t
         _________________________________________________
-                   A |- (do ((x1 ei1 es1)
+                   A |- (loop ((x1 ei1 es1)
                                  ...
-                             (xn ein esn))
+                               (xn ein esn))
                          (et  er)  eb): tr
         ------------------------------------------------*/
 
       // match at_letbindings
-      shared_ptr<TSEnvironment > doGamma = gamma->newScope();
-      ast->envs.gamma = doGamma;
+      shared_ptr<TSEnvironment > loopGamma = gamma->newScope();
+      ast->envs.gamma = loopGamma;
 
-      shared_ptr<AST> dbs = ast->child(0);
-      dbs->symType = Type::make(ty_tvar);
+      shared_ptr<AST> lbs = ast->child(0);
+      lbs->symType = Type::make(ty_tvar);
 
       // Initializers
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);
-        shared_ptr<AST> init = db->child(1);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);
+        shared_ptr<AST> init = lb->child(1);
         shared_ptr<Type> tv = newTvar();
-        TYPEINFER(init, doGamma, instEnv, impTypes, tcc,
+        TYPEINFER(init, loopGamma, instEnv, impTypes, tcc,
                   trail, USE_MODE, TI_EXPRESSION);
         UNIFY(trail, init->loc, 
               init->symType, MBF(tv));
       }
       
       // Definitions
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);
-        shared_ptr<AST> localDefPat = db->child(0);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);
+        shared_ptr<AST> localDefPat = lb->child(0);
         shared_ptr<AST> localDef = localDefPat->child(0);
-        shared_ptr<AST> init = db->child(1);
+        shared_ptr<AST> init = lb->child(1);
         
         localDef->symType = MBF(init->symType);
-        TYPEINFER(localDefPat, doGamma, instEnv, impTypes, tcc,
+        TYPEINFER(localDefPat, loopGamma, instEnv, impTypes, tcc,
                   trail, DEF_MODE, TI_EXPRESSION);
       }
 
       // Next step initializers
-      for (size_t c = 0; c < dbs->children.size(); c++) {
-        shared_ptr<AST> db = dbs->child(c);
-        shared_ptr<AST> localDef = db->getID();
-        shared_ptr<AST> step = db->child(2);
+      for (size_t c = 0; c < lbs->children.size(); c++) {
+        shared_ptr<AST> lb = lbs->child(c);
+        shared_ptr<AST> localDef = lb->getID();
+        shared_ptr<AST> step = lb->child(2);
         
-        TYPEINFER(step, doGamma, instEnv, impTypes, tcc,
+        TYPEINFER(step, loopGamma, instEnv, impTypes, tcc,
                   trail, USE_MODE, TI_EXPRESSION);
         
         UNIFY(trail, step->loc, step->symType, 
@@ -5257,16 +5257,16 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       }
 
       // Finally evaluate the test and the final expression           
-      TYPEINFER(ast->child(1), doGamma, instEnv, impTypes, 
+      TYPEINFER(ast->child(1), loopGamma, instEnv, impTypes, 
                 tcc, trail, USE_MODE, TI_EXPRESSION);
-      TYPEINFER(ast->child(2), doGamma, instEnv, impTypes, 
+      TYPEINFER(ast->child(2), loopGamma, instEnv, impTypes, 
                 tcc, trail, USE_MODE, TI_EXPRESSION);
 
       ast->symType = ast->child(1)->symType;      
       break;
     }
 
-  case at_dotest:
+  case at_looptest:
     {
       /*------------------------------------------------
                A |- et: tb ... A |- er: tr

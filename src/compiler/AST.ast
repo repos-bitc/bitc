@@ -1099,7 +1099,7 @@ GROUP eform = literal | var | unit
             | if | when | and | or | cond | uswitch
             | setbang | dup | deref | inner_ref
             | try | throw | let | letStar | letrec
-            | container | do
+            | container | loop
             | mkClosure | allocREF | copyREF | setClosure
             | block | return_from
             | sizeof | bitsizeof | mkArrayByref
@@ -1238,10 +1238,10 @@ AST letbinding = identPattern expr;
 AST letrec = letbindings expr constraints;
 
 // DO [7.6]
-AST do = dobindings dotest expr;
-AST dobindings = dobinding*;
-AST dobinding = identPattern expr expr;
-AST dotest = expr expr;
+AST loop = loopbindings looptest expr;
+AST loopbindings = loopbinding*;
+AST loopbinding = identPattern expr expr;
+AST looptest = expr expr;
 
 // COMPILER INTERNAL:
 // LOCALFRAME -- this is a backend AST

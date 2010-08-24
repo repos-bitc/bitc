@@ -75,7 +75,7 @@
 		   (lambda (i) 
 		     (if (not (stdio.isEOF iStream))
 			 (stdio.read_byte iStream) 0))))
-  //(do ((i 0 (+ i 1)))
+  //(loop ((i 0 (+ i 1)))
   //    ((>= i len) ())
   //    (set! (nth input i) 
   //	    (if (not (stdio.isEOF iStream))
@@ -95,7 +95,7 @@
 		   (stdio.write_char stdio.stdout '\linefeed'))))
     
     (set! start (stdlib.getTimeStamp)) 
-    (do ((i:word 0 (+ i 1)))
+    (loop ((i:word 0 (+ i 1)))
 	((>= i 500) ())
 	(examine (sha1.sha1Reset sha) "Reset")
 	(examine (sha1.sha1Input sha input) "Input")
@@ -104,7 +104,7 @@
 // (TS "SHA1: " (- stop start))
     
 //(set! start (stdlib.getTimeStamp))
-    (do ((i 0 (+ i 1)))
+    (loop ((i 0 (+ i 1)))
 	((>= i 20) ())
 	(if (> i 0)
 	    (begin (stdio.write_char stdio.stdout '\space') ())

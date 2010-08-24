@@ -41,8 +41,8 @@
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (do ((a 0:int32 (+ a 1))
-	 (b 1:int32 (+ b 2)))
+    (loop ((a 0:int32 (+ a 1))
+	   (b 1:int32 (+ b 2)))
 	(#t 0)
 	#f)))
  

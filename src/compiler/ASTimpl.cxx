@@ -431,11 +431,11 @@ AST::atKwd() const
   case at_return_from:
     return "return-from";
 
-  case at_do:
-    return "do";
+  case at_loop:
+    return "loop";
 
-  case at_dotest:
-    return "<dotest>";
+  case at_looptest:
+    return "<looptest>";
 
   case at_select:
     return "<select>";
@@ -518,11 +518,11 @@ AST::atKwd() const
   case at_letbinding:
     return "letbinding";
 
-  case at_dobindings:
-    return "<dobindings>";
+  case at_loopbindings:
+    return "<loopbindings>";
 
-  case at_dobinding:
-    return "dobinding";
+  case at_loopbinding:
+    return "loopbinding";
 
   case at_letrec:
     return "letrec";
@@ -806,7 +806,7 @@ AST::getID()
   case at_define:
   case at_recdef:
   case at_letbinding:
-  case at_dobinding:
+  case at_loopbinding:
     return child(0)->child(0);
 
   case at_defstruct:

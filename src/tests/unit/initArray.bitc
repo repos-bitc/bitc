@@ -42,6 +42,6 @@
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (let ((a:(array (mutable int32) 10) (array 0 0 0 0 0 0 0 0 0 0)))
-      (do ((i:word 0 (+ i 1)))
+      (loop ((i:word 0 (+ i 1)))
 	  ((== i 10) 0:int32)
 	  (set! (nth a i) (convert i))))))
