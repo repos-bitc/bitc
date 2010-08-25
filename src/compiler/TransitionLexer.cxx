@@ -844,6 +844,8 @@ TransitionLexer::getNextToken()
                         || (lastToken.tokType == tk_LETREC)
                         || (lastToken.tokType == tk_IN)
                         || (lastToken.tokType == tk_DO)
+                        || (lastToken.tokType == tk_THEN)
+                        || (lastToken.tokType == tk_ELSE)
                         || false);
 
   if (curlyRequired && (tok.tokType != '{')) {
@@ -978,8 +980,17 @@ TransitionLexer::getNextToken()
   if (tok.tokType == '{')
     beginBlock(false);
 
-  if (tok.tokType == '}')
+  if (tok.tokType == '}') {
+    // Following will stop closing blocks when it reaches the most
+    // recent explicit block, which is what we want.
+    closeToOffset(0);
+    if (trimLayoutStack()) {
+      pushTokenBack(tok);
+      return LToken('}', startLoc, endLoc, "}");
+    }
+
     endBlock(false);
+  }
 
   return tok;
 }

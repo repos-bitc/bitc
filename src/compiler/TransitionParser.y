@@ -462,7 +462,9 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_ident blk_defident blk_useident
 %type <ast> intLit natLit floatLit charLit strLit boolLit
 
-%type <tok> ILCB IRCB closeToLET closeToLETREC closeToCASE
+%type <tok> ILCB IRCB
+%type <tok> closeToLET closeToLETREC closeToCASE
+%type <tok> closeToTHEN closeToELSE
 
 %%
 
@@ -3622,13 +3624,13 @@ sxp_unqual_expr: '(' sxp_expr sxp_actual_params ')' { /* apply to zero or more a
 };
 
 // IF [7.15.1]
-blk_stmt: tk_IF blk_expr tk_THEN blk_stmt tk_ELSE blk_stmt %prec tk_ELSE {
-  SHOWPARSE("blk_stmt -> IF blk_expr THEN blk_stmt ELSE blk_stmt");
-  $$ = AST::make(at_if, $1.loc, $2, $4, $6);
+blk_stmt: tk_IF blk_expr tk_THEN ILCB blk_stmt_seq closeToTHEN tk_ELSE ILCB blk_stmt_seq closeToELSE %prec tk_ELSE {
+  SHOWPARSE("blk_stmt -> IF blk_expr THEN { blk_stmt_seq } ELSE { blk_stmt_seq }");
+  $$ = AST::make(at_if, $1.loc, $2, $5, $9);
 };
-blk_stmt: tk_IF blk_expr tk_THEN blk_stmt %prec tk_THEN {
-  SHOWPARSE("blk_stmt -> IF blk_expr THEN blk_stmt");
-  $$ = AST::make(at_when, $1.loc, $2, $4);
+blk_stmt: tk_IF blk_expr tk_THEN ILCB blk_stmt_seq closeToTHEN %prec tk_THEN {
+  SHOWPARSE("blk_stmt -> IF blk_expr THEN { blk_stmt_seq }");
+  $$ = AST::make(at_when, $1.loc, $2, $5);
 };
 sxp_unqual_expr: '(' tk_IF sxp_expr sxp_expr sxp_expr ')' {
   SHOWPARSE("sxp_unqual_expr -> (IF sxp_expr sxp_expr sxp_expr )");
@@ -4082,8 +4084,8 @@ blk_stmt: tk_LET ILCB blk_letbindings closeToLET tk_IN blk_block {
   $$ = AST::make(at_let, $1.loc, $3, $6);
   $$->addChild(AST::make(at_constraints));
 }
-blk_letbinding: blk_bindingpattern '=' blk_expr {
-  SHOWPARSE("blk_letbinding -> blk_bindingpattern '=' blk_expr");
+blk_letbinding: blk_bindingpattern '=' blk_stmt {
+  SHOWPARSE("blk_letbinding -> blk_bindingpattern '=' blk_stmt");
   $$ = AST::make(at_letbinding, $1->loc, $1, $3);
 };
 // Following not used in LET, but may end up used in LETREC:
@@ -4535,6 +4537,20 @@ closeToCASE:   IRCB  { $$ = $1; }
 closeToCASE:   error {
   yyerrok;
   lexer->closeOpeningTokenBrace(tk_CASE);
+  lexer->showNextError = false;
+  $$ = LToken('}', "}");
+}
+closeToTHEN:   IRCB  { $$ = $1; }
+closeToTHEN:   error {
+  yyerrok;
+  lexer->closeOpeningTokenBrace(tk_THEN);
+  lexer->showNextError = false;
+  $$ = LToken('}', "}");
+}
+closeToELSE:   IRCB  { $$ = $1; }
+closeToELSE:   error {
+  yyerrok;
+  lexer->closeOpeningTokenBrace(tk_ELSE);
   lexer->showNextError = false;
   $$ = LToken('}', "}");
 }
