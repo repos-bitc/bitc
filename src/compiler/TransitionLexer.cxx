@@ -447,7 +447,7 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
 
   // Don't accept block syntax keywords until we see the new version syntax,
   // which is accepted under lf_version
-  currentLang = lf_sexpr | lf_version;
+  currentLang = lf_block | lf_version;
   lispParenDepth = 0;
   num_errors = 0;
   isRuntimeUoc = false;
@@ -823,11 +823,17 @@ TransitionLexer::getNextToken()
 #if 1
   // The transitional syntax requires curly brace insertion at start
   // and end of file, but otherwise we don't want to do layout
-  // processing when we are handling the S-expression syntax:
+  // processing when we are handling the S-expression syntax.
+  if ((currentLang & lf_sexpr) &&
+      (tok.tokType != EOF))
+    return tok;
+
+#if 0
   if (((currentLang & lf_block) == 0) &&
       (lastToken.tokType != EOF) &&     // beginning of file
       (tok.tokType != EOF))     // end of file
     return tok;
+#endif
 #endif
 
   LexLoc startLoc = here;

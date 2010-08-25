@@ -129,8 +129,6 @@ public:
   // Hack to work around crappy Bison/Yacc error handling strategy:
   bool showNextError;
 
-
-private:
   boost::shared_ptr<LayoutFrame> layoutStack;
   LayoutFlags layoutFlags;
 

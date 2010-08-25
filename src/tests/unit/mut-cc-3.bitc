@@ -35,7 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-(bitc version 0.10)
+bitc version 0.11
 
 // Test for porper instantiation in the presence of
 // full-CopyCompatibility. 

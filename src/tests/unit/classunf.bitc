@@ -40,7 +40,7 @@
 // bound in the environment, or restricted by value restriction
 
 
-(bitc version 0.10)
+bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 

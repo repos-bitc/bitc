@@ -2,7 +2,7 @@
 // libbitc.bita to the command line so that the compiler will be
 // forced to ingest that. The purpose of the test is to ensure that
 // libbitc.bita is well-formed and parseable.
-(bitc version 0.10)
+bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 

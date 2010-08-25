@@ -35,7 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-(bitc version 0.10)
+bitc version 0.11
 
 // Test the working of TypeOfCopy() 
 // behaviour wrt deep maybe-introduction for value types

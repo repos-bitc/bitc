@@ -35,7 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-(bitc version 0.10)
+bitc version 0.11
 
 // Test for mutability inference and hint propagation.
 // Inference is actually doing the right thing here. 

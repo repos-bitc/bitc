@@ -39,7 +39,7 @@
 // failed to introduce local variables for removed arguments of unit
 // type in wrapper routines for closure converted functions.
 
-(bitc version 0.10)
+bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 

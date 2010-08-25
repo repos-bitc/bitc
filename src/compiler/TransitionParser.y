@@ -354,15 +354,11 @@ static unsigned VersionMinor(const std::string s)
  
 %type <tok> LP RP
 
-%type <ast> sxp_module sxp_implicit_module sxp_module_seq
 %type <ast> trn_module trn_implicit_module trn_module_seq
-%type <ast> sxp_interface
 %type <ast> trn_interface
 %type <ast> sxp_defpattern blk_defpattern
-%type <ast> sxp_mod_definitions
 %type <ast> sxp_mod_definition blk_mod_definition
 %type <ast> trn_mod_definitions trn_mod_definition
-%type <ast> sxp_if_definitions sxp_if_definition
 %type <ast> trn_if_definitions trn_if_definition
 %type <ast> sxp_common_definition
 %type <ast> blk_common_definition
@@ -463,6 +459,8 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> intLit natLit floatLit charLit strLit boolLit
 
 %type <tok> ILCB IRCB
+%type <tok> begin
+%type <tok> closeToINTERFACE closeToMODULE
 %type <tok> closeToLET closeToLETREC closeToCASE
 %type <tok> closeToTHEN closeToELSE
 
@@ -475,17 +473,7 @@ static unsigned VersionMinor(const std::string s)
 // This definition of start must be changed as it ignores
 // junk after the body.
 
-start: ILCB sxp_version SC sxp_uoc_body IRCB {
-  SHOWPARSE("start -> sxp_version SC sxp_uoc_body");
-  return 0;
-};
-
-start: ILCB sxp_uoc_body IRCB {
-  SHOWPARSE("start -> sxp_uoc_body");
-  return 0;
-};
-
-start: ILCB blk_version SC trn_uoc_body IRCB {
+start: ILCB blk_version ';' trn_uoc_body IRCB {
   SHOWPARSE("start -> ILCB blk_version SC trn_uoc_body IRCB}");
   return 0;
 };
@@ -493,18 +481,6 @@ start: ILCB blk_version SC trn_uoc_body IRCB {
 start: error {
   syntaxError("input");
   return -1;
-}
-
-sxp_uoc_body: sxp_interface {
-  SHOWPARSE("sxp_uoc_body -> sxp_interface");
-}
-
-sxp_uoc_body: sxp_implicit_module {
-  SHOWPARSE("sxp_uoc_body -> sxp_implicit_module");
-}
-
-sxp_uoc_body: sxp_module_seq {
-  SHOWPARSE("sxp_uoc_body -> sxp_module_seq");
 }
 
 trn_uoc_body: trn_interface {
@@ -520,23 +496,6 @@ trn_uoc_body: trn_module_seq {
 }
 
 // VERSION [2.5]
-
-sxp_version: LP tk_BITC {
-    lexer->currentLang |= TransitionLexer::lf_version; 
-} tk_VERSION { 
-    lexer->currentLang |= TransitionLexer::lf_version; 
-} tk_VersionNumber RP {
-  SHOWPARSE("sxp_version -> LP BITC-VERSION VersionNumber RP");
-  shared_ptr<AST> version = AST::makeStringLit($6);
-
-  // Beginning in version 0.12, this entire form will be gone.
-
-  if ((VersionMajor(version->s) == 0) && (VersionMinor(version->s) < 10)) {
-    std::string s = ": Error: input language version " + version->s + " is no longer accepted.";
-    lexer->ReportParseError(version->loc, s);
-  }
-};
-
 blk_version: tk_BITC {
     lexer->currentLang |= TransitionLexer::lf_version; 
 } tk_VERSION {
@@ -549,9 +508,6 @@ blk_version: tk_BITC {
     std::string s = ": Error: block syntax is supported in versions 0.11 and above.";
     lexer->ReportParseError(version->loc, s);
   }
-
-  lexer->currentLang |= TransitionLexer::lf_block; 
-  lexer->currentLang &= ~TransitionLexer::lf_sexpr; 
 };
 
 // Documentation comments. These are added only in productions where
@@ -578,15 +534,17 @@ trn_interface: tk_INTERFACE blk_ifident {
     if ($2.str.find("bitc.") == 0)
       lexer->isRuntimeUoc = true;
   }
-  trn_optdocstring '{' trn_if_definitions '}' {
-  SHOWPARSE("trn_interface -> INTERFACE blk_ifident trn_optdocstring { sxp_if_definitions }");
+  trn_optdocstring begin {
+    lexer->layoutStack->precedingToken = tk_INTERFACE;
+  } trn_if_definitions closeToINTERFACE {
+  SHOWPARSE("trn_interface -> INTERFACE blk_ifident trn_optdocstring { trn_if_definitions }");
   shared_ptr<AST> ifIdent = AST::make(at_ident, $2);
   $$ = AST::make(at_interface, $1.loc, ifIdent);
-  $$->addChildrenFrom($6);
+  $$->addChildrenFrom($7);
 
   if (lexer->isCommandLineInput) {
     const char *s =
-      ": Warning: sxp_interface units of compilation should no longer\n"
+      ": Warning: interface units of compilation should no longer\n"
       "    be given on the command line.\n";
     lexer->ReportParseWarning($$->loc, s);
   }
@@ -622,49 +580,6 @@ trn_interface: LP tk_INTERFACE sxp_ifident {
   }
   trn_optdocstring trn_if_definitions RP {
   SHOWPARSE("trn_interface -> ( INTERFACE sxp_ifident trn_optdocstring trn_if_definitions )");
-  shared_ptr<AST> ifIdent = AST::make(at_ident, $3);
-  $$ = AST::make(at_interface, $2.loc, ifIdent);
-  $$->addChildrenFrom($6);
-
-  if (lexer->isCommandLineInput) {
-    const char *s =
-      ": Warning: sxp_interface units of compilation should no longer\n"
-      "    be given on the command line.\n";
-    lexer->ReportParseWarning($$->loc, s);
-  }
-
-  std::string uocName = ifIdent->s;
-  shared_ptr<UocInfo> uoc =
-    UocInfo::make(uocName, lexer->here.origin, $$);
-
-  if (uocName == "bitc.prelude")
-    uoc->flags |= UOC_IS_PRELUDE;
-
-  shared_ptr<UocInfo> existingUoc = UocInfo::findInterface(uocName);
-
-  if (existingUoc) {
-    std::string s = "Error: This sxp_interface has already been loaded from "
-      + existingUoc->uocAst->loc.asString();
-    lexer->ReportParseError($$->loc, s);
-
-  }
-  else  {
-    /* Put the UoC onto the sxp_interface list so that we do not recurse on
-       import. */
-    UocInfo::ifList[uocName] = uoc;
-  }
-  
-  // Regardless, compile the new sxp_interface to check for further
-  // warnings and/or errors:
-  uoc->Compile();
-};
-
-sxp_interface: LP tk_INTERFACE sxp_ifident {
-    if ($3.str.find("bitc.") == 0)
-      lexer->isRuntimeUoc = true;
-  }
-  trn_optdocstring sxp_if_definitions RP {
-  SHOWPARSE("sxp_interface -> ( INTERFACE sxp_ifident trn_optdocstring sxp_if_definitions )");
   shared_ptr<AST> ifIdent = AST::make(at_ident, $3);
   $$ = AST::make(at_interface, $2.loc, ifIdent);
   $$->addChildrenFrom($6);
@@ -756,26 +671,11 @@ trn_implicit_module: trn_mod_definitions  {
  UocInfo::srcList[uocName] = uoc;
 };
 
-sxp_implicit_module: sxp_mod_definitions  {
- SHOWPARSE("sxp_implicit_module -> sxp_mod_definitions");
- $$ = $1;
- $$->astType = at_module;
- $$->printVariant = pf_IMPLIED;
-
- // Construct, compile, and admit the parsed UoC:
- string uocName =
-   UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
-
- shared_ptr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
- lexer->nModules++;
-
- uoc->Compile();
- UocInfo::srcList[uocName] = uoc;
-};
-
-trn_module: tk_MODULE trn_optdocstring '{' trn_mod_definitions '}' {
+trn_module: tk_MODULE trn_optdocstring begin {
+    lexer->layoutStack->precedingToken = tk_INTERFACE;
+  } trn_mod_definitions closeToMODULE {
  SHOWPARSE("trn_module -> tk_MODULE trn_optdocstring { trn_mod_definitions }");
- $$ = $4;
+ $$ = $5;
  $$->astType = at_module;
 
  string uocName =
@@ -802,9 +702,11 @@ trn_module: LP tk_MODULE trn_optdocstring trn_mod_definitions RP {
  UocInfo::srcList[uocName] = uoc;
 };
 
-trn_module: tk_MODULE blk_ifident trn_optdocstring '{' trn_mod_definitions '}' {
+trn_module: tk_MODULE blk_ifident trn_optdocstring begin {
+    lexer->layoutStack->precedingToken = tk_INTERFACE;
+  } trn_mod_definitions closeToMODULE {
  SHOWPARSE("trn_module -> tk_MODULE sxp_ifident trn_optdocstring { trn_mod_definitions }");
- $$ = $5;
+ $$ = $6;
  $$->astType = at_module;
 
  // Construct, compile, and admit the parsed UoC.
@@ -835,46 +737,6 @@ trn_module: LP tk_MODULE sxp_ifident trn_optdocstring trn_mod_definitions RP {
  UocInfo::srcList[uocName] = uoc;
 };
 
-sxp_module: LP tk_MODULE trn_optdocstring sxp_mod_definitions RP {
- SHOWPARSE("sxp_module -> ( tk_MODULE trn_optdocstring sxp_mod_definitions )");
- $$ = $4;
- $$->astType = at_module;
-
- string uocName =
-   UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
-
- // Construct, compile, and admit the parsed UoC:
- shared_ptr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
- lexer->nModules++;
- uoc->Compile();
- UocInfo::srcList[uocName] = uoc;
-};
-
-sxp_module: LP tk_MODULE sxp_ifident trn_optdocstring sxp_mod_definitions RP {
- SHOWPARSE("sxp_module -> ( tk_MODULE sxp_ifident trn_optdocstring sxp_mod_definitions )");
- $$ = $5;
- $$->astType = at_module;
-
- // Construct, compile, and admit the parsed UoC.
- // Note that we do not even consider the user-provided sxp_module name
- // for purposes of internal naming, because it is not significant.
- string uocName =
-   UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
-
- shared_ptr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
- lexer->nModules++;
- uoc->Compile();
- UocInfo::srcList[uocName] = uoc;
-};
-
-sxp_module_seq: sxp_module {
- SHOWPARSE("sxp_module_seq -> sxp_module");
-}
-
-sxp_module_seq: sxp_module_seq SC sxp_module {
- SHOWPARSE("sxp_module_seq -> sxp_module_seq SC sxp_module");
-}
-
 // INTERFACE TOP LEVEL DEFINITIONS
 trn_if_definitions: trn_if_definition {
   SHOWPARSE("trn_if_definitions -> trn_if_definition");
@@ -894,22 +756,6 @@ trn_if_definition: sxp_common_definition {
 
 trn_if_definition: blk_common_definition {
   SHOWPARSE("trn_if_definition -> blk_common_definition");
-  $$ = $1;
-};
-
-sxp_if_definitions: sxp_if_definition {
-  SHOWPARSE("sxp_if_definitions -> sxp_if_definition");
-  $$ = AST::make(at_Null, $1->loc, $1);
-};
-
-sxp_if_definitions: sxp_if_definitions SC sxp_if_definition {
-  SHOWPARSE("sxp_if_definitions -> sxp_if_definitions SC sxp_if_definition");
-  $$ = $1;
-  $$->addChild($3); 
-};
-
-sxp_if_definition: sxp_common_definition {
-  SHOWPARSE("sxp_if_definition -> sxp_common_definition");
   $$ = $1;
 };
 
@@ -950,17 +796,6 @@ trn_mod_definition: sxp_mod_definition {
 trn_mod_definition: blk_mod_definition {
   SHOWPARSE("trn_mod_definition -> blk_mod_defintion");
   $$ = $1;
-};
-
-sxp_mod_definitions: sxp_mod_definition {
-  SHOWPARSE("sxp_mod_definitions -> sxp_mod_definition");
-  $$ = AST::make(at_Null, $1->loc, $1);
-};
-
-sxp_mod_definitions: sxp_mod_definitions SC sxp_mod_definition {
-  SHOWPARSE("sxp_mod_definitions -> sxp_mod_definitions SC sxp_mod_definition");
-  $$ = $1;
-  $$->addChild($3); 
 };
 
 blk_mod_definition: blk_provide_definition {
@@ -4519,6 +4354,14 @@ ILCB: '{' {
 IRCB: '}' {
 }
 
+begin:         ILCB  { $$ = $1; }
+begin:         error {
+  yyerrok;
+  lexer->beginBlock(true);
+  lexer->showNextError = false;
+  $$ = LToken('}', "}");
+}
+
 closeToLET:    IRCB  { $$ = $1; }
 closeToLET:    error {
   yyerrok;
@@ -4551,6 +4394,20 @@ closeToELSE:   IRCB  { $$ = $1; }
 closeToELSE:   error {
   yyerrok;
   lexer->closeOpeningTokenBrace(tk_ELSE);
+  lexer->showNextError = false;
+  $$ = LToken('}', "}");
+}
+closeToINTERFACE:   IRCB  { $$ = $1; }
+closeToINTERFACE:   error {
+  yyerrok;
+  lexer->closeOpeningTokenBrace(tk_INTERFACE);
+  lexer->showNextError = false;
+  $$ = LToken('}', "}");
+}
+closeToMODULE:   IRCB  { $$ = $1; }
+closeToMODULE:   error {
+  yyerrok;
+  lexer->closeOpeningTokenBrace(tk_MODULE);
   lexer->showNextError = false;
   $$ = LToken('}', "}");
 }
