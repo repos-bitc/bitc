@@ -53,9 +53,12 @@ interface bitc.vector {
     "Given a vector, return a list of its elements."
     = {
         def subvectorToList(vec, pos, len) = 
-            if pos > len then throw IndexBoundsError
-            else if pos == len then nil : list('a)
-            else cons(vec[pos], subvectorToList(vec, pos+1, len))
+            if pos > len
+            then throw IndexBoundsError
+            else
+              if pos == len 
+              then nil : list('a)
+              else cons(vec[pos], subvectorToList(vec, pos+1, len))
 
         subvectorToList(vec, 0, vec.length)
       }

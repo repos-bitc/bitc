@@ -48,7 +48,9 @@ interface bitc.list {
     "Apply procedure f to each element of list."
     = switch lst {
       case x as nil  in true
-      case x as cons in { f(x.car) map(f, x.cdr) }
+      case x as cons in
+        f(x.car)
+        map(f, x.cdr)
     }
 
   // These are included for convenience, but it is probably not

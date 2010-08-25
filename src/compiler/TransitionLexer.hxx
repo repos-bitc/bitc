@@ -137,10 +137,13 @@ private:
   void beginBlock(bool implicit);
   void endBlock(bool implicit);
 
-  /// @brief Mark layout stack frames dead until (a) we reach one that
-  /// was explicit, or (b) we reach one preceded by a bracketing match
-  /// for the indicated token.
-  void closeToOpeningToken(int closingToken);
+public:
+  /// @brief We are looking at a lookahead token like IN, ELSE, or
+  /// THEN. If closing a single outstanding brace will let us make
+  /// progress, do so, but check that we are closing the intended brace:
+  bool closeOpeningTokenBrace(int openingToken);
+
+private:
   void closeToOffset(unsigned offset);
   bool conditionallyInsertSemicolon(unsigned offset);
 

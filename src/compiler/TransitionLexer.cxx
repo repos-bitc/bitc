@@ -652,45 +652,17 @@ TransitionLexer::endBlock(bool implicit)
 #endif
 }
 
-void
-TransitionLexer::closeToOpeningToken(int closingToken)
+bool
+TransitionLexer::closeOpeningTokenBrace(int openingToken)
 {
-  /// closeToOpeningToken is always followed by multiple, serially
-  /// reentrant calls to TrimLayoutStack. If we are currently in the
-  /// trimming state, then we have already done the work that
-  /// closeToOpeningToken was supposed to do, and we should just return.
-  if (layoutFlags & TRIMMING_LAYOUT_STACK)
-    return;
-
   boost::shared_ptr<LayoutFrame> ls = layoutStack;
 
-  while (ls && ls->implicit) {
-    ls->dead = true;
-
-    bool foundOpeningToken = false;
-
-    switch(closingToken) {
-    case EOF:
-      if (ls->precedingToken == EOF)
-        foundOpeningToken = true;
-      break;
-
-    case tk_IN:
-      if (   ls->precedingToken == tk_LET
-          || ls->precedingToken == tk_LETREC
-          || ls->precedingToken == tk_CASE)
-        foundOpeningToken = true;
-      break;
-    }
-
-    if (foundOpeningToken)
-      break;
-
-    ls = ls->next;
+  if (ls && ls->implicit && ls->precedingToken == openingToken) {
+    endBlock(true);
+    return true;
   }
 
-  layoutFlags |= TRIMMING_LAYOUT_STACK;
-  return;
+  return false;
 }
 
 void
@@ -962,8 +934,7 @@ TransitionLexer::getNextToken()
 
   // Rule 4: At end of file, any outstanding implicit blocks are closed.
   if (tok.tokType == EOF) {
-    closeToOpeningToken(EOF);
-    if (trimLayoutStack()) {
+    if (closeOpeningTokenBrace(EOF)) {
       pushTokenBack(tok);
       return LToken('}', startLoc, endLoc, "}");
     }
@@ -1000,21 +971,6 @@ TransitionLexer::getNextToken()
     }
 
     layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
-  }
-
-  // Rule 6: When we see IN, close implicit braces up to the
-  // appropriate preceding keyword. This is special-cased because IN
-  // frequently appears as a de-facto close-bracket token on the same
-  // line as the corresponding open-bracket token.
-  //
-  // FIX: Once I clean up the surface syntax, this should also be done
-  // for tk_DO.
-  if (tok.tokType == tk_IN) {
-    closeToOpeningToken(tk_IN);
-    if (trimLayoutStack()) {
-      pushTokenBack(tok);
-      return LToken('}', startLoc, endLoc, "}");
-    }
   }
 
   // Open and close layout contexts when we see explicit open/close

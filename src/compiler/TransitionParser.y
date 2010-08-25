@@ -462,7 +462,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_ident blk_defident blk_useident
 %type <ast> intLit natLit floatLit charLit strLit boolLit
 
-%type <tok> ILCB IRCB
+%type <tok> ILCB IRCB closeToLET closeToLETREC closeToCASE
 
 %%
 
@@ -3104,11 +3104,13 @@ blk_block: ILCB IRCB {
 }
 blk_block: ILCB blk_stmt_seq IRCB {
   SHOWPARSE("blk_block -> { blk_stmt_seq }");
+
   // Remove redundant blocks eagerly:
   if ($2->children.size() == 1 && $2->child(0)->astType == at_begin)
     $2 = $2->child(0);
   $$ = $2;
 }
+
 blk_stmt_seq: blk_stmt {
   SHOWPARSE("blk_stmt_seq -> blk_stmt");
   $$ = AST::make(at_begin, $1->loc, $1);
@@ -3127,13 +3129,13 @@ blk_stmt_seq: blk_stmt_seq SC blk_value_definition {
   $$ = $1;
   $$->addChild($3);
   };*/
-blk_stmt_seq: blk_stmt_seq SC blk_stmt {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq SC blk_stmt");
+blk_stmt_seq: blk_stmt_seq ';' blk_stmt {
+  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq ; blk_stmt");
   $$ = $1;
   $$->addChild($3);
 };
-blk_stmt_seq: blk_stmt_seq SC blk_value_definition {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq SC blk_value_definition");
+blk_stmt_seq: blk_stmt_seq ';' blk_value_definition {
+  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq ; blk_value_definition");
   $$ = $1;
   $$->addChild($3);
 };
@@ -3850,7 +3852,7 @@ blk_sw_legs: blk_sw_leg {
   SHOWPARSE("blk_sw_legs -> blk_sw_leg");
   $$ = AST::make(at_usw_legs, $1->loc, $1);
 }
-blk_sw_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_block {
+blk_sw_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match closeToCASE tk_IN blk_block {
   SHOWPARSE("blk_sw_leg -> CASE { blk_ident AS blk_type } blk_block");
   $$ = AST::make(at_usw_leg, $1.loc, $3, $8, $5);
 }
@@ -4011,7 +4013,7 @@ blk_stmt: tk_TRY blk_expr blk_otherwise {
 //  $$ = AST::make(at_kennedy_try, $1.loc, bindings, $4);
 //}
 
-blk_catch_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_block {
+blk_catch_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match closeToCASE tk_IN blk_block {
   SHOWPARSE("blk_catch_leg -> CATCH { blk_ident AS blk_type } IN blk_block");
   //  $$ = AST::make(at_catchleg, $1.loc, $2, $4, $6);
   $$ = AST::make(at_usw_leg, $1.loc, $3, $5, $8);
@@ -4074,7 +4076,7 @@ sxp_unqual_expr: sxp_let_eform {
 };
 
 // LET [5.3.1]                 
-blk_stmt: tk_LET ILCB blk_letbindings IRCB tk_IN blk_block {
+blk_stmt: tk_LET ILCB blk_letbindings closeToLET tk_IN blk_block {
   SHOWPARSE("blk_stmt -> LET { blk_letbindings } IN  blk_block");
 
   $$ = AST::make(at_let, $1.loc, $3, $6);
@@ -4117,7 +4119,7 @@ sxp_letbinding: '(' sxp_bindingpattern sxp_expr ')' {
 };
 
 // LETREC [5.3.2]              
-blk_stmt: tk_LETREC ILCB blk_letbindings IRCB tk_IN blk_block {
+blk_stmt: tk_LETREC ILCB blk_letbindings closeToLETREC tk_IN blk_block {
   SHOWPARSE("blk_stmt -> LETREC { blk_letbindings } IN blk_block");
 
   $$ = AST::make(at_letrec, $1.loc, $3, $6);
@@ -4513,6 +4515,28 @@ strLit: tk_String {
 ILCB: '{' {
 }
 IRCB: '}' {
+}
+
+closeToLET:    IRCB  { $$ = $1; }
+closeToLET:    error {
+  yyerrok;
+  lexer->closeOpeningTokenBrace(tk_LET);
+  lexer->showNextError = false;
+  $$ = LToken('}', "}");
+}
+closeToLETREC: IRCB  { $$ = $1; }
+closeToLETREC: error {
+  yyerrok;
+  lexer->closeOpeningTokenBrace(tk_LETREC);
+  lexer->showNextError = false;
+  $$ = LToken('}', "}");
+}
+closeToCASE:   IRCB  { $$ = $1; }
+closeToCASE:   error {
+  yyerrok;
+  lexer->closeOpeningTokenBrace(tk_CASE);
+  lexer->showNextError = false;
+  $$ = LToken('}', "}");
 }
 
 // TRANSITIONAL SUPPORT FOR MIXED-MODE PARSING
