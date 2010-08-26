@@ -29,7 +29,7 @@
       </p>
     </legalnotice>
     <categories>
-      <category>dev/bitc</category>
+      <category>compiler/implementation</category>
     </categories>
     <synopsis>
       <p>Describes how layout is actually implemented in the bring-up
