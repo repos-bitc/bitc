@@ -574,48 +574,6 @@ trn_interface: tk_INTERFACE blk_ifident {
   // warnings and/or errors:
   uoc->Compile();
 };
-trn_interface: LP tk_INTERFACE sxp_ifident {
-    if ($3.str.find("bitc.") == 0)
-      lexer->isRuntimeUoc = true;
-  }
-  trn_optdocstring trn_if_definitions RP {
-  SHOWPARSE("trn_interface -> ( INTERFACE sxp_ifident trn_optdocstring trn_if_definitions )");
-  shared_ptr<AST> ifIdent = AST::make(at_ident, $3);
-  $$ = AST::make(at_interface, $2.loc, ifIdent);
-  $$->addChildrenFrom($6);
-
-  if (lexer->isCommandLineInput) {
-    const char *s =
-      ": Warning: sxp_interface units of compilation should no longer\n"
-      "    be given on the command line.\n";
-    lexer->ReportParseWarning($$->loc, s);
-  }
-
-  std::string uocName = ifIdent->s;
-  shared_ptr<UocInfo> uoc =
-    UocInfo::make(uocName, lexer->here.origin, $$);
-
-  if (uocName == "bitc.prelude")
-    uoc->flags |= UOC_IS_PRELUDE;
-
-  shared_ptr<UocInfo> existingUoc = UocInfo::findInterface(uocName);
-
-  if (existingUoc) {
-    std::string s = "Error: This sxp_interface has already been loaded from "
-      + existingUoc->uocAst->loc.asString();
-    lexer->ReportParseError($$->loc, s);
-
-  }
-  else  {
-    /* Put the UoC onto the sxp_interface list so that we do not recurse on
-       import. */
-    UocInfo::ifList[uocName] = uoc;
-  }
-  
-  // Regardless, compile the new sxp_interface to check for further
-  // warnings and/or errors:
-  uoc->Compile();
-};
 
 // When IfIdentMode is set we are matching fully legal interface
 // identifiers in both syntax families.
@@ -687,42 +645,12 @@ trn_module: tk_MODULE trn_optdocstring begin {
  uoc->Compile();
  UocInfo::srcList[uocName] = uoc;
 };
-trn_module: LP tk_MODULE trn_optdocstring trn_mod_definitions RP {
- SHOWPARSE("trn_module -> ( tk_MODULE trn_optdocstring trn_mod_definitions )");
- $$ = $4;
- $$->astType = at_module;
-
- string uocName =
-   UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
-
- // Construct, compile, and admit the parsed UoC:
- shared_ptr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
- lexer->nModules++;
- uoc->Compile();
- UocInfo::srcList[uocName] = uoc;
-};
 
 trn_module: tk_MODULE blk_ifident trn_optdocstring begin {
     lexer->layoutStack->precedingToken = tk_INTERFACE;
   } trn_mod_definitions closeToMODULE {
- SHOWPARSE("trn_module -> tk_MODULE sxp_ifident trn_optdocstring { trn_mod_definitions }");
+ SHOWPARSE("trn_module -> tk_MODULE blk_ifident trn_optdocstring { trn_mod_definitions }");
  $$ = $6;
- $$->astType = at_module;
-
- // Construct, compile, and admit the parsed UoC.
- // Note that we do not even consider the user-provided sxp_module name
- // for purposes of internal naming, because it is not significant.
- string uocName =
-   UocInfo::UocNameFromSrcName(lexer->here.origin, lexer->nModules);
-
- shared_ptr<UocInfo> uoc = UocInfo::make(uocName, lexer->here.origin, $$);
- lexer->nModules++;
- uoc->Compile();
- UocInfo::srcList[uocName] = uoc;
-};
-trn_module: LP tk_MODULE sxp_ifident trn_optdocstring trn_mod_definitions RP {
- SHOWPARSE("trn_module -> ( tk_MODULE sxp_ifident trn_optdocstring trn_mod_definitions )");
- $$ = $5;
  $$->astType = at_module;
 
  // Construct, compile, and admit the parsed UoC.
@@ -4379,8 +4307,8 @@ closeToLETREC: error {
 closeToCASE:   IRCB  { $$ = $1; }
 closeToCASE:   error {
   yyerrok;
-  lexer->closeOpeningTokenBrace(tk_CASE);
   lexer->showNextError = false;
+  lexer->closeOpeningTokenBrace(tk_CASE);
   $$ = LToken('}', "}");
 }
 closeToTHEN:   IRCB  { $$ = $1; }

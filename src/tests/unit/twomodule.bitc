@@ -36,7 +36,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(module MainModule
+module MainModule
   (import bitc.main as main)
     (provide bitc.main main)
     (import bitc.stdio as stdio)
@@ -47,5 +47,5 @@ bitc version 0.11
         (stdio.write_char stdio.stdout '\linefeed')
         0)))
 
-(module AnotherModule
+module AnotherModule
   (define (f x:int32) x))
