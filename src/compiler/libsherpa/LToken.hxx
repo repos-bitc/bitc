@@ -40,7 +40,20 @@
  **************************************************************************/
 
 #include <stdio.h>
+#include <libsherpa/EnumSet.hxx>
 #include <libsherpa/LexLoc.hxx>
+
+enum TokenFlagValues {
+  /// @brief No Token flags.
+  TF_NO_FLAGS = 0,
+
+  /// @brief Token Was inserted by layout.
+  TF_INSERTED = 0x1u,
+
+  /// @brief This was the first token on its line.
+  TF_FIRST_ON_LINE = 0x2u,
+};
+typedef sherpa::EnumSet<TokenFlagValues> TokenFlags;
 
 /// @brief A lexically indivisible unit of text with an associated
 /// location.
@@ -62,13 +75,12 @@
 /// introduced whose length does not match the original input text. In
 /// order to support correct error reporting, we track these cases by
 /// describing the input as a string whose elements are LTokens.
-
 namespace sherpa {
 
   struct LToken {
     int tokType;                // as decided by Bison
 
-    bool inserted;              // TRUE iff this token was inserted by layout
+    TokenFlags flags;
 
     LexLoc loc;
     LexLoc endLoc;
@@ -83,14 +95,14 @@ namespace sherpa {
       :loc(), endLoc(), str()
     {
       tokType = EOF;
-      inserted = false;
+      flags = TF_NO_FLAGS;
     }
 
 #if 0
     LToken(int tokType, const LexLoc& loc, const std::string& s)
     {
       this->tokType = tokType;
-      this->inserted = false;
+      this->flags = TF_NO_FLAGS;
       this->loc = loc;
       this->endLoc = LexLoc();
       this->str = s;
@@ -101,7 +113,7 @@ namespace sherpa {
            const std::string& s)
     {
       this->tokType = tokType;
-      this->inserted = false;
+      this->flags = TF_NO_FLAGS;
       this->loc = loc;
       this->endLoc = endLoc;
       this->str = s;
@@ -110,7 +122,7 @@ namespace sherpa {
     LToken(int tokType, const LToken& that)
     {
       this->tokType = that.tokType;
-      this->inserted = that.inserted;
+      this->flags = that.flags;
       this->loc = that.loc;
       this->endLoc = that.endLoc;
       this->str = that.str;
@@ -119,7 +131,7 @@ namespace sherpa {
     LToken(int tokType, const std::string& str)
     {
       this->tokType = tokType;
-      this->inserted = false;
+      this->flags = TF_NO_FLAGS;
       this->loc = LexLoc();
       this->endLoc = LexLoc();
       this->str = str;
@@ -128,7 +140,7 @@ namespace sherpa {
     LToken& operator=(const LToken& that)
     {
       this->tokType = that.tokType;
-      this->inserted = that.inserted;
+      this->flags = that.flags;
       this->loc = that.loc;
       this->endLoc = that.endLoc;
       this->str = that.str;
@@ -138,7 +150,7 @@ namespace sherpa {
     bool operator==(const LToken& that)
     {
       return ((this->tokType == that.tokType) &&
-              (this->inserted == that.inserted) &&
+              (this->flags == that.flags) &&
               (this->loc == that.loc) &&
               (this->endLoc == that.endLoc) &&
               (this->str == that.str));

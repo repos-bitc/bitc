@@ -795,11 +795,11 @@ TransitionLexer::pushTokenBack(LToken& tok)
   pushbackTokens.push_back(tok);
 }
 
-#define RETURN_INSERTED(tok) \
-  do {                       \
-    LToken _tok = tok;       \
-    _tok.inserted = true;    \
-    return _tok;             \
+#define RETURN_INSERTED(tok)      \
+  do {                            \
+    LToken _tok = tok;            \
+    _tok.flags |= TF_INSERTED;    \
+    return _tok;                  \
   } while(false)
 
 LToken
