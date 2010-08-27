@@ -591,8 +591,10 @@ isCharDelimiter(ucs4_t c)
 int
 TransitionLexer::lex(ParseType *lvalp)
 {
-  if (!havePushbackToken)
+  if (!havePushbackToken) {
+    assert (pushbackTokens.size() == 0);
     here = skipWhiteSpaceAndComments();
+  }
 
   LToken tok = getNextToken();
   if (debug) {
@@ -665,7 +667,7 @@ TransitionLexer::closeOpeningTokenBrace(int openingToken)
   return false;
 }
 
-void
+bool
 TransitionLexer::closeToOffset(unsigned offset)
 {
   // Note that in contrast to closeToOpeningToken, this can safely
@@ -675,33 +677,22 @@ TransitionLexer::closeToOffset(unsigned offset)
   // file, or on junk tokens after end of module. In both cases we
   // won't have a layout stack yet.
   if (!layoutStack)
-    return;
+    return false;
+
+  if (!layoutStack->implicit)
+    return false;
+
+  if (offset >= layoutStack->column)
+    return false;
 
 #ifdef LAYOUT_BLOCK_DEBUG
   unsigned count = 0;
 
   errStream << "  LAYOUT: " << here 
-            << ": closeToOffsetToken called: ";
+            << ": closeToOffsetToken inserted '}'" << std::endl;
 #endif
-
-  boost::shared_ptr<LayoutFrame> ls = layoutStack;
-
-  // Make sure we don't do this at top level, where there *isn't* a
-  // containing offset.
-  while (ls && ls->implicit && (offset < ls->column)) {
-    ls->dead = true;
-    ls = ls->next;
-#ifdef LAYOUT_BLOCK_DEBUG
-    count++;
-#endif
-  }
     
-#ifdef LAYOUT_BLOCK_DEBUG
-  errStream << count << " frames closed" << std::endl;
-#endif
-
-  layoutFlags |= TRIMMING_LAYOUT_STACK;
-  return;
+  return true;
 }
 
 bool
@@ -716,18 +707,6 @@ TransitionLexer::conditionallyInsertSemicolon(unsigned offset)
   assert(layoutStack);
   if (here.offset <= layoutStack->column)
     return true;
-  return false;
-}
-
-bool
-TransitionLexer::trimLayoutStack()
-{
-  if (layoutStack && layoutStack->dead) {
-    endBlock(true);
-    return true;
-  }
-
-  layoutFlags &= ~LayoutFlags(TRIMMING_LAYOUT_STACK);
   return false;
 }
 
@@ -813,7 +792,15 @@ TransitionLexer::pushTokenBack(LToken& tok)
 {
   pushbackToken = tok;
   havePushbackToken = true;
+  pushbackTokens.push_back(tok);
 }
+
+#define RETURN_INSERTED(tok) \
+  do {                       \
+    LToken _tok = tok;       \
+    _tok.inserted = true;    \
+    return _tok;             \
+  } while(false)
 
 LToken
 TransitionLexer::getNextToken()
@@ -859,17 +846,17 @@ TransitionLexer::getNextToken()
     beginBlock(true);
     
     // No position update for inserted token.
-    return LToken('{', startLoc, endLoc, "{");
+    RETURN_INSERTED(LToken('{', startLoc, endLoc, "{"));
   }
 
 #ifdef LAYOUT_BLOCK_DEBUG
-  if (lastToken < 256 && isprint(lastToken)) {
+  if (lastToken.tokType < 256 && isprint(lastToken.tokType)) {
     errStream << "  LAYOUT: " << startLoc 
-              << ": last token was '" << (char)lastToken << "'." << std::endl;
+              << ": last token was '" << (char)lastToken.tokType << "'." << std::endl;
   }
   else {
     errStream << "  LAYOUT: " << startLoc 
-              << ": last token was " << lastToken << "." << std::endl;
+              << ": last token was " << lastToken.str << "." << std::endl;
   }
 #endif
 
@@ -913,7 +900,7 @@ TransitionLexer::getNextToken()
       pushTokenBack(tok);
       endBlock(true);
 
-      return LToken('}', startLoc, endLoc, "}");
+      RETURN_INSERTED(LToken('}', startLoc, endLoc, "}"));
     }
 
     layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
@@ -933,10 +920,10 @@ TransitionLexer::getNextToken()
 
     // FIX: Consider NOT doing start of line processing in various cases:
 
-    closeToOffset(startLoc.offset);
-    if (trimLayoutStack()) {
+    if (closeToOffset(startLoc.offset)) {
       pushTokenBack(tok);
-      return LToken('}', startLoc, endLoc, "}");
+      endBlock(true);
+      RETURN_INSERTED(LToken('}', startLoc, endLoc, "}"));
     }
   }
 
@@ -944,7 +931,7 @@ TransitionLexer::getNextToken()
   if (tok.tokType == EOF) {
     if (closeOpeningTokenBrace(EOF)) {
       pushTokenBack(tok);
-      return LToken('}', startLoc, endLoc, "}");
+      RETURN_INSERTED(LToken('}', startLoc, endLoc, "}"));
     }
 
     return tok;
@@ -974,7 +961,7 @@ TransitionLexer::getNextToken()
                   << startLoc.offset << std::endl;
 #endif
         pushTokenBack(tok);
-        return LToken(';', startLoc, endLoc, ";");
+        RETURN_INSERTED(LToken(';', startLoc, endLoc, ";"));
       }
     }
 
@@ -989,10 +976,10 @@ TransitionLexer::getNextToken()
   if (tok.tokType == '}') {
     // Following will stop closing blocks when it reaches the most
     // recent explicit block, which is what we want.
-    closeToOffset(0);
-    if (trimLayoutStack()) {
+    if (closeToOffset(0)) {
       pushTokenBack(tok);
-      return LToken('}', startLoc, endLoc, "}");
+      endBlock(true);
+      RETURN_INSERTED(LToken('}', startLoc, endLoc, "}"));
     }
 
     endBlock(false);
@@ -1005,7 +992,11 @@ LToken
 TransitionLexer::getNextInputToken()
 {
   if (havePushbackToken) {
+    assert(pushbackTokens.size());
     havePushbackToken = false;
+    LToken pbTok = pushbackTokens[pushbackTokens.size()-1];
+    pushbackTokens.pop_back();
+    assert(pbTok == pushbackToken);
     return pushbackToken;
   }
 

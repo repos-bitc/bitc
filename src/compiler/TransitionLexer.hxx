@@ -78,9 +78,6 @@ enum LayoutFlagValues {
   /// right brace[s] and or a semicolon before the next token
   /// according to its indent level.
   CHECK_FIRST_TOKEN = 0x1u,
-
-  /// @brief Set iff we are currently unwinding the layout stack.
-  TRIMMING_LAYOUT_STACK = 0x2u,
 };
 typedef sherpa::EnumSet<LayoutFlagValues> LayoutFlags;
 
@@ -89,7 +86,6 @@ struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
   bool implicit;              // true IFF left curly was implicit
   unsigned column;            // column of first token after '{'
   int precedingToken;         // token that preceded this '{'
-  bool dead;
 
   boost::shared_ptr<LayoutFrame> next;
 
@@ -100,7 +96,6 @@ struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
     lf->implicit = _implicit;
     lf->precedingToken = _precedingToken;
     lf->column = _column;
-    lf->dead = false;
 
     return boost::shared_ptr<LayoutFrame>(lf);
   }
@@ -142,12 +137,9 @@ public:
   bool closeOpeningTokenBrace(int openingToken);
 
 private:
-  void closeToOffset(unsigned offset);
+  bool closeToOffset(unsigned offset);
   bool conditionallyInsertSemicolon(unsigned offset);
 
-  /// @brief If the top layout stack entry is dead, drop it, update
-  /// the layout context accordingly, and return true.
-  bool trimLayoutStack();
 
 public:
   enum LangFlagsValues {
@@ -334,6 +326,7 @@ private:
 
   bool havePushbackToken;
   sherpa::LToken pushbackToken;
+  std::vector<sherpa::LToken> pushbackTokens;
 
   /** @brief Fetch next token to hand to the parser.
    *
