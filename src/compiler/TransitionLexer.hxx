@@ -324,10 +324,6 @@ private:
    */
   sherpa::LexLoc skipWhiteSpaceAndComments();
 
-  bool havePushbackToken;
-  sherpa::LToken pushbackToken;
-  std::vector<sherpa::LToken> pushbackTokens;
-
   /** @brief Fetch next token to hand to the parser.
    *
    * This calls getNextInputToken(), applies layout rules, and either
@@ -336,11 +332,18 @@ private:
    */
   sherpa::LToken getNextToken();
 
+  std::vector<sherpa::LToken> pushbackTokens;
+  inline bool havePushbackToken()
+  {
+    return (pushbackTokens.size() != 0);
+  }
+
   /** @brief Push a token back onto the input stream.
    *
    * Used in some cases by layout processing.
    */
   void pushTokenBack(sherpa::LToken& tok);
+  sherpa::LToken popToken();
 
   /** @brief Fetch next token from the input stream.
    *

@@ -458,7 +458,6 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
 
   showNextError = true;
 
-  havePushbackToken = false;
   lastToken = LToken(EOF, "end of file");
 }
 
@@ -591,11 +590,6 @@ isCharDelimiter(ucs4_t c)
 int
 TransitionLexer::lex(ParseType *lvalp)
 {
-  if (!havePushbackToken) {
-    assert (pushbackTokens.size() == 0);
-    here = skipWhiteSpaceAndComments();
-  }
-
   LToken tok = getNextToken();
   if (debug) {
     errStream << "TOKEN " << tok.tokType << ": " << tok.loc << ' '
@@ -790,8 +784,6 @@ TransitionLexer::skipWhiteSpaceAndComments()
 void
 TransitionLexer::pushTokenBack(LToken& tok)
 {
-  pushbackToken = tok;
-  havePushbackToken = true;
   pushbackTokens.push_back(tok);
 }
 
@@ -805,23 +797,14 @@ TransitionLexer::pushTokenBack(LToken& tok)
 LToken
 TransitionLexer::getNextToken()
 {
-  LToken tok = getNextInputToken();
+  LToken tok = havePushbackToken() ? popToken() : getNextInputToken();
 
-#if 1
   // The transitional syntax requires curly brace insertion at start
   // and end of file, but otherwise we don't want to do layout
   // processing when we are handling the S-expression syntax.
   if ((currentLang & lf_sexpr) &&
       (tok.tokType != EOF))
     return tok;
-
-#if 0
-  if (((currentLang & lf_block) == 0) &&
-      (lastToken.tokType != EOF) &&     // beginning of file
-      (tok.tokType != EOF))     // end of file
-    return tok;
-#endif
-#endif
 
   LexLoc startLoc = here;
   LexLoc endLoc = here;
@@ -989,16 +972,19 @@ TransitionLexer::getNextToken()
 }
 
 LToken
+TransitionLexer::popToken()
+{
+  assert(havePushbackToken());
+  
+  LToken pbTok = pushbackTokens[pushbackTokens.size()-1];
+  pushbackTokens.pop_back();
+  return pbTok;
+}
+
+LToken
 TransitionLexer::getNextInputToken()
 {
-  if (havePushbackToken) {
-    assert(pushbackTokens.size());
-    havePushbackToken = false;
-    LToken pbTok = pushbackTokens[pushbackTokens.size()-1];
-    pushbackTokens.pop_back();
-    assert(pbTok == pushbackToken);
-    return pushbackToken;
-  }
+  here = skipWhiteSpaceAndComments();
 
   thisToken.erase();
 
