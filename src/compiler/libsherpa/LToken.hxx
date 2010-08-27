@@ -68,6 +68,8 @@ namespace sherpa {
   struct LToken {
     int tokType;                // as decided by Bison
 
+    bool inserted;              // TRUE iff this token was inserted by layout
+
     LexLoc loc;
     LexLoc endLoc;
     std::string str;
@@ -81,12 +83,14 @@ namespace sherpa {
       :loc(), endLoc(), str()
     {
       tokType = EOF;
+      inserted = false;
     }
 
 #if 0
     LToken(int tokType, const LexLoc& loc, const std::string& s)
     {
       this->tokType = tokType;
+      this->inserted = false;
       this->loc = loc;
       this->endLoc = LexLoc();
       this->str = s;
@@ -97,6 +101,7 @@ namespace sherpa {
            const std::string& s)
     {
       this->tokType = tokType;
+      this->inserted = false;
       this->loc = loc;
       this->endLoc = endLoc;
       this->str = s;
@@ -105,26 +110,38 @@ namespace sherpa {
     LToken(int tokType, const LToken& that)
     {
       this->tokType = that.tokType;
+      this->inserted = that.inserted;
       this->loc = that.loc;
       this->endLoc = that.endLoc;
       this->str = that.str;
     }
 
-    LToken(int tokType, const std::string& that)
+    LToken(int tokType, const std::string& str)
     {
       this->tokType = tokType;
+      this->inserted = false;
       this->loc = LexLoc();
       this->endLoc = LexLoc();
-      this->str = that;
+      this->str = str;
     }
 
     LToken& operator=(const LToken& that)
     {
       this->tokType = that.tokType;
+      this->inserted = that.inserted;
       this->loc = that.loc;
       this->endLoc = that.endLoc;
       this->str = that.str;
       return *this;
+    }
+
+    bool operator==(const LToken& that)
+    {
+      return ((this->tokType == that.tokType) &&
+              (this->inserted == that.inserted) &&
+              (this->loc == that.loc) &&
+              (this->endLoc == that.endLoc) &&
+              (this->str == that.str));
     }
   };
 
