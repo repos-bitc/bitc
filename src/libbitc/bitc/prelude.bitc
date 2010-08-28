@@ -62,7 +62,7 @@ interface bitc.prelude {
   // type 'b. This is NOT symmetric. For example:
   //   (forall ((LiteralUnitType int32 'a))
   //     (CopyFromTo 'a 'b)
-  //     but NOT (CopyFromTo 'b 'a)
+  //     but NOT (CopyFromTo 'b 'a))
   closed trait CopyFromTo('a, 'b) {}
 
   // Type class relating two types 'a, 'b such that they are
