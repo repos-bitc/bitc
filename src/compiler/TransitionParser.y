@@ -229,6 +229,7 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_FILL
 %token <tok> tk_RESERVED
 %token <tok> tk_WHERE
+%token <tok> tk_IS
 
 %token <tok> tk_BITC
 %token <tok> tk_VERSION
@@ -461,6 +462,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> intLit natLit floatLit charLit strLit boolLit
 
 %type <tok> ILCB IRCB
+%type <tok> IsILCB  // Used in types
 
 %%
 
@@ -534,7 +536,7 @@ trn_interface: tk_INTERFACE blk_ifident {
     if ($2.str.find("bitc.") == 0)
       lexer->isRuntimeUoc = true;
   }
-  trn_optdocstring ILCB {
+  trn_optdocstring IsILCB {
     lexer->layoutStack->precedingToken = tk_INTERFACE;
   } trn_if_definitions IRCB {
   SHOWPARSE("trn_interface -> INTERFACE blk_ifident trn_optdocstring { trn_if_definitions }");
@@ -629,7 +631,7 @@ trn_implicit_module: trn_mod_definitions  {
  UocInfo::srcList[uocName] = uoc;
 };
 
-trn_module: tk_MODULE trn_optdocstring ILCB {
+trn_module: tk_MODULE trn_optdocstring IsILCB {
     lexer->layoutStack->precedingToken = tk_INTERFACE;
   } trn_mod_definitions IRCB {
  SHOWPARSE("trn_module -> tk_MODULE trn_optdocstring { trn_mod_definitions }");
@@ -646,7 +648,7 @@ trn_module: tk_MODULE trn_optdocstring ILCB {
  UocInfo::srcList[uocName] = uoc;
 };
 
-trn_module: tk_MODULE blk_ifident trn_optdocstring ILCB {
+trn_module: tk_MODULE blk_ifident trn_optdocstring IsILCB {
     lexer->layoutStack->precedingToken = tk_INTERFACE;
   } trn_mod_definitions IRCB {
  SHOWPARSE("trn_module -> tk_MODULE blk_ifident trn_optdocstring { trn_mod_definitions }");
@@ -963,7 +965,7 @@ sxp_ptype_name: '(' sxp_defident sxp_tvlist ')' {
 //};
 
 // STRUCTURE TYPES [3.6.1]         
-blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares '{' blk_fields_and_methods '}' {
+blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares IsILCB blk_fields_and_methods IRCB {
   SHOWPARSE("blk_type_definition -> blk_val STRUCT blk_ptype_name blk_constraints "
             "trn_optdocstring blk_declares { blk_fields }");
   $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $1,
@@ -982,7 +984,7 @@ sxp_type_definition: LP tk_DEFSTRUCT sxp_ptype_name sxp_val trn_optdocstring sxp
 
 
 // UNION TYPES [3.6.2]              
-blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares '{' blk_constructors '}' {
+blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares IsILCB blk_constructors IRCB {
   SHOWPARSE("blk_type_definition -> blk_val UNION blk_ptype_name blk_constraints "
             "trn_optdocstring blk_opt_declares { blk_constructors }");
   $$ = AST::make(at_defunion, $2.loc, $3->child(0), $3->child(1), $1,
@@ -1075,7 +1077,7 @@ sxp_type_definition: LP tk_DEFUNION sxp_ptype_name sxp_val trn_optdocstring sxp_
 /* }; */
 
 // REPR TYPES
-blk_type_definition: blk_val tk_REPR blk_defident trn_optdocstring blk_opt_declares '{' blk_repr_constructors '}' {
+blk_type_definition: blk_val tk_REPR blk_defident trn_optdocstring blk_opt_declares IsILCB blk_repr_constructors IRCB {
   SHOWPARSE("blk_type_definition -> blk_val REPR blk_defident "
             "trn_optdocstring blk_opt_declares { blk_repr_constructors }");
   $$ = AST::make(at_defrepr, $2.loc, $3, $1, $5, $7);
@@ -1093,7 +1095,7 @@ blk_repr_constructors: blk_repr_constructors SC blk_repr_constructor {
   $$->addChild($3);
 }
 
-blk_repr_constructor: blk_ident ILCB blk_fields IRCB tk_WHERE blk_repr_reprs {
+blk_repr_constructor: blk_ident IsILCB blk_fields IRCB tk_WHERE blk_repr_reprs {
   SHOWPARSE("blk_repr_constructor ->  blk_ident { sxp_fields } WHERE blk_repr_reprs");
   $1->flags |= (ID_IS_GLOBAL);
   shared_ptr<AST> ctr = AST::make(at_constructor, $1->loc, $1);
@@ -1170,7 +1172,7 @@ sxp_externals: tk_EXTERNAL sxp_exident {
 
 
 // OBJECT TYPES [3.6.1]         
-blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares ILCB blk_methods_only IRCB  {
+blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares IsILCB blk_methods_only IRCB  {
   SHOWPARSE("blk_type_definition -> OBJECT blk_ptype_name blk_constraints "
             "trn_optdocstring blk_opt_declares blk_methods_only )");
 
@@ -1333,7 +1335,7 @@ sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident trn_optdocstring RP {
   $$->child(0)->defForm = $$;
 };
 
-blk_type_definition: tk_EXCEPTION blk_ident trn_optdocstring ILCB blk_fields IRCB {
+blk_type_definition: tk_EXCEPTION blk_ident trn_optdocstring IsILCB blk_fields IRCB {
   SHOWPARSE("blk_type_definition -> exception blk_ident { blk_fields }");
   $2->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $1.loc, $2);
@@ -1352,7 +1354,7 @@ sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident trn_optdocstring sxp_fields RP
 // TYPE CLASSES [4]
 // TYPE CLASS DEFINITION [4.1]
 
-blk_tc_definition: blk_openclosed tk_TRAIT blk_ptype_name blk_constraints trn_optdocstring blk_tc_decls ILCB blk_method_decls IRCB {
+blk_tc_definition: blk_openclosed tk_TRAIT blk_ptype_name blk_constraints trn_optdocstring blk_tc_decls IsILCB blk_method_decls IRCB {
   SHOWPARSE("blk_tc_definition -> blk_openclosed TRAIT blk_ptype_name blk_constraints trn_optdocstring blk_tc_decls blk_method_decls)");
   $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0),
                  $3->child(1), $6, $1, $8, $4);
@@ -1865,12 +1867,12 @@ sxp_constructors: sxp_constructors sxp_constructor {
   $$->addChild($2);
 };
 
-blk_constructor: blk_ident {                          /* simple constructor */
+blk_constructor: blk_ident { /* simple constructor */
   SHOWPARSE("blk_constructor -> blk_ident");
   $1->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $1->loc, $1);
 };
-blk_constructor: blk_ident ILCB blk_fields IRCB { /* compound constructor */
+blk_constructor: blk_ident IsILCB blk_fields IRCB { /* compound constructor */
   SHOWPARSE("blk_constructor ->  blk_ident { blk_fields }");
   $1->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $1->loc, $1);
@@ -4281,6 +4283,13 @@ strLit: tk_String {
 };
 
 // These are for transitional documentation purposes:
+IsILCB: '{' {
+  $$ = $1;
+}
+IsILCB: tk_IS ILCB {
+  $$ = $2;
+}
+
 ILCB: '{' {
   $$ = $1;
 }

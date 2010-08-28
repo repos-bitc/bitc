@@ -275,6 +275,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "int64",            lf_transition,        tk_INT64 ),
   TransitionLexer::KeyWord( "int8",             lf_transition,        tk_INT8 ),
   TransitionLexer::KeyWord( "interface",        lf_transition,        tk_INTERFACE ),
+  TransitionLexer::KeyWord( "is",               lf_transition,        tk_IS ),
   TransitionLexer::KeyWord( "label",            lf_block,             tk_LABEL ),
   TransitionLexer::KeyWord( "lambda",           lf_transition,        tk_LAMBDA ),
   TransitionLexer::KeyWord( "let",              lf_transition,        tk_LET ),
