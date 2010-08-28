@@ -83,17 +83,17 @@ typedef sherpa::EnumSet<LayoutFlagValues> LayoutFlags;
 
 
 struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
-  bool implicit;              // true IFF left curly was implicit
+  bool inserted;              // true IFF left curly was inserted
   unsigned column;            // column of first token after '{'
   int precedingToken;         // token that preceded this '{'
 
   boost::shared_ptr<LayoutFrame> next;
 
   static inline boost::shared_ptr<LayoutFrame>
-  make(int _precedingToken, bool _implicit, unsigned _column) {
+  make(int _precedingToken, bool _inserted, unsigned _column) {
     LayoutFrame *lf = new LayoutFrame;
 
-    lf->implicit = _implicit;
+    lf->inserted = _inserted;
     lf->precedingToken = _precedingToken;
     lf->column = _column;
 
@@ -115,7 +115,12 @@ struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
  */
 struct TransitionLexer {
 private:
-  sherpa::LexLoc lastTokenPosition;
+  /// @brief If token stack is non-empty, Last token value returned
+  /// before the item on the top of the token stack, else matches
+  /// lastToken.tokType.
+  int lastTokType;
+
+  /// @brief Last token value that was returned from the lexer.
   sherpa::LToken lastToken;
 public:
   sherpa::LToken getLastToken()
@@ -125,16 +130,10 @@ public:
   bool showNextError;
 
   boost::shared_ptr<LayoutFrame> layoutStack;
-  LayoutFlags layoutFlags;
+  bool atBeginningOfLine;
 
-  void beginBlock(bool implicit);
-  void endBlock(bool implicit);
-
-public:
-  /// @brief We are looking at a lookahead token like IN, ELSE, or
-  /// THEN. If closing a single outstanding brace will let us make
-  /// progress, do so, but check that we are closing the intended brace:
-  bool closeOpeningTokenBrace(int openingToken);
+  void beginBlock(const sherpa::LToken& tok);
+  void endBlock(const sherpa::LToken& tok);
 
 private:
   bool closeToOffset(unsigned offset);
@@ -259,12 +258,12 @@ public:
   /** @brief Report parse error @p msg attributed to current input location. */
   void ReportParseError(std::string msg)
   {
-    ReportParseError(lastTokenPosition, msg);
+    ReportParseError(lastToken.loc, msg);
   }
   /** @brief Report parse warning @p msg attributed to current input location. */
   inline void ReportParseWarning(std::string msg)
   {
-    ReportParseWarning(lastTokenPosition, msg);
+    ReportParseWarning(lastToken.loc, msg);
   }
 
   /** @brief Issue debugging output on iff @p showlex is true */
@@ -332,17 +331,22 @@ private:
    */
   sherpa::LToken getNextToken();
 
+  void showToken(std::ostream& errStream, const sherpa::LToken& tok);
+
   std::vector<sherpa::LToken> pushbackTokens;
   inline bool havePushbackToken()
   {
     return (pushbackTokens.size() != 0);
   }
 
+public:
   /** @brief Push a token back onto the input stream.
    *
    * Used in some cases by layout processing.
    */
-  void pushTokenBack(sherpa::LToken& tok);
+  void pushTokenBack(const sherpa::LToken& tok, bool verbose = false);
+
+private:
   sherpa::LToken popToken();
 
   /** @brief Fetch next token from the input stream.

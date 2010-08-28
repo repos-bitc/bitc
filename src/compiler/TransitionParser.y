@@ -158,6 +158,7 @@ static unsigned VersionMinor(const std::string s)
 // but I'm not convinced that we can do that safely until we are fully
 // done with the s-expression syntax.
 %pure-parser
+%token-table
 %parse-param {TransitionLexer *lexer}
 
 %token <tok> tk_ReservedWord        /* reserved words */
@@ -194,6 +195,7 @@ static unsigned VersionMinor(const std::string s)
 %left <tok> ':'
 %token <tok> ')'                /* procedure call, unit */
 %right <tok> ','                /* pair */
+%token <tok> '{' '}' ';'
 %left <tok> '[' ']'            /* array, vector */
 %token <tok> '.'
 %token <tok> '`'
@@ -386,7 +388,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_tc_decls // sxp_tc_decl
 %type <ast> blk_tc_decls // blk_tc_decl
 %type <ast> sxp_declares sxp_declare sxp_decls sxp_decl
-%type <ast> blk_declares blk_declare blk_decls blk_decl
+%type <ast> blk_opt_declares blk_declares blk_declare blk_decl
 %type <ast> sxp_constructors sxp_constructor
 %type <ast> blk_constructors blk_constructor
 %type <ast> sxp_repr_constructors sxp_repr_constructor
@@ -459,10 +461,6 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> intLit natLit floatLit charLit strLit boolLit
 
 %type <tok> ILCB IRCB
-%type <tok> begin
-%type <tok> closeToINTERFACE closeToMODULE
-%type <tok> closeToLET closeToLETREC closeToCASE
-%type <tok> closeToTHEN closeToELSE
 
 %%
 
@@ -526,6 +524,8 @@ trn_optdocstring: trn_docstring {
 };
 trn_optdocstring: {
   SHOWPARSE("trn_optdocstring -> ");
+  yyerrok;
+  lexer->showNextError = false;
   $$ = AST::make(at_docString);
 };
 
@@ -534,9 +534,9 @@ trn_interface: tk_INTERFACE blk_ifident {
     if ($2.str.find("bitc.") == 0)
       lexer->isRuntimeUoc = true;
   }
-  trn_optdocstring begin {
+  trn_optdocstring ILCB {
     lexer->layoutStack->precedingToken = tk_INTERFACE;
-  } trn_if_definitions closeToINTERFACE {
+  } trn_if_definitions IRCB {
   SHOWPARSE("trn_interface -> INTERFACE blk_ifident trn_optdocstring { trn_if_definitions }");
   shared_ptr<AST> ifIdent = AST::make(at_ident, $2);
   $$ = AST::make(at_interface, $1.loc, ifIdent);
@@ -629,9 +629,9 @@ trn_implicit_module: trn_mod_definitions  {
  UocInfo::srcList[uocName] = uoc;
 };
 
-trn_module: tk_MODULE trn_optdocstring begin {
+trn_module: tk_MODULE trn_optdocstring ILCB {
     lexer->layoutStack->precedingToken = tk_INTERFACE;
-  } trn_mod_definitions closeToMODULE {
+  } trn_mod_definitions IRCB {
  SHOWPARSE("trn_module -> tk_MODULE trn_optdocstring { trn_mod_definitions }");
  $$ = $5;
  $$->astType = at_module;
@@ -646,9 +646,9 @@ trn_module: tk_MODULE trn_optdocstring begin {
  UocInfo::srcList[uocName] = uoc;
 };
 
-trn_module: tk_MODULE blk_ifident trn_optdocstring begin {
+trn_module: tk_MODULE blk_ifident trn_optdocstring ILCB {
     lexer->layoutStack->precedingToken = tk_INTERFACE;
-  } trn_mod_definitions closeToMODULE {
+  } trn_mod_definitions IRCB {
  SHOWPARSE("trn_module -> tk_MODULE blk_ifident trn_optdocstring { trn_mod_definitions }");
  $$ = $6;
  $$->astType = at_module;
@@ -963,13 +963,13 @@ sxp_ptype_name: '(' sxp_defident sxp_tvlist ')' {
 //};
 
 // STRUCTURE TYPES [3.6.1]         
-blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints trn_optdocstring blk_declares '{' blk_fields_and_methods '}' {
+blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares '{' blk_fields_and_methods '}' {
   SHOWPARSE("blk_type_definition -> blk_val STRUCT blk_ptype_name blk_constraints "
             "trn_optdocstring blk_declares { blk_fields }");
   $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $1,
                  $6, $8, $4);
   $$->child(0)->defForm = $$;
-  };
+};
 
 sxp_type_definition: LP tk_DEFSTRUCT sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_fields_and_methods RP {
   SHOWPARSE("sxp_type_definition -> ( DEFSTRUCT sxp_ptype_name sxp_val "
@@ -982,9 +982,9 @@ sxp_type_definition: LP tk_DEFSTRUCT sxp_ptype_name sxp_val trn_optdocstring sxp
 
 
 // UNION TYPES [3.6.2]              
-blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints trn_optdocstring blk_declares '{' blk_constructors '}' {
+blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares '{' blk_constructors '}' {
   SHOWPARSE("blk_type_definition -> blk_val UNION blk_ptype_name blk_constraints "
-            "trn_optdocstring blk_declares { blk_constructors }");
+            "trn_optdocstring blk_opt_declares { blk_constructors }");
   $$ = AST::make(at_defunion, $2.loc, $3->child(0), $3->child(1), $1,
                  $6, $8, $4);
   $$->child(0)->defForm = $$;
@@ -1075,9 +1075,9 @@ sxp_type_definition: LP tk_DEFUNION sxp_ptype_name sxp_val trn_optdocstring sxp_
 /* }; */
 
 // REPR TYPES
-blk_type_definition: blk_val tk_REPR blk_defident trn_optdocstring blk_declares '{' blk_repr_constructors '}' {
+blk_type_definition: blk_val tk_REPR blk_defident trn_optdocstring blk_opt_declares '{' blk_repr_constructors '}' {
   SHOWPARSE("blk_type_definition -> blk_val REPR blk_defident "
-            "trn_optdocstring blk_declares { blk_repr_constructors }");
+            "trn_optdocstring blk_opt_declares { blk_repr_constructors }");
   $$ = AST::make(at_defrepr, $2.loc, $3, $1, $5, $7);
   $$->child(0)->defForm = $$;
 }
@@ -1093,8 +1093,8 @@ blk_repr_constructors: blk_repr_constructors SC blk_repr_constructor {
   $$->addChild($3);
 }
 
-blk_repr_constructor: blk_ident '{' blk_fields '}' tk_WHERE blk_repr_reprs {
-  SHOWPARSE("blk_repr_constructor ->  blk_ident '{ sxp_fields '}' WHERE blk_repr_reprs");
+blk_repr_constructor: blk_ident ILCB blk_fields IRCB tk_WHERE blk_repr_reprs {
+  SHOWPARSE("blk_repr_constructor ->  blk_ident { sxp_fields } WHERE blk_repr_reprs");
   $1->flags |= (ID_IS_GLOBAL);
   shared_ptr<AST> ctr = AST::make(at_constructor, $1->loc, $1);
   ctr->addChildrenFrom($3);
@@ -1127,8 +1127,11 @@ sxp_type_definition: LP tk_DEFREPR sxp_defident sxp_val trn_optdocstring sxp_dec
 
 // Type Declarations
 // External declarations
-blk_externals: /* nothing */ {
+blk_externals: {
   SHOWPARSE("blk_externals -> ");
+  yyerrok;
+  lexer->showNextError = false;
+
   $$ = AST::make(at_Null);
   $$->flags = NO_FLAGS;
 };
@@ -1167,9 +1170,9 @@ sxp_externals: tk_EXTERNAL sxp_exident {
 
 
 // OBJECT TYPES [3.6.1]         
-blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints trn_optdocstring blk_declares '{' blk_methods_only '}'  {
+blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares ILCB blk_methods_only IRCB  {
   SHOWPARSE("blk_type_definition -> OBJECT blk_ptype_name blk_constraints "
-            "trn_optdocstring blk_declares blk_methods_only )");
+            "trn_optdocstring blk_opt_declares blk_methods_only )");
 
   // For the moment, all objects are value types:
   shared_ptr<AST> valCat = 
@@ -1330,7 +1333,7 @@ sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident trn_optdocstring RP {
   $$->child(0)->defForm = $$;
 };
 
-blk_type_definition: tk_EXCEPTION blk_ident trn_optdocstring '{' blk_fields '}' {
+blk_type_definition: tk_EXCEPTION blk_ident trn_optdocstring ILCB blk_fields IRCB {
   SHOWPARSE("blk_type_definition -> exception blk_ident { blk_fields }");
   $2->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $1.loc, $2);
@@ -1349,7 +1352,7 @@ sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident trn_optdocstring sxp_fields RP
 // TYPE CLASSES [4]
 // TYPE CLASS DEFINITION [4.1]
 
-blk_tc_definition: blk_openclosed tk_TRAIT blk_ptype_name blk_constraints trn_optdocstring blk_tc_decls '{' blk_method_decls '}' {
+blk_tc_definition: blk_openclosed tk_TRAIT blk_ptype_name blk_constraints trn_optdocstring blk_tc_decls ILCB blk_method_decls IRCB {
   SHOWPARSE("blk_tc_definition -> blk_openclosed TRAIT blk_ptype_name blk_constraints trn_optdocstring blk_tc_decls blk_method_decls)");
   $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0),
                  $3->child(1), $6, $1, $8, $4);
@@ -1455,13 +1458,13 @@ sxp_method_decl: sxp_ident ':' sxp_fntype {
 };
 
 // TYPE CLASS INSTANTIATIONS [4.2]
-blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring {
-  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints [docstring])");
+blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring ILCB IRCB {
+  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints [docstring] { } )");
   $$ = AST::make(at_definstance, $1.loc, $2,
                  AST::make(at_tcmethods, $1.loc), $3);
 };
-blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring '{' blk_method_bindings '}' {
-  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints [docstring] '{' blk_method_bindings '}'");
+blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring ILCB blk_method_bindings IRCB {
+  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints [docstring] { blk_method_bindings }");
   $$ = AST::make(at_definstance, $1.loc, $2, $6, $3);
 };
 
@@ -1764,14 +1767,31 @@ sxp_provideList: sxp_provideList sxp_ident {
 //    $$ = AST::make(at_defthm, $2.loc, $3, $4);
 // };
 
-blk_declares: {
-  SHOWPARSE("blk_declares -> <empty>");
+blk_opt_declares: {
+  SHOWPARSE("blk_opt_declares -> <empty>");
+  yyerrok;
+  lexer->showNextError = false;
   $$ = AST::make(at_declares);
 };
-blk_declares: blk_declares blk_declare {
+blk_opt_declares: blk_declares {
+  SHOWPARSE("blk_opt_declares -> blk_declares");
+  $$ = $1;
+};
+
+blk_declares: blk_declare {
+  SHOWPARSE("blk_declares -> blk_declare");
+  $$ = AST::make(at_declares, $1->loc, $1);
+};
+
+blk_declares: blk_declares SC blk_declare {
   SHOWPARSE("blk_declares -> blk_declares blk_declare");
   $$ = $1;
-  $$->addChildrenFrom($2);
+  $$->addChildrenFrom($3);
+};
+
+blk_declare: tk_DECLARE blk_decl {
+  SHOWPARSE("blk_declare -> DECLARE blk_decl");
+  $$ = $2;
 };
 
 sxp_declares: {
@@ -1784,25 +1804,9 @@ sxp_declares: sxp_declares sxp_declare {
   $$->addChildrenFrom($2);
 };
 
-blk_declare: tk_DECLARE blk_decls {
-  SHOWPARSE("blk_declare -> DECLARE blk_decls");
-  $$ = $2;
-};
-
 sxp_declare: '(' tk_DECLARE sxp_decls ')' {
   SHOWPARSE("sxp_declare -> ( DECLARE sxp_decls )");
   $$ = $3;
-};
-
-blk_decls: blk_decl {
-  SHOWPARSE("blk_decls -> bkl_decl");
-  $$ = AST::make(at_declares, $1->loc, $1);
-};
-
-blk_decls: blk_decls blk_decl {
-  SHOWPARSE("blk_decls -> blk_decls blk_decl");
-  $$ = $1;
-  $$->addChild($2);
 };
 
 sxp_decls: sxp_decl {
@@ -1866,7 +1870,7 @@ blk_constructor: blk_ident {                          /* simple constructor */
   $1->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $1->loc, $1);
 };
-blk_constructor: blk_ident '{' blk_fields '}' { /* compound constructor */
+blk_constructor: blk_ident ILCB blk_fields IRCB { /* compound constructor */
   SHOWPARSE("blk_constructor ->  blk_ident { blk_fields }");
   $1->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $1->loc, $1);
@@ -2862,7 +2866,7 @@ blk_stmt: blk_expr {
   $$ = $1;
 }
 
-blk_block: ILCB IRCB {
+blk_block: ILCB '}' {
   SHOWPARSE("blk_block -> { }");
   // Empty blocks are okay:
   $$ = AST::make(at_begin, $1.loc);
@@ -3387,11 +3391,11 @@ sxp_unqual_expr: '(' sxp_expr sxp_actual_params ')' { /* apply to zero or more a
 };
 
 // IF [7.15.1]
-blk_stmt: tk_IF blk_expr tk_THEN ILCB blk_stmt_seq closeToTHEN tk_ELSE ILCB blk_stmt_seq closeToELSE %prec tk_ELSE {
+blk_stmt: tk_IF blk_expr tk_THEN ILCB blk_stmt_seq IRCB tk_ELSE ILCB blk_stmt_seq IRCB %prec tk_ELSE {
   SHOWPARSE("blk_stmt -> IF blk_expr THEN { blk_stmt_seq } ELSE { blk_stmt_seq }");
   $$ = AST::make(at_if, $1.loc, $2, $5, $9);
 };
-blk_stmt: tk_IF blk_expr tk_THEN ILCB blk_stmt_seq closeToTHEN %prec tk_THEN {
+blk_stmt: tk_IF blk_expr tk_THEN ILCB blk_stmt_seq IRCB %prec tk_THEN {
   SHOWPARSE("blk_stmt -> IF blk_expr THEN { blk_stmt_seq }");
   $$ = AST::make(at_when, $1.loc, $2, $5);
 };
@@ -3576,7 +3580,7 @@ sxp_unqual_expr: '(' tk_SET sxp_expr sxp_expr ')' {
 };
 
 // SWITCH
-blk_stmt: tk_SWITCH blk_expr '{' blk_sw_legs blk_opt_otherwise '}' {
+blk_stmt: tk_SWITCH blk_expr ILCB blk_sw_legs blk_opt_otherwise IRCB {
   SHOWPARSE("blk_stmt -> SWITCH blk_expr blk_sw_legs blk_opt_otherwise");
   $$ = AST::make(at_uswitch, $1.loc, 
                  AST::make(at_ident, LToken(tk_BlkIdent, "__dummy")),
@@ -3617,7 +3621,7 @@ blk_sw_legs: blk_sw_leg {
   SHOWPARSE("blk_sw_legs -> blk_sw_leg");
   $$ = AST::make(at_usw_legs, $1->loc, $1);
 }
-blk_sw_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match closeToCASE tk_IN blk_block {
+blk_sw_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_block {
   SHOWPARSE("blk_sw_leg -> CASE { blk_ident AS blk_type } blk_block");
   $$ = AST::make(at_usw_leg, $1.loc, $3, $8, $5);
 }
@@ -3736,7 +3740,7 @@ typecase_leg: '(' sxp_bindingpattern sxp_expr ')'  {
   }; */
 
 // TRY/CATCH [7.19.1]
-blk_stmt: tk_TRY blk_expr tk_HANDLE '{' blk_catch_legs blk_opt_otherwise '}' {
+blk_stmt: tk_TRY blk_expr tk_HANDLE ILCB blk_catch_legs blk_opt_otherwise IRCB {
   SHOWPARSE("blk_stmt -> TRY blk_expr blk_catch_legs blk_opt_otherwise");
   $$ = AST::make(at_try, $1.loc, $2, 
                  AST::make(at_ident, LToken(tk_BlkIdent, "__dummy")),
@@ -3778,7 +3782,7 @@ blk_stmt: tk_TRY blk_expr blk_otherwise {
 //  $$ = AST::make(at_kennedy_try, $1.loc, bindings, $4);
 //}
 
-blk_catch_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match closeToCASE tk_IN blk_block {
+blk_catch_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_block {
   SHOWPARSE("blk_catch_leg -> CATCH { blk_ident AS blk_type } IN blk_block");
   //  $$ = AST::make(at_catchleg, $1.loc, $2, $4, $6);
   $$ = AST::make(at_usw_leg, $1.loc, $3, $5, $8);
@@ -3841,7 +3845,7 @@ sxp_unqual_expr: sxp_let_eform {
 };
 
 // LET [5.3.1]                 
-blk_stmt: tk_LET ILCB blk_letbindings closeToLET tk_IN blk_block {
+blk_stmt: tk_LET ILCB blk_letbindings IRCB tk_IN blk_block {
   SHOWPARSE("blk_stmt -> LET { blk_letbindings } IN  blk_block");
 
   $$ = AST::make(at_let, $1.loc, $3, $6);
@@ -3884,7 +3888,7 @@ sxp_letbinding: '(' sxp_bindingpattern sxp_expr ')' {
 };
 
 // LETREC [5.3.2]              
-blk_stmt: tk_LETREC ILCB blk_letbindings closeToLETREC tk_IN blk_block {
+blk_stmt: tk_LETREC ILCB blk_letbindings IRCB tk_IN blk_block {
   SHOWPARSE("blk_stmt -> LETREC { blk_letbindings } IN blk_block");
 
   $$ = AST::make(at_letrec, $1.loc, $3, $6);
@@ -4278,66 +4282,59 @@ strLit: tk_String {
 
 // These are for transitional documentation purposes:
 ILCB: '{' {
+  $$ = $1;
 }
+ILCB: error {
+  yyerrok;
+
+  assert(yychar != YYEMPTY);
+
+  yylval.tok.flags |= TF_REPROCESS;
+
+  LToken tok = LToken('{', yylval.tok.loc, yylval.tok.loc, "{");
+  tok.prevTokType = yylval.tok.prevTokType;
+  yylval.tok.prevTokType = '{';
+  tok.flags |= (TF_INSERTED|TF_BY_PARSER);
+
+  lexer->pushTokenBack(yylval.tok, true);
+  lexer->pushTokenBack(tok, true);
+  lexer->lex(&yylval);    /* re-read for side effects */
+
+  // Force parser to re-fetch the lookahead token after we reduce,
+  // since it may have changed because of the layout rules:
+  if (yychar != YYEMPTY)
+    yyclearin;
+
+  lexer->showNextError = false;
+  $$ = tok;
+}
+
 IRCB: '}' {
+  $$ = $1;
 }
+IRCB: error {
+  yyerrok;
 
-begin:         ILCB  { $$ = $1; }
-begin:         error {
-  yyerrok;
-  lexer->beginBlock(true);
-  lexer->showNextError = false;
-  $$ = LToken('}', "}");
-}
+  assert(yychar != YYEMPTY);
 
-closeToLET:    IRCB  { $$ = $1; }
-closeToLET:    error {
-  yyerrok;
-  lexer->closeOpeningTokenBrace(tk_LET);
+  yylval.tok.flags |= TF_REPROCESS;
+
+  LToken tok = LToken('}', yylval.tok.loc, yylval.tok.loc, "}");
+  tok.prevTokType = yylval.tok.prevTokType;
+  yylval.tok.prevTokType = '}';
+  tok.flags |= (TF_INSERTED|TF_BY_PARSER);
+
+  lexer->pushTokenBack(yylval.tok, true);
+  lexer->pushTokenBack(tok, true);
+  lexer->lex(&yylval);    /* re-read for side effects */
+
+  // Force parser to re-fetch the lookahead token after we reduce,
+  // since it may have changed because of the layout rules:
+  if (yychar != YYEMPTY)
+    yyclearin;
+
   lexer->showNextError = false;
-  $$ = LToken('}', "}");
-}
-closeToLETREC: IRCB  { $$ = $1; }
-closeToLETREC: error {
-  yyerrok;
-  lexer->closeOpeningTokenBrace(tk_LETREC);
-  lexer->showNextError = false;
-  $$ = LToken('}', "}");
-}
-closeToCASE:   IRCB  { $$ = $1; }
-closeToCASE:   error {
-  yyerrok;
-  lexer->showNextError = false;
-  lexer->closeOpeningTokenBrace(tk_CASE);
-  $$ = LToken('}', "}");
-}
-closeToTHEN:   IRCB  { $$ = $1; }
-closeToTHEN:   error {
-  yyerrok;
-  lexer->closeOpeningTokenBrace(tk_THEN);
-  lexer->showNextError = false;
-  $$ = LToken('}', "}");
-}
-closeToELSE:   IRCB  { $$ = $1; }
-closeToELSE:   error {
-  yyerrok;
-  lexer->closeOpeningTokenBrace(tk_ELSE);
-  lexer->showNextError = false;
-  $$ = LToken('}', "}");
-}
-closeToINTERFACE:   IRCB  { $$ = $1; }
-closeToINTERFACE:   error {
-  yyerrok;
-  lexer->closeOpeningTokenBrace(tk_INTERFACE);
-  lexer->showNextError = false;
-  $$ = LToken('}', "}");
-}
-closeToMODULE:   IRCB  { $$ = $1; }
-closeToMODULE:   error {
-  yyerrok;
-  lexer->closeOpeningTokenBrace(tk_MODULE);
-  lexer->showNextError = false;
-  $$ = LToken('}', "}");
+  $$ = tok;
 }
 
 // TRANSITIONAL SUPPORT FOR MIXED-MODE PARSING
@@ -4399,4 +4396,17 @@ PrintSyntaxError(TransitionLexer *lexer, const char *s)
 
   lexer->ReportParseError(ss.str());
   lexer->showNextError = false;
+}
+
+/// @brief Given a token number as seen by lex, return the token name
+/// as a string.
+const char *TransitionTokenName(int lexTokenNumber)
+{
+  if (lexTokenNumber == -1)
+    return "EOF";
+
+  int bisonSymbolNumber = YYTRANSLATE(lexTokenNumber);
+  const char * bisonTokenName = yytname[bisonSymbolNumber];
+
+  return bisonTokenName;
 }

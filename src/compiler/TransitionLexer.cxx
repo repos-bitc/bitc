@@ -52,6 +52,8 @@ using namespace sherpa;
 #include "TransitionLexer.hxx"
 #include "LitValue.hxx"
 
+extern const char *TransitionTokenName(int lexTokenNumber);
+
 bool
 TransitionLexer::valid_ident_start(ucs4_t ucs4)
 {
@@ -408,8 +410,8 @@ TransitionLexer::kwCheck(const char *s, int identType)
 void
 TransitionLexer::ReportParseError()
 {
-  errStream << lastTokenPosition
-            << ": syntax error (via yyerror)" << '\n';
+  errStream << lastToken.loc
+            << ": syntax error (via yyerror)" << std::endl;
   num_errors++;
 }
  
@@ -458,6 +460,7 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
 
   showNextError = true;
 
+  lastTokType = EOF;
   lastToken = LToken(EOF, "end of file");
 }
 
@@ -587,29 +590,98 @@ isCharDelimiter(ucs4_t c)
   return isWhiteSpace(c);
 }
 
+void
+TransitionLexer::showToken(std::ostream& errStream, const LToken& tok)
+{
+  const char *tokTypeName = TransitionTokenName(tok.tokType);
+  const char *prevTokTypeName = TransitionTokenName(tok.prevTokType);
+
+  errStream << tok.tokType << ": " << tok.loc << ' '
+            << tokTypeName;
+
+  switch(tok.tokType) {
+  case tk_TypeVar:
+  case tk_EffectVar:
+    errStream << " ('" << tok.str << ")";
+    break;
+  case tk_BlkIdent:
+  case tk_SxpIdent:
+  case tk_MixIdent:
+  case tk_NegativeInt:
+  case tk_Nat:
+  case tk_Float:
+  case tk_VersionNumber:
+    errStream << " (" << tok.str << ")";
+    break;
+
+  case tk_Char:
+    errStream << " ('" << tok.str << "')";
+    break;
+  case tk_String:
+    errStream << " (\"" << tok.str << "\")";
+    break;
+  default:
+    break;
+  }
+
+  errStream << " followed " << prevTokTypeName;
+
+  if (tok.flags) {
+    errStream << " [";
+
+    if (tok.flags & TF_INSERTED)
+      errStream << "INSERTED";
+
+    if (tok.flags & TF_BY_PARSER)
+      errStream << " BY PARSER";
+
+    if (tok.flags & TF_AT_FIRST)
+      errStream << " AT FIRST";
+
+    if (tok.flags & TF_FIRST_ON_LINE) {
+      if (tok.flags & TF_INSERTED)
+        errStream << ", ";
+      errStream << "FIRST-ON-LINE";
+    }
+
+    if (tok.flags & TF_REPROCESS) {
+      if (tok.flags & (TF_INSERTED | TF_FIRST_ON_LINE))
+        errStream << ", ";
+      errStream << "REPROCESS";
+    }
+    errStream << "]";
+  }
+}
+
 int
 TransitionLexer::lex(ParseType *lvalp)
 {
   LToken tok = getNextToken();
+  assert (tok.prevTokType == lastTokType);
+
   if (debug) {
-    errStream << "TOKEN " << tok.tokType << ": " << tok.loc << ' '
-              << '"' << tok.str << '"' << '\n';
+    errStream << "TOKEN ";
+    showToken(errStream, tok);
+    errStream << std::endl;
   }
 
+  lastTokType = tok.tokType;
+  lastToken = tok;
+  
   lvalp->tok = tok;
   here = tok.endLoc;
-  lastToken = tok;
-  lastTokenPosition = tok.loc;
-  return lastToken.tokType;
+
+  return tok.tokType;
 }
 
-// #define LAYOUT_BLOCK_DEBUG
 void
-TransitionLexer::beginBlock(bool implicit)
+TransitionLexer::beginBlock(const LToken& tok)
 {
+  bool inserted = (tok.flags & TF_INSERTED);
+
 #ifdef LAYOUT_BLOCK_DEBUG
   errStream << "  LAYOUT: " << here 
-            << (implicit ? ": implicit " : ": explicit ")
+            << (inserted ? ": inserted " : ": explicit ")
             << "beginBlock()" << std::endl;
 #endif
 
@@ -618,7 +690,7 @@ TransitionLexer::beginBlock(bool implicit)
   unsigned column = layoutStack ? layoutStack->column : 0;
 
   boost::shared_ptr<LayoutFrame> lf = 
-    LayoutFrame::make(lastToken.tokType, implicit, column);
+    LayoutFrame::make(lastToken.tokType, inserted, column);
 
   //  expectingLeftBrace = false; // we're about to return it.
   //  learnBlockIndent = true;
@@ -628,37 +700,26 @@ TransitionLexer::beginBlock(bool implicit)
 }
 
 void
-TransitionLexer::endBlock(bool implicit)
+TransitionLexer::endBlock(const LToken& tok)
 {
-  if (implicit && ! layoutStack->implicit)
-    ReportParseError(here, "Implicit close brace balances explicit open brace.");
-  else if (!implicit && layoutStack->implicit) 
-    ReportParseError(here, "Explicit close brace balances implicit open brace.");
+  bool inserted = (tok.flags & TF_INSERTED);
+
+  if (inserted && ! layoutStack->inserted)
+    ReportParseError(here, "Inserted close brace balances explicit open brace.");
+  else if (!inserted && layoutStack->inserted) 
+    ReportParseError(here, "Explicit close brace balances inserted open brace.");
 
   // considerLineStart = false; // we've done it
   layoutStack = layoutStack->next;
 
 #ifdef LAYOUT_BLOCK_DEBUG
   errStream << "  LAYOUT: " << here 
-            << (implicit ? ": implicit " : ": explicit ")
+            << (inserted ? ": inserted " : ": explicit ")
             << "endBlock()";
   if (layoutStack)
     errStream << " leaving indent at " << layoutStack->column;
   errStream << std::endl;
 #endif
-}
-
-bool
-TransitionLexer::closeOpeningTokenBrace(int openingToken)
-{
-  boost::shared_ptr<LayoutFrame> ls = layoutStack;
-
-  if (ls && ls->implicit && ls->precedingToken == openingToken) {
-    endBlock(true);
-    return true;
-  }
-
-  return false;
 }
 
 bool
@@ -673,7 +734,7 @@ TransitionLexer::closeToOffset(unsigned offset)
   if (!layoutStack)
     return false;
 
-  if (!layoutStack->implicit)
+  if (!layoutStack->inserted)
     return false;
 
   if (offset >= layoutStack->column)
@@ -683,7 +744,7 @@ TransitionLexer::closeToOffset(unsigned offset)
   unsigned count = 0;
 
   errStream << "  LAYOUT: " << here 
-            << ": closeToOffsetToken inserted '}'" << std::endl;
+            << ": closeToOffset inserted '}'" << std::endl;
 #endif
     
   return true;
@@ -746,7 +807,7 @@ TransitionLexer::skipWhiteSpaceAndComments()
         else if (c == '\n' || c == '\r') {
           /* If a multi-line comment spans lines, the next token after
              the comment is the first token on that line */
-          layoutFlags |= LayoutFlags(CHECK_FIRST_TOKEN);
+          atBeginningOfLine = true;
         }
         else if (c == EOF) {
           pos.updateWith(thisToken);
@@ -765,8 +826,9 @@ TransitionLexer::skipWhiteSpaceAndComments()
 
   if (isWhiteSpace(c)) {
     while (isWhiteSpace(c)) {
-      if (c == '\n' || c == '\r')
-        layoutFlags |= LayoutFlags(CHECK_FIRST_TOKEN);
+      if (c == '\n' || c == '\r') {
+        atBeginningOfLine = true;
+      }
 
       c = getChar();
     }
@@ -782,17 +844,36 @@ TransitionLexer::skipWhiteSpaceAndComments()
 }
 
 void
-TransitionLexer::pushTokenBack(LToken& tok)
+TransitionLexer::pushTokenBack(const LToken& tok, bool verbose)
 {
+  if (verbose && debug) {
+    errStream << "PARSER PUSHED BACK TOKEN ";
+    showToken(errStream, tok);
+    errStream << std::endl;
+  }
   pushbackTokens.push_back(tok);
+
+  lastTokType = tok.prevTokType;
+
+  if (verbose && debug) {
+    errStream << "  Pushback Stack Is:\n";
+
+    for (size_t i = pushbackTokens.size(); i > 0; i--) {
+      LToken theTok = pushbackTokens[i-1];
+      errStream << "  " << i-1 << " ";
+      showToken(errStream, theTok);
+      errStream << std::endl;
+    }
+  }
 }
 
-#define RETURN_INSERTED(tok)      \
-  do {                            \
-    LToken _tok = tok;            \
-    _tok.flags |= TF_INSERTED;    \
-    return _tok;                  \
+#if 0
+#define RETURN_INSERTED(tok) do {  \
+    LToken _tok = tok;             \
+    _tok.flags |= TF_INSERTED;     \
+    return _tok;                   \
   } while(false)
+#endif
 
 LToken
 TransitionLexer::getNextToken()
@@ -814,34 +895,39 @@ TransitionLexer::getNextToken()
   //
   // FIX: Once I clean up the surface syntax, this should also be done
   // for tk_DO.
-  bool curlyRequired = ((lastToken.tokType == EOF)        // beginning of file
-                        || (lastToken.tokType == tk_CASE)
-                        || (lastToken.tokType == tk_LET)
-                        || (lastToken.tokType == tk_LETREC)
-                        || (lastToken.tokType == tk_IN)
-                        || (lastToken.tokType == tk_DO)
-                        || (lastToken.tokType == tk_THEN)
-                        || (lastToken.tokType == tk_ELSE)
+  bool curlyRequired = ((lastTokType == EOF)        // beginning of file
+                        || (lastTokType == tk_CASE)
+                        || (lastTokType == tk_LET)
+                        || (lastTokType == tk_LETREC)
+                        || (lastTokType == tk_IN)
+                        || (lastTokType == tk_DO)
+                        || (lastTokType == tk_THEN)
+                        || (lastTokType == tk_ELSE)
                         || false);
 
-  if (curlyRequired && (tok.tokType != '{')) {
-    pushTokenBack(tok);
-    beginBlock(true);
-    
-    // No position update for inserted token.
-    RETURN_INSERTED(LToken('{', startLoc, endLoc, "{"));
-  }
-
 #ifdef LAYOUT_BLOCK_DEBUG
-  if (lastToken.tokType < 256 && isprint(lastToken.tokType)) {
+  if (lastTokType < 256 && isprint(lastTokType)) {
     errStream << "  LAYOUT: " << startLoc 
-              << ": last token was '" << (char)lastToken.tokType << "'." << std::endl;
+              << ": last token was '" << (char)lastTokType << "'." << std::endl;
   }
   else {
     errStream << "  LAYOUT: " << startLoc 
-              << ": last token was " << lastToken.str << "." << std::endl;
+              << ": last token was type " << lastTokType << std::endl;
   }
 #endif
+
+  if (curlyRequired && (tok.tokType != '{')) {
+    pushTokenBack(tok);
+
+    LToken newTok = LToken('{', startLoc, endLoc, "{");
+    newTok.flags |= TF_INSERTED;
+    newTok.prevTokType = tok.prevTokType;
+
+    beginBlock(newTok);
+    
+    // No position update for inserted token.
+    return newTok;
+  }
 
   // Rule 2: If the last token was a '{', then the next token is
   // processed specially. Either:
@@ -852,7 +938,7 @@ TransitionLexer::getNextToken()
   //   b) The next token is NOT more indented, in which case the
   //      block is presumed to have been empty and a '} is immediately
   //      inserted. 
-  if (lastToken.tokType == '{') {
+  if (lastTokType == '{') {
     assert(layoutStack);
 
 #ifdef LAYOUT_BLOCK_DEBUG
@@ -862,10 +948,11 @@ TransitionLexer::getNextToken()
 
     if ((startLoc.offset > layoutStack->column) ||
         // Top-level context needs special handling if the curly brace
-        // was implicitly inserted:
-        (layoutStack->implicit && !layoutStack->next)) {
+        // was insertedly inserted:
+        (layoutStack->inserted && !layoutStack->next)) {
       // Valid indent. Establish indent level for new block:
       layoutStack->column = startLoc.offset;
+
 #ifdef LAYOUT_BLOCK_DEBUG
       errStream << "  LAYOUT: " << startLoc 
                 << ": set indent to "
@@ -873,26 +960,30 @@ TransitionLexer::getNextToken()
                 << ", disable check first token." << std::endl;
 #endif
     }
-    else if (layoutStack->implicit && layoutStack->next) {
+    else if (layoutStack->inserted && layoutStack->next) {
 #ifdef LAYOUT_BLOCK_DEBUG
       errStream << "  LAYOUT: " << startLoc 
-                << " : close empty implicit block." << std::endl;
+                << " : close empty inserted block." << std::endl;
 #endif
       // First token after '{' is at the previous (or earlier) indent
-      // level, and it was an implicit open block. Close it immediately:
+      // level, and it was an inserted open block. Close it immediately:
       pushTokenBack(tok);
-      endBlock(true);
 
-      RETURN_INSERTED(LToken('}', startLoc, endLoc, "}"));
+      LToken newTok = LToken('}', startLoc, endLoc, "}");
+      newTok.flags |= TF_INSERTED;
+      newTok.prevTokType = tok.prevTokType;
+
+      endBlock(newTok);
+
+      return newTok;
     }
-
-    layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
   }
 
-  // Rule 3: If this is the first token on a line, then WHILE the
-  // current indent level is less than the prevailing indent level,
-  // close implicit blocks.
-  if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
+  if (tok.flags & TF_FIRST_ON_LINE) {
+    // Rule 3: If this is the first token on a line, then WHILE the
+    // current indent level is less than the prevailing indent level,
+    // close inserted blocks.
+
     // Consider possible right curly insertion and/or semicolon
     // insertion.
 
@@ -905,16 +996,27 @@ TransitionLexer::getNextToken()
 
     if (closeToOffset(startLoc.offset)) {
       pushTokenBack(tok);
-      endBlock(true);
-      RETURN_INSERTED(LToken('}', startLoc, endLoc, "}"));
+
+      LToken newTok = LToken('}', startLoc, endLoc, "}");
+      newTok.flags |= TF_INSERTED|TF_AT_FIRST;
+      newTok.prevTokType = tok.prevTokType;
+
+      endBlock(newTok);
+      return newTok;
     }
   }
 
-  // Rule 4: At end of file, any outstanding implicit blocks are closed.
+  // Rule 4: At end of file, any outstanding inserted blocks are closed.
   if (tok.tokType == EOF) {
-    if (closeOpeningTokenBrace(EOF)) {
+    if (layoutStack && layoutStack->inserted) {
       pushTokenBack(tok);
-      RETURN_INSERTED(LToken('}', startLoc, endLoc, "}"));
+
+      LToken newTok = LToken('}', startLoc, endLoc, "}");
+      newTok.flags |= TF_INSERTED|TF_AT_FIRST;
+      newTok.prevTokType = tok.prevTokType;
+
+      endBlock(newTok);
+      return newTok;
     }
 
     return tok;
@@ -926,8 +1028,9 @@ TransitionLexer::getNextToken()
   //   a) we just saw one, or
   //   b) we are closing the block explicitly.
 
-  if (layoutFlags & LayoutFlags(CHECK_FIRST_TOKEN)) {
-    bool wantAutoSemi = !(lastToken.tokType == ';' ||
+  if (tok.flags & TF_FIRST_ON_LINE) {
+    bool wantAutoSemi = !(lastTokType == ';' ||
+                          lastTokType == '{' ||
                           tok.tokType == ';' ||
                           tok.tokType == '}' ||
                           tok.tokType == tk_THEN ||
@@ -944,28 +1047,38 @@ TransitionLexer::getNextToken()
                   << startLoc.offset << std::endl;
 #endif
         pushTokenBack(tok);
-        RETURN_INSERTED(LToken(';', startLoc, endLoc, ";"));
+
+        LToken newTok = LToken(';', startLoc, endLoc, ";");
+        newTok.flags |= TF_INSERTED|TF_AT_FIRST;
+        newTok.prevTokType = tok.prevTokType;
+
+        return newTok;
       }
     }
-
-    layoutFlags &= ~LayoutFlags(CHECK_FIRST_TOKEN);
   }
 
   // Open and close layout contexts when we see explicit open/close
   // curly braces:
   if (tok.tokType == '{')
-    beginBlock(false);
+    beginBlock(tok);
 
   if (tok.tokType == '}') {
-    // Following will stop closing blocks when it reaches the most
-    // recent explicit block, which is what we want.
-    if (closeToOffset(0)) {
-      pushTokenBack(tok);
-      endBlock(true);
-      RETURN_INSERTED(LToken('}', startLoc, endLoc, "}"));
+    if (!(tok.flags & TF_INSERTED)) {
+      // Following will stop closing blocks when it reaches the most
+      // recent explicit block, which is what we want.
+      if (closeToOffset(0)) {
+        pushTokenBack(tok);
+
+        LToken newTok = LToken('}', startLoc, endLoc, "}");
+        newTok.flags |= TF_INSERTED|TF_AT_FIRST;
+        newTok.prevTokType = tok.prevTokType;
+
+        endBlock(newTok);
+        return newTok;
+      }
     }
 
-    endBlock(false);
+    endBlock(tok);
   }
 
   return tok;
@@ -978,8 +1091,19 @@ TransitionLexer::popToken()
   
   LToken pbTok = pushbackTokens[pushbackTokens.size()-1];
   pushbackTokens.pop_back();
+  pbTok.prevTokType = lastTokType;
   return pbTok;
 }
+
+#define RETURN_TOKEN(tok) do {               \
+    LToken _tok = tok;                       \
+    _tok.prevTokType = lastTokType;          \
+    if (atBeginningOfLine) {                 \
+      _tok.flags |= TF_FIRST_ON_LINE;        \
+      atBeginningOfLine = false;             \
+    }                                        \
+    return _tok;                             \
+  } while(false)
 
 LToken
 TransitionLexer::getNextInputToken()
@@ -1004,17 +1128,17 @@ TransitionLexer::getNextInputToken()
       // legal:
       if (currentLang & lf_sexpr) {
         endLoc.updateWith(thisToken);
-        return LToken(EOF, startLoc, endLoc, "end of file");
+        RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
       }
 
       endLoc.updateWith(thisToken);
-      return LToken(c, startLoc, endLoc, thisToken);
+      RETURN_TOKEN(LToken(c, startLoc, endLoc, thisToken));
     }
 
   case ';':
     {
       endLoc.updateWith(thisToken);
-      return LToken(c, startLoc, endLoc, thisToken);
+      RETURN_TOKEN(LToken(c, startLoc, endLoc, thisToken));
     }
 
   case ':':
@@ -1030,18 +1154,18 @@ TransitionLexer::getNextInputToken()
         ungetChar(c2);
 
       endLoc.updateWith(thisToken);
-      return LToken(tokID, startLoc, endLoc, thisToken);
+      RETURN_TOKEN(LToken(tokID, startLoc, endLoc, thisToken));
     }
 
   case '{':
     {
       endLoc.updateWith(thisToken);
-      return LToken(c, startLoc, endLoc, thisToken);
+      RETURN_TOKEN(LToken(c, startLoc, endLoc, thisToken));
     }
   case '}':
     {
       endLoc.updateWith(thisToken);
-      return LToken(c, startLoc, endLoc, thisToken);
+      RETURN_TOKEN(LToken(c, startLoc, endLoc, thisToken));
     }
 
   case '.':                        // Single character tokens
@@ -1052,7 +1176,7 @@ TransitionLexer::getNextInputToken()
   case ')':
     {
       endLoc.updateWith(thisToken);
-      return LToken(c, startLoc, endLoc, thisToken);
+      RETURN_TOKEN(LToken(c, startLoc, endLoc, thisToken));
     }
 
   case '"':                        // String literal
@@ -1072,13 +1196,13 @@ TransitionLexer::getNextInputToken()
         badHere.offset += badpos;
         errStream << badHere.asString()
                   << ": Illegal (non-printing) character in string '"
-                  << thisToken << "'\n";
+                  << thisToken << "'" << std::endl;
         num_errors++;
       }
 
       endLoc.updateWith(thisToken);
-      return LToken(tk_String, startLoc, endLoc, 
-                    thisToken.substr(1, thisToken.size()-2));
+      RETURN_TOKEN(LToken(tk_String, startLoc, endLoc, 
+                          thisToken.substr(1, thisToken.size()-2)));
     }
 
 
@@ -1091,28 +1215,28 @@ TransitionLexer::getNextInputToken()
           if ((currentLang & lf_sexpr) == 0) {
             ungetChar('t');
             ungetChar('#');
-            return LToken(EOF, startLoc, endLoc, "end of file");
+            RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
           }
           endLoc.updateWith(thisToken);
-          return LToken(tk_TRUE, startLoc, endLoc, thisToken);
+          RETURN_TOKEN(LToken(tk_TRUE, startLoc, endLoc, thisToken));
         }
       case 'f':
         {
           if ((currentLang & lf_sexpr) == 0) {
             ungetChar('f');
             ungetChar('#');
-            return LToken(EOF, startLoc, endLoc, "end of file");
+            RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
           }
 
           endLoc.updateWith(thisToken);
-          return LToken(tk_FALSE, startLoc, endLoc, thisToken);
+          RETURN_TOKEN(LToken(tk_FALSE, startLoc, endLoc, thisToken));
         }
 
       default:
         // FIX: this is bad input
         {
           endLoc.updateWith(thisToken);
-          return LToken(EOF, startLoc, endLoc, "end of file");
+          RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
         }
       }
     }
@@ -1128,7 +1252,7 @@ TransitionLexer::getNextInputToken()
 
       if (c1 == EOF || c2 == EOF) {
         endLoc.updateWith(thisToken);
-        return LToken(EOF, startLoc, endLoc, "end of file");
+        RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
       }
 
       // Check for simple, one-codepoint character:
@@ -1144,19 +1268,19 @@ TransitionLexer::getNextInputToken()
             ungetChar(c2);
             ungetChar(c1);
             endLoc.updateWith(thisToken);
-            return LToken(EOF, startLoc, endLoc, "end of file");
+            RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
           }
         default:
           {
             if (LitValue::DecodeCharacter(thisToken) >= 0) {
               endLoc.updateWith(thisToken);
-              return LToken(tk_Char, startLoc, endLoc, thisToken);
+              RETURN_TOKEN(LToken(tk_Char, startLoc, endLoc, thisToken));
             }
 
             ungetChar(c2);
             ungetChar(c1);
             endLoc.updateWith(thisToken);
-            return LToken(EOF, startLoc, endLoc, "end of file");
+            RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
           }          
         }
       }
@@ -1169,17 +1293,17 @@ TransitionLexer::getNextInputToken()
           c = getChar();
           if (c == EOF) {
             endLoc.updateWith(thisToken);
-            return LToken(EOF, startLoc, endLoc, "end of file");
+            RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
           }
         } while (c != '\'');
 
         if (LitValue::DecodeCharacter(thisToken) >= 0) {
           endLoc.updateWith(thisToken);
-          return LToken(tk_Char, startLoc, endLoc, thisToken);
+          RETURN_TOKEN(LToken(tk_Char, startLoc, endLoc, thisToken));
         }
 
         endLoc.updateWith(thisToken);
-        return LToken(EOF, startLoc, endLoc, "end of file");
+        RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
       }
 
       // Otherwise it is a type variable.
@@ -1197,7 +1321,7 @@ TransitionLexer::getNextInputToken()
         // FIX: this is bad input
         ungetChar(c1);
         endLoc.updateWith(thisToken);
-        return LToken(EOF, startLoc, endLoc, "end of file");
+        RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
       }
 
       do {
@@ -1206,7 +1330,7 @@ TransitionLexer::getNextInputToken()
       ungetChar(c);
 
       endLoc.updateWith(thisToken);
-      return LToken(tokType, startLoc, endLoc, thisToken);
+      RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
     }
 
     // Hyphen requires special handling. If it is followed by a digit
@@ -1278,7 +1402,7 @@ TransitionLexer::getNextInputToken()
         int tokType = (thisToken[0] == '-') ? tk_NegativeInt : tk_Nat;
 
         endLoc.updateWith(thisToken);
-        return LToken(tokType, startLoc, endLoc, thisToken);
+        RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
       }
 
       if (currentLang & lf_version) {
@@ -1291,7 +1415,7 @@ TransitionLexer::getNextInputToken()
         count--;
         ungetChar(c);
         endLoc.updateWith(thisToken);
-        return LToken(tk_VersionNumber, startLoc, endLoc, thisToken);
+        RETURN_TOKEN(LToken(tk_VersionNumber, startLoc, endLoc, thisToken));
       }
       else {
         /* We have seen a decimal point, so from here on it must be a
@@ -1310,7 +1434,7 @@ TransitionLexer::getNextInputToken()
       if (c != '^') {
         ungetChar(c);
         endLoc.updateWith(thisToken);
-        return LToken(tk_Float, startLoc, endLoc, thisToken);
+        RETURN_TOKEN(LToken(tk_Float, startLoc, endLoc, thisToken));
       }
 
       /* Need to collect the exponent. Revert to radix 10 until
@@ -1342,13 +1466,13 @@ TransitionLexer::getNextInputToken()
 
       ungetChar(c);
       endLoc.updateWith(thisToken);
-      return LToken(tk_Float, startLoc, endLoc, thisToken);
+      RETURN_TOKEN(LToken(tk_Float, startLoc, endLoc, thisToken));
     }
 
   case EOF:
     {
       endLoc.updateWith(thisToken);
-      return LToken(EOF, startLoc, endLoc, "end of file");
+      RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
     }
 
   default:
@@ -1359,7 +1483,7 @@ TransitionLexer::getNextInputToken()
 
     // FIX: Malformed token
     endLoc.updateWith(thisToken);
-    return LToken(EOF, startLoc, endLoc, "end of file");
+    RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
   }
 
  identifier_or_operator:
@@ -1382,7 +1506,7 @@ TransitionLexer::getNextInputToken()
   ident_done:
     int tokType = kwCheck(thisToken.c_str(), tk_BlkIdent);
     endLoc.updateWith(thisToken);
-    return LToken(tokType, startLoc, endLoc, thisToken);
+    RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
   }
   else if (valid_operator_start(c)) {
     do {
@@ -1392,6 +1516,6 @@ TransitionLexer::getNextInputToken()
 
     int tokType = kwCheck(thisToken.c_str(), tk_MixIdent);
     endLoc.updateWith(thisToken);
-    return LToken(tokType, startLoc, endLoc, thisToken);
+    RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
   }
 }

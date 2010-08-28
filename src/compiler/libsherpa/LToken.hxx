@@ -47,11 +47,20 @@ enum TokenFlagValues {
   /// @brief No Token flags.
   TF_NO_FLAGS = 0,
 
-  /// @brief Token Was inserted by layout.
+  /// @brief Token was inserted by layout engine.
   TF_INSERTED = 0x1u,
 
+  /// @brief Token was inserted by parser during error recovery.
+  TF_BY_PARSER = 0x2u,
+
+  /// @brief Token was inserted at start of line by layout.
+  TF_AT_FIRST = 0x4u,
+
+  /// @brief Token was pushed back by parser during error recovery.
+  TF_REPROCESS = 0x8u,
+
   /// @brief This was the first token on its line.
-  TF_FIRST_ON_LINE = 0x2u,
+  TF_FIRST_ON_LINE = 0x10u,
 };
 typedef sherpa::EnumSet<TokenFlagValues> TokenFlags;
 
@@ -79,6 +88,7 @@ namespace sherpa {
 
   struct LToken {
     int tokType;                // as decided by Bison
+    int prevTokType;
 
     TokenFlags flags;
 
@@ -95,6 +105,7 @@ namespace sherpa {
       :loc(), endLoc(), str()
     {
       tokType = EOF;
+      prevTokType = EOF;
       flags = TF_NO_FLAGS;
     }
 
@@ -113,6 +124,7 @@ namespace sherpa {
            const std::string& s)
     {
       this->tokType = tokType;
+      this->prevTokType = prevTokType;
       this->flags = TF_NO_FLAGS;
       this->loc = loc;
       this->endLoc = endLoc;
@@ -122,6 +134,7 @@ namespace sherpa {
     LToken(int tokType, const LToken& that)
     {
       this->tokType = that.tokType;
+      this->prevTokType = that.prevTokType;
       this->flags = that.flags;
       this->loc = that.loc;
       this->endLoc = that.endLoc;
@@ -131,6 +144,7 @@ namespace sherpa {
     LToken(int tokType, const std::string& str)
     {
       this->tokType = tokType;
+      this->prevTokType = 0;
       this->flags = TF_NO_FLAGS;
       this->loc = LexLoc();
       this->endLoc = LexLoc();
@@ -140,6 +154,7 @@ namespace sherpa {
     LToken& operator=(const LToken& that)
     {
       this->tokType = that.tokType;
+      this->prevTokType = that.prevTokType;
       this->flags = that.flags;
       this->loc = that.loc;
       this->endLoc = that.endLoc;
@@ -147,6 +162,7 @@ namespace sherpa {
       return *this;
     }
 
+#if 0
     bool operator==(const LToken& that)
     {
       return ((this->tokType == that.tokType) &&
@@ -155,6 +171,7 @@ namespace sherpa {
               (this->endLoc == that.endLoc) &&
               (this->str == that.str));
     }
+#endif
   };
 
 } /* namespace sherpa */
