@@ -38,14 +38,14 @@
 bitc version 0.11
 module MainModule
   (import bitc.main as main)
-    (provide bitc.main main)
-    (import bitc.stdio as stdio)
+  (provide bitc.main main)
+  (import bitc.stdio as stdio)
 
-    (define main.main:(fn (vector string) -> int32)
-      (lambda (argvec)
-        (stdio.write_char stdio.stdout 'a')
-        (stdio.write_char stdio.stdout '\linefeed')
-        0)))
+  (define main.main:(fn (vector string) -> int32)
+    (lambda (argvec)
+      (stdio.write_char stdio.stdout 'a')
+      (stdio.write_char stdio.stdout '\linefeed')
+      0))
 
 module AnotherModule
-  (define (f x:int32) x))
+  (define (f x:int32) x)
