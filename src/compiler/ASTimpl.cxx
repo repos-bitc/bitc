@@ -83,6 +83,8 @@ AST::makeCharLit(const sherpa::LToken &tok)
   return ast;
 }
 
+/// This needs to use bignum representation, because host integer
+/// and target integer sizes may not agree.
 shared_ptr<AST>
 AST::makeIntLit(const sherpa::LToken &tok)
 {
@@ -101,15 +103,25 @@ AST::makeIntLit(const sherpa::LToken &tok)
     num = tok.str.substr(0, tok.str.size());
   }
 
-  std::string::size_type pos = num.find ('r');
-  if (pos != std::string::npos) {
-    std::string rad = num.substr(0, pos);
-    num = num.substr(pos+1, num.size());
-    char *end;
-    ast->litBase = strtoul(rad.c_str(), &end, 10); //&OK
-  }
-  else {
-    ast->litBase = 10;
+  ast->litBase = 10;
+
+  if (num.size() > 1) {
+    if (num[0] == '0' && num[1] == 'x') {
+      ast->litBase = 16;
+      num = num.substr(2, num.size());
+    }
+    else if (num[0] == '0' && num[1] == 'o') {
+      ast->litBase = 8;
+      num = num.substr(2, num.size());
+    }
+    else if (num[0] == '0' && num[1] == 'b') {
+      ast->litBase = 2;
+      num = num.substr(2, num.size());
+    }
+    else if (num[0] == '0') {
+      ast->litBase = 8;
+      // No need to adjust num in this case.
+    }
   }
 
   ast->litValue.i = BigNum(num, ast->litBase);
@@ -123,8 +135,9 @@ AST::makeIntLit(const sherpa::LToken &tok)
   return ast;
 }
 
-/// @bug This is not doing the correct conversion. It completely
-/// ignores the radix encoding and the exponent encoding.
+/// @bug This works only for single- and double-precision floats, and
+/// it doesn't work at all for non-ANSI floating point implementations
+/// on either host or target.
 shared_ptr<AST>
 AST::makeFloatLit(const sherpa::LToken &tok)
 {
@@ -133,78 +146,6 @@ AST::makeFloatLit(const sherpa::LToken &tok)
   ast->litValue.d = strtod(tok.str.c_str(), 0);
 
   ast->litValue.lr = lr_float;
-#if 0
-  std::string litString = tok.str;
-  std::string expString;
-  std::string mantissaString;
-
-  std::string::size_type epos = litString.find ('^');
-
-  if (epos != std::string::npos) {
-    expString = litString.substr(epos+1, litString.size());
-    mantissaString = litString.substr(0, epos);
-  }
-  else {
-    expString = "";
-    mantissaString = litString;
-  }
-
-  /* Handle the mantissa */
-
-  std::string::size_type pos = mantissaString.find ('r');
-  if (pos != std::string::npos) {
-    std::string rad;
-    if (mantissaString[0] == '-') {
-      rad = mantissaString.substr(1, pos);
-      mantissaString =
-        "-" + mantissaString.substr(pos+1, mantissaString.size());
-    }
-    else {
-      rad = mantissaString.substr(0, pos);
-      mantissaString = mantissaString.substr(pos+1, mantissaString.size());
-    }
-
-    char *end;
-    ast->litBase = strtoul(rad.c_str(), &end, 10); // &OK
-  }
-
-  /* Handle the exponent part */
-  std::string exponent = "";//ss.str();
-  if (epos != std::string::npos) {
-    size_t expBase = 10;
-
-    std::string::size_type pos = expString.find ('r');
-    if (pos != std::string::npos) {
-      std::string rad;
-      if (expString[0] == '-') {
-        rad = expString.substr(1, pos);
-        expString = "-" + expString.substr(pos+1, expString.size());
-      }
-      else {
-        rad = expString.substr(0, pos);
-        expString = expString.substr(pos+1, expString.size());
-      }
-
-      char *end;
-      expBase = strtoul(rad.c_str(), &end, 10); //&OK
-    }
-    mpz_t expmpz;
-    mpz_init_set_str(expmpz, expString.c_str(), expBase);
-    exponent = "@" + std::string(mpz_get_str (NULL, ast->litBase, expmpz));
-  }
-  else
-    exponent = "@0";
-
-  //std::cout << " Mantissa = " << mantissaString << " Exponent = "
-  //            << exponent
-  //            << " Base = " << ast->litBase;
-
-  /* Finish off */
-  mpf_init_set_str(ast->litValue.d, (mantissaString + exponent).c_str(),
-                   ast->litBase);
-  //gmp_printf(" %Ff\n", ast->litValue.d);
-
-#endif
   return ast;
 }
 

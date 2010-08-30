@@ -157,11 +157,11 @@ module sha1_impl {
     context.lenLow := 0
     context.lenHigh := 0
     context.messNdx := 0
-    context.digest[0] := 16r67452301
-    context.digest[1] := 16rEFCDAB89
-    context.digest[2] := 16r98BADCFE
-    context.digest[3] := 16r10325476
-    context.digest[4] := 16rC3D2E1F0
+    context.digest[0] := 0x67452301
+    context.digest[1] := 0xEFCDAB89
+    context.digest[2] := 0x98BADCFE
+    context.digest[3] := 0x10325476
+    context.digest[4] := 0xC3D2E1F0
     
     context.computed := false
     context.corrupted := sha1.sha_Success
@@ -207,7 +207,7 @@ module sha1_impl {
 
         loop i = 0 then i + 1
           until i >= 20 {
-            digest[i] := Truncate(context.digest[i >> 2] >> (8 * (3 - i & 16r03)))
+            digest[i] := Truncate(context.digest[i >> 2] >> (8 * (3 - i & 0x03)))
           }
         sha1.sha_Success
       }
@@ -247,7 +247,7 @@ module sha1_impl {
               then {
                 loop i = 0 then i + 1
                   until (i >= message.length) && context.corrupted.sha_Success {
-                    context.message[context.messNdx] := message[i] & 16rff
+                    context.message[context.messNdx] := message[i] & 0xff
                     context.messNdx := context.messNdx + 1
                     context.lenLow := context.lenLow + 8
 
@@ -291,7 +291,7 @@ module sha1_impl {
 
   def sha1ProcessMessageBlock(context : ByRef sha1.sha1Context) = {
     // Constants defined in SHA-1 
-    def K = array(16r5A827999, 16r6ED9EBA1, 16r8F1BBCDC, 16rCA62C1D6)
+    def K = array(0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6)
     
     def W: (mutable uint32)[80] =
       array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -400,7 +400,7 @@ module sha1_impl {
     // block, process it, and then continue padding into a second block.
     if context.messNdx > 55   
       then {
-        context.message[context.messNdx] := 16r80
+        context.message[context.messNdx] := 0x80
         context.messNdx := context.messNdx + 1
 
         loop until context.messNdx >= 64 {
@@ -418,7 +418,7 @@ module sha1_impl {
         }
       }
       else {
-        context.message[context.messNdx] := 16r80
+        context.message[context.messNdx] := 0x80
         context.messNdx := context.messNdx + 1
 
         loop until context.messNdx >= 56 {

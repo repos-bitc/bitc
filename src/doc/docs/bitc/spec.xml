@@ -526,16 +526,17 @@ using         value-at</literallayout>
 	<sect3 id="intlit">
 	  <title>Integer Literals</title>
 	  <p>
-	    The general form of an integer literal is:
+            An integer literal takes one of the following forms:
 	  </p>
 	  <literallayout>
-[<b>-</b>][<em>base</em><b>r</b>]<em>digits</em></literallayout>
+<em>decimal digits</em>  // decimal integer literal
+0x<em>hex digits</em>  // hexadecimal integer literal
+0o<em>octal digits</em>  // octal integer literal
+0b<em>binary digits</em>  // binary integer literal
+0<em>octal digits</em>  // octal integer literal</literallayout>
 	  <p indent="no">
-	    where <em>base</em> is radix of the subsequent digits
-	    expressed in decimal form. Legal bases are 2, 8, 10, and
-	    16. In the absence of a base prefix, the digits are
-	    interpreted as base ten. The <em>digits</em> are selected
-	    from the characters
+            A decimal integer literal may not begin with a leading
+            zero.  <em>Digits</em> are selected from the characters
 	  </p>
 	  <literallayout>
 0 1 2 3 4 5 6 7 8 9 a b c d e f</literallayout>
@@ -581,17 +582,18 @@ word</literallayout>
 	    The general form of a floating point literal is:
 	  </p>
 	  <literallayout>
-[<b>-</b>][<em>base</em><b>r</b>]<em>digits</em><b>.</b><em>digits</em>[<b>^</b><em>exponent</em>]</literallayout>
+<em>digits</em><b>.</b><em>digits</em>[<b>e</b>[<b>-</b>]<em>exponent</em>]</literallayout>
 	  <p indent="no">
-	    where <em>base</em> defines the decimal encoded radix of
-	    the digits and <em>exponent</em> is an integer literal,
-	    possibly including an initial minus sign and a radix
-	    specification for the exponent part.  Digits are selected
-	    as for integer literals, above. Note that the decimal
-	    point is not optional, and must have digits on both
-	    sides. Thus, <progident>0.0</progident> is a valid
-	    floating point literal, but <progident>0.</progident> and
-	    <progident>.0</progident> are not.
+	    where all digits are decimal. Floating point values may
+	    not have any radix other than 10. The <em>exponent</em>
+	    may include an optional initial minus sign. Note that the
+	    decimal point is not optional, and must have at least one
+	    digit on both sides. Thus, <progident>0.0</progident> is a
+	    valid floating point literal, but
+	    <progident>0.</progident> and <progident>.0</progident>
+	    are not. Also <progident>1e11</progident> is not a valid
+	    floating point literal; <progident>1.0e11</progident>
+	    should be used instead.
 	  </p>
 	  <p>
 	    As with integer literals, floating point literals of an
@@ -659,9 +661,11 @@ float double quad</literallayout>
 	  </p>
 	  <literallayout>
 '\U+<em>hex digits</em>'  // unicode code point
+'\<em>decimal digits</em>'  // unicode code point expressed in decimal
 '\0x<em>hex digits</em>'  // unicode code point expressed in hexadecimal
+'\0o<em>octal digits</em>'  // unicode code point expressed in octal
 '\0b<em>binary digits</em>'  // unicode code point expressed in binary
-'\0<em>binary digits</em>'  // unicode code point expressed in octal</literallayout>
+'\0<em>octal digits</em>'  // unicode code point expressed in octal</literallayout>
 	  <p indent="no">
 	    The value supplied
 	    must be a valid unicode code point, which is a value in

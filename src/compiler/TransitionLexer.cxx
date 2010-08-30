@@ -1109,6 +1109,9 @@ TransitionLexer::popToken()
 LToken
 TransitionLexer::getNextInputToken()
 {
+  // For numbers:
+  int radix = 10;
+
   here = skipWhiteSpaceAndComments();
 
   thisToken.erase();
@@ -1334,6 +1337,10 @@ TransitionLexer::getNextInputToken()
       RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
     }
 
+    // Leading '-' no longer requires special handling now that we are
+    // getting rid of the S-expression syntax. Unary negation is
+    // handled in the parser in the new syntax.
+
     // Hyphen requires special handling. If it is followed by a digit
     // then it is the beginning of a numeric literal, else it is part
     // of an identifier.
@@ -1366,33 +1373,32 @@ TransitionLexer::getNextInputToken()
   case '8':
   case '9':
     {
-      /// @bug Need to remove the legacy radix syntax here. When I do
-      /// so, I should add support to accept and ignore '_' in decimal
-      /// numbers as a placeholder for commas, e.g. 1_000_000
-
-      int radix = 10;
+      if (c == '0') {
+        ucs4_t c2 = getChar();
+        switch(c2) {
+        case 'b':
+          radix = 2;
+          break;
+        case 'x':
+          radix = 16;
+          break;
+        case 'o':
+          radix = 8;
+          break;
+        default:
+          ungetChar(c2);
+          // 0 followed by legal octal digit is a number:
+          if (LitValue::digitValue(c2, 8) >= 0) {
+            radix = 8;
+            break;
+          }
+          // c still holds 0, which is okay.
+        }
+      }
 
       do {
         c = getChar();
-      } while (LitValue::digitValue(c, 10) >= 0);
-
-      /* At this point we could either discover a radix marker 'r', or
-         a decimal point (indicating a floating poing literal or a
-         language version). If it is a radix marker, change the radix
-         value here so that we match the succeeding digits in the
-         correct radix. */
-      if (c == 'r') {
-        radix = strtol(thisToken.c_str(), 0, 10);
-        if (radix < 0) radix = -radix; // leading sign not part of radix
-
-        long count = 0;
-        do {
-          c = getChar();
-          count++;
-        } while (LitValue::digitValue(c, radix) >= 0);
-        count--;
-        /* FIX: if count is 0, number is malformed */
-      }
+      } while (LitValue::digitValue(c, radix) >= 0);
 
       /* We are either done with the literal, in which case it is an
          integer literal, or we are about to see a decimal point, in
@@ -1406,21 +1412,32 @@ TransitionLexer::getNextInputToken()
         RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
       }
 
+      // Language version number?
       if (currentLang & lf_version) {
+        if (radix != 10) {
+          ReportParseError(startLoc, "Language version number must be decimal.");
+          RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
+        }
+
         /* Looking for a language version number. */
         long count = 0;
         do {
           c = getChar();
           count++;
-        } while (LitValue::digitValue(c, 10) >= 0);
+        } while (LitValue::digitValue(c, radix) >= 0);
         count--;
         ungetChar(c);
         endLoc.updateWith(thisToken);
         RETURN_TOKEN(LToken(tk_VersionNumber, startLoc, endLoc, thisToken));
       }
-      else {
-        /* We have seen a decimal point, so from here on it must be a
-           floating point literal. */
+
+      // It's a floating point literal.
+      {
+        if (radix != 10) {
+          ReportParseError(startLoc, "Floating point literals must be base 10.");
+          RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
+        }
+
         long count = 0;
         do {
           c = getChar();
@@ -1430,9 +1447,9 @@ TransitionLexer::getNextInputToken()
         /* FIX: if count is 0, number is malformed */
       }
 
-      /* We are either done with this token or we are looking at a '^'
+      /* We are either done with this token or we are looking at a 'e'
          indicating start of an exponent. */
-      if (c != '^') {
+      if (c != 'e') {
         ungetChar(c);
         endLoc.updateWith(thisToken);
         RETURN_TOKEN(LToken(tk_Float, startLoc, endLoc, thisToken));
