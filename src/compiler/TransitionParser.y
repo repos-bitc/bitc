@@ -400,11 +400,10 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_actual_params sxp_nonempty_params
 %type <ast> blk_actual_params blk_nonempty_params
 %type <ast> sxp_block sxp_block_exprs
-%type <ast> blk_block blk_stmt_seq
+%type <ast> blk_block blk_expr_seq
 %type <ast> sxp_expr sxp_the_expr sxp_unqual_expr
 %type <ast> blk_primary_expr blk_postfix_expr blk_prefix_expr blk_infix_expr
 %type <ast> blk_tqual_expr
-%type <ast> blk_stmt
 %type <ast> blk_expr
 %type <ast> sxp_method_decls sxp_method_decl
 %type <ast> blk_method_decls blk_method_decl
@@ -1491,8 +1490,8 @@ blk_method_bindings: blk_method_bindings SC blk_method_binding {
   $$->addChild($3);
 };
 
-blk_method_binding: blk_ident '=' blk_stmt {
-  SHOWPARSE("blk_method_binding -> blk_ident = blk_stmt");
+blk_method_binding: blk_ident '=' blk_expr {
+  SHOWPARSE("blk_method_binding -> blk_ident = blk_expr");
 
   $$ = AST::make(at_tcmethod_binding, $1->loc, $1, $3);
 };
@@ -1519,11 +1518,11 @@ sxp_method_binding: '(' sxp_ident sxp_ident sxp_expr ')' {
 };
 
 // DEFINE  [5.1]
-//blk_value_definition: tk_DEF blk_defpattern blk_constraints '=' blk_stmt {
+//blk_value_definition: tk_DEF blk_defpattern blk_constraints '=' blk_expr {
 //  SHOWPARSE("blk_value_definition -> DEF  blk_defpattern blk_constraints = blk_expr");
 //  $$ = AST::make(at_define, $1.loc, $2, $5, $3);
 //};
-blk_value_definition: tk_DEF blk_defpattern blk_constraints trn_optdocstring '=' blk_stmt {
+blk_value_definition: tk_DEF blk_defpattern blk_constraints trn_optdocstring '=' blk_expr {
   SHOWPARSE("blk_value_definition -> DEF blk_defpattern blk_constraints trn_optdocstring = blk_expr");
   $$ = AST::make(at_define, $1.loc, $2, $6, $3);
 };
@@ -1538,8 +1537,8 @@ sxp_value_definition: LP tk_DEFINE sxp_defpattern trn_docstring sxp_expr RP  {
   $$->addChild(AST::make(at_constraints));
 };
 
-blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstring '=' blk_stmt %prec '(' {
-  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_stmt");
+blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstring '=' blk_expr %prec '(' {
+  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_expr");
   // $5 = stripDocString($5);
   shared_ptr<AST> iRetBlock =
     AST::make(at_block, $1.loc, 
@@ -1551,8 +1550,8 @@ blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstri
   $$ = AST::make(at_recdef, $1.loc, iP, iLambda, $5);
 }
 
-blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constraints trn_optdocstring '=' blk_stmt %prec '(' {
-  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_stmt");
+blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constraints trn_optdocstring '=' blk_expr %prec '(' {
+  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_expr");
   // $5 = stripDocString($5);
   shared_ptr<AST> iRetBlock =
     AST::make(at_block, $1.loc, 
@@ -2862,18 +2861,13 @@ blk_expr: blk_infix_expr {
   $$ = $1;
 }
 
-blk_stmt: blk_expr {
-  SHOWPARSE("blk_stmt -> blk_expr");
-  $$ = $1;
-}
-
 blk_block: ILCB '}' {
   SHOWPARSE("blk_block -> { }");
   // Empty blocks are okay:
   $$ = AST::make(at_begin, $1.loc);
 }
-blk_block: ILCB blk_stmt_seq IRCB {
-  SHOWPARSE("blk_block -> { blk_stmt_seq }");
+blk_block: ILCB blk_expr_seq IRCB {
+  SHOWPARSE("blk_block -> { blk_expr_seq }");
 
   // Remove redundant blocks eagerly:
   if ($2->children.size() == 1 && $2->child(0)->astType == at_begin)
@@ -2881,31 +2875,31 @@ blk_block: ILCB blk_stmt_seq IRCB {
   $$ = $2;
 }
 
-blk_stmt_seq: blk_stmt {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt");
+blk_expr_seq: blk_expr {
+  SHOWPARSE("blk_expr_seq -> blk_expr");
   $$ = AST::make(at_begin, $1->loc, $1);
 };
-blk_stmt_seq: blk_value_definition {
-  SHOWPARSE("blk_stmt_seq -> blk_value_definition");
+blk_expr_seq: blk_value_definition {
+  SHOWPARSE("blk_expr_seq -> blk_value_definition");
   $$ = AST::make(at_begin, $1->loc, $1);
 };
-/*blk_stmt_seq: blk_stmt_seq blk_stmt {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq blk_stmt");
+/*blk_expr_seq: blk_expr_seq blk_expr {
+  SHOWPARSE("blk_expr_seq -> blk_expr_seq blk_expr");
   $$ = $1;
   $$->addChild($2);
 };
-blk_stmt_seq: blk_stmt_seq SC blk_value_definition {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq SC blk_value_definition");
+blk_expr_seq: blk_expr_seq SC blk_value_definition {
+  SHOWPARSE("blk_expr_seq -> blk_expr_seq SC blk_value_definition");
   $$ = $1;
   $$->addChild($3);
   };*/
-blk_stmt_seq: blk_stmt_seq ';' blk_stmt {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq ; blk_stmt");
+blk_expr_seq: blk_expr_seq ';' blk_expr {
+  SHOWPARSE("blk_expr_seq -> blk_expr_seq ; blk_expr");
   $$ = $1;
   $$->addChild($3);
 };
-blk_stmt_seq: blk_stmt_seq ';' blk_value_definition {
-  SHOWPARSE("blk_stmt_seq -> blk_stmt_seq ; blk_value_definition");
+blk_expr_seq: blk_expr_seq ';' blk_value_definition {
+  SHOWPARSE("blk_expr_seq -> blk_expr_seq ; blk_value_definition");
   $$ = $1;
   $$->addChild($3);
 };
@@ -3319,8 +3313,8 @@ sxp_unqual_expr: '(' tk_BLOCK sxp_ident sxp_block ')' {
   $$ = AST::make(at_block, $2.loc, $3, $4);
 }
 
-blk_stmt: tk_FROM blk_ident tk_RETURN blk_stmt {
-  SHOWPARSE("blk_stmt -> FROM blk_ident RETURN blk_stmt");
+blk_expr: tk_FROM blk_ident tk_RETURN blk_expr {
+  SHOWPARSE("blk_expr -> FROM blk_ident RETURN blk_expr");
   $$ = AST::make(at_return_from, $1.loc, $2, $4);
 }
 sxp_unqual_expr: '(' tk_FROM sxp_ident tk_RETURN sxp_expr ')' {
@@ -3333,8 +3327,8 @@ sxp_unqual_expr: '(' tk_FROM sxp_ident tk_RETURN sxp_expr ')' {
 // Replaced by v.length, a.length, ar.length
 
 // convenience syntax: multiple arguments
-blk_expr: tk_LAMBDA '(' ')' blk_stmt {
-  SHOWPARSE("blk_expr -> LAMBDA () blk_stmt )");
+blk_expr: tk_LAMBDA '(' ')' blk_expr {
+  SHOWPARSE("blk_expr -> LAMBDA () blk_expr )");
   shared_ptr<AST> argVec = AST::make(at_argVec, $2.loc);
   shared_ptr<AST> iRetBlock =
     AST::make(at_block, $1.loc, 
@@ -3342,8 +3336,8 @@ blk_expr: tk_LAMBDA '(' ')' blk_stmt {
   $$ = AST::make(at_lambda, $1.loc, argVec, iRetBlock);
 };
 
-blk_expr: tk_LAMBDA '(' blk_lambdapatterns ')' blk_stmt {
-  SHOWPARSE("blk_expr -> LAMBDA (blk_lambdapatterns) blk_stmt");
+blk_expr: tk_LAMBDA '(' blk_lambdapatterns ')' blk_expr {
+  SHOWPARSE("blk_expr -> LAMBDA (blk_lambdapatterns) blk_expr");
   shared_ptr<AST> iRetBlock =
     AST::make(at_block, $1.loc, 
               AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $5);
@@ -3368,8 +3362,8 @@ sxp_unqual_expr: '(' tk_LAMBDA '(' sxp_lambdapatterns ')' sxp_block ')'  {
 };
 
 // RETURN [7.13]         
-blk_stmt: tk_RETURN blk_stmt {
-  SHOWPARSE("blk_stmt -> RETURN blk_stmt");
+blk_expr: tk_RETURN blk_expr {
+  SHOWPARSE("blk_expr -> RETURN blk_expr");
   $$ = AST::make(at_return_from, $1.loc,
                  AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $2);
 }
@@ -3392,12 +3386,12 @@ sxp_unqual_expr: '(' sxp_expr sxp_actual_params ')' { /* apply to zero or more a
 };
 
 // IF [7.15.1]
-blk_stmt: tk_IF blk_expr tk_THEN ILCB blk_stmt_seq IRCB tk_ELSE ILCB blk_stmt_seq IRCB %prec tk_ELSE {
-  SHOWPARSE("blk_stmt -> IF blk_expr THEN { blk_stmt_seq } ELSE { blk_stmt_seq }");
+blk_expr: tk_IF blk_expr tk_THEN ILCB blk_expr_seq IRCB tk_ELSE ILCB blk_expr_seq IRCB %prec tk_ELSE {
+  SHOWPARSE("blk_expr -> IF blk_expr THEN { blk_expr_seq } ELSE { blk_expr_seq }");
   $$ = AST::make(at_if, $1.loc, $2, $5, $9);
 };
-blk_stmt: tk_IF blk_expr tk_THEN ILCB blk_stmt_seq IRCB %prec tk_THEN {
-  SHOWPARSE("blk_stmt -> IF blk_expr THEN { blk_stmt_seq }");
+blk_expr: tk_IF blk_expr tk_THEN ILCB blk_expr_seq IRCB %prec tk_THEN {
+  SHOWPARSE("blk_expr -> IF blk_expr THEN { blk_expr_seq }");
   $$ = AST::make(at_when, $1.loc, $2, $5);
 };
 sxp_unqual_expr: '(' tk_IF sxp_expr sxp_expr sxp_expr ')' {
@@ -3406,8 +3400,8 @@ sxp_unqual_expr: '(' tk_IF sxp_expr sxp_expr sxp_expr ')' {
 };
 
 // WHEN [7.15.2]
-blk_stmt: tk_WHEN '(' blk_expr ')' blk_stmt {
-  SHOWPARSE("blk_stmt -> WHEN (blk_expr) blk_stmt");
+blk_expr: tk_WHEN '(' blk_expr ')' blk_expr {
+  SHOWPARSE("blk_expr -> WHEN (blk_expr) blk_expr");
   $$ = AST::make(at_when, $1.loc, $3, $5);
 };
 sxp_unqual_expr: '(' tk_WHEN sxp_expr sxp_block ')' {
@@ -3565,14 +3559,14 @@ sxp_condcase: '(' sxp_expr sxp_block ')'  {
 };
 
 // SET! [7.16]                
-blk_stmt: blk_postfix_expr tk_ASSIGN blk_stmt {
+blk_expr: blk_postfix_expr tk_ASSIGN blk_expr {
   /* Strictly speaking, RHS could be a higher-level parse form,, but
    * none of those are l-values in any case. Need postfix_expr in
    * order to pick up things like 'a.b'. There is a location check
    * later in the compiler, but might as well reject what we can
    * early.
    */
-  SHOWPARSE("blk_assignment -> blk_postfix_expr := blk_stmt");
+  SHOWPARSE("blk_assignment -> blk_postfix_expr := blk_expr");
   $$ = AST::make(at_setbang, $2.loc, $1, $3);
 };
 sxp_unqual_expr: '(' tk_SET sxp_expr sxp_expr ')' {
@@ -3581,8 +3575,8 @@ sxp_unqual_expr: '(' tk_SET sxp_expr sxp_expr ')' {
 };
 
 // SWITCH
-blk_stmt: tk_SWITCH blk_expr ILCB blk_sw_legs blk_opt_otherwise IRCB {
-  SHOWPARSE("blk_stmt -> SWITCH blk_expr blk_sw_legs blk_opt_otherwise");
+blk_expr: tk_SWITCH blk_expr ILCB blk_sw_legs blk_opt_otherwise IRCB {
+  SHOWPARSE("blk_expr -> SWITCH blk_expr blk_sw_legs blk_opt_otherwise");
   $$ = AST::make(at_uswitch, $1.loc, 
                  AST::make(at_ident, LToken(tk_BlkIdent, "__dummy")),
                  $2, $4, $5);
@@ -3701,8 +3695,8 @@ blk_opt_otherwise: { //empty
   SHOWPARSE("blk_opt_otherwise -> ");
   $$ = AST::make(at_Null);
 };
-blk_otherwise: tk_OTHERWISE blk_stmt {
-  SHOWPARSE("blk_otherwise -> OTHERWISE blk_stmt");
+blk_otherwise: tk_OTHERWISE blk_expr {
+  SHOWPARSE("blk_otherwise -> OTHERWISE blk_expr");
   $$ = AST::make(at_otherwise, $1.loc, $2);
 };
 
@@ -3741,8 +3735,8 @@ typecase_leg: '(' sxp_bindingpattern sxp_expr ')'  {
   }; */
 
 // TRY/CATCH [7.19.1]
-blk_stmt: tk_TRY blk_expr tk_HANDLE ILCB blk_catch_legs blk_opt_otherwise IRCB {
-  SHOWPARSE("blk_stmt -> TRY blk_expr blk_catch_legs blk_opt_otherwise");
+blk_expr: tk_TRY blk_expr tk_HANDLE ILCB blk_catch_legs blk_opt_otherwise IRCB {
+  SHOWPARSE("blk_expr -> TRY blk_expr blk_catch_legs blk_opt_otherwise");
   $$ = AST::make(at_try, $1.loc, $2, 
                  AST::make(at_ident, LToken(tk_BlkIdent, "__dummy")),
                  $5, $6);
@@ -3752,8 +3746,8 @@ blk_stmt: tk_TRY blk_expr tk_HANDLE ILCB blk_catch_legs blk_opt_otherwise IRCB {
   // syntax we have the ident explicitly in each leg, so we don't do
   // that.
 }
-blk_stmt: tk_TRY blk_expr blk_otherwise {
-  SHOWPARSE("blk_stmt -> TRY blk_expr blk_catch_legs blk_otherwise");
+blk_expr: tk_TRY blk_expr blk_otherwise {
+  SHOWPARSE("blk_expr -> TRY blk_expr blk_catch_legs blk_otherwise");
   shared_ptr<AST> dummyID = 
     AST::make(at_ident, LToken(tk_BlkIdent, "__dummy"));
   $$ = AST::make(at_try, $1.loc, $2, dummyID,
@@ -3776,8 +3770,8 @@ blk_stmt: tk_TRY blk_expr blk_otherwise {
 //  $$ = $1;
 //}
 
-//blk_stmt: tk_TRY blk_letbinding tk_IN blk_stmt blk_catch_legs {
-//  SHOWPARSE("blk_stmt -> LET blk_letbinding IN expr");
+//blk_expr: tk_TRY blk_letbinding tk_IN blk_expr blk_catch_legs {
+//  SHOWPARSE("blk_expr -> LET blk_letbinding IN expr");
 //
 //  shared_ptr<AST> bindings = AST::make(at_letbindings, $2->loc, $2);
 //  $$ = AST::make(at_kennedy_try, $1.loc, bindings, $4);
@@ -3846,14 +3840,14 @@ sxp_unqual_expr: sxp_let_eform {
 };
 
 // LET [5.3.1]                 
-blk_stmt: tk_LET ILCB blk_letbindings IRCB tk_IN blk_block {
-  SHOWPARSE("blk_stmt -> LET { blk_letbindings } IN  blk_block");
+blk_expr: tk_LET ILCB blk_letbindings IRCB tk_IN blk_block {
+  SHOWPARSE("blk_expr -> LET { blk_letbindings } IN  blk_block");
 
   $$ = AST::make(at_let, $1.loc, $3, $6);
   $$->addChild(AST::make(at_constraints));
 }
-blk_letbinding: blk_bindingpattern '=' blk_stmt {
-  SHOWPARSE("blk_letbinding -> blk_bindingpattern '=' blk_stmt");
+blk_letbinding: blk_bindingpattern '=' blk_expr {
+  SHOWPARSE("blk_letbinding -> blk_bindingpattern '=' blk_expr");
   $$ = AST::make(at_letbinding, $1->loc, $1, $3);
 };
 // Following not used in LET, but may end up used in LETREC:
@@ -3889,8 +3883,8 @@ sxp_letbinding: '(' sxp_bindingpattern sxp_expr ')' {
 };
 
 // LETREC [5.3.2]              
-blk_stmt: tk_LETREC ILCB blk_letbindings IRCB tk_IN blk_block {
-  SHOWPARSE("blk_stmt -> LETREC { blk_letbindings } IN blk_block");
+blk_expr: tk_LETREC ILCB blk_letbindings IRCB tk_IN blk_block {
+  SHOWPARSE("blk_expr -> LETREC { blk_letbindings } IN blk_block");
 
   $$ = AST::make(at_letrec, $1.loc, $3, $6);
   $$->addChild(AST::make(at_constraints));
@@ -3907,8 +3901,8 @@ sxp_let_eform: '(' tk_LETREC '(' sxp_letbindings ')' sxp_block ')' {
   $$->addChild(AST::make(at_constraints));
 };
 
-blk_stmt: tk_LOOP blk_loopbindings tk_UNTIL blk_expr blk_giving blk_block {
-  SHOWPARSE("blk_stmt -> LOOP blk_loopbindings UNTIL blk_expr blk_giving blk_block");
+blk_expr: tk_LOOP blk_loopbindings tk_UNTIL blk_expr blk_giving blk_block {
+  SHOWPARSE("blk_expr -> LOOP blk_loopbindings UNTIL blk_expr blk_giving blk_block");
 
   // In the block syntax, I didn't fabricate the test AST in a
   // separate production:
