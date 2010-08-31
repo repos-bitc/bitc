@@ -49,27 +49,22 @@ typedef long ucs4_t;
 class PushBack {
   // Needs to be the size of the largest token that we might have to
   // push back due to layout, but not less than four.
-  enum { maxPushBack = 8 };
-
-  long stack[maxPushBack];
-  unsigned depth;
+  std::vector<ucs4_t> stack;
 
 public:
   inline void push(ucs4_t c) {
-    assert (depth < maxPushBack);
-    stack[depth] = c;
-    depth++;
+    stack.push_back(c);
   }
 
   inline long pop() {
-    if (depth == 0)
+    if (stack.size() == 0)
       return -1;
-    depth--;
-    return stack[depth];
+    ucs4_t c = stack[stack.size()-1];
+    stack.pop_back();
+    return c;
   }
 
   PushBack() {
-    depth = 0;
   }
 };
 

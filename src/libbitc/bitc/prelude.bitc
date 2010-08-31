@@ -152,8 +152,8 @@ interface bitc.prelude {
   def __<<    : fn('a, word) -> 'a external
   def __>>    : fn('a, word) -> 'a external
 
-  def `!      : fn(bool) -> bool external
-  def `not(b) = !b
+  def `!`     : fn(bool) -> bool external
+  def `not`(b) = !b
 
   // Conversion operation. This one is actually quite dangerous,
   // and I'm not convinced that we should have it at all. If we *do*
@@ -242,28 +242,28 @@ interface bitc.prelude {
   // TYPES ADMITTING EQUALITY
   ///////////////////////////////////////////////////////////
   trait Eq('a) {
-    `== : fn('a,'a) -> bool
-    `!= : fn('a,'a) -> bool
+    `==` : fn('a,'a) -> bool
+    `!=` : fn('a,'a) -> bool
   }
   
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING ORDERING
   ///////////////////////////////////////////////////////////
   trait Ord('a) where Eq('a) {
-    `<  : fn('a, 'a) -> bool
-    `>  : fn('a, 'a) -> bool
-    `<= : fn('a, 'a) -> bool
-    `>= : fn('a, 'a) -> bool
+    `<`  : fn('a, 'a) -> bool
+    `>`  : fn('a, 'a) -> bool
+    `<=` : fn('a, 'a) -> bool
+    `>=` : fn('a, 'a) -> bool
   }
   
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING (FOUR-FUNCTION) ARITHMETIC
   ///////////////////////////////////////////////////////////
   trait Arith('a) where Ord('a) {
-    `+ : fn('a, 'a) -> 'a
-    `- : fn('a, 'a) -> 'a
-    `* : fn('a, 'a) -> 'a
-    `/ : fn('a, 'a) -> 'a
+    `+` : fn('a, 'a) -> 'a
+    `-` : fn('a, 'a) -> 'a
+    `*` : fn('a, 'a) -> 'a
+    `/` : fn('a, 'a) -> 'a
     negate : fn('a) -> 'a
   }
 
@@ -271,7 +271,7 @@ interface bitc.prelude {
   // TYPES ADMITTING INTEGER MODULUS ARITHMETIC
   ///////////////////////////////////////////////////////////
   trait IntArith('a) where Arith('a), IntLit('a) {
-    `% : fn('a, 'a) -> 'a
+    `%` : fn('a, 'a) -> 'a
   }
 
   ///////////////////////////////////////////////////////////
@@ -282,330 +282,330 @@ interface bitc.prelude {
       bit_or   : fn('a, 'a)   -> 'a   // Bitwise OR
       bit_not  : fn('a)       -> 'a   // One's Complement
       bit_xor  : fn('a, 'a)   -> 'a   // Bitwise XOR
-      `<<      : fn('a, word) -> 'a   // Left Shift
-      `>>      : fn('a, word) -> 'a   // Right Shift
+      `<<`     : fn('a, word) -> 'a   // Left Shift
+      `>>`     : fn('a, word) -> 'a   // Right Shift
   }
 
-  def `&(x, y) = bit_and(x, y)
-  def `|(x, y) = bit_or(x, y)
-  def `^(x, y) = bit_xor(x, y)
-  def `~(x) = bit_not(x)
+  def `&`(x, y) = bit_and(x, y)
+  def `|`(x, y) = bit_or(x, y)
+  def `^`(x, y) = bit_xor(x, y)
+  def `~`(x) = bit_not(x)
 
   ///////////////////////////////////////////////////////////
   // Instance Definitions
   ///////////////////////////////////////////////////////////
 
   instance Eq(()) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
     
   instance Eq(char) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
 
   instance Eq(bool) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
 
   instance Eq(int8) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
 
   instance Eq(int16) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
 
   instance Eq(int32) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
 
   instance Eq(int64) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
 
   instance Eq(uint8) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
 
   instance Eq(uint16) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
 
   instance Eq(uint32) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
 
   instance Eq(uint64) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=`  = __!=
   }
 
   instance Eq(word) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=`  = __!=
   }
 
   instance Eq(float) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=`  = __!=
   }
 
   instance Eq(double) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=`  = __!=
   }
 
   instance Eq(quad) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=`  = __!=
   }
 
   instance Eq(string) {
-    `== = __==
-    `!= = __!=
+    `==` = __==
+    `!=` = __!=
   }
 
   instance Ord(char) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
   
   instance Ord(bool) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
 
   instance Ord(int8) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
   instance Ord(int16) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
   instance Ord(int32) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
   instance Ord(int64) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
   instance Ord(uint8) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
   instance Ord(uint16) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
   instance Ord(uint32) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
   instance Ord(uint64) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
 
   instance Ord(word) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
 
   instance Ord(float) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
   instance Ord(double) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
   instance Ord(quad) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>`  = __>
+    `<=` = __<=
+    `>=` = __>=
   }
 
   instance Ord(string) {
-    `< = __<
-    `> = __>
-    `<= = __<=
-    `>= = __>=
+    `<`  = __<
+    `>` = __>
+    `<=` = __<=
+    `>=` = __>=
   }
 
   instance Arith(int8) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
   instance Arith(int16) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
   instance Arith(int32) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
   instance Arith(int64) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
   instance Arith(uint8) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
   instance Arith(uint16) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
   instance Arith(uint32) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
   instance Arith(uint64) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
   instance Arith(word) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
 
   instance Arith(float) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
   instance Arith(double) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
   instance Arith(quad) {
-    `+ = __+
-    `- = __-
-    `* = __*
-    `/ = __/
+    `+` = __+
+    `-` = __-
+    `*` = __*
+    `/` = __/
     negate = __negate
   }
 
-  instance IntArith(int8)   { `% = __% }
-  instance IntArith(int16)  { `% = __% }
-  instance IntArith(int32)  { `% = __% }
-  instance IntArith(int64)  { `% = __% }
-  instance IntArith(uint8)  { `% = __% }
-  instance IntArith(uint16) { `% = __% }
-  instance IntArith(uint32) { `% = __% }
-  instance IntArith(uint64) { `% = __% }
-  instance IntArith(word)   { `% = __% }
+  instance IntArith(int8)   { `%` = __% }
+  instance IntArith(int16)  { `%` = __% }
+  instance IntArith(int32)  { `%` = __% }
+  instance IntArith(int64)  { `%` = __% }
+  instance IntArith(uint8)  { `%` = __% }
+  instance IntArith(uint16) { `%` = __% }
+  instance IntArith(uint32) { `%` = __% }
+  instance IntArith(uint64) { `%` = __% }
+  instance IntArith(word)   { `%` = __% }
 
   instance Bitwise(uint8) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
     bit_xor = __b_xor
-    `<< =  __<<
-    `>> =  __>>
+    `<<` =  __<<
+    `>>` =  __>>
   }
   instance Bitwise(uint16) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
     bit_xor = __b_xor
-    `<< =  __<<
-    `>> =  __>>
+    `<<` =  __<<
+    `>>` =  __>>
   }
   instance Bitwise(uint32) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
     bit_xor = __b_xor
-    `<< =  __<<
-    `>> =  __>>
+    `<<` =  __<<
+    `>>` =  __>>
   }
   instance Bitwise(uint64) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
     bit_xor = __b_xor
-    `<< =  __<<
-    `>> =  __>>
+    `<<` =  __<<
+    `>>` =  __>>
   }
   instance Bitwise(word) {
     bit_and = __b_and
     bit_or = __b_or
     bit_not = __b_not
     bit_xor = __b_xor
-    `<< =  __<<
-    `>> =  __>>
+    `<<` =  __<<
+    `>>` =  __>>
   }
 
   trait Length('a) {

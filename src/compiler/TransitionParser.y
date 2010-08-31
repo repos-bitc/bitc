@@ -198,7 +198,6 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> '{' '}' ';'
 %left <tok> '[' ']'            /* array, vector */
 %token <tok> '.'
-%token <tok> '`'
 %token <tok> tk_ASSIGN
 
 /* Primary types and associated hand-recognized literals: */
@@ -4068,87 +4067,6 @@ blk_ident: tk_MixIdent {
   SHOWPARSE("blk_ident -> ` <MixIdent " + $1.str + ">");
   $$ = AST::make(at_ident, $1);
 };
-blk_ident: '`' tk_NOT {
-  SHOWPARSE("blk_ident -> ` <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '!' {
-  SHOWPARSE("blk_ident -> ` <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '+' {
-  SHOWPARSE("blk_ident -> ` <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '-' {
-  SHOWPARSE("blk_ident -> ` <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '*' {
-  SHOWPARSE("blk_ident -> ` <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '/' {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '%' {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' tk_INFIX_CONS {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' tk_EQUALS {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' tk_NOTEQUALS {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '<' {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' tk_LE {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '>' {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' tk_GE {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '|' {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '^' {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '&' {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' '~' {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' tk_LSHIFT {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-blk_ident: '`' tk_RSHIFT {
-  SHOWPARSE("blk_ident -> <MixIdent " + $2.str + ">");
-  $$ = AST::make(at_ident, $2);
-};
-
 blk_ident: tk_ReservedWord {
   SHOWPARSE("blk_ident -> <RESERVED=" + $1.str + ">");
   cerr << $1.loc.asString() << ": The token \"" << $1.str

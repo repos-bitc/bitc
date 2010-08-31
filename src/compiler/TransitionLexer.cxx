@@ -1135,8 +1135,48 @@ TransitionLexer::getNextInputToken()
         RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
       }
 
-      endLoc.updateWith(thisToken);
-      RETURN_TOKEN(LToken(c, startLoc, endLoc, thisToken));
+      // In the block syntax, back-tick has the effect of quoting an
+      // operator, turning it in to an identifier for use in function
+      // call position:
+      ucs4_t c = getChar();
+
+      // "not" is handled as a special-case operator:
+      if (valid_ident_start(c)) {
+        do {
+          c = getChar();
+        } while (valid_ident_continue(c));
+
+        if (c != '`' || thisToken != "`not`") {
+          ungetThisToken();
+          endLoc.updateWith(thisToken);
+          RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
+        }
+
+        endLoc.updateWith(thisToken);
+        RETURN_TOKEN(LToken(tk_BlkIdent, startLoc, endLoc, 
+                            thisToken.substr(1, thisToken.size()-2)));
+      }
+      else if (valid_operator_start(c)) {
+        do {
+          c = getChar();
+        } while (valid_operator_continue(c));
+
+        if (c != '`') {
+          ungetThisToken();
+          endLoc.updateWith(thisToken);
+          RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
+        }
+
+        endLoc.updateWith(thisToken);
+        RETURN_TOKEN(LToken(tk_BlkIdent, startLoc, endLoc, 
+                            thisToken.substr(1, thisToken.size()-2)));
+      }
+      else {
+        ungetChar(c);
+        endLoc.updateWith(thisToken);
+        RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
+      }
+
     }
 
   case ';':
