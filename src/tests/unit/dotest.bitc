@@ -43,6 +43,6 @@ bitc version 0.11
   (lambda (argvec) 
     (loop ((a 0:int32 (+ a 1))
 	   (b 1:int32 (+ b 2)))
-	(#t 0)
-	#f)))
+	(true 0)
+	false)))
  

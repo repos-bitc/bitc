@@ -38,9 +38,9 @@
 bitc version 0.11
 
 (define  (somefun lst:(list 'a))
-  (let ((v:'a #t))  // should resolve to the same tvar
+  (let ((v:'a true))  // should resolve to the same tvar
     (let ((xyz (lambda (LST) ())))
-      #t)))
+      true)))
 
 
 (import bitc.main as main)

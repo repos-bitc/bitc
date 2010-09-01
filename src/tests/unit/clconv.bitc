@@ -44,4 +44,4 @@ bitc version 0.11
     (lambda (x) y)))
 
 (define main.main:(fn (vector string) -> int32)
-  (lambda (argvec) ((f) #t))) 
+  (lambda (argvec) ((f) true))) 

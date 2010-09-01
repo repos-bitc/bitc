@@ -43,16 +43,16 @@ bitc version 0.11
 // Structure with RefType Wrapper
 (defstruct (St 'a 'b):val f1:(mutable (vector 'a)) f2:'b)
 
-(define q1 (St (vector #t) #f))
-(define q2:(mutable 'a) (St (vector #t) #f))
+(define q1 (St (vector true) false))
+(define q2:(mutable 'a) (St (vector true) false))
 //WORKS OK because of CopyCompatibility at arg position of vector
 //constructor !
-(define q3:(St (mutable bool) bool) (St (vector #t) #f))
+(define q3:(St (mutable bool) bool) (St (vector true) false))
 //SHOULD NOT WORK
 //(define q4:(St (mutable bool) bool) 
-// (St (vector #t):(vector bool) #f))
+// (St (vector true):(vector bool) false))
 
-(define q5:(St  bool (mutable bool)) (St (vector #t) #f))
+(define q5:(St  bool (mutable bool)) (St (vector true) false))
  
 (import bitc.main as main)
 (provide bitc.main main)

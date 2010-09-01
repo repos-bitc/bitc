@@ -41,6 +41,6 @@ bitc version 0.11
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (if (and (== (! #t) #f)
-             (== (not #t) #f))
+    (if (and (== (! true) false)
+             (== (not true) false))
         0 1)))

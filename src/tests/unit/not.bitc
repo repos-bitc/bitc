@@ -41,4 +41,4 @@ bitc version 0.11
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (if (not #f) 0 1)))
+    (if (not false) 0 1)))

@@ -64,7 +64,7 @@ bitc version 0.11
 	   (== (the uint64 0)
 	       (the uint64 0))
 	   (== 'a' 'a')
-	   (== #t #t)
+	   (== true true)
 	   (== "abc" "abc")
 	   (> "abc" "abc")
 	   (< "abc" "abc")

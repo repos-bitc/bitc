@@ -41,7 +41,7 @@ bitc version 0.11
 interface bitc.list {
 
   def isNull(l:list('a)) 
-    "Return #t (#f) if list is empty (non-empty)."
+    "Return true (false) if list is empty (non-empty)."
     = if l.nil then true else false
 
   def map(f, lst:list('a))

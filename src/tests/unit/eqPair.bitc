@@ -45,8 +45,8 @@ bitc version 0.11
 // rec-instantiated, the application of the method still works on the 
 // original type. 
 
-(define (returnTrue x y) #t)
-(define (returnFalse x y) #f)
+(define (returnTrue x y) true)
+(define (returnFalse x y) false)
 
 (definstance (Eq (ref (pair bool bool)))
   (== = returnTrue) (!= = returnTrue))
@@ -54,9 +54,9 @@ bitc version 0.11
 (definstance (Eq (ref (pair (mutable bool) (mutable bool))))
   (== = returnFalse) (!= = returnFalse))
 
-(define p (dup (#t, #f)))
+(define p (dup (true, false)))
 (define mp:(ref (pair (mutable bool) (mutable bool))) 
-  (dup (#t, #f)))
+  (dup (true, false)))
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

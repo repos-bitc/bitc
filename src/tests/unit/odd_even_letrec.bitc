@@ -46,7 +46,7 @@ bitc version 0.11
 (define oe
   (letrec ((odd (lambda (x) (even x)))
 	   (even (lambda(x) (odd x))))
-    (odd #t):bool
+    (odd true):bool
     (odd 10:int32):int32 ))
 
 (import bitc.main as main)

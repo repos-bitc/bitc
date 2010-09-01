@@ -42,4 +42,4 @@ bitc version 0.11
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (block L
-	   (if #t (from L return 0:int32) 25:int32))))
+	   (if true (from L return 0:int32) 25:int32))))

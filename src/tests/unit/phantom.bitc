@@ -45,5 +45,5 @@ bitc version 0.11
   (lambda (argVec) 
     (let ((s1:(St int32 int32) (St 10))
 	  (s2:(St int32 bool)  (St 10)))
-      //(if #t s1 s2) // will not work
+      //(if true s1 s2) // will not work
       (- s1.n s2.n))))

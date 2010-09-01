@@ -47,7 +47,7 @@ bitc version 0.11
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (if (id #t) 
+    (if (id true) 
       (id (id i1))
       (id (id (id (id i2)))))
     i0))

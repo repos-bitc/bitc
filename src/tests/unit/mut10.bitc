@@ -38,9 +38,9 @@
 bitc version 0.11
 
 // Test for mutability inference and hint propagation.
-(define p (if #t 
-	      (pair #t #f):(pair (mutable bool) bool) 
-	      (pair #f #t):(pair bool (mutable bool))))
+(define p (if true 
+	      (pair true false):(pair (mutable bool) bool) 
+	      (pair false true):(pair bool (mutable bool))))
 
 (import bitc.main as main)
 (provide bitc.main main)

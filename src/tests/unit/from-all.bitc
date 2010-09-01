@@ -43,6 +43,6 @@ bitc version 0.11
 
 (define main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (map (lambda (x) x) (cons #t nil))
+    (map (lambda (x) x) (cons true nil))
     0))
 

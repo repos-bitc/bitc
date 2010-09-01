@@ -41,8 +41,8 @@ bitc version 0.11
  
 (defunion unin C)
 (definstance (Eq unin) 
-  (== = (lambda (x y) #t))
-  (!= = (lambda (x y) #f)))
+  (== = (lambda (x y) true))
+  (!= = (lambda (x y) false)))
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

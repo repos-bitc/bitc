@@ -43,6 +43,6 @@ bitc version 0.11
 (provide bitc.main main)
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)   
-    (list.cons #t list.nil) 0))
+    (list.cons true list.nil) 0))
 
 

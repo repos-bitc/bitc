@@ -43,7 +43,7 @@ bitc version 0.11
 (define (abc x)
   (let ((id (lambda (y) y)))
     (id 1:int32)
-    (id #t)
+    (id true)
     (id x)))
  
 (define main.main:(fn (vector string) -> int32)

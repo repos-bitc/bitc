@@ -44,7 +44,7 @@ bitc version 0.11
 (define i2 (the int32 2))
 
 (define duped (dup i2))
-(define dpair (dup (i0, #f)))
+(define dpair (dup (i0, false)))
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     duped^ dpair^.fst

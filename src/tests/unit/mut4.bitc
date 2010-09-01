@@ -47,7 +47,7 @@ bitc version 0.11
 (defstruct St:val f1:(mutable int32) f2:(mutable bool))
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (let ((p (St 10 #t)))
+    (let ((p (St 10 true)))
       (set! p.f1 25)
       (set! p (St p.f1 p.f2)))
     0))

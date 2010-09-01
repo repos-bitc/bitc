@@ -55,4 +55,4 @@ bitc version 0.11
  
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (Ct1 (pr1 #t 10) #f) 0))
+    (Ct1 (pr1 true 10) false) 0))

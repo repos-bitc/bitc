@@ -42,7 +42,7 @@ bitc version 0.11
 (define (id x) x)
 
 (define X (let ((myID id))
-            (myID #t)
+            (myID true)
 	    (myID (the int32 10))))
  
 (define main.main:(fn (vector string) -> int32)

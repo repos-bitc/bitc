@@ -43,6 +43,6 @@ bitc version 0.11
 
 (defstruct (st 'a 'b) a: 'a)
 
-(define c (st #t))
+(define c (st true))
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) c 0))

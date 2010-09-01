@@ -41,8 +41,8 @@ bitc version 0.11
 
 (defstruct (St 'a)  f:(const 'a))
   
-(define x (St #t))
-(define x2 (St #t):(St (mutable bool)))
+(define x (St true))
+(define x2 (St true):(St (mutable bool)))
 (define y (St 10:int32))
 (define z (St (lambda (x) x)))
 

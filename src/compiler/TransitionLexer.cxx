@@ -255,7 +255,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "enable",           lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "exception",        lf_transition,        tk_EXCEPTION ),
   TransitionLexer::KeyWord( "external",         lf_transition,        tk_EXTERNAL ),
-  TransitionLexer::KeyWord( "false",            lf_block,             tk_FALSE ),
+  TransitionLexer::KeyWord( "false",            lf_transition,        tk_FALSE ),
   TransitionLexer::KeyWord( "fill",             lf_transition,        tk_FILL ),
   TransitionLexer::KeyWord( "float",            lf_transition,        tk_FLOAT ),
   TransitionLexer::KeyWord( "fn",               lf_transition,        tk_FN ),
@@ -320,7 +320,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "then",             lf_block,             tk_THEN ),
   TransitionLexer::KeyWord( "throw",            lf_transition,        tk_THROW ),
   TransitionLexer::KeyWord( "trait",            lf_block,             tk_TRAIT ),
-  TransitionLexer::KeyWord( "true",             lf_block,             tk_TRUE ),
+  TransitionLexer::KeyWord( "true",             lf_transition,        tk_TRUE ),
   TransitionLexer::KeyWord( "try",              lf_transition,        tk_TRY ),
   TransitionLexer::KeyWord( "tycon",            lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "tyfn",             lf_transition,        tk_ReservedWord ),
@@ -1247,42 +1247,6 @@ TransitionLexer::getNextInputToken()
       endLoc.updateWith(thisToken);
       RETURN_TOKEN(LToken(tk_String, startLoc, endLoc, 
                           thisToken.substr(1, thisToken.size()-2)));
-    }
-
-
-  case '#':                        // character and boolean literals
-    {
-      c = getChar();
-      switch(c) {
-      case 't':
-        {
-          if ((currentLang & lf_sexpr) == 0) {
-            ungetChar('t');
-            ungetChar('#');
-            RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
-          }
-          endLoc.updateWith(thisToken);
-          RETURN_TOKEN(LToken(tk_TRUE, startLoc, endLoc, thisToken));
-        }
-      case 'f':
-        {
-          if ((currentLang & lf_sexpr) == 0) {
-            ungetChar('f');
-            ungetChar('#');
-            RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
-          }
-
-          endLoc.updateWith(thisToken);
-          RETURN_TOKEN(LToken(tk_FALSE, startLoc, endLoc, thisToken));
-        }
-
-      default:
-        // FIX: this is bad input
-        {
-          endLoc.updateWith(thisToken);
-          RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
-        }
-      }
     }
 
   case '\'':                        // Type variable or character literal.

@@ -41,5 +41,5 @@ bitc version 0.11
  
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)   
-    (begin (vector #t #f #t).length
+    (begin (vector true false true).length
 	   (nth (MakeVector 25 (lambda (n) 0:int32)) 10))))

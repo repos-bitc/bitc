@@ -40,9 +40,9 @@ bitc version 0.11
 (provide bitc.main main)
 
 (defstruct St:val f:(mutable bool))
-(define x:St (St #t))
+(define x:St (St true))
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (set! x.f #f)
-    (set! x (St #t))
+    (set! x.f false)
+    (set! x (St true))
     (if x.f 0 1)))

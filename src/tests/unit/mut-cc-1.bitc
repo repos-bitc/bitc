@@ -43,11 +43,11 @@ bitc version 0.11
 // Structure with mutable wrapper
 (defstruct (St 'a 'b):val f1:(mutable 'a) f2:'b)
 
-(define p1 (St #t #f))
-(define p2:(mutable 'a) (St #t #f))
+(define p1 (St true false))
+(define p2:(mutable 'a) (St true false))
 //SHOULD NOT WORK
-//(define p3:(St (mutable bool) bool) (St #t #f))
-(define p4:(St  bool (mutable bool)) (St #t #f))
+//(define p3:(St (mutable bool) bool) (St true false))
+(define p4:(St  bool (mutable bool)) (St true false))
 
 (import bitc.main as main)
 (provide bitc.main main)

@@ -45,7 +45,7 @@ bitc version 0.11
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (cons 
-     (st2 (st2 #t (cons 0:int32 nil)) 
-	  (st1 0:int32 (cons #t nil)))
+     (st2 (st2 true (cons 0:int32 nil)) 
+	  (st1 0:int32 (cons true nil)))
      nil) 0))
 

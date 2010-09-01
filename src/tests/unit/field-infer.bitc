@@ -46,4 +46,4 @@ bitc version 0.11
 
 (define (main.main argv:(vector string))
   (f (S1 10))
-  (f (S2 #t 0)))
+  (f (S2 true 0)))

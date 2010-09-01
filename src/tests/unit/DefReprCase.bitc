@@ -45,6 +45,6 @@ bitc version 0.11
  
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (switch x (Ct1 #t)
+    (switch x (Ct1 true)
       ((Ct1 Ct2) x.i))))
   

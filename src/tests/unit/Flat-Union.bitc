@@ -42,14 +42,14 @@ bitc version 0.11
 (defunion unin:val C1 (C2 c21:int32 c22:bool) C3) 
 
 (definstance (Eq unin) 
-  (== = (lambda (x y) #t))
-  (!= = (lambda (x y) #f)))
+  (== = (lambda (x y) true))
+  (!= = (lambda (x y) false)))
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (let ((n:(mutable int32) 10))
-      C1 (C2 10 #t)
-      (== C1 (C2 n #t))
+      C1 (C2 10 true)
+      (== C1 (C2 n true))
       (== C3 C1)
       0)))
 

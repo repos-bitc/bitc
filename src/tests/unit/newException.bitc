@@ -46,5 +46,5 @@ bitc version 0.11
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)   
     (throw Xn)
-    (throw (Xn2 10 #f))
+    (throw (Xn2 10 false))
     0)) 

@@ -68,8 +68,8 @@ bitc version 0.11
 //(define RPQ (<<== (the int64 123) 456)) 
 
 (definstance (Eq (list 'a)) 
-  (== = (lambda (x y) #t))
-  (!= = (lambda (x y) #f)))
+  (== = (lambda (x y) true))
+  (!= = (lambda (x y) false)))
 
 (definstance (EQL (list 'a)) (=== = ==))
 (define (f x:(list 'a)) (=== x x))
@@ -77,7 +77,7 @@ bitc version 0.11
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (=== (the int32 10) 20)
-    (=== #t #f)
+    (=== true false)
     (=== nil nil)
-    (P #t #f) 0))
+    (P true false) 0))
 

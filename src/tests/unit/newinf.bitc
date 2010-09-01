@@ -42,7 +42,7 @@ bitc version 0.11
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (let ((id (lambda (x) x)))
-      (id #t)
+      (id true)
       (id '\t')
       //(set! id id)// must not work
       (let ((idid (id, id)))

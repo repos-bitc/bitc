@@ -45,7 +45,7 @@ bitc version 0.11
 
 (define (hasOdd oList)
   (switch x oList 
-    (nil #f)
+    (nil false)
     (cons (or (x.car.odd) (hasOdd x.cdr)))))
 
 (define main.main:(fn (vector string) -> int32)
@@ -64,15 +64,15 @@ bitc version 0.11
       (begin
 	(define f 10.0:float)
 	(define (inc_f) (set! f (+ f 1.0)))
-	(define (odd_f) #f) // :)
+	(define (odd_f) false) // :)
 	(Obj inc_f odd_f)))
 	
     // An object with encapsulated boolean state
     (define objb
       (begin
-	(define b #t)
-	(define (inc_b) (set! b #t))  // :)
-	(define (odd_b) #t)           // :)
+	(define b true)
+	(define (inc_b) (set! b true))  // :)
+	(define (odd_b) true)           // :)
 	(Obj inc_b odd_b)))
 
     // All objects have the same type Obj, no way to recover the inner

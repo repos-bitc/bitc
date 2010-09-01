@@ -43,7 +43,7 @@ bitc version 0.11
 (import bitc.vector as vec)
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)   
-    (let ((mvec (vec.make_mutable_vector 10 #t)))
-      (set! (nth mvec 5) #f))
+    (let ((mvec (vec.make_mutable_vector 10 true)))
+      (set! (nth mvec 5) false))
     0))
 

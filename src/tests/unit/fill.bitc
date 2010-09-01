@@ -50,5 +50,5 @@ bitc version 0.11
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (Struct i0 i0 i0)
-    (U2 #t)
+    (U2 true)
     i0)) 

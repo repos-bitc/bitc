@@ -41,11 +41,11 @@ bitc version 0.11
 
 (forall ((Arith 'a) (IntLit 'a)) (proclaim even : (fn 'a -> bool)))
 (define (odd x) (cond ((< x 0) (odd (- x 0)))
-		      ((== x 0) #f)
+		      ((== x 0) false)
 		      (otherwise (even (- x 1)))))
 
 (define (even x) (cond ((< x 0) (even (- x 0))) 
-		      ((== x 0) #t)
+		      ((== x 0) true)
 		      (otherwise (odd (- x 1)))))
 
 (define main.main:(fn (vector string) -> int32)

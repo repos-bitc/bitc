@@ -49,7 +49,7 @@ bitc version 0.11
 		 (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-			0 0 0 0) 0 #f sha1.sha_Success))
+			0 0 0 0) 0 false sha1.sha_Success))
     
     (define digest:(array (mutable uint8) 20)
       (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))

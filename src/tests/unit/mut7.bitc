@@ -55,10 +55,10 @@ bitc version 0.11
 (define v2q:(list (mutable int32)) (cons m1 nil))
 (define v2q2:(mutable (list (mutable int32))) (cons m1 nil))
 
-(define v31 (if #t m1 2))
-(define v32 (if #t m1 m2))
-(define v33 (if #t m1 2:int32))
-(define v33q:(mutable int32) (if #t m1 2:int32))
+(define v31 (if true m1 2))
+(define v32 (if true m1 m2))
+(define v33 (if true m1 2:int32))
+(define v33q:(mutable int32) (if true m1 2:int32))
 
 (define (l2v lst)
   (MakeVector (length lst) 

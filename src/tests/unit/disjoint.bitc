@@ -41,7 +41,7 @@ bitc version 0.11
 
 (define i0 (the int32 0))
  
-(define (FUN x:'a y:'a) #t)
+(define (FUN x:'a y:'a) true)
 
 (deftypeclass (ABC 'a)
   FN: (fn 'a 'a -> bool))

@@ -40,8 +40,8 @@ bitc version 0.11
 // Test for porper instantiation in the presence of
 // full-CopyCompatibility. 
 
-(define mb:(mutable bool) #t)
-(define p1:(pair bool (mutable bool)) (pair #t mb))
+(define mb:(mutable bool) true)
+(define p1:(pair bool (mutable bool)) (pair true mb))
 (define p2:(pair (mutable bool) bool) p1)
 
 (import bitc.main as main)
