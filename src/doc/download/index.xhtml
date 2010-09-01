@@ -19,12 +19,38 @@
       if you like.
     </p>
     <p>
-      The easiest way to obtain the BitC source is to download it
+      The easiest way to obtain the BitC source is to copy it
       using rsync:
     </p>
     <pre class="literallayout">
-rsync -avz rsync://www.bitc-lang.org/src.bitc/ bitc/
-(cd bitc/src; make)</pre>
+rsync -avz rsync://www.bitc-lang.org/src.bitc/ bitc/</pre>
+    <p>
+      You can also obtain it using <command>mercurial</command>:
+    </p>
+    <pre class="literallayout">
+hg clone http://dev.eros-os.com/hg/bitc</pre>
+    <p>
+      Whichever way you fetch it, you then need to:
+    </p>
+    <pre class="literallayout">
+cd bitc/src
+# Set CXXFLAGS so that you can help us debug the compiler:
+CXXFLAGS=-g ./configure
+make</pre>
+    <p>
+      If you are trying to track the development updates as we go,
+      it's always a good idea to run:
+    </p>
+    <pre class="literallayout">
+cd bitc/src
+# Set CXXFLAGS so that you can help us debug the compiler:
+CXXFLAGS=-g ./configure
+make clean
+make</pre>
+    <p indent="no">
+      Because we are still making changes to makefiles that are
+      generated using configure.
+    </p>
     <p>
       When releases and/or
       source are available for download, an item will appear in the
