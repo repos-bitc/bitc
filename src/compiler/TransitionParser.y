@@ -3441,7 +3441,10 @@ blk_prefix_expr: '!' blk_prefix_expr  {
 // AND [7.15.4]                 
 blk_infix_expr: blk_infix_expr tk_AND blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr && blk_infix_expr");
-  $$ = AST::make(at_and, $2.loc, $1, $3);
+  $$ = AST::make(at_apply, $2.loc, 
+                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "and")),
+                 $1, $3);
+  // $$ = AST::make(at_and, $2.loc, $1, $3);
 };
 sxp_unqual_expr: '(' tk_AND sxp_nonempty_params ')'  {
   SHOWPARSE("sxp_unqual_expr -> ( AND sxp_nonempty_params )");
@@ -3453,7 +3456,10 @@ sxp_unqual_expr: '(' tk_AND sxp_nonempty_params ')'  {
 // OR [7.15.5]
 blk_infix_expr: blk_infix_expr tk_OR blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr || blk_infix_expr");
-  $$ = AST::make(at_or, $2.loc, $1, $3);
+  $$ = AST::make(at_apply, $2.loc, 
+                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "or")),
+                 $1, $3);
+  // $$ = AST::make(at_or, $2.loc, $1, $3);
 };
 sxp_unqual_expr: '(' tk_OR sxp_nonempty_params ')'  {
   SHOWPARSE("sxp_unqual_expr -> ( OR sxp_nonempty_params )");
@@ -3467,7 +3473,8 @@ blk_infix_expr: blk_infix_expr '|' blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr | blk_infix_expr");
   // $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
   $$ = AST::make(at_apply, $2.loc, 
-                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "bit_or")), $1, $3);
+                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "bit_or")),
+                 $1, $3);
 };
 blk_infix_expr: blk_infix_expr '^' blk_infix_expr  {
   SHOWPARSE("blk_infix_expr -> blk_infix_expr ^ blk_infix_expr");

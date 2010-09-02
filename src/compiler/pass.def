@@ -37,11 +37,47 @@
 //   ident          name           description
 PASS(none,          "<none>",       "<none>")
 PASS(parse,         "parser",       "Parsing")
-//Remove redundant begins, simplify local defines
+
+// The parser-constructed AST tree contains at_mixfix nodes. These
+// will be converted to expression trees during symbol resolution, but
+// that processing has not yet happened. Any passes between here and
+// the symbol resolution phase need to be prepared to handle that.
+
+// Simplify DefRepr declarations into annotated unions to reduce the
+// number of cases that need to be handled by later passes:
 PASS(reprSimp,      "reprsimp",     "Defrepr Simplification")
+
+// Simplify redundant expression sequence wrappers.
 PASS(beginSimp,     "beginsimp",    "Some simplifications in the begining")
+
+// Find method declarations within structure and object
+// definitions/declarations. Rewrite those by appending the
+// corresponding declaration forms just after the structure/object
+// definitions/declarations to ensure that type matching requirements
+// are met when the corresponding definition is encountered.
 PASS(methDecl,      "methdecl",     "Inject method function proclaims")
+
+// We decided to do MixFix processing in the symbol resolution
+// pass. This seems to be the cleanest way to treat operator binding
+// forms in a way that is consistent with other binding forms.
+//
+// The introduction of mixfix caused me to change the processing of
+// AND and OR. The problem is that these they sit in the middle
+// of the infix expression precedence hierarchy. This makes it hard
+// to deal with them in the parser, where we no longer know the
+// precedence of operators. What we do now is gather them like any
+// other operator in the expr_infix production, and rewrite them into
+// primitive form as a special case. If we eventually add thunkification,
+// they will cease to be primitive, and we'll be able to eliminate the
+// special handling.
 PASS(symresolve,    "symresolve",   "Symbol Resolution")
+
+// Below here, MixFix nodes have been converted to normal expression
+// trees. The at_mixexpr node should not be encountered below this
+// point. The effect of Mixfix introduction, syntax introduction, and
+// syntax use forms has been processed and the corresponding AST nodes
+// removed.
+
 PASS(typeCheck,     "typecheck",    "Type Checking")
 PASS(locCheck,      "loccheck",     "Location semantics Checking")
 PASS(reprCheck,     "reprcheck",    "Defrepr Consistency Checking")

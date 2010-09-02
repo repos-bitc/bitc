@@ -370,15 +370,43 @@ markComplete(shared_ptr<ASTEnvironment > env)
     itr->second->flags |= BF_COMPLETE;
 }
 
+shared_ptr<AST>
+ProcessMixFix(std::ostream& errStream, 
+              shared_ptr<AST> ast, 
+              shared_ptr<ASTEnvironment > aliasEnv,
+              shared_ptr<ASTEnvironment > env,
+              shared_ptr<ASTEnvironment > lamLevel,
+              ResolutionMode mode, 
+              IdentType identType,
+              shared_ptr<AST> currLB,
+              ResolverFlags flags)
+{
+  return ast;
+}
+
+#define REWRITE_AST_IN_PLACE(_to, _from)          \
+  do {                                            \
+    shared_ptr<AST> to = (_to);                   \
+    shared_ptr<AST> from = (_from);               \
+                                                  \
+    to->s = from->s;                              \
+    to->astType = from->astType;                  \
+    to->identType = from->identType;              \
+    to->flags = from->flags;                      \
+    to->children = from->children;                \
+    to->fqn = from->fqn;                          \
+  } while (0)
+
 //WARNING: **REQUIRES** answer and errorFree.
 // Carries aliasEnv passively throughout, as if closed over.
-#define RESOLVE(ast,env,lamLevel,mode,identType,currLB,flags)        \
+#define RESOLVE(ast,env,lamLevel,mode,identType,currLB,flags)         \
   do {                                                                \
-    answer = resolve(errStream, (ast), aliasEnv, (env), (lamLevel), \
-                     (mode), (identType), (currLB), (flags));        \
-    if (answer == false)                                                \
-      errorFree = false;                                        \
-  }while (0)
+    bool answer =                                                     \
+      resolve(errStream, (ast), aliasEnv, (env), (lamLevel),          \
+              (mode), (identType), (currLB), (flags));                \
+    if (answer == false)                                              \
+      errorFree = false;                                              \
+  } while (0)
 
 
 /// @brief The symbol resolver.
@@ -415,7 +443,7 @@ resolve(std::ostream& errStream,
         shared_ptr<AST> currLB,
         ResolverFlags flags)
 {
-  bool errorFree = true, answer = false;
+  bool errorFree = true;
 
   // Save the current environment in the AST.
   // If we create a new environment, we will update it later.
@@ -494,6 +522,10 @@ resolve(std::ostream& errStream,
     
   case at_ident:
     {
+      // Special handling for infix primitives that interact with MixFix:
+      if (ast->s == "and" || ast->s == "or")
+        break;
+
       // If you change the way this works, see the comment in the
       // at_usesel case first!
       if (!ast->fqn.isInitialized()) {
@@ -1992,6 +2024,32 @@ resolve(std::ostream& errStream,
       break;
     }
 
+  case at_mixfix_expr:
+    {
+      // First process the elements:
+      for (size_t c = 0; c < ast->children.size(); c++)
+        RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
+                currLB, flags);
+
+      shared_ptr<AST> tree;
+
+      // Now do the mixfix conversion:
+      if (errorFree)
+        shared_ptr<AST> tree = 
+          ProcessMixFix(errStream, ast, aliasEnv, env, lamLevel, 
+                        USE_MODE, idc_value, currLB, flags);
+
+      if (tree) {
+        // Finally, clobber the at_mixfix_expr node in-place with the
+        // processed result:
+        REWRITE_AST_IN_PLACE(ast, tree);
+      }
+      else
+        errorFree = false;
+
+      break;
+    }
+
   case at_tqexpr:
     {
       // match agt_eform
@@ -2252,6 +2310,20 @@ resolve(std::ostream& errStream,
       for (size_t c = 1; c < ast->children.size(); c++)
         RESOLVE(ast->child(c), env, lamLevel, USE_MODE, 
                 idc_value, currLB, flags);
+
+      // Special-case fixup for AND and OR:
+      if (ast->child(0)->s == "and") {
+        shared_ptr<AST> node = 
+          AST::make(at_and, ast->loc, ast->child(1), ast->child(2));
+
+        REWRITE_AST_IN_PLACE(ast, node);
+      }
+      else if (ast->child(0)->s == "or") {
+        shared_ptr<AST> node = 
+          AST::make(at_and, ast->loc, ast->child(1), ast->child(2));
+
+        REWRITE_AST_IN_PLACE(ast, node);
+      }
 
       break;
     }

@@ -633,6 +633,7 @@ enum AstType {
   at_dummyType,
   at_identPattern,
   at_tqexpr,
+  at_mixfix_expr,
   at_unit,
   at_suspend,
   at_sizeof,
