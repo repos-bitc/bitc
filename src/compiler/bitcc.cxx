@@ -107,6 +107,7 @@
 #include "backend.hxx"
 #include "Instantiate.hxx"
 #include "TvPrinter.hxx"
+#include "MixFix.hxx"
 
 using namespace std;
 using namespace boost;
@@ -709,6 +710,8 @@ main(int argc, char *argv[])
       break;
     }
   }
+
+  mixfix::init();
 
   // Select default backend if none chosen otherwise.
   if (Options::backEnd == 0)

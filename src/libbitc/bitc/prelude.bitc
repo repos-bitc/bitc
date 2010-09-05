@@ -267,6 +267,11 @@ interface bitc.prelude {
     negate : fn('a) -> 'a
   }
 
+  def `**`(a, b) = if b == 0 then 1 else a * `**`(a, b - 1)
+  def _+_ = `+`
+  def _*_ = `*`
+  def _**_ = `**`
+
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING INTEGER MODULUS ARITHMETIC
   ///////////////////////////////////////////////////////////

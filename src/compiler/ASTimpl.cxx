@@ -166,6 +166,9 @@ AST::atKwd() const
   case at_Null:
     return "NULL";
 
+  case at_mixExpr:
+    return "mixExpr";
+
   case at_docString:
     return "<doccomment>";
 

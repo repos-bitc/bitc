@@ -169,7 +169,7 @@ static unsigned VersionMinor(const std::string s)
 
 /* Categorical terminals: */
 %token <tok> tk_SxpIdent
-%nonassoc <tok> tk_BlkIdent tk_MixIdent
+%nonassoc <tok> tk_BlkIdent
 %nonassoc <tok> tk_NotApply
 
 %token <tok> tk_TypeVar
@@ -220,6 +220,8 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_UINT32
 %token <tok> tk_UINT64
 %token <tok> tk_WORD
+
+%token <tok> tk_MIXFIX          /* for testing */
 
 %token <tok> tk_SIZEOF
 %token <tok> tk_BITSIZEOF
@@ -324,6 +326,7 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_IN
 %token <tok> tk_FN
 %token <tok> tk_FNARROW
+%token <tok> tk_EXPT
 %token <tok> tk_BEGIN
 %token <tok> tk_LOOP
 %token <tok> tk_DO
@@ -403,6 +406,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_block blk_expr_seq
 %type <ast> sxp_expr sxp_the_expr sxp_unqual_expr
 %type <ast> blk_primary_expr blk_postfix_expr blk_prefix_expr blk_infix_expr
+%type <ast> blk_mixfix_expr blk_mixfix_elems blk_mixfix_elem
 %type <ast> blk_tqual_expr
 %type <ast> blk_expr
 %type <ast> sxp_method_decls sxp_method_decl
@@ -2853,6 +2857,45 @@ blk_infix_expr: blk_tqual_expr %prec prec_PreferShift {
   $$ = $1;
 }
 
+blk_infix_expr: blk_mixfix_expr {
+  SHOWPARSE("blk_infix_expr -> blk_mixfix_expr");
+  $$ = $1;
+}
+
+blk_mixfix_expr: tk_MIXFIX '{' blk_mixfix_elems '}' {
+  SHOWPARSE("blk_mixfix_expr -> MIXFIX { blk_mixfix_elems }");
+  $$ = $3;
+}
+
+blk_mixfix_elems: blk_mixfix_elem {
+  SHOWPARSE("blk_mixfix_elems -> blk_mixfix_elem");
+  $$ = AST::make(at_mixExpr, $1->loc, $1);
+}
+
+blk_mixfix_elems: blk_mixfix_elems blk_mixfix_elem {
+  SHOWPARSE("blk_mixfix_elems -> blk_mixfix_elems blk_mixfix_elem");
+  $1->addChild($2);
+  $$ = $1;
+}
+
+blk_mixfix_elem: blk_tqual_expr {
+  SHOWPARSE("blk_mixfix_elem -> blk_tqual_expr");
+  $$ = $1;
+}
+
+blk_mixfix_elem: '+' {
+  SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + ">");
+  $$ = AST::make(at_ident, $1);
+}
+blk_mixfix_elem: '*' {
+  SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + ">");
+  $$ = AST::make(at_ident, $1);
+}
+blk_mixfix_elem: tk_EXPT {
+  SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + ">");
+  $$ = AST::make(at_ident, $1);
+}
+
 // This is the only production defining blk_expr. It is causing
 // a (correctly resolved) S/R ambiguity that we should probably try to
 // clean up.
@@ -4061,11 +4104,6 @@ sxp_exident: tk_SxpReservedWord {
 // IDENTIFIERS [2.2]
 blk_ident: tk_BlkIdent {
   SHOWPARSE("blk_ident -> <Ident " + $1.str + ">");
-  $$ = AST::make(at_ident, $1);
-};
-
-blk_ident: tk_MixIdent {
-  SHOWPARSE("blk_ident -> ` <MixIdent " + $1.str + ">");
   $$ = AST::make(at_ident, $1);
 };
 blk_ident: tk_ReservedWord {

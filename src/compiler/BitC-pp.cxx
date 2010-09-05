@@ -181,6 +181,14 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_Null:
     break;
 
+  case at_mixExpr:
+    out << "(" << ast->atKwd();
+    out.more();
+    doChildren(out, ast, 0, true, showTypes);
+    out << ")";
+    out.less();
+    break;
+
   case at_refCat:
   case at_boxedCat:
     if (!(ast->printVariant & pf_IMPLIED))

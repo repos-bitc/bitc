@@ -57,28 +57,31 @@ extern const char *TransitionTokenName(int lexTokenNumber);
 bool
 TransitionLexer::valid_ident_start(ucs4_t ucs4)
 {
-  // Extended characters are only permitted as the first
-  // identifier character in lisp identifier mode.
-  return (u_hasBinaryProperty(ucs4,UCHAR_XID_START)
-          || (ucs4 == '_'));
+  // '_' is now handled as a special case in the tokenizer, because it
+  // has behavioral significance for mixfix identifiers
+  return u_hasBinaryProperty(ucs4,UCHAR_XID_START);
 }
 
 bool
 TransitionLexer::valid_ident_continue(ucs4_t ucs4)
 {
-  // For the moment, extended characters are permitted as 
-  // continue characters.
-  return (u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE)
-          || (ucs4 == '_'));
+  // '_' is now handled as a special case in the tokenizer, because it
+  // has behavioral significance for mixfix identifiers
+  return u_hasBinaryProperty(ucs4,UCHAR_XID_CONTINUE);
 }
 
 bool
 TransitionLexer::valid_ascii_symbol(ucs4_t ucs4)
 {
   switch (ucs4) {
-  case '#':                     // until S-expressions are gone
-  case '_':                     // because it is extended alphabetic
+  case '_':
+    // '_' is now handled as a special case in the tokenizer, because
+    // it has behavioral significance for mixfix identifiers
     return false;
+
+  case '#':                     // until S-expressions are gone
+    return false;
+
 
   case '!':
   case '$':
@@ -189,6 +192,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "%",                lf_block,             '%' ),
   TransitionLexer::KeyWord( "&",                lf_block,             '&' ),
   TransitionLexer::KeyWord( "&&",               lf_block,             tk_AND ),
+  TransitionLexer::KeyWord( "**",               lf_transition,        tk_SxpIdent, tk_EXPT ),
   TransitionLexer::KeyWord( "*",                lf_transition,        tk_SxpIdent, '*' ),
   TransitionLexer::KeyWord( "+",                lf_transition,        tk_SxpIdent, '+' ),
   TransitionLexer::KeyWord( "-",                lf_transition,        tk_SxpIdent, '-' ),
@@ -286,6 +290,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "MakeVector",       lf_transition,        tk_MAKE_VECTOR ),
   TransitionLexer::KeyWord( "member",           lf_transition,        tk_MEMBER ),   /* REDUNDANT */
   TransitionLexer::KeyWord( "method",           lf_transition,        tk_METHOD ),
+  TransitionLexer::KeyWord( "mixfix",           lf_transition,        tk_MIXFIX ),
   TransitionLexer::KeyWord( "module",           lf_transition,        tk_MODULE ),
   TransitionLexer::KeyWord( "mutable",          lf_transition,        tk_MUTABLE ),
   TransitionLexer::KeyWord( "namespace",        lf_transition,        tk_ReservedWord ),
@@ -342,6 +347,31 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "word",             lf_transition,        tk_WORD ),
   TransitionLexer::KeyWord( "|",                lf_block,             '|' ),
   TransitionLexer::KeyWord( "||",               lf_block,             tk_OR )
+
+#if 0
+  MixRule("_or_",  0, LEFT_ASSOC),
+  MixRule("_and_", 1, LEFT_ASSOC),
+  MixRule("_!=_",  2, LEFT_ASSOC),
+  MixRule("_==_",  2, LEFT_ASSOC),
+  MixRule("_<_",   3, LEFT_ASSOC),
+  MixRule("_<=_",  3, LEFT_ASSOC),
+  MixRule("_>_",   3, LEFT_ASSOC),
+  MixRule("_>=_",  3, LEFT_ASSOC),
+  MixRule("_::_",  4, LEFT_ASSOC), // infix cons
+  MixRule("_|_",   5, LEFT_ASSOC),
+  MixRule("_^_",   6, LEFT_ASSOC),
+  MixRule("_&_",   7, LEFT_ASSOC),
+  MixRule("_<<_",  8, LEFT_ASSOC),
+  MixRule("_>>_",  8, LEFT_ASSOC),
+  MixRule("_+_",   9, LEFT_ASSOC),
+  MixRule("_-_",   9, LEFT_ASSOC),
+  MixRule("_%_",  10, LEFT_ASSOC),
+  MixRule("_*_",  10, LEFT_ASSOC),
+  MixRule("_/_",  10, LEFT_ASSOC),
+
+  MixRule("_**_",    11, LEFT_ASSOC), // exponentiation
+  MixRule("_**_+_",  11, LEFT_ASSOC)  // hypothetical mul-add for testing
+#endif
 };
 
 static int
@@ -603,11 +633,10 @@ TransitionLexer::showToken(std::ostream& errStream, const LToken& tok)
   switch(tok.tokType) {
   case tk_TypeVar:
   case tk_EffectVar:
-    errStream << " ('" << tok.str << ")";
+    errStream << " (" << tok.str << ")";
     break;
   case tk_BlkIdent:
   case tk_SxpIdent:
-  case tk_MixIdent:
   case tk_NegativeInt:
   case tk_Nat:
   case tk_Float:
@@ -1126,6 +1155,7 @@ TransitionLexer::getNextInputToken()
   LexLoc endLoc = here;
 
   switch (c) {
+#if 1
   case '`':
     {
       // back-tick should never appear in any context where a sexpr is
@@ -1178,6 +1208,7 @@ TransitionLexer::getNextInputToken()
       }
 
     }
+#endif
 
   case ';':
     {
@@ -1353,7 +1384,6 @@ TransitionLexer::getNextInputToken()
     // We now handle unary negate at the expression level in the block
     // syntax:
     if ((currentLang & lf_sexpr) == 0) {
-      ungetChar(c);
       goto identifier_or_operator;
     }
 
@@ -1361,7 +1391,7 @@ TransitionLexer::getNextInputToken()
 
     if (LitValue::digitValue(c, 10) < 0) {
       ungetChar(c);
-      ungetChar('-');
+      c = '-';
       goto identifier_or_operator;
     }
 
@@ -1498,8 +1528,7 @@ TransitionLexer::getNextInputToken()
     }
 
   default:
-    if (valid_ident_start(c) || valid_operator_start(c)) {
-      ungetChar(c);
+    if (valid_ident_start(c) || valid_operator_start(c) || c == '_') {
       goto identifier_or_operator;
     }
 
@@ -1509,35 +1538,69 @@ TransitionLexer::getNextInputToken()
   }
 
  identifier_or_operator:
-  do {
+  /// With the introduction of mixfix, the definition of a valid
+  /// identifier has to change. Previously, it was basically a choice
+  /// between "a classical alpha ident" and "stuff made of
+  /// punctuation". Mixfix introduces two new wrinkles:
+  ///
+  ///  - We now need to accept '_' as legal for either type of
+  ///    identifier 
+  ///  - A mixfix definition effectively introduces multiple
+  ///    quasi-keywords, and it is the individual keywords that need
+  ///    to be recognizable as either "a classical alpha ident" or
+  ///    "stuff made of punctuation".
+  ///
+  /// So the new rule for identifiers is that it consists of a
+  /// sequence of "classical alpha ident" chunks and "stuff made of
+  /// punctuation chunks" that are separated by a single underscore,
+  /// may be optionally preceded by multiple underscores, and are
+  /// optionally trailed by a single underscore.
+  while(c == '_')
     c = getChar();
-  } while (c == '_');
+
+  while (valid_ident_start(c) || valid_operator_start(c) || c == '_') {
+    // Grab an alpha chunk or a punctuation chunk:
+    if (valid_ident_start(c)) {
+      do {
+        c = getChar();
+      } while (valid_ident_continue(c));
+    }
+    else if (valid_operator_start(c)) {
+      do {
+        c = getChar();
+      } while (valid_operator_continue(c));
+    }
+
+    // We need special transitional handling to recognize set! for
+    // use in S-expressions. This violates the longest match rule, but
+    // note that it does so on an otherwise illegal token.
+    //
+    // This will go away soon.
+    if (thisToken == "set!") {
+      int tokType = kwCheck(thisToken.c_str(), tk_BlkIdent);
+      endLoc.updateWith(thisToken);
+      RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
+    }
+
+    // Check if this is a multi-part token:
+    if (c == '_') {
+      do {
+        c = getChar();
+      } while (c == '_');
+      continue;
+    }
+    else {
+      // Can't continue the loop here, since we might have seen
+      // something like !b, and we don't want to accept the trailing
+      // 'b' in the absence of an intervening '_'.
+      break;
+    }
+  }
+
+  // We have gone one too far.
   ungetChar(c);
 
-  // Possibly an alpha identifier:
-  if (valid_ident_start(c)) {
-    do {
-      c = getChar();
-    } while (valid_ident_continue(c));
-
-    // Transitional handling for set! for S-expression LISP
-    // syntax. The conditional will go away once we drop set!
-    if (thisToken != "set!")
-      ungetChar(c);
-
-  ident_done:
-    int tokType = kwCheck(thisToken.c_str(), tk_BlkIdent);
-    endLoc.updateWith(thisToken);
-    RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
-  }
-  else if (valid_operator_start(c)) {
-    do {
-      c = getChar();
-    } while (valid_operator_continue(c));
-    ungetChar(c);
-
-    int tokType = kwCheck(thisToken.c_str(), tk_MixIdent);
-    endLoc.updateWith(thisToken);
-    RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
-  }
+  int tokType = kwCheck(thisToken.c_str(), tk_BlkIdent);
+  endLoc.updateWith(thisToken);
+  RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
 }

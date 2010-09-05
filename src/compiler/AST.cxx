@@ -567,8 +567,8 @@ AST::tagName(const AstType at)
     return "at_identPattern";
   case at_tqexpr:
     return "at_tqexpr";
-  case at_mixfix_expr:
-    return "at_mixfix_expr";
+  case at_mixExpr:
+    return "at_mixExpr";
   case at_unit:
     return "at_unit";
   case at_suspend:
@@ -896,8 +896,8 @@ AST::astName() const
     return "identPattern";
   case at_tqexpr:
     return "tqexpr";
-  case at_mixfix_expr:
-    return "mixfix_expr";
+  case at_mixExpr:
+    return "mixExpr";
   case at_unit:
     return "unit";
   case at_suspend:
@@ -1163,7 +1163,7 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_dummyType
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_identPattern
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_tqexpr
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_mixfix_expr
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_mixExpr
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_unit
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_suspend
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_sizeof
@@ -3184,7 +3184,7 @@ AST::isValid() const
     }
     break;
 
-  case at_mixfix_expr: // normal AST:
+  case at_mixExpr: // normal AST:
     // match agt_expr+
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());

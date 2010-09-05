@@ -70,12 +70,14 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <stack>
 
 #include "Options.hxx"
 #include "AST.hxx"
 #include "Environment.hxx"
 #include "Symtab.hxx"
 #include "inter-pass.hxx"
+#include "MixFix.hxx"
 
 using namespace std;
 using namespace boost;
@@ -360,28 +362,12 @@ bindIdentDef(shared_ptr<AST> ast, shared_ptr<ASTEnvironment > env,
 
 }
 
-
-
 static void
 markComplete(shared_ptr<ASTEnvironment > env)
 {
   for (ASTEnvironment::iterator itr = env->begin();
       itr != env->end(); ++itr)
     itr->second->flags |= BF_COMPLETE;
-}
-
-shared_ptr<AST>
-ProcessMixFix(std::ostream& errStream, 
-              shared_ptr<AST> ast, 
-              shared_ptr<ASTEnvironment > aliasEnv,
-              shared_ptr<ASTEnvironment > env,
-              shared_ptr<ASTEnvironment > lamLevel,
-              ResolutionMode mode, 
-              IdentType identType,
-              shared_ptr<AST> currLB,
-              ResolverFlags flags)
-{
-  return ast;
 }
 
 #define REWRITE_AST_IN_PLACE(_to, _from)          \
@@ -2024,28 +2010,39 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_mixfix_expr:
+  case at_mixExpr:
     {
       // First process the elements:
       for (size_t c = 0; c < ast->children.size(); c++)
         RESOLVE(ast->child(c), env, lamLevel, USE_MODE, idc_value,
                 currLB, flags);
 
-      shared_ptr<AST> tree;
 
       // Now do the mixfix conversion:
-      if (errorFree)
-        shared_ptr<AST> tree = 
-          ProcessMixFix(errStream, ast, aliasEnv, env, lamLevel, 
-                        USE_MODE, idc_value, currLB, flags);
+      if (errorFree) {
+        shared_ptr<AST> tree = mixfix::ProcessMixFix(errStream, ast);
 
-      if (tree) {
-        // Finally, clobber the at_mixfix_expr node in-place with the
-        // processed result:
-        REWRITE_AST_IN_PLACE(ast, tree);
+        if (tree) {
+          // If we got back an at_apply node, we need to run the
+          // resolver on the leading child, because that was inserted
+          // by the mixfix converter and has not been resolved.
+          //
+          // Since it's harmless, we do this by re-running the
+          // resolver on the resulting node so that the fixups for
+          // builtins get run as well.
+          if (tree->astType == at_apply)
+            RESOLVE(tree, env, lamLevel, USE_MODE, 
+                    idc_apply, currLB, flags);        
+
+          // Finally, clobber the at_mixfix_expr node in-place with the
+          // processed result:
+          REWRITE_AST_IN_PLACE(ast, tree);
+        }
+        else {
+          // Mixfix layer parse error
+          errorFree = false;
+        }
       }
-      else
-        errorFree = false;
 
       break;
     }

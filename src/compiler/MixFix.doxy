@@ -1,0 +1,250 @@
+/* -*- mode: c++ -*-  */
+
+/** @page MixFixProcessing (Plan for) MixFix Processing
+ *
+ * BitC accepts mixfix expressions. A mixfix declaration takes one of
+ * the forms:
+ *
+ * @verbatim
+mixfix _+_   5     // infix
+mixfix _!    9     // postfix
+mixfix not_  6     // prefix
+mixfix (_)   6     // outfix  (term?)
+mixfix _[_]  6     // postfix with multiple expressions
+@endverbatim
+ *
+ * These declarations have the effect of augmenting the expression
+ * grammar. Expressions in the primary grammar have some "primary"
+ * cases that are higher precedence than any mixfix production
+ * (e.g. "a.b"). When the primary parser processes the mixfix_expr
+ * production, it gathers the elements into a linear list consisting
+ * of expressions. Some of these really are expression nodes that
+ * resulted from primary expression parsing. Most are
+ * identifiers. Some of the identifiers turn out to be mixfix
+ * quasi-keywords introduced by mixfix declarations. Those will be
+ * processed/rearranged by the mixfix processor here.
+ *
+ * The BitC mixfix design borrows syntax from the Agda programming
+ * language. It also borrows the idea that "interior" (fully
+ * bracketed) holes can accept expressions having any precedence. That
+ * is: precedence rules are only applied at edge holes. In contrast to
+ * Agda, we retain the tradition that precedence relations are
+ * transitive. While we treat quasi-keywords as keywords while they
+ * are in scope (meaning mainly that they cannot be rebound), we do
+ * <em>not</em> require that they be unique. In particular, it is
+ * perfectly okay in BitC to introduce the mixfix rules:
+ *
+ * @verbatim
+mixfix while_do_  5
+mixfix until_do_  5
+@endverbatim
+ *
+ * even though they both use "do" as a quasi-keyword. The fact that
+ * quasi-keywords are not unique somewhat increases the challenge of
+ * the BitC parsing problem in comparison to other mixfix
+ * implementations.
+ *
+ * The Agda papers note that transitive precedence can lead to some
+ * odd cases. My view is that uses of mixfix tend to fall into two
+ * cases:
+ *
+ * - Most uses of mixfix "fit" the regular precedence hierarchy
+ *   comfortably. That is: you can find an available spot for them in
+ *   the available precedence hierarchy *and* applying the precedence
+ *   rules in a transitive way doesn't result in any surprises.
+ * - A few uses of mixfix are sophisticated, and are introducing
+ *   completely different syntactic schemas than the ones that are
+ *   conventional in programming languages. Either there aren't
+ *   enough levels available to insert the right operators in the
+ *   desired ways, or it is truly necessary to change the
+ *   <em>relative</em> precedences of certain operators in the context
+ *   of the new sub-language, or perhaps it is desired to
+ *   <em>remove</em> some operators that are part of the set provided
+ *   by the prelude. That is: you are designing a new, specialized
+ *   expression language rather than tweaking an existing one.
+ *
+ * My (unsubstantiated) belief is that the perceived problems with
+ * transitive precedence relations arise mainly in the second
+ * situation, and are a result of the fact that existing
+ * implementations don't provide a first-class notion of syntax
+ * rules. That's easily remedied without too much complexity, so we're
+ * going to give it a try in BitC.
+ *
+ * MixFix itself is conceptually straightforward, but not documented
+ * in a way that is particularly accessible to first-time implementors
+ * (like myself). We are presented with a linear list of expressions,
+ * some of which are quasi-keywords. For example, the mixfix rule:
+ *
+ * @verbatim
+mixfix _[_]  6     // postfix with multiple expressions
+@endverbatim
+ * 
+ * introduces the quasi-keywords '[' and ']'. While this rule is in
+ * scope, these identifiers will be treated as keywords. The rule
+ * also introduces what amounts to a grammar production
+ *
+ * @verbatim
+mixfix_expr: mixfix_expr '[' mixfix_expr ']'  %prec 6
+@endverbatim
+ *
+ * The job of the mixfix layer is to implement these productions. The
+ * implementation challenge derives from the fact that the set of
+ * productions is not fixed: mixfix declarations can (eventually)
+ * occur in local scopes. In the classic table-driven parsing
+ * techniques, <em>adding</em> a production is (barely) tractable, but
+ * <em>deleting</em> one is pretty darned expensive. So, for example,
+ * the AGDA implementation uses memoizing parser combinators, and (I
+ * assume - haven't checked) flushes the memoization cache when a
+ * production is removed.
+ *
+ * @section MixFixTheoryOfOperation Theory of Operation
+ *
+ * The implementation chosen here here is simply to do an
+ * interpretive, back-tracking GLR parser. This avoids all (or at
+ * least most) of the challenges of inserting and removing
+ * productions. Reading between the lines, I think there is a concern
+ * among implementors that this is an O(N<sup>3</sup>) algorithm, but
+ * it's important to remember that this is an asymptotic worst case
+ * rather than the typical case. In the context of a mixfix
+ * implementation, several factors mitigate this bound:
+ *
+ * - Two "holes" are never adjacent.
+ * - No eta-productions (rules matching empty) are present.
+ * - Ambiguities are rare in practice. The "right" production, when
+ *   one is present, can generally be determined by looking at the
+ *   next two items in the input stream. This typically reduces the
+ *   number of productions that must be considered down to one.
+ * - Most productions are infix, and selection options on these are
+ *   bounded by precedence rules. Two element lookahead (which is
+ *   possible because of the "no two holes" rule is often enough to
+ *   further filter the candidate rules.
+ * - For human reasons, expressions don't tend to get too large before
+ *   parenthesis start to appear. This has the effect of bounding N.
+ *
+ * I could be completely wrong about the combined impact of this on
+ * the observed complexity, but I'm going to give it a try anyway. If
+ * nothing else, it will be interesting to measure how much
+ * back-tracking actually occurs on real input.
+ *
+ * @subsection MixFixParseDataStructures Supporting Data Structures
+ *
+ * The implementation maintains some supporting data structures:
+ *
+ * - @b rule, which records for each rule its name, the RHS elements
+ *   of the production, its precedence, and its associativity. The
+ *   length of the RHS vector matches the "reduce size" of the
+ *   production (the number of elements on the parse stack to remove
+ *   when reducing).
+ *
+ * - @b kwMap, a mapping from strings (identifiers) to unsigned. The
+ *   bitset records how many active productions currently incorporate
+ *   that string as a quasi-keyword. A counter is used instead of a
+ *   bit in order to facilitiate rule deletion. [I may augment this
+ *   with counters for the number of times the keyword appears in
+ *   PREOP, POSTOP, and INOP positions to assist filtering, but let's
+ *   see if that is needed first.
+ *
+ * - @b prodMap, a mapping from leading subsequences to the set of
+ *   productions having that leading subsequence. If if_then_else_ is
+ *   a mixfix rule, then the rule data structure for that rule will be
+ *   an element of the set at prodMap["if_"]. Similarly, if _+_ is a
+ *   mixfix rule, the rule data structure for that rule will be an
+ *   element of the set at prodMap["_+"].
+ *
+ * @section Junk Historical Junk
+ * BitC accepts mixfix expressions. The programmer is able to
+ * introduce lexically-scoped parser rules that augment the
+ * expression grammar. The primary parser gathers expressions into 
+ * linear list consisting of expressions (computed by productions in
+ * the primary grammar) and operator nodes. That list is then
+ * processed by the mixfix parser to generate an expression tree.
+ *
+ * My initial thought was to somehow use the same parse strategy as
+ * the main parser. The problem with doing that is that (a) there isn't
+ * any single place where we can compute parse tables to check for
+ * ambiguities or errors, and (b) none of the well-known parse table
+ * construction techniques is designed to provide for <em>removal</em>
+ * of productions.
+ *
+ * In the end, I decided to go with a prioritized recursive descent
+ * approach using infinite lookahead. In theory, this approach has a
+ * fairly bad complexity order. In practice I suspect (hope?) that it
+ * doesn't matter, because most expression productions have only one
+ * operator and the prioritizations serve to trim the search space.
+ *
+ * Every mixfix rule consists of holes and operator nodes. The
+ * operator nodes are one of four types: 
+ *
+ *   - PREOP nodes are followed by an expression. These introduce
+ *     either a prefix expression or a bracketed expression.
+ *   - POSTOP nodes are preceded by an expression. These always signal
+ *     the end of an expression (either postfix or bracketed).
+ *   - INOP (interior operator) nodes are preceded and succeeded by
+ *     an expression. These are either standalone infix operators or
+ *     an interior component of a multi-token expression.
+ *   - TINOP an interior operator that is the @em final component in
+ *     an operator (distinguished for ease of processing).
+ *
+ * So:
+ * @verbatim
+mixfix _[_]  9   // INOP then POSTOP
+mixfix *+_+_ 6   // PREOP then TINOP
+@endverbatim
+ *
+ * There are several aspects of the BitC mixfix specification that
+ * simplify or help to optimizer the parsing problem:
+ *
+ *   - It is never the case that two expression "holes" are adjacent.
+ *   - Every mixfix specification has at least one hole.
+ *   - There are no eta-productions to consider
+ *   - Every production either starts with a quasi-keyword (an
+ *     operator) or an expression
+ *   - There is only one non-terminal: @em mixfix-expr
+ *   - In any place where there is ambiguity of action, either there
+ *     is a disambiguating precedence rule or there is an error.
+ *
+ * Between them, I'm hopeful that these rules will let me get away
+ * with performing an interpreted parse by the following strategy:
+ *
+ * For rapid production lookup and search branching decisions, we
+ * (logically) keep two tables. The first provides a mapping from
+ * initial keywords to productions <em>starting with</em> that
+ * keyword. The second provides a mapping from keywords to productions
+ * starting with an expression <em>followed by</em> that keyword. This
+ * is used to determine where branching decisions have to be taken in
+ * the parser.
+ *
+ * At any given point, the parser is working on a rule of the form
+ * X_Y_Z or _X_Y or some such, and it is operating at a particular
+ * position in that rule. We proceed as follows:
+ *
+ *  - Given a lookahead quasi-keyword K:
+ *       - If the top of stack is a quasi-keyword, it may be INOP or
+ *         PREOP. See if some prefix of the current lookahead stream
+ *         is reducible as an expresion.
+ *
+ *       - If the stack is empty, see if some prefix of the current
+ *         lookahead stream is reducible as an expresion. 
+ *
+ *       - If the top of stack is an expression, see if shifting
+ *         produces a valid prefix. The lookahead token cannot start 
+ *         a new expresion, because the grammar does not permit two
+ *         adjacent expressions. 
+ *         
+ *         If the valid prefix is reducible, we have a candidate
+ *         expression. Return from the current expression parse with
+ *         this candidate.
+ *
+ *       - Else: error
+ *
+ *  - Given a lookahead expression:
+ *       - If top of stack is INOP or PREOP, shift the expression.
+ *
+ *       - If the stack is empty, see if some prefix of the current
+ *         lookahead stream is reducible as an expresion. 
+ *
+ *       - Else: error
+ *
+ *  - If there is no more lookahead, either the current prefix is
+ *    reducible or we have an error.
+ */
