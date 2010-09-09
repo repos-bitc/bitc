@@ -52,8 +52,8 @@ install: all
 doxygen-stuff:
 	(cd $(BITC_SRC)/compiler;make doxygen)
 	(cd $(BITC_SRC)/libbitc;make doxygen)
-	rsync --delete -avz $(BITC_SRC)/compiler/doxygen/html/ $(BITC_SRC)/doc/doxygen/compiler
-	rsync --delete -avz $(BITC_SRC)/libbitc/doxygen/html/ $(BITC_SRC)/doc/doxygen/libbitc
+	rsync --delete -avz $(BITC_SRC)/compiler/doxygen/html/ $(BITC_SRC)/doc/browse/compiler
+	rsync --delete -avz $(BITC_SRC)/libbitc/doxygen/html/ $(BITC_SRC)/doc/browse/libbitc
 
 clean.doxygen-stuff:
 	rm -rf compiler libbitc
