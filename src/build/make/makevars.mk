@@ -49,18 +49,11 @@ PWD=$(shell pwd)
 #
 ifdef BITC_ROOT
 
-BITC_SRCDIR=$(word 1, $(strip $(subst /, ,$(subst $(BITC_ROOT)/,,$(PWD)))))
 BITC_FINDDIR=old
 
 else
 
-ifneq "" "$(findstring /bitc/pkgsrc,$(PWD))"
-BITC_SRCDIR=pkgsrc
-else
-BITC_SRCDIR=src
-endif
-
-BITC_ROOT=$(firstword $(subst /bitc/$(BITC_SRCDIR), ,$(PWD)))/bitc
+BITC_ROOT=$(shell (cd $(BITC_SRC)/..;pwd))
 
 endif
 
@@ -198,9 +191,6 @@ DOMLIB += $(DOMCRTN)
 BITC_SRC_DIR=$(shell (cd $(BITC_SRC);pwd))
 BITC_CURRENT_DIR=$(subst $(BITC_SRC_DIR)/,,$(PWD))
 PACKAGE=$(word 1, $(strip $(subst /, ,$(BITC_CURRENT_DIR))))
-
-#PKG_ROOT=$(BITC_ROOT)/pkg/${PACKAGE}
-#PKG_SRC=$(BITC_ROOT)/$(BITC_SRCDIR)/${PACKAGE}
 
 # Until proven otherwise...
 IMGMAP=imgmap

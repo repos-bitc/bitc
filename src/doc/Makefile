@@ -41,31 +41,19 @@ OSDOC_XHTML_SRC=$(patsubst %.xhtml,%,$(wildcard *.xhtml))
 OSDOC_OHTML_SRC=$(patsubst %.ohtml,%,$(wildcard *.ohtml))
 HTML_TOPNAV=home.html
 
-DIRS=topnav docs download projects
+DIRS=topnav docs download doxygen projects
 DOCSTYLES= #docstyles.css
 
 include $(BITC_SRC)/build/make/makerules.mk
 
-all: index.html browse
+all: index.html
 
 install: all
 
 #docstyles.css: ../doctools/XSLT/styles.css
 #	cp ../doctools/XSLT/styles.css docstyles.css
 
-.PHONY: browse
-clean: clean.browse
-clean.browse:
-	rm -rf browse
-
 distclean: clean
-
-browse:
-	(cd ../compiler;make doxygen)
-	(cd ../libbitc;make doxygen)
-	mkdir -p $(BITC_SRC)/doc/browse/
-	rsync --delete -avz ../compiler/doxygen/html/ $(BITC_SRC)/doc/browse/compiler
-	rsync --delete -avz ../libbitc/doxygen/html/ $(BITC_SRC)/doc/browse/libbitc
 
 index.html: bitc.html
 	ln -s bitc.html index.html
