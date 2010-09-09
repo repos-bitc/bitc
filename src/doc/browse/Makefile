@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2004, Jonathan S. Shapiro.
+# Copyright (C) 2010, Jonathan S. Shapiro.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or
@@ -31,29 +31,29 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
 
 default: package
-BITC_SRC=..
-CLEANLIST=index.html doxygen.css tabs.css
-OSDOC_NAVCONTEXT="Home"
-OSDOC_SIDENAV="sidenav.html"
+BITC_SRC=../..
+OSDOC_NAVCONTEXT="Doxygen"
 OSDOC_XHTML_SRC=$(patsubst %.xhtml,%,$(wildcard *.xhtml))
 OSDOC_OHTML_SRC=$(patsubst %.ohtml,%,$(wildcard *.ohtml))
-HTML_TOPNAV=home.html
+HTML_TOPNAV=projects.html
 
-DIRS=topnav docs download browse projects
 DOCSTYLES= #docstyles.css
 
 include $(BITC_SRC)/build/make/makerules.mk
 
-all: index.html
+all: doxygen-stuff
 
 install: all
 
-#docstyles.css: ../doctools/XSLT/styles.css
-#	cp ../doctools/XSLT/styles.css docstyles.css
+.PHONY: doxygen-stuff
+doxygen-stuff:
+	(cd $(BITC_SRC)/compiler;make doxygen)
+	(cd $(BITC_SRC)/libbitc;make doxygen)
+	rsync --delete -avz $(BITC_SRC)/compiler/doxygen/html/ $(BITC_SRC)/doc/doxygen/compiler
+	rsync --delete -avz $(BITC_SRC)/libbitc/doxygen/html/ $(BITC_SRC)/doc/doxygen/libbitc
 
-distclean: clean
-
-index.html: bitc.html
-	ln -s bitc.html index.html
+clean.doxygen-stuff:
+	rm -rf compiler libbitc
