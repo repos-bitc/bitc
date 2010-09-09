@@ -11,6 +11,12 @@
 /// <li>
 /// <p>
 ///
+/// We are finally down to one parser <a
+/// href="TransitionParser_8y-source.html">TransitionParser.y</a>,
+/// though that still supports two 
+/// versions of the surface syntax. Thankfully not for much longer!
+/// Because of the surface syntax transition, the specification
+/// document is terribly stale.
 /// There are two parsers at present. The S-expression parser is in <a
 /// href="SexprParser_8y-source.html">SexprParser.y</a>, and matches
 /// the specification. If it doesn't, it is a bug, and please tell us!
