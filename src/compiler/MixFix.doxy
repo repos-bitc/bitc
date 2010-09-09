@@ -234,6 +234,9 @@ a f (b-1)   // invalid
  * - Of these, pair construction is a bit unpleasant, because it means
  *   that the (_) rule might mean either ordinary parenthesization or
  *   the pair construction convenience syntax!
+ * - And just for fun, mixfix also has to handle _._, because after it
+ *   takes over parenthesis we still need to be able to process
+ *   <code>(a).b</code>.
  *
  * Here is how I ended up sorting this all out:
  *
