@@ -85,7 +85,6 @@
 using namespace std;
 using namespace boost;
 using namespace sherpa;
-using namespace mixfix;
 
 typedef shared_ptr<AST> ASTPtr;
 typedef std::vector<ASTPtr> ASTVec;
@@ -602,8 +601,8 @@ MixContext::ParseMixFix(std::ostream& errStream,
 /** Wrapper for ParseMixFix.
  */
 shared_ptr<AST>
-mixfix::ProcessMixFix(std::ostream& errStream, 
-                      shared_ptr<AST> mixAST)
+ProcessMixFix(std::ostream& errStream, 
+              shared_ptr<AST> mixAST)
 {
   MIXDEBUG(2) {
     errStream << "Processing mixfix expression ";
@@ -1009,7 +1008,7 @@ MixRulePtr MixRules[] =  {
 static size_t nMixRules = sizeof(MixRules) / sizeof(MixRules[0]);
 
 void
-mixfix::init()
+mixfix_init()
 {
   for (size_t i = 0; i < nMixRules; i++) {
     TheMixContext.add(MixRules[i]);

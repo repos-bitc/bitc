@@ -50,28 +50,26 @@
 #include "AST.hxx"
 #include "shared_ptr.hxx"
 
-namespace mixfix {
-  enum Associativity {
-    assoc_left = -1,
-    assoc_right = 1,
-    assoc_none = 0
-  };
+enum Associativity {
+  assoc_left = -1,
+  assoc_right = 1,
+  assoc_none = 0
+};
 
-  enum Fixity {
-    prefix,
-    postfix,
-    infix,
-    closed                      // sometimes called "outfix"
-  };
+enum Fixity {
+  prefix,
+  postfix,
+  infix,
+  closed                      // sometimes called "outfix"
+};
 
-  /// @brief Given a mixfix expression AST, convert it into a
-  /// expression tree according to the prevailing mixfix rules.
-  boost::shared_ptr<AST>
-  ProcessMixFix(std::ostream& errStream, boost::shared_ptr<AST> mixAST);
+/// @brief Given a mixfix expression AST, convert it into a
+/// expression tree according to the prevailing mixfix rules.
+boost::shared_ptr<AST>
+ProcessMixFix(std::ostream& errStream, boost::shared_ptr<AST> mixAST);
 
-  /// @brief Initialize the mixfix rule table (temporary expedient for
-  /// testing).
-  void init();
-}
+/// @brief Initialize the mixfix rule table (temporary expedient for
+/// testing).
+void mixfix_init();
 
-#endif /* SYMTAB_HXX */
+#endif /* MIXFIX_HXX */

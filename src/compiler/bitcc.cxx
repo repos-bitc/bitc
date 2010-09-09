@@ -711,7 +711,7 @@ main(int argc, char *argv[])
     }
   }
 
-  mixfix::init();
+  mixfix_init();
 
   // Select default backend if none chosen otherwise.
   if (Options::backEnd == 0)

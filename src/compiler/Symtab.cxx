@@ -2020,7 +2020,7 @@ resolve(std::ostream& errStream,
 
       // Now do the mixfix conversion:
       if (errorFree) {
-        shared_ptr<AST> tree = mixfix::ProcessMixFix(errStream, ast);
+        shared_ptr<AST> tree = ProcessMixFix(errStream, ast);
 
         if (tree) {
           // If we got back an at_apply node, we need to run the
