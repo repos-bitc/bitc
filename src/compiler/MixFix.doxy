@@ -2,8 +2,12 @@
 
 /** @page MixFixProcessing (Plan for) MixFix Processing
  *
- * BitC accepts mixfix expressions. A mixfix declaration takes one of
- * the forms:
+ * BitC accepts mixfix expressions. This note describes some of the
+ * implementation issues.
+ *
+ * @section MixFixWhatIs What is MixFix?
+ *
+ * A mixfix declaration takes one of the forms:
  *
  * @verbatim
 mixfix _+_   5     // infix
@@ -44,9 +48,21 @@ mixfix until_do_  5
  * the BitC parsing problem in comparison to other mixfix
  * implementations.
  *
- * The Agda papers note that transitive precedence can lead to some
- * odd cases. My view is that uses of mixfix tend to fall into two
- * cases:
+ * @note Actually, this example isn't quite legal because
+ * <code>while</code>, <code>until</code>,  and <code>do</code> are
+ * keywords, but with the introduction of the mixfix mechanism and the
+ * (forthcoming) support for automatic thunking these may move out of
+ * the core and get specified as mixfix entries in the prelude.
+ *
+ * @section MixFixPrecedence Handling of Precedence
+ *
+ * One of the back-and-forth discussions in the literature is whether
+ * precedence relations in mixfix should be transitive. For
+ * example, if we know <code>_AND_ &lt; _==_</code> and <code>_==_
+ * &lt; _+_</code>, does it follow that <code>_AND_ &lt; _+_</code>
+ * (which is arguably nonsense)? Danielsson argues that this is undesirable,
+ * because transitive precedence can lead to some odd cases. My view
+ * is that uses of mixfix tend to fall into two cases:
  *
  * - Most uses of mixfix "fit" the regular precedence hierarchy
  *   comfortably. That is: you can find an available spot for them in
@@ -69,6 +85,8 @@ mixfix until_do_  5
  * implementations don't provide a first-class notion of syntax
  * rules. That's easily remedied without too much complexity, so we're
  * going to give it a try in BitC.
+ *
+ * @section MixFixTheoryOfOperation Theory of Operation
  *
  * MixFix itself is conceptually straightforward, but not documented
  * in a way that is particularly accessible to first-time implementors
@@ -96,8 +114,6 @@ mixfix_expr: mixfix_expr '[' mixfix_expr ']'  %prec 6
  * the AGDA implementation uses memoizing parser combinators, and (I
  * assume - haven't checked) flushes the memoization cache when a
  * production is removed.
- *
- * @section MixFixTheoryOfOperation Theory of Operation
  *
  * The implementation chosen here here is simply to do an
  * interpretive, back-tracking GLR parser. This avoids all (or at
@@ -130,121 +146,147 @@ mixfix_expr: mixfix_expr '[' mixfix_expr ']'  %prec 6
  *
  * The implementation maintains some supporting data structures:
  *
- * - @b rule, which records for each rule its name, the RHS elements
- *   of the production, its precedence, and its associativity. The
- *   length of the RHS vector matches the "reduce size" of the
- *   production (the number of elements on the parse stack to remove
- *   when reducing).
+ * - @b MixRule, which records for each rule its name, the RHS elements
+ *   of the production, its precedence, its fixity, and its
+ *   associativity. The length of the RHS vector matches the "reduce
+ *   size" of the production (the number of elements on the parse
+ *   stack to remove when reducing).
  *
- * - @b kwMap, a mapping from strings (identifiers) to unsigned. The
- *   bitset records how many active productions currently incorporate
- *   that string as a quasi-keyword. A counter is used instead of a
- *   bit in order to facilitiate rule deletion. [I may augment this
- *   with counters for the number of times the keyword appears in
- *   PREOP, POSTOP, and INOP positions to assist filtering, but let's
- *   see if that is needed first.
+ * - @b QuasiKeyword, a mapping from strings (identifiers) to a
+ *   structure of counters. This structure records:
+ *   - How many times the quasi-keyword is in use in some production
+ *   - How many times it appears as the first element of a rule
+ *   - How many times it appears in some rule just before a trailing hole
+ *   - How many times it appears in some rule just after a leading hole
+ *   Counters are used instead of bits in order to facilitiate rule
+ *   deletion.
  *
- * - @b prodMap, a mapping from leading subsequences to the set of
- *   productions having that leading subsequence. If if_then_else_ is
- *   a mixfix rule, then the rule data structure for that rule will be
- *   an element of the set at prodMap["if_"]. Similarly, if _+_ is a
- *   mixfix rule, the rule data structure for that rule will be an
- *   element of the set at prodMap["_+"].
+ * - @b MixContext, a structure that records a mixfix parsing context
+ *   and its associated keyword map.
  *
- * @section Junk Historical Junk
- * BitC accepts mixfix expressions. The programmer is able to
- * introduce lexically-scoped parser rules that augment the
- * expression grammar. The primary parser gathers expressions into 
- * linear list consisting of expressions (computed by productions in
- * the primary grammar) and operator nodes. That list is then
- * processed by the mixfix parser to generate an expression tree.
- *
- * My initial thought was to somehow use the same parse strategy as
- * the main parser. The problem with doing that is that (a) there isn't
- * any single place where we can compute parse tables to check for
- * ambiguities or errors, and (b) none of the well-known parse table
- * construction techniques is designed to provide for <em>removal</em>
- * of productions.
- *
- * In the end, I decided to go with a prioritized recursive descent
- * approach using infinite lookahead. In theory, this approach has a
- * fairly bad complexity order. In practice I suspect (hope?) that it
- * doesn't matter, because most expression productions have only one
- * operator and the prioritizations serve to trim the search space.
- *
- * Every mixfix rule consists of holes and operator nodes. The
- * operator nodes are one of four types: 
- *
- *   - PREOP nodes are followed by an expression. These introduce
- *     either a prefix expression or a bracketed expression.
- *   - POSTOP nodes are preceded by an expression. These always signal
- *     the end of an expression (either postfix or bracketed).
- *   - INOP (interior operator) nodes are preceded and succeeded by
- *     an expression. These are either standalone infix operators or
- *     an interior component of a multi-token expression.
- *   - TINOP an interior operator that is the @em final component in
- *     an operator (distinguished for ease of processing).
- *
- * So:
- * @verbatim
-mixfix _[_]  9   // INOP then POSTOP
-mixfix *+_+_ 6   // PREOP then TINOP
-@endverbatim
+ * The mixfix parser implementation itself is a recursive, predictive,
+ * shunting-yard variant. It uses a distinct parse stack and copy of
+ * the input for each production it attempts so that it is easier to
+ * back-track.
  *
  * There are several aspects of the BitC mixfix specification that
  * simplify or help to optimizer the parsing problem:
  *
  *   - It is never the case that two expression "holes" are adjacent.
  *   - Every mixfix specification has at least one hole.
- *   - There are no eta-productions to consider
+ *   - There are no eta-productions to consider.
  *   - Every production either starts with a quasi-keyword (an
- *     operator) or an expression
- *   - There is only one non-terminal: @em mixfix-expr
+ *     operator) or an expression.
+ *   - There is only one non-terminal: @em mixfix-expr.
  *   - In any place where there is ambiguity of action, either there
  *     is a disambiguating precedence rule or there is an error.
  *
- * Between them, I'm hopeful that these rules will let me get away
- * with performing an interpreted parse by the following strategy:
+ * @subsection MixFixComplications Complications
  *
- * For rapid production lookup and search branching decisions, we
- * (logically) keep two tables. The first provides a mapping from
- * initial keywords to productions <em>starting with</em> that
- * keyword. The second provides a mapping from keywords to productions
- * starting with an expression <em>followed by</em> that keyword. This
- * is used to determine where branching decisions have to be taken in
- * the parser.
+ * After getting an initial mixfix implementation working, I stumbled
+ * into an unpleasant surprise. The expression:
  *
- * At any given point, the parser is working on a rule of the form
- * X_Y_Z or _X_Y or some such, and it is operating at a particular
- * position in that rule. We proceed as follows:
+ * @verbatim
+a + (b-1)
+@endverbatim
  *
- *  - Given a lookahead quasi-keyword K:
- *       - If the top of stack is a quasi-keyword, it may be INOP or
- *         PREOP. See if some prefix of the current lookahead stream
- *         is reducible as an expresion.
+ * got completely mangled, because function application has higher
+ * precedence than anything else. In a mixfix parser, the ``+'' is
+ * just an idenfitier, so the <code>+(b-1)</code> got processed as a
+ * procedure application in the primary parser before processing ever
+ * made it into the mixfix layer. The resulting input at the mixfix
+ * layer was:
  *
- *       - If the stack is empty, see if some prefix of the current
- *         lookahead stream is reducible as an expresion. 
+ * @verbatim
+a {apply + {apply - b 1}}
+@endverbatim
  *
- *       - If the top of stack is an expression, see if shifting
- *         produces a valid prefix. The lookahead token cannot start 
- *         a new expresion, because the grammar does not permit two
- *         adjacent expressions. 
- *         
- *         If the valid prefix is reducible, we have a candidate
- *         expression. Return from the current expression parse with
- *         this candidate.
+ * Needless to say, this was not quite what I had in mind. The
+ * question is: since ``+'' is just an identifier, why are the
+ * following two things handled differently?
  *
- *       - Else: error
+ * @verbatim
+a + (b-1)
+a f (b-1)   // invalid
+@endverbatim
  *
- *  - Given a lookahead expression:
- *       - If top of stack is INOP or PREOP, shift the expression.
+ * The answer is that they are different because, at the mixfix layer,
+ * the ``+'' is not an identifier; it is a quasi-keyword. In
+ * consequence, the input pattern <code>+(b-1)</code> does not have an
+ * expression on the left, and therefore will not match the rule for
+ * application. "Hang on," you say, "the rule for application?"
  *
- *       - If the stack is empty, see if some prefix of the current
- *         lookahead stream is reducible as an expresion. 
+ * Yes. That's what this whole ``complications'' discussion is leading
+ * up to. We can't make decisions about what is an application until
+ * we get into the mixfix layer, which leads us to the following chain
+ * of conclusions:
  *
- *       - Else: error
+ * - The mixfix layer has to take over the handling of application, so
+ *   we need a rule for _(_). 
+ * - Since BitC procedures are n-ary, this means that the mixfix layer
+ *   also has to take over handling of _,_ in order to handle
+ *   arguments, but...
+ * - Once mixfix handles _,_ it also needs to handle pair
+ *   construction, some of the list convenience syntax, and vector
+ *   initializers.
+ * - Since those "take over" array indexing, mixfix needs to process
+ *   that too. 
+ * - Of these, pair construction is a bit unpleasant, because it means
+ *   that the (_) rule might mean either ordinary parenthesization or
+ *   the pair construction convenience syntax!
  *
- *  - If there is no more lookahead, either the current prefix is
- *    reducible or we have an error.
+ * Here is how I ended up sorting this all out:
+ *
+ * First, remember that the mixfix layer is building ASTs, and that it
+ * is purely context free. Because of this, my description above of
+ * the apply pattern doesn't work, and here's what we need to do to
+ * sort out pairs and application:
+ *
+ * - Initially, we treat <code>_,_</code> as building apply ASTs of the
+ *   form <code>{apply _,_ e1 e2}</code>
+ * - Similarly, we treat <code>(_)</code> as building apply ASTs of the
+ *   form {apply <code>(_)</code> e1}
+ * - We handle procedure application with the special-case pattern
+ *   ``<code>_&nbsp;_</code>'', 
+ *   where the second expression is required to be of the form <code>{apply
+ *   (_) e1}</code>. So a procedure call with show up as
+ *   <code>{ apply __ { apply (_) e1 }}</code> where the <em>e1</em>
+ *   will be an 
+ *   apply of <code>_,_</code> exactly if the procedure takes multiple arguments.
+ * - We handle array indexing similarly to procedure calls using 
+ *   ``<code>_&nbsp;_</code>'', 
+ *   where the second expression is required to be of the form <code>{apply
+ *   [_] e1}</code>.
+ * - For list literals <code>[ a, b, c ]</code>, we end up with:
+ *   <code>{ apply (_) { apply [_] e1} }</code>
+ * - For pair literals <code>(a, b, c)</code>, we end up with:
+ *   <code>{ apply (_) { apply _,_ e1 e2} }</code>
+ * - For vector literals, we may end up with:
+ *   <code>{ apply MakeVector { apply _,_ e1 e2} }</code> or 
+ *   <code>{ apply MakeVector (singleton expr) }</code> or 
+ *
+ * The first important point in all of this is to notice that an
+ * <code>{apply _,_
+ * e}</code> is <em>always</em> ``wrapped'' by something else in
+ * well-formed input, and conversely, that an <code>{apply (_)
+ * e}</code> node which is merely a parenthesized expression can be
+ * identified by virtue of <em>not</em> being wrapped. 
+ *
+ * The second important point is that the operator precedence rules
+ * for <code>_,_</code>, <code>(_)</code>, and ``<code>_&nbsp;_</code>''
+ * (and friends) work out correctly, primarily because
+ * <code>_,_</code> always appears inside a closed form.
+ *
+ * The end result is that we can let the mixfix layer assemble an
+ * expression tree by running the precedence-based parser, and then
+ * make a post-pass to rewrite that tree into the proper form for
+ * literal constructions, vector constructions, and applications.
+ *
+ * Which, after seeing the initial mess created by:
+ *
+ * @verbatim
+a + (b-1)
+@endverbatim
+ *
+ * is a feasibility conclusion that I was <em>very</em> relieved to reach!
  */
