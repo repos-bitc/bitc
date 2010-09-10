@@ -292,4 +292,16 @@ a + (b-1)
 @endverbatim
  *
  * is a feasibility conclusion that I was <em>very</em> relieved to reach!
+ *
+ * @subsection MixFixImplIssues Issues on Implementation
+ *
+ * When I went to actually implement, I found that the preferred parse
+ * rules for handling <code>_,_</code> are not possible. Ideally, the
+ * primary parser would ensure that <code>_,_</code> only arises
+ * within the legal bracketing forms <code>(_)</code> or
+ * <code>[_]</code>. In practice, this causes a long list of parse
+ * conflicts. The workaround is to simply accept ``,'' as if it were
+ * an identifier, and leave the syntactic issue to be diagnosed in the
+ * mixfix handler through the absence of any <code>,_</code> or
+ * <code>_,</code> productions.
  */
