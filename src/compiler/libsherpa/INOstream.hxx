@@ -57,7 +57,10 @@ struct INOstream {
   size_t col;
   bool needIndent;
   std::ostream &ostrm;
-  //void doIndent();
+
+  // Following is useful for emitting block comments. Note that this
+  // is inserted AFTER indentation occurs
+  std::string postIndent;
 
   INOstream(std::ostream &os)
     :ostrm(os)
@@ -65,6 +68,11 @@ struct INOstream {
     depth = 0;
     col = 0;
     needIndent = true;
+  }
+
+  void setPostindent(const std::string& s) 
+  {
+    postIndent = s;
   }
 
   inline void indent(int i)
@@ -110,6 +118,7 @@ struct INOstream {
 	ostrm << ' ';
 	col++;
       }
+      ostrm << postIndent;
     }
     needIndent = false;
   }

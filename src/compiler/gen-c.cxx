@@ -924,13 +924,13 @@ typeIsUnmangled(shared_ptr<Type> typ)
   }
 }
 
-bool
+static bool
 needsBackslashEscape(uint32_t c)
 {
   return (c == '"' || c == '\'' || c == '\\');
 }
 
-bool
+static bool
 asciiPrintableCharacter(uint32_t c)
 {
   /* ASCII printable glyphs are in the range [0x20,0x7e], but a few
@@ -2840,10 +2840,13 @@ TypesTOC(std::ostream& errStream,
         //    << " \"" << *(ast->loc.path) << "\""
         //    << std::endl;
 
-        out << "/***************************************" << endl
-            << "   " << ast->loc << endl
-            << "   " << ast->asString() << endl
-            << "***************************************/" << endl;
+        out << "////////////////////////////////////////" << endl;
+        out.setPostindent("// ");
+        out << ast->loc << endl
+            << ast->asString() << endl;
+        out.setPostindent("");
+        out << "////////////////////////////////////////" << endl;
+
         CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls,
                             mod, c, flags));
         out << endl;        
@@ -2861,10 +2864,13 @@ TypesTOC(std::ostream& errStream,
         emit_arr_vec_fn_types(ast, out, arrSet, arrByrefSet,  
                               vecSet, fnSet);
 
-        out << "/***************************************" << endl
-            << "   " << ast->loc << endl
-            << "   " << ast->asString() << endl
-            << "***************************************/" << endl;
+        out << "////////////////////////////////////////" << endl;
+        out.setPostindent("// ");
+        out << ast->loc << endl
+            << ast->asString() << endl;
+        out.setPostindent("");
+        out << "////////////////////////////////////////" << endl;
+
         shared_ptr<AST> ident = ast->child(0);
         if (decls.find(CMangle(ident)) == decls.end()) {
           decls.insert(CMangle(ident));
@@ -2893,10 +2899,13 @@ TypesTOC(std::ostream& errStream,
         emit_arr_vec_fn_types(ast, out, arrSet, arrByrefSet, 
                               vecSet, fnSet);
 
-        out << "/***************************************" << endl
-            << "   " << ast->loc << endl
-            << "   " << ast->asString() << endl
-            << "***************************************/" << endl;
+        out << "////////////////////////////////////////" << endl;
+        out.setPostindent("// ");
+        out << ast->loc << endl
+            << ast->asString() << endl;
+        out.setPostindent("");
+        out << "////////////////////////////////////////" << endl;
+
         CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls,
                             mod, c, flags));
         out << endl << endl;
@@ -2991,10 +3000,12 @@ EmitGlobalInitializers(std::ostream& errStream,
         //    << " \"" << *(ast->loc.path) << "\""
         //    << std::endl;
 
-        out << "/***************************************" << endl
-            << "   " << ast->loc << endl
-            << "   " << ast->asString() << endl
-            << "***************************************/" << endl;
+        out << "////////////////////////////////////////" << endl;
+        out.setPostindent("// ");
+        out << ast->loc << endl
+            << ast->asString() << endl;
+        out.setPostindent("");
+        out << "////////////////////////////////////////" << endl;
         
         shared_ptr<AST> id = ast->getID();
         shared_ptr<AST> label = GC_NULL;
@@ -3096,10 +3107,12 @@ EmitGlobalInitializers(std::ostream& errStream,
         //    << " \"" << *(ast->loc.path) << "\""
         //    << std::endl;
 
-        out << "/***************************************" << endl
-            << "   " << ast->loc << endl
-            << "   " << ast->asString() << endl
-            << "***************************************/" << endl;
+        out << "////////////////////////////////////////" << endl;
+        out.setPostindent("// ");
+        out << ast->loc << endl
+            << ast->asString() << endl;
+        out.setPostindent("");
+        out << "////////////////////////////////////////" << endl;
         
         CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls,
                             mod, c, flags));
@@ -3118,9 +3131,11 @@ EmitGlobalInitializers(std::ostream& errStream,
 
   // Making this unconditional simplifies things, and it does not
   // really hurt us.
-  out << "/***************************************"  << endl
-      << "         THE   initializer              "  << endl
-      << "***************************************/"  << endl;
+  out << "////////////////////////////////////////" << endl;
+  out.setPostindent("// ");
+  out << "The Initializer";
+  out.setPostindent("");
+  out << "////////////////////////////////////////" << endl;
   if (UocInfo::mainIsDefined)
     out << "static " ;
   out << "void"                                      << endl
@@ -3139,10 +3154,13 @@ EmitMain(INOstream &out)
 {
   bool errFree = true;
 
-  out << "/***************************************"  << endl
-      << "         THE   main()                   "  << endl
-      << "***************************************/"  << endl
-      << "int"                                       << endl
+  out << "////////////////////////////////////////" << endl;
+  out.setPostindent("// ");
+  out << "The main procedure";
+  out.setPostindent("");
+  out << "////////////////////////////////////////" << endl;
+
+  out << "int"                                       << endl
       << "main(int argc, char*argv[])"               << endl
       << "{"                                         << endl;
   out.more();
@@ -3219,10 +3237,13 @@ ValuesTOH(std::ostream& errStream,
     case at_proclaim:
       {
         if (ast->getID()->flags & DEF_IS_EXTERNAL) {
-          out << "/***************************************" << endl
-              << "   " << ast->loc << endl
-              << "   " << ast->asString()
-              << "***************************************/" << endl;
+          out << "////////////////////////////////////////" << endl;
+          out.setPostindent("// ");
+          out << ast->loc << endl
+              << ast->asString() << endl;
+          out.setPostindent("");
+          out << "////////////////////////////////////////" << endl;
+
           CHKERR(errFree, toc(errStream, uoc, ast, out, "", decls,
                               mod, c, flags));
           out << endl;
@@ -3247,13 +3268,15 @@ GenerateCoutput(std::ostream &errStream, INOstream &out,
   assert(uoc);
   set<string> decls;
 
-  out << "/********************************************" << endl
-      << "   This code was automatically generated by "  << endl
+  out << "/////////////////////////////////////////////" << endl;
+  out.setPostindent("// ");
+  out << "   This code was automatically generated by "  << endl
       << "   BitC compiler version " << Version()        << endl
       << endl
       << "        !!!     DO NOT EDIT     !!!   "        << endl
-      << "         !!  uness you are sure !!  "          << endl
-      << "********************************************/" << endl;
+      << "         !!  uness you are sure !!  "          << endl;
+  out.setPostindent("");
+  out << "/////////////////////////////////////////////" << endl;
 
   //  ifstream runtime(BITCCDIR"/runtime.h");
 
