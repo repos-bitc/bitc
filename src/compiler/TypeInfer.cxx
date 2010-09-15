@@ -4882,7 +4882,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       if (moreCases) {
         if (otherwise->astType == at_Null) {
           errStream << ast->loc << ": The following cases"
-                    << "are not covered: ";
+                    << " are not covered: ";
           for (size_t j=0; j < uType->components.size(); j++) {
             shared_ptr<Type> cTyp = uType->CompType(j)->getType();
             if (j > 0)

@@ -110,17 +110,22 @@ warnUnresRef(std::ostream& errStream,
 
           errStream << ast->loc << ": WARNING: " 
                     << "Local declaration of " << ast->child(0)->s 
-                    << " found here, but no definition found";
-          
-          errStream << std::endl;
+                    << " found here, but no definition found."
+                    << std::endl;
           
           if (Options::Wall)
             errorFree = false;
           break;
         }
 
-        if (def != NULL)
-          assert(!def->isDecl);
+        if (def != NULL) {
+          if (def->isDecl) {
+            errStream << ast->loc << ": ERROR: declaration of " << ast->child(0)->s
+                      << " appears to be it's own defintion!"
+                      << std::endl;
+            assert(false);
+          }
+        }
       }
     default:
       break;
