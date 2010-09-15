@@ -390,3 +390,55 @@ LitValue::DecodeCharacter(const std::string& s)
 
   return codePoint;
 }
+
+static bool
+needsBackslashEscape(uint32_t c)
+{
+  return (c == '"' || c == '\'' || c == '\\');
+}
+
+static bool
+asciiPrintableCharacter(uint32_t c)
+{
+  /* ASCII printable glyphs are in the range [0x20,0x7e], but a few
+     of these require special escaping. */
+  return (c >= 0x20 && c < 0x7f);
+}
+
+std::string
+LitValue::asString() const
+{
+  std::stringstream ss;
+
+  switch(litType) {
+  case lt_bool:
+    return (b == true) ? "true" : "false";
+
+  case lt_char:
+    {
+      if (asciiPrintableCharacter(c))
+        ss << (needsBackslashEscape(c) ? "'\\" : "'")
+           << (unsigned char) c << "'";
+      else
+        ss << (unsigned long)(c);
+
+      return ss.str();
+    }
+  case lt_int:
+    ss << i;                    // defer to bignum printer
+    return ss.str();
+
+  case lt_float:
+    {
+      char buf[256];
+      snprintf(buf, sizeof(buf), " %f\n", d);
+      return buf;
+    }
+
+  case lt_string:
+    return s;
+
+  default:
+    return "BAD LITERAL TYPE";
+  }
+}

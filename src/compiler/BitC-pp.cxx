@@ -212,7 +212,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_floatLiteral:
 
     out << ast->s;
-
+    out << " /* " << ast->litValue << " */";
     if (showTypes) print_type(out, ast);
 
     break;

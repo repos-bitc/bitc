@@ -63,7 +63,7 @@ AST::makeBoolLit(const sherpa::LToken &tok)
     ast->litValue.b = true;
   else
     ast->litValue.b = false;
-  ast->litValue.lr = lr_bool;
+  ast->litValue.litType = lt_bool;
 
   return ast;
 }
@@ -78,7 +78,7 @@ AST::makeCharLit(const sherpa::LToken &tok)
   //  mpz_init_set_str(ast->litValue.i, tok.is.c_str(), 0);
 
   ast->litValue.c = LitValue::DecodeCharacter(tok.str);
-  ast->litValue.lr = lr_char;
+  ast->litValue.litType = lt_char;
 
   return ast;
 }
@@ -130,7 +130,7 @@ AST::makeIntLit(const sherpa::LToken &tok)
   if (negative)
     ast->litValue.i = -ast->litValue.i;
 
-  ast->litValue.lr = lr_int;
+  ast->litValue.litType = lt_int;
 
   return ast;
 }
@@ -145,7 +145,7 @@ AST::makeFloatLit(const sherpa::LToken &tok)
   ast->litBase = 10;
   ast->litValue.d = strtod(tok.str.c_str(), 0);
 
-  ast->litValue.lr = lr_float;
+  ast->litValue.litType = lt_float;
   return ast;
 }
 
@@ -154,7 +154,7 @@ AST::makeStringLit(const sherpa::LToken &tok)
 {
   shared_ptr<AST> ast = AST::make(at_stringLiteral, tok);
   ast->litValue.s = tok.str;
-  ast->litValue.lr = lr_string;
+  ast->litValue.litType = lt_string;
 
   return ast;
 }

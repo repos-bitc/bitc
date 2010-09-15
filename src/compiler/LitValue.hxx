@@ -44,17 +44,17 @@
 
 #include "ucs.hxx"
 
-enum LitRepr {
-  lr_none,
-  lr_bool,
-  lr_char,
-  lr_int,
-  lr_float,
-  lr_string
+enum LiteralType {
+  lt_none,
+  lt_bool,
+  lt_char,
+  lt_int,
+  lt_float,
+  lt_string
 };
 
 struct LitValue {
-  LitRepr lr;
+  LiteralType litType;
 
   bool   b;                        /* boolean Values */
   unsigned long c;                 /* utf32 code points */
@@ -89,9 +89,18 @@ struct LitValue {
   static ucs4_t DecodeStringCharacter(const char *s, const char **next);
   static ucs4_t DecodeCharacter(const std::string&);
 
+  std::string asString() const;
+
   LitValue() {
-    lr = lr_none;
+    litType = lt_none;
   }
 };
+
+inline
+std::ostream& operator<<(std::ostream& strm, const LitValue& lv)
+{
+  strm << lv.asString();
+  return strm;
+}
 
 #endif /* LITVALUE_HXX */
