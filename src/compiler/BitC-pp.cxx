@@ -961,17 +961,22 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << ast->atKwd();
       out.more();
 
+      size_t start = 0;
+
       if (ast->printVariant != 0) {
         // explicit module form. Put name on same line:
         out << " ";
+        BitcP(out, ast->child(0), showTypes);
+        out << " is";
+        start = 1;
       }
       else
-        out << std::endl;
+        out << " is" << std::endl;
 
       /* Dont call doChildren; that will put spaces in front
          of the top level forms. Remember, bitc-version has
          already been emitted without a space */
-      for (unsigned i = 0; i < ast->children.size(); i++) {
+      for (size_t i = start; i < ast->children.size(); i++) {
         BitcP(out, ast->child(i), showTypes);
         out << std::endl;
       }
@@ -1312,6 +1317,15 @@ AST::PrettyPrint(std::ostream& strm, bool decorated,
                  bool endline) const
 {
   INOstream out(strm);
+  BitcP(out, shared_from_this(), decorated);
+  if (endline)
+    out << std::endl;
+}
+
+void
+AST::PrettyPrint(INOstream& out, bool decorated,
+                 bool endline) const
+{
   BitcP(out, shared_from_this(), decorated);
   if (endline)
     out << std::endl;
