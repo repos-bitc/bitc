@@ -82,6 +82,8 @@ TransitionLexer::valid_ascii_symbol(ucs4_t ucs4)
   case '#':                     // until S-expressions are gone
     return false;
 
+  case ':':                     // this just broke too much stuff
+    return false;
 
   case '!':
   case '$':
@@ -186,27 +188,10 @@ TransitionLexer::KeyWord::KeyWord(const char *_nm, LangFlags _whichLang,
 static bool keywords_sorted = false;
 
 struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
-  TransitionLexer::KeyWord( "!",                lf_block,             '!' ),
-  TransitionLexer::KeyWord( "~",                lf_block,             '~' ),
-  TransitionLexer::KeyWord( "!=",               lf_block,             tk_NOTEQUALS ),
-  TransitionLexer::KeyWord( "%",                lf_block,             '%' ),
-  TransitionLexer::KeyWord( "&",                lf_block,             '&' ),
-  TransitionLexer::KeyWord( "&&",               lf_block,             tk_AND ),
-  TransitionLexer::KeyWord( "**",               lf_transition,        tk_SxpIdent, tk_EXPT ),
-  TransitionLexer::KeyWord( "*",                lf_transition,        tk_SxpIdent, '*' ),
-  TransitionLexer::KeyWord( "+",                lf_transition,        tk_SxpIdent, '+' ),
-  TransitionLexer::KeyWord( "-",                lf_transition,        tk_SxpIdent, '-' ),
+  TransitionLexer::KeyWord( "=",                lf_block,             '=' ),
+//  TransitionLexer::KeyWord( "!=",               lf_block,             tk_NOTEQUALS ),
   TransitionLexer::KeyWord( "->",               lf_transition,        tk_FNARROW ),
-  TransitionLexer::KeyWord( "/",                lf_transition,        tk_SxpIdent, '/' ),
-  TransitionLexer::KeyWord( "<",                lf_block,             '<' ),
-  TransitionLexer::KeyWord( "<<",               lf_block,             tk_LSHIFT ),
-  TransitionLexer::KeyWord( "<=",               lf_block,             tk_LE ),
-  TransitionLexer::KeyWord( "=",                lf_transition,        tk_SxpIdent, '=' ),
-  TransitionLexer::KeyWord( "^",                lf_transition,        '^' ),
   TransitionLexer::KeyWord( "==",               lf_block,             tk_EQUALS ),
-  TransitionLexer::KeyWord( ">",                lf_block,             '>' ),
-  TransitionLexer::KeyWord( ">=",               lf_block,             tk_GE ),
-  TransitionLexer::KeyWord( ">>",               lf_block,             tk_RSHIFT ),
   TransitionLexer::KeyWord( "and",              lf_transition,        tk_AND ),
   TransitionLexer::KeyWord( "apply",            lf_transition,        tk_APPLY ),
   TransitionLexer::KeyWord( "array",            lf_transition,        tk_ARRAY ),
@@ -294,7 +279,6 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "module",           lf_transition,        tk_MODULE ),
   TransitionLexer::KeyWord( "mutable",          lf_transition,        tk_MUTABLE ),
   TransitionLexer::KeyWord( "namespace",        lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "not",              lf_block,             tk_NOT ),
   TransitionLexer::KeyWord( "nth",              lf_sexpr,             tk_NTH ),
   TransitionLexer::KeyWord( "object",           lf_block,             tk_OBJECT ),
   TransitionLexer::KeyWord( "opaque",           lf_transition,        tk_OPAQUE ),
@@ -344,34 +328,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "version",          lf_version,           tk_VERSION ),
   TransitionLexer::KeyWord( "when",             lf_transition,        tk_WHEN ),
   TransitionLexer::KeyWord( "where",            lf_transition,        tk_WHERE ),
-  TransitionLexer::KeyWord( "word",             lf_transition,        tk_WORD ),
-  TransitionLexer::KeyWord( "|",                lf_block,             '|' ),
-  TransitionLexer::KeyWord( "||",               lf_block,             tk_OR )
-
-#if 0
-  MixRule("_or_",  0, LEFT_ASSOC),
-  MixRule("_and_", 1, LEFT_ASSOC),
-  MixRule("_!=_",  2, LEFT_ASSOC),
-  MixRule("_==_",  2, LEFT_ASSOC),
-  MixRule("_<_",   3, LEFT_ASSOC),
-  MixRule("_<=_",  3, LEFT_ASSOC),
-  MixRule("_>_",   3, LEFT_ASSOC),
-  MixRule("_>=_",  3, LEFT_ASSOC),
-  MixRule("_::_",  4, LEFT_ASSOC), // infix cons
-  MixRule("_|_",   5, LEFT_ASSOC),
-  MixRule("_^_",   6, LEFT_ASSOC),
-  MixRule("_&_",   7, LEFT_ASSOC),
-  MixRule("_<<_",  8, LEFT_ASSOC),
-  MixRule("_>>_",  8, LEFT_ASSOC),
-  MixRule("_+_",   9, LEFT_ASSOC),
-  MixRule("_-_",   9, LEFT_ASSOC),
-  MixRule("_%_",  10, LEFT_ASSOC),
-  MixRule("_*_",  10, LEFT_ASSOC),
-  MixRule("_/_",  10, LEFT_ASSOC),
-
-  MixRule("_**_",    11, LEFT_ASSOC), // exponentiation
-  MixRule("_**_+_",  11, LEFT_ASSOC)  // hypothetical mul-add for testing
-#endif
+  TransitionLexer::KeyWord( "word",             lf_transition,        tk_WORD )
 };
 
 static int
@@ -720,7 +677,7 @@ TransitionLexer::beginBlock(const LToken& tok)
   unsigned column = layoutStack ? layoutStack->column : 0;
 
   boost::shared_ptr<LayoutFrame> lf = 
-    LayoutFrame::make(lastToken.tokType, inserted, column);
+    LayoutFrame::make(lastToken.tokType, inserted, column, tok);
 
   //  expectingLeftBrace = false; // we're about to return it.
   //  learnBlockIndent = true;
@@ -734,10 +691,20 @@ TransitionLexer::endBlock(const LToken& tok)
 {
   bool inserted = (tok.flags & TF_INSERTED);
 
-  if (inserted && ! layoutStack->inserted)
-    ReportParseError(here, "Inserted close brace balances explicit open brace.");
-  else if (!inserted && layoutStack->inserted) 
-    ReportParseError(here, "Explicit close brace balances inserted open brace.");
+  if (inserted && ! layoutStack->inserted) {
+    std::stringstream ss;
+    ss << "Inserted close brace balances explicit open brace at " 
+       << layoutStack->tok.loc
+       << ".";
+    ReportParseError(tok.loc, ss.str());
+  }
+  else if (!inserted && layoutStack->inserted) {
+    std::stringstream ss;
+    ss << "Explicit close brace balances inserted open brace at "
+       << layoutStack->tok.loc
+       << ".";
+    ReportParseError(tok.loc, ss.str());
+  }
 
   // considerLineStart = false; // we've done it
   layoutStack = layoutStack->next;
@@ -926,12 +893,16 @@ TransitionLexer::getNextToken()
   // FIX: Once I clean up the surface syntax, this should also be done
   // for tk_DO.
   bool curlyRequired = ((lastTokType == EOF)        // beginning of file
-                        || (lastTokType == tk_CASE)
                         || (lastTokType == tk_LET)
                         || (lastTokType == tk_LETREC)
+                        || (lastTokType == tk_LOOP)
+                        || (lastTokType == tk_SWITCH)
                         || (lastTokType == tk_IN)
+                        || (lastTokType == tk_IS)
                         || (lastTokType == tk_DO)
                         || (lastTokType == tk_THEN)
+                        || (lastTokType == tk_OTHERWISE)
+                        || (lastTokType == tk_THROW)
                         || (lastTokType == tk_ELSE)
                         || false);
 
@@ -1065,6 +1036,10 @@ TransitionLexer::getNextToken()
                           tok.tokType == '}' ||
                           tok.tokType == tk_THEN ||
                           tok.tokType == tk_ELSE ||
+                          tok.tokType == tk_CASE ||
+                          tok.tokType == tk_OTHERWISE ||
+                          tok.tokType == tk_UNTIL ||
+                          tok.tokType == tk_GIVING ||
                           tok.tokType == tk_IN ||
                           tok.tokType == tk_DO ||
                           false);
@@ -1155,67 +1130,6 @@ TransitionLexer::getNextInputToken()
   LexLoc endLoc = here;
 
   switch (c) {
-#if 1
-  case '`':
-    {
-      // back-tick should never appear in any context where a sexpr is
-      // legal:
-      if (currentLang & lf_sexpr) {
-        endLoc.updateWith(thisToken);
-        RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
-      }
-
-      // In the block syntax, back-tick has the effect of quoting an
-      // operator, turning it in to an identifier for use in function
-      // call position:
-      ucs4_t c = getChar();
-
-      // "not" is handled as a special-case operator:
-      if (valid_ident_start(c)) {
-        do {
-          c = getChar();
-        } while (valid_ident_continue(c));
-
-        if (c != '`' || thisToken != "`not`") {
-          ungetThisToken();
-          endLoc.updateWith(thisToken);
-          RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
-        }
-
-        endLoc.updateWith(thisToken);
-        RETURN_TOKEN(LToken(tk_BlkIdent, startLoc, endLoc, 
-                            thisToken.substr(1, thisToken.size()-2)));
-      }
-      else if (valid_operator_start(c)) {
-        do {
-          c = getChar();
-        } while (valid_operator_continue(c));
-
-        if (c != '`') {
-          ungetThisToken();
-          endLoc.updateWith(thisToken);
-          RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
-        }
-
-        endLoc.updateWith(thisToken);
-        RETURN_TOKEN(LToken(tk_BlkIdent, startLoc, endLoc, 
-                            thisToken.substr(1, thisToken.size()-2)));
-      }
-      else {
-        ungetChar(c);
-        endLoc.updateWith(thisToken);
-        RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
-      }
-
-    }
-#endif
-
-  case ';':
-    {
-      endLoc.updateWith(thisToken);
-      RETURN_TOKEN(LToken(c, startLoc, endLoc, thisToken));
-    }
-
   case ':':
     {
       int tokID = ':';
@@ -1223,13 +1137,19 @@ TransitionLexer::getNextInputToken()
       ucs4_t c2 = getChar();
       if (c2 == '=')
         tokID = tk_ASSIGN;
-      else if (c2 == ':')
-        tokID = tk_INFIX_CONS;
+      else if (c2 == ':') {
+        tokID = tk_BlkIdent;
+      }
       else
         ungetChar(c2);
 
       endLoc.updateWith(thisToken);
       RETURN_TOKEN(LToken(tokID, startLoc, endLoc, thisToken));
+    }
+  case ';':
+    {
+      endLoc.updateWith(thisToken);
+      RETURN_TOKEN(LToken(c, startLoc, endLoc, thisToken));
     }
 
   case '{':

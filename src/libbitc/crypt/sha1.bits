@@ -127,17 +127,15 @@ module sha1_impl {
 
   // Forward declarations
   def sha1PadMessage : fn (ByRef sha1.sha1Context) -> ()
-  def sha1ProcessMessageBlock : fn(ByRef sha1.sha1Context) -> ()
 
   // Strings for Sha-Result
   def sha1.shaResultAsString(res) =
-    switch(res) {
-    case x as sha1.sha_Success in "Success"
-    case x as sha1.sha_Null in "Null"
-    case x as sha1.sha_InputTooLong in "Too-Long"
-    case x as sha1.sha_StateError in "State-Error"
-    }
-    
+    switch x = res
+    case sha1.sha_Success in "Success"
+    case sha1.sha_Null in "Null"
+    case sha1.sha_InputTooLong in "Too-Long"
+    case sha1.sha_StateError in "State-Error"
+
   //////////////////////////////////////////////////////////
   // SHA1Reset  
   //
@@ -196,9 +194,9 @@ module sha1_impl {
           then {
             sha1PadMessage(context)
             loop i = 0 then i + 1
-              until i >= 64 {
+              until i >= 64 
+              in
                 context.message[i] := 0
-              }
             context.lenLow := 0
             context.lenHigh := 0
             context.computed := true
@@ -206,67 +204,12 @@ module sha1_impl {
           else ()
 
         loop i = 0 then i + 1
-          until i >= 20 {
+          until i >= 20
+          in
             digest[i] := Truncate(context.digest[i >> 2] >> (8 * (3 - i & 0x03)))
-          }
         sha1.sha_Success
       }
       else context.corrupted
-  }
-
-
-  //////////////////////////////////////////////////////////
-  // SHA1Input  
-  //
-  // Description:
-  //     This function accepts an array of octets as the next portion
-  //     of the message. 
-  //
-  // Parameters:
-  //     context: [in/out]
-  //         The SHA context to update
-  //      message: [in]
-  //         A vector of characters representing the next portion of
-  //         the message. 
-  //
-  // Returns:
-  //      sha Error Code.
-  //////////////////////////////////////////////////////////
-
-  def sha1.sha1Input(context:ByRef sha1.sha1Context, message:(mutable uint8)[]) = {
-    if message.length == 0
-      then sha1.sha_Success
-      else {
-        if context.computed
-          then {
-            context.corrupted := sha1.sha_StateError
-            sha1.sha_StateError
-          }
-          else {
-            if context.corrupted.sha_Success
-              then {
-                loop i = 0 then i + 1
-                  until (i >= message.length) && context.corrupted.sha_Success {
-                    context.message[context.messNdx] := message[i] & 0xff
-                    context.messNdx := context.messNdx + 1
-                    context.lenLow := context.lenLow + 8
-
-                    if context.lenLow == 0
-                      then {
-                        context.lenHigh := context.lenHigh + 1
-                        if context.lenHigh == 0
-                          then context.corrupted := sha1.sha_InputTooLong
-                      }
-
-                    if context.messNdx == 64
-                      then sha1ProcessMessageBlock(context)
-                  }
-
-                sha1.sha_Success
-              }
-              else context.corrupted
-          }
-      }
   }
 
   //////////////////////////////////////////////////////////
@@ -300,17 +243,17 @@ module sha1_impl {
 	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     
     loop t = 0 then t + 1
-      until t >= 16 {
+      until t >= 16
+      in
         W[t] := ZeroExtend(context.message[t*4]) << 24
         W[t] := W[t] | ZeroExtend(context.message[t*4 + 1]) << 16
         W[t] := W[t] | ZeroExtend(context.message[t*4 + 2]) << 8
         W[t] := W[t] | ZeroExtend(context.message[t*4 + 3])
-      }
 
     loop t = 16 then t + 1
-      until t >= 80 {
+      until t >= 80
+      in
         W[t] := circShift(1, W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16])
-      }
 
     def A = context.digest[0]
     def B = context.digest[1]
@@ -319,7 +262,8 @@ module sha1_impl {
     def E = context.digest[4]
 
     loop t = 0 then t + 1
-      until t >= 20 {
+      until t >= 20
+      in
         def temp = circShift(5, A) + ((B&C) | (~B & D)) + E + W[t] + K[0]
 
         E := D
@@ -327,10 +271,10 @@ module sha1_impl {
         C := circShift(30, B)
         B := A
         A := temp
-      }
-
+ 
     loop t = 20 then t + 1
-      until t >= 40 {
+      until t >= 40
+      in
         def temp = circShift(5, A) + (B^(C^D)) + E + W[t] + K[1]
 
         E := D
@@ -338,10 +282,10 @@ module sha1_impl {
         C := circShift(30, B)
         B := A
         A := temp
-      }
 
     loop t = 40 then t + 1
-      until t >= 60 {
+      until t >= 60
+      in
         def temp = circShift(5, A) + ((B&C)|(B&D)|(C&D)) + E + W[t] + K[2]
 
         E := D
@@ -349,10 +293,10 @@ module sha1_impl {
         C := circShift(30, B)
         B := A
         A := temp
-      }
 
     loop t = 60 then t + 1
-      until t >= 80 {
+      until t >= 80
+      in
         def temp = circShift(5, A) + (B^(C^D)) + E + W[t] + K[3]
 
         E := D
@@ -360,7 +304,6 @@ module sha1_impl {
         C := circShift(30, B)
         B := A
         A := temp
-      }
 
     context.digest[0] := context.digest[0] + A
     context.digest[1] := context.digest[1] + B
@@ -369,6 +312,60 @@ module sha1_impl {
     context.digest[4] := context.digest[4] + E
 
     context.messNdx := 0
+  }
+
+  //////////////////////////////////////////////////////////
+  // SHA1Input  
+  //
+  // Description:
+  //     This function accepts an array of octets as the next portion
+  //     of the message. 
+  //
+  // Parameters:
+  //     context: [in/out]
+  //         The SHA context to update
+  //      message: [in]
+  //         A vector of characters representing the next portion of
+  //         the message. 
+  //
+  // Returns:
+  //      sha Error Code.
+  //////////////////////////////////////////////////////////
+
+  def sha1.sha1Input(context:ByRef sha1.sha1Context, message:(mutable uint8)[]) = {
+    if message.length == 0
+      then sha1.sha_Success
+      else {
+        if context.computed
+          then {
+            context.corrupted := sha1.sha_StateError
+            sha1.sha_StateError
+          }
+          else {
+            if context.corrupted.sha_Success
+              then {
+                loop i = 0 then i + 1
+                  until (i >= message.length) && context.corrupted.sha_Success
+                  in
+                    context.message[context.messNdx] := message[i] & 0xff
+                    context.messNdx := context.messNdx + 1
+                    context.lenLow := context.lenLow + 8
+
+                    if context.lenLow == 0
+                      then {
+                        context.lenHigh := context.lenHigh + 1
+                        if context.lenHigh == 0
+                          then context.corrupted := sha1.sha_InputTooLong
+                      }
+
+                    if context.messNdx == 64
+                      then sha1ProcessMessageBlock(context)
+
+                sha1.sha_Success
+              }
+              else context.corrupted
+          }
+      }
   }
 
   //////////////////////////////////////////////////////////
@@ -393,7 +390,6 @@ module sha1_impl {
   //      Nothing.
   //////////////////////////////////////////////////////////
 
-
   def sha1PadMessage(context:ByRef sha1.sha1Context) = {
     // Check to see if the current message block is too small to hold
     // the initial padding bits and length. If so, we will pad the
@@ -403,28 +399,28 @@ module sha1_impl {
         context.message[context.messNdx] := 0x80
         context.messNdx := context.messNdx + 1
 
-        loop until context.messNdx >= 64 {
+        loop until context.messNdx >= 64
+        in
           context.message[context.messNdx] := 0
           context.messNdx := context.messNdx + 1
-        }
 
         sha1ProcessMessageBlock(context)
 
         // Will reset context.messNdx to 0
 
-        loop until context.messNdx >= 56 {
+        loop until context.messNdx >= 56
+        in
           context.message[context.messNdx] := 0
           context.messNdx := context.messNdx + 1
-        }
       }
       else {
         context.message[context.messNdx] := 0x80
         context.messNdx := context.messNdx + 1
 
-        loop until context.messNdx >= 56 {
+        loop until context.messNdx >= 56
+        in
           context.message[context.messNdx] := 0
           context.messNdx := context.messNdx + 1
-        }
       }
 
     // Store the message length as the last 8 octets

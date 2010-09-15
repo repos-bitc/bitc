@@ -161,14 +161,14 @@ static unsigned VersionMinor(const std::string s)
 %token-table
 %parse-param {TransitionLexer *lexer}
 
-%token <tok> tk_ReservedWord        /* reserved words */
-%token <tok> tk_SxpReservedWord     /* S-expression reserved words */
-
  /* Place-holder "low priority" terminal for use in %prec */
 %nonassoc <tok> prec_PreferShift
 
+%nonassoc <tok> tk_ReservedWord        /* reserved words */
+%nonassoc <tok> tk_SxpReservedWord     /* S-expression reserved words */
+
 /* Categorical terminals: */
-%token <tok> tk_SxpIdent
+%nonassoc <tok> tk_SxpIdent
 %nonassoc <tok> tk_BlkIdent
 %nonassoc <tok> tk_NotApply
 
@@ -191,14 +191,14 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_String
 %token <tok> tk_VersionNumber
 
-%left <tok> '('
-%left <tok> ':'
-%token <tok> ')'                /* procedure call, unit */
-%right <tok> ','                /* pair */
-%token <tok> '{' '}' ';'
-%left <tok> '[' ']'            /* array, vector */
-%token <tok> '.'
-%token <tok> tk_ASSIGN
+%nonassoc <tok> '('
+%nonassoc <tok> ':'
+%nonassoc <tok> ')'                /* procedure call, unit */
+%right    <tok> ','                /* pair */
+%nonassoc <tok> '{' '}' ';'
+%nonassoc <tok> '[' ']'            /* array, vector */
+%left     <tok> '.'
+%nonassoc <tok> tk_ASSIGN
 
 /* Primary types and associated hand-recognized literals: */
 %token <tok> tk_AS
@@ -249,27 +249,18 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_THE
 
 %token <tok> tk_WHEN
-%token <tok> tk_NOT '!'
-%token <tok> '~'
 %token <tok> tk_COND
 %token <tok> tk_SWITCH
 %token <tok> tk_TYPECASE
-%token <tok> tk_CASE
-%token <tok> tk_OTHERWISE
+%left <tok> tk_CASE
+%nonassoc <tok> tk_OTHERWISE
 
-/* Precedence relationships for infix operators. In Bison, lower
-   precedence operators come first: */
-%left <tok> tk_OR
-%left <tok> tk_AND
-%left <tok> tk_EQUALS tk_NOTEQUALS
-%left <tok> '<' tk_LE '>' tk_GE
-%right <tok> tk_INFIX_CONS
-%left <tok> '|'
-%left <tok> '^'
-%left <tok> '&'
-%left <tok> tk_LSHIFT tk_RSHIFT // eventually
-%left <tok> '+' '-'
-%left <tok> '*' '/' '%'
+// MIXFIX: No more infix operators now that we have mixfix. AND an OR
+// are handled as special cases in the mixfix engine.
+
+%left <tok> tk_AND tk_OR
+%left <tok> tk_EQUALS
+// %left <tok> tk_NOTEQUALS
 
 %left <tok> '='
 
@@ -277,6 +268,7 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_LABEL
 %token <tok> tk_RETURN tk_FROM tk_CONTINUE
 
+// MIXFIX:These are regrettably going to get tricky to handle...
 %token <tok> tk_PAIR
 %token <tok> tk_VECTOR
 %token <tok> tk_ARRAY
@@ -326,7 +318,6 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_IN
 %token <tok> tk_FN
 %token <tok> tk_FNARROW
-%token <tok> tk_EXPT
 %token <tok> tk_BEGIN
 %token <tok> tk_LOOP
 %token <tok> tk_DO
@@ -381,8 +372,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_importList sxp_provideList
 %type <ast> blk_importList blk_provideList
 %type <ast> sxp_type_cpair sxp_unqual_expr_cpair
-%type <ast> blk_type_cpair blk_expr_cpair
-%type <ast> blk_list_elements
+%type <ast> blk_type_cpair
 %type <ast> sxp_value_definition blk_value_definition 
 %type <ast> sxp_tc_definition sxp_ti_definition
 %type <ast> blk_tc_definition blk_ti_definition
@@ -403,10 +393,16 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_actual_params sxp_nonempty_params
 %type <ast> blk_actual_params blk_nonempty_params
 %type <ast> sxp_block sxp_block_exprs
-%type <ast> blk_block blk_expr_seq
+%type <ast> blk_iblock blk_ieblock
+%type <ast> blk_expr_seq
 %type <ast> sxp_expr sxp_the_expr sxp_unqual_expr
-%type <ast> blk_primary_expr blk_postfix_expr blk_prefix_expr blk_infix_expr
-%type <ast> blk_mixfix_expr blk_mixfix_elems blk_mixfix_elem
+// Primary exprs are the truly primitive things.
+// Closed exprs are things like LET, DO, WHILE that are bracketed on
+// all sides.
+%type <ast> blk_primary_expr blk_closed_expr
+%type <ast> blk_postfix_expr blk_prefix_expr
+%type <ast> blk_mixfix_expr blk_mixfix_elem
+%type <ast> blk_mixfix_arglist
 %type <ast> blk_tqual_expr
 %type <ast> blk_expr
 %type <ast> sxp_method_decls sxp_method_decl
@@ -422,12 +418,14 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_prefix_type
 %type <ast> blk_postfix_type
 %type <ast> blk_shallowperm_type
+%type <ast> primary_type
 %type <ast> blk_primary_type
+%type <ast> sxp_primary_type
 
 %type <ast> blk_type_args blk_bitfieldtype
 %type <ast> sxp_field_type sxp_type_pl_byref sxp_type_args_pl_byref
 %type <ast> blk_field_type blk_type_pl_byref blk_type_args_pl_byref
-%type <ast> int_type uint_type any_int_type float_type primary_type bool_type
+%type <ast> int_type uint_type any_int_type float_type bool_type
 %type <ast> sxp_tvlist blk_tvlist
 %type <ast> sxp_fields sxp_field
 %type <ast> blk_fields blk_field
@@ -446,7 +444,6 @@ static unsigned VersionMinor(const std::string s)
  //%type <ast> reprbody reprbodyitems reprbodyitem reprtags reprcase reprcaseleg
 //%type <ast> typecase_leg typecase_legs
 %type <ast> sxp_sw_legs sxp_sw_leg sxp_otherwise sxp_opt_otherwise
-%type <ast> blk_catch_legs blk_catch_leg
 %type <ast> blk_sw_legs blk_sw_leg
 %type <ast> blk_otherwise blk_opt_otherwise
 //%type <ast> catchclauses catchclause
@@ -463,7 +460,11 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_ident blk_defident blk_useident
 %type <ast> intLit natLit floatLit charLit strLit boolLit
 
-%type <tok> ILCB IRCB
+%type <tok> ILCB  IRCB   // one inserted by layout
+ // %type <tok> ErrLCB
+%type <tok> ErrRCB
+ // %type <tok> OptLCB
+%type <tok> OptRCB
 %type <tok> IsILCB  // Used in types
 
 %%
@@ -476,7 +477,7 @@ static unsigned VersionMinor(const std::string s)
 // junk after the body.
 
 start: ILCB blk_version ';' trn_uoc_body IRCB {
-  SHOWPARSE("start -> ILCB blk_version SC trn_uoc_body IRCB}");
+  SHOWPARSE("start -> ILCB blk_version SC trn_uoc_body IRCB");
   return 0;
 };
 
@@ -1097,7 +1098,7 @@ blk_repr_constructors: blk_repr_constructors SC blk_repr_constructor {
   $$->addChild($3);
 }
 
-blk_repr_constructor: blk_ident IsILCB blk_fields IRCB tk_WHERE blk_repr_reprs {
+blk_repr_constructor: blk_ident IsILCB blk_fields OptRCB tk_WHERE blk_repr_reprs {
   SHOWPARSE("blk_repr_constructor ->  blk_ident { sxp_fields } WHERE blk_repr_reprs");
   $1->flags |= (ID_IS_GLOBAL);
   shared_ptr<AST> ctr = AST::make(at_constructor, $1->loc, $1);
@@ -1110,8 +1111,8 @@ blk_repr_reprs: blk_repr_repr {
   SHOWPARSE("blk_repr_reprs -> blk_repr_repr");
   $$ = AST::make(at_Null, $1->loc, $1);
 };
-blk_repr_reprs: blk_repr_reprs tk_AND blk_repr_repr {
-  SHOWPARSE("blk_repr_reprs -> blk_repr_reprs tk_AND blk_repr_repr");
+blk_repr_reprs: blk_repr_reprs ',' blk_repr_repr {
+  SHOWPARSE("blk_repr_reprs -> blk_repr_reprs ',' blk_repr_repr");
   $$ = $1;
   $$->addChild($3);
 };
@@ -1462,12 +1463,12 @@ sxp_method_decl: sxp_ident ':' sxp_fntype {
 };
 
 // TYPE CLASS INSTANTIATIONS [4.2]
-blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring ILCB IRCB {
-  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints [docstring] { } )");
+blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring {
+  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints [docstring] )");
   $$ = AST::make(at_definstance, $1.loc, $2,
                  AST::make(at_tcmethods, $1.loc), $3);
 };
-blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring ILCB blk_method_bindings IRCB {
+blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring IsILCB blk_method_bindings IRCB {
   SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints [docstring] { blk_method_bindings }");
   $$ = AST::make(at_definstance, $1.loc, $2, $6, $3);
 };
@@ -1541,7 +1542,7 @@ sxp_value_definition: LP tk_DEFINE sxp_defpattern trn_docstring sxp_expr RP  {
   $$->addChild(AST::make(at_constraints));
 };
 
-blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstring '=' blk_expr %prec '(' {
+blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstring '=' blk_expr {
   SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_expr");
   // $5 = stripDocString($5);
   shared_ptr<AST> iRetBlock =
@@ -1554,7 +1555,7 @@ blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstri
   $$ = AST::make(at_recdef, $1.loc, iP, iLambda, $5);
 }
 
-blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constraints trn_optdocstring '=' blk_expr %prec '(' {
+blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constraints trn_optdocstring '=' blk_expr {
   SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_expr");
   // $5 = stripDocString($5);
   shared_ptr<AST> iRetBlock =
@@ -1943,10 +1944,10 @@ blk_fields: blk_field  {
   $$ = AST::make(at_fields, $1->loc, $1);
 };
 
-blk_fields: blk_fields blk_field {
-  SHOWPARSE("sxp_fields -> sxp_fields sxp_field ");
+blk_fields: blk_fields SC blk_field {
+  SHOWPARSE("sxp_fields -> sxp_fields SC sxp_field ");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 };
 
 sxp_fields: sxp_field  {
@@ -2170,13 +2171,18 @@ blk_primary_type: tk_VECTOR '(' blk_type ')' {
 
 }
 
-primary_type: sxp_useident  {   /* previously defined type */
-  SHOWPARSE("primary_type -> sxp_useident");
+sxp_primary_type: primary_type {
+  SHOWPARSE("sxp_primary_type -> primary_type");
+  $$ = $1;
+}
+
+sxp_primary_type: sxp_useident  {   /* previously defined type */
+  SHOWPARSE("blk_primary_type -> sxp_useident");
   $$ = $1;
 };
 
-primary_type: blk_useident %prec prec_PreferShift {   /* previously defined type */
-  SHOWPARSE("primary_type -> blk_useident");
+blk_primary_type: blk_useident %prec prec_PreferShift {   /* previously defined type */
+  SHOWPARSE("blk_primary_type -> blk_useident");
   $$ = $1;
 };
 
@@ -2292,7 +2298,7 @@ primary_type: typevar  {
   $$ = $1;
 };
 
-sxp_type: primary_type {
+sxp_type: sxp_primary_type {
   SHOWPARSE("sxp_type -> primary_type");
   $$ = $1;
 };
@@ -2487,7 +2493,7 @@ sxp_type: '(' tk_ARRAY sxp_type natLit ')'  {
   $$ = AST::make(at_arrayType, $2.loc, $3, $4);
 };
 // VECTOR TYPE [3.5.2]             
-blk_postfix_type: blk_postfix_type '[' ']' %prec '['  {
+blk_postfix_type: blk_postfix_type '[' ']' %prec '[' {
   SHOWPARSE("blk_postfix_type -> blk_postfix_type '[' ']'");
   $$ = AST::make(at_vectorType, $1->loc, $1);
 };
@@ -2670,7 +2676,7 @@ blk_defpattern: blk_defident %prec prec_PreferShift {
   SHOWPARSE("blk_defpattern -> blk_defident");
   $$ = AST::make(at_identPattern, $1->loc, $1);
 };
-blk_defpattern: blk_defident ':' blk_type {
+blk_defpattern: blk_defident ':' blk_type %prec ':' {
   SHOWPARSE("blk_defpattern -> blk_defident : blk_qual_type");
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
 };
@@ -2825,23 +2831,63 @@ sxp_lambdapattern: '(' tk_THE '(' tk_ARRAY_REF sxp_type ')' sxp_ident ')' {
 // them in postfix_expr mainly to put things of like appearance in a
 // common production.
 
-blk_primary_expr: blk_block {
-  SHOWPARSE("blk_expr -> blk_block");
+// MIXFIX: This needs a replacement...
+blk_primary_expr: blk_iblock {
+  SHOWPARSE("blk_expr -> blk_iblock");
   $$ = $1;
 }
 
-blk_primary_expr: '(' blk_expr ')' {
-  SHOWPARSE("blk_primary_expr -> ( blk_expr )");
-  $$ = $2;
-  // Be careful to preserve precedence when pretty printing:
-  $$->printVariant |= pf_PARENWRAP;
-}
+// blk_primary_expr: '(' blk_expr ')' {
+//  SHOWPARSE("blk_primary_expr -> ( blk_expr )");
+//   $$ = $2;
+//   // Be careful to preserve precedence when pretty printing:
+//   $$->printVariant |= pf_PARENWRAP;
+// }
 
-blk_postfix_expr: blk_primary_expr {
-  SHOWPARSE("blk_postfix_expr -> blk_primary_expr");
+blk_closed_expr: blk_primary_expr {
+  SHOWPARSE("blk_closed_expr -> blk_primary_expr");
   $$ = $1;
 }
-blk_prefix_expr: blk_postfix_expr %prec tk_NotApply {
+blk_closed_expr: tk_SIZEOF '(' blk_type ')' {
+  SHOWPARSE("blk_closed_expr -> SIZEOF (blk_type)");
+  $$ = AST::make(at_sizeof, $1.loc, $3);
+};
+blk_closed_expr: tk_BITSIZEOF '(' blk_type ')' {
+  SHOWPARSE("blk_closed_expr -> BITSIZEOF (blk_type)");
+  $$ = AST::make(at_bitsizeof, $1.loc, $3);
+};
+// FIX: This should be a built-in procedure
+blk_closed_expr: tk_DUP '(' blk_expr ')' {
+  SHOWPARSE("blk_closed_expr -> DUP ( blk_expr )");
+  $$ = AST::make(at_dup, $1.loc, $3);
+};
+blk_closed_expr: tk_DEREF '(' blk_expr ')' {
+  SHOWPARSE("blk_closed_expr -> DEREF ( blk_expr )");
+  $$ = AST::make(at_deref, $1.loc, $3);
+};
+blk_closed_expr: tk_MAKE_VECTOR '(' blk_expr ',' blk_expr ')' {
+  SHOWPARSE("blk_closed_expr -> MAKE-VECTOR ( blk_expr , blk_expr )");
+  $$ = AST::make(at_makevectorL, $1.loc, $3, $5);
+};
+blk_closed_expr: tk_VECTOR '(' blk_actual_params ')' {
+  SHOWPARSE("blk_closed_expr -> VECTOR (blk_actual_params)");
+  $$ = $3;
+  $$->astType = at_vector;
+  $$->loc = $1.loc;
+};
+blk_closed_expr: tk_ARRAY '(' blk_nonempty_params ')' {
+  // Zero-length vector is illegal
+  SHOWPARSE("blk_closed_expr -> (ARRAY blk_nonempty_params)");
+  $$ = $3;
+  $$->astType = at_array;
+  $$->loc = $1.loc;
+};
+
+blk_postfix_expr: blk_closed_expr {
+  SHOWPARSE("blk_postfix_expr -> blk_closed_expr");
+  $$ = $1;
+}
+blk_prefix_expr: blk_postfix_expr {
   SHOWPARSE("blk_prefix_expr -> blk_postfix_expr");
   $$ = $1;
 }
@@ -2852,64 +2898,111 @@ blk_tqual_expr: blk_prefix_expr {
   $$ = $1;
 }
 
-blk_infix_expr: blk_tqual_expr %prec prec_PreferShift {
-  SHOWPARSE("blk_infix_expr -> blk_prefix_expr");
+blk_mixfix_expr: blk_mixfix_elem %prec prec_PreferShift {
+  SHOWPARSE("blk_mixfix_expr -> blk_mixfix_elem");
   $$ = $1;
 }
 
-blk_infix_expr: blk_mixfix_expr {
-  SHOWPARSE("blk_infix_expr -> blk_mixfix_expr");
+blk_mixfix_expr: blk_mixfix_expr blk_mixfix_elem {
+  SHOWPARSE("blk_mixfix_expr -> blk_mixfix_expr blk_mixfix_elem");
+  $1->addChildrenFrom($2);
   $$ = $1;
 }
 
-blk_mixfix_expr: tk_MIXFIX '{' blk_mixfix_elems '}' {
-  SHOWPARSE("blk_mixfix_expr -> MIXFIX { blk_mixfix_elems }");
-  $$ = $3;
-}
-
-blk_mixfix_elems: blk_mixfix_elem {
-  SHOWPARSE("blk_mixfix_elems -> blk_mixfix_elem");
-  $$ = AST::make(at_mixExpr, $1->loc, $1);
-}
-
-blk_mixfix_elems: blk_mixfix_elems blk_mixfix_elem {
-  SHOWPARSE("blk_mixfix_elems -> blk_mixfix_elems blk_mixfix_elem");
-  $1->addChild($2);
-  $$ = $1;
-}
+// blk_mixfix_elem: blk_mixfix_expr '.' blk_ident {
+//   SHOWPARSE("blk_mixfix_expr -> blk_mixfix_expr . blk_ident");
+//   $$ = $1;
+//   $$->addChild(at_ident, $1));
+//   $$->addChild($3);
+// }
 
 blk_mixfix_elem: blk_tqual_expr {
   SHOWPARSE("blk_mixfix_elem -> blk_tqual_expr");
-  $$ = $1;
+  $$ = AST::make(at_mixExpr, $1->loc, $1);
 }
 
-blk_mixfix_elem: '+' {
-  SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + ">");
-  $$ = AST::make(at_ident, $1);
+// This entry is rather strange because it allows mixfix expressions
+// like "1 , , 2". Unfortunately, trying to impose any sort of
+// syntactic sanity here by doing something like mixfix_expr ','
+// mixfix_expr causes gobs of shift/reduce errors. So I'm leaving it
+// this way, and we'll field the unsyntactic cases in the mixfix
+// parser by virtue of the fact that neither ",_" nor "_," will be
+// defined. Then we'll check in the post-rewrite pass that these don't
+// appear outside of their legal bracketing contexts, which are
+// "(a,..,b)" and "[a,..,b]"
+
+// blk_mixfix_elem: ',' {
+//   SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + ">");
+//   $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
+// };
+
+// Note that the "_._" rule is the only rule admitting '.', and will
+// force an expr match on the left, which is what we want.
+blk_mixfix_elem: '.' blk_ident {
+  SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + "> blk_ident");
+  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1), $2);
+};
+
+blk_mixfix_arglist: blk_expr {
+  SHOWPARSE("blk_mixfix_arglist -> blk_expr");
+  $$ = AST::make(at_mixExpr, $1->loc, $1);
 }
-blk_mixfix_elem: '*' {
-  SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + ">");
-  $$ = AST::make(at_ident, $1);
+
+blk_mixfix_arglist: blk_mixfix_arglist ',' blk_expr {
+  SHOWPARSE("blk_mixfix_arglist -> blk_mixfix_arglist , blk_expr");
+  $$ = $1;
+  $$->addChild(AST::make(at_ident, $2));
+  $$->addChild(AST::make(at_mixExpr, $3->loc, $3));
 }
-blk_mixfix_elem: tk_EXPT {
-  SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + ">");
-  $$ = AST::make(at_ident, $1);
+
+blk_mixfix_elem: '(' blk_mixfix_arglist ')' {
+  SHOWPARSE("blk_mixfix_elem -> ( blk_mixfix_arglist )");
+  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
+  $$->addChildrenFrom($2);
+  $$->addChild(AST::make(at_ident, $3));
+}
+
+blk_mixfix_elem: '(' ')' {
+  SHOWPARSE("blk_mixfix_elem -> ( )");
+  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
+  $$->addChild(AST::make(at_ident, $2));
+}
+
+blk_mixfix_elem: '[' blk_mixfix_arglist ']' {
+  SHOWPARSE("blk_mixfix_elem -> [ blk_mixfix_arglist ]");
+  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
+  $$->addChildrenFrom($2);
+  $$->addChild(AST::make(at_ident, $3));
 }
 
 // This is the only production defining blk_expr. It is causing
 // a (correctly resolved) S/R ambiguity that we should probably try to
 // clean up.
-blk_expr: blk_infix_expr {
-  SHOWPARSE("blk_expr -> blk_infix_expr");
+blk_expr: blk_mixfix_expr %prec prec_PreferShift {
+  SHOWPARSE("blk_expr -> blk_mixfix_expr");
   $$ = $1;
 }
 
-blk_block: ILCB '}' {
+blk_iblock: ILCB IRCB {
   SHOWPARSE("blk_block -> { }");
   // Empty blocks are okay:
   $$ = AST::make(at_begin, $1.loc);
 }
-blk_block: ILCB blk_expr_seq IRCB {
+blk_iblock: ILCB blk_expr_seq IRCB {
+  SHOWPARSE("blk_block -> { blk_expr_seq }");
+
+  // Remove redundant blocks eagerly:
+  if ($2->children.size() == 1 && $2->child(0)->astType == at_begin)
+    $2 = $2->child(0);
+  $$ = $2;
+}
+
+blk_ieblock: ILCB OptRCB {
+  SHOWPARSE("blk_block -> { }");
+  // Empty blocks are okay:
+  $$ = AST::make(at_begin, $1.loc);
+}
+blk_ieblock: ILCB blk_expr_seq ErrRCB {
   SHOWPARSE("blk_block -> { blk_expr_seq }");
 
   // Remove redundant blocks eagerly:
@@ -3011,7 +3104,7 @@ sxp_nonempty_params: sxp_nonempty_params sxp_expr {
 };
 
 // TYPE QUALIFIED EXPRESSIONS  [7.3]
-blk_tqual_expr: blk_tqual_expr ':' blk_type %prec ':' {
+blk_tqual_expr: blk_tqual_expr ':' blk_type {
   SHOWPARSE("blk_tqual_expr -> blk_tqual_expr : blk_type");
   $$ = AST::make(at_tqexpr, $1->loc, $1, $3);
 };
@@ -3052,29 +3145,21 @@ sxp_unqual_expr: trn_literal {
   $$ = $1;
 };
 
-blk_postfix_expr: tk_SIZEOF '(' blk_type ')' {
-  SHOWPARSE("blk_postfix_expr -> SIZEOF (blk_type)");
-  $$ = AST::make(at_sizeof, $1.loc, $3);
-};
 sxp_unqual_expr: '(' tk_SIZEOF sxp_type ')' {
   SHOWPARSE("sxp_unqual_expr -> (SIZEOF sxp_type)");
   $$ = AST::make(at_sizeof, $2.loc, $3);
 };
 
-blk_postfix_expr: tk_BITSIZEOF '(' blk_type ')' {
-  SHOWPARSE("blk_postfix_expr -> BITSIZEOF (blk_type)");
-  $$ = AST::make(at_bitsizeof, $1.loc, $3);
-};
 sxp_unqual_expr: '(' tk_BITSIZEOF sxp_type ')' {
   SHOWPARSE("sxp_unqual_expr -> (BITSIZEOF sxp_type)");
   $$ = AST::make(at_bitsizeof, $2.loc, $3);
 };
 
 // UNIT EXPRESSIONS   [7.4.1]
-blk_primary_expr: '(' ')' {
-  SHOWPARSE("blk_primary_expr -> ()");
-  $$ = AST::make(at_unit, $1.loc);
-};
+// blk_primary_expr: '(' ')' {
+//   SHOWPARSE("blk_primary_expr -> ()");
+//   $$ = AST::make(at_unit, $1.loc);
+// };
 sxp_unqual_expr: '(' ')' {
   SHOWPARSE("sxp_unqual_expr -> ()");
   $$ = AST::make(at_unit, $1.loc);
@@ -3126,10 +3211,10 @@ sxp_unqual_expr: sxp_ident {
 // structure types from sxp_field names in any case, so those will
 // probably require argument declarations in any case.
 
-blk_postfix_expr: blk_postfix_expr '.' blk_ident {
-  SHOWPARSE("blk_postfix_expr -> blk_postfix_expr . blk_ident");
-  $$ = AST::make(at_select, $1->loc, $1, $3);
-};
+// blk_postfix_expr: blk_postfix_expr '.' blk_ident {
+//   SHOWPARSE("blk_postfix_expr -> blk_postfix_expr . blk_ident");
+//   $$ = AST::make(at_select, $1->loc, $1, $3);
+// };
 sxp_unqual_expr: sxp_unqual_expr '.' sxp_ident {
   SHOWPARSE("sxp_unqual_expr -> sxp_unqual_expr . sxp_ident");
   $$ = AST::make(at_select, $1->loc, $1, $3);
@@ -3148,10 +3233,6 @@ sxp_unqual_expr: '(' tk_MEMBER sxp_expr sxp_ident ')' {
 };
 
 // NTH-REF [7.11.2]         
-blk_postfix_expr: blk_postfix_expr '[' blk_expr ']' {
-  SHOWPARSE("blk_postfix_expr -> blk_postfix_expr [ blk_expr ]");
-  $$ = AST::make(at_nth, $1->loc, $1, $3);
-};
 sxp_unqual_expr: sxp_expr '[' sxp_expr ']' {
   SHOWPARSE("sxp_unqual_expr -> sxp_expr [ sxp_expr ]");
   $$ = AST::make(at_nth, $1->loc, $1, $3);
@@ -3162,10 +3243,6 @@ sxp_unqual_expr: '(' tk_NTH sxp_expr sxp_expr ')' {
 };
 
 // DUP [7.17.1]
-blk_postfix_expr: tk_DUP '(' blk_expr ')' {
-  SHOWPARSE("blk_postfix_expr -> DUP ( blk_expr )");
-  $$ = AST::make(at_dup, $1.loc, $3);
-};
 sxp_unqual_expr: '(' tk_DUP sxp_expr ')' {
   SHOWPARSE("sxp_unqual_expr -> ( DUP sxp_expr )");
   $$ = AST::make(at_dup, $2.loc, $3);
@@ -3187,10 +3264,6 @@ sxp_unqual_expr: sxp_expr '^' {
   $$->printVariant = pf_IMPLIED;
 };
 
-blk_postfix_expr: tk_DEREF '(' blk_expr ')' {
-  SHOWPARSE("blk_postfix_expr -> DEREF ( blk_expr )");
-  $$ = AST::make(at_deref, $1.loc, $3);
-};
 sxp_unqual_expr: '(' tk_DEREF sxp_expr ')' {
   SHOWPARSE("sxp_unqual_expr -> ( DEREF sxp_expr )");
   $$ = AST::make(at_deref, $2.loc, $3);
@@ -3221,21 +3294,6 @@ sxp_unqual_expr: '(' tk_DEREF sxp_expr ')' {
 //      In any case, this is an issue that we should certainly revisit
 //      before introducing mixfix.
 
-blk_expr_cpair: blk_expr ',' blk_expr {
-  SHOWPARSE("blk_expr_cpair -> blk_expr ',' blk_expr");
-  $$ = AST::make(at_apply, $2.loc,
-                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
-                 $1, $3);
-  $$->printVariant = pf_IMPLIED;
-};
-blk_expr_cpair: blk_expr ',' blk_expr_cpair {
-  SHOWPARSE("blk_expr_cpair -> blk_expr ',' blk_expr_cpair");
-  $$ = AST::make(at_apply, $2.loc,
-                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
-                 $1, $3);
-  $$->printVariant = pf_IMPLIED;
-};
-
 sxp_unqual_expr_cpair: sxp_expr ',' sxp_expr {
   SHOWPARSE("sxp_unqual_expr_cpair -> sxp_expr ',' sxp_expr");
   $$ = AST::make(at_apply, $2.loc,
@@ -3251,61 +3309,18 @@ sxp_unqual_expr_cpair: sxp_expr ',' sxp_unqual_expr_cpair {
   $$->printVariant = pf_IMPLIED;
 };
 
-// Following four productions provide experimental list support.
-blk_infix_expr: blk_infix_expr tk_INFIX_CONS blk_infix_expr {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr :: blk_infix_expr");
-  $$ = AST::make(at_apply, $1->loc,
-                 AST::make(at_ident, $2),
-                 $1, 
-                 $3);
-};
-
-blk_primary_expr: '(' '[' blk_list_elements ']' ')' {
-  SHOWPARSE("blk_primary_expr -> ([ blk_expr_cpair ])");
-  $$ = $3;
-}
-
-blk_list_elements: blk_expr {
-  SHOWPARSE("blk_list_elements -> blk_expr");
-  $$ = AST::make(at_apply, $1->loc,
-                 AST::make(at_ident, LToken(tk_BlkIdent, $1->loc, $1->loc,"cons")),
-                 $1, 
-                 AST::make(at_ident, LToken(tk_BlkIdent, $1->loc, $1->loc, "nil")));
-}
-
-blk_list_elements: blk_expr ',' blk_list_elements {
-  SHOWPARSE("blk_list_elements -> blk_expr");
-  $$ = AST::make(at_apply, $1->loc,
-                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "cons")),
-                 $1, $3);
-
-}
-
-blk_primary_expr: '(' blk_expr_cpair ')' {
-  SHOWPARSE("blk_primary_expr -> ( blk_expr_cpair )");
-  $$ = $2;
-};
+// Following three productions provide experimental list support.
 sxp_unqual_expr: '(' sxp_unqual_expr_cpair ')' {
   SHOWPARSE("sxp_unqual_expr -> ( sxp_unqual_expr_cpair )");
   $$ = $2;
 };
 
-blk_postfix_expr: tk_MAKE_VECTOR '(' blk_expr ',' blk_expr ')' {
-  SHOWPARSE("blk_postfix_expr -> MAKE-VECTOR ( blk_expr , blk_expr )");
-  $$ = AST::make(at_makevectorL, $1.loc, $3, $5);
-};
 sxp_unqual_expr: '(' tk_MAKE_VECTOR sxp_expr sxp_expr ')' {
   SHOWPARSE("sxp_unqual_expr -> ( MAKE-VECTOR sxp_expr sxp_expr )");
   $$ = AST::make(at_makevectorL, $2.loc, $3, $4);
 };
 
 // VECTORS [7.4.3]
-blk_postfix_expr: tk_VECTOR '(' blk_actual_params ')' {
-  SHOWPARSE("blk_postfix_expr -> VECTOR (blk_actual_params)");
-  $$ = $3;
-  $$->astType = at_vector;
-  $$->loc = $1.loc;
-};
 sxp_unqual_expr: '(' tk_VECTOR sxp_actual_params ')' {
   // Zero-length vector is useless, but legal
   SHOWPARSE("sxp_unqual_expr -> (VECTOR sxp_actual_params)");
@@ -3315,13 +3330,6 @@ sxp_unqual_expr: '(' tk_VECTOR sxp_actual_params ')' {
 };
 
 // ARRAYS [7.4.3]
-blk_postfix_expr: tk_ARRAY '(' blk_nonempty_params ')' {
-  // Zero-length vector is illegal
-  SHOWPARSE("blk_postfix_expr -> (ARRAY blk_nonempty_params)");
-  $$ = $3;
-  $$->astType = at_array;
-  $$->loc = $1.loc;
-};
 sxp_unqual_expr: '(' tk_ARRAY sxp_nonempty_params ')' {
   // Zero-length vector is illegal
   SHOWPARSE("sxp_unqual_expr -> (ARRAY sxp_nonempty_params)");
@@ -3345,12 +3353,14 @@ sxp_unqual_expr: '(' tk_BEGIN sxp_block_exprs ')' {
 // position here, because that creates an ambiguity with primary
 // expressions. Note that we only want a local identifier here in any
 // case, and not an operator, so using tk_BlkIdent is fine here.
-blk_primary_expr: tk_LABEL tk_BlkIdent '=' blk_block {
-  SHOWPARSE("blk_primary_expr -> LABEL Ident = blk_block");
-  $$ = AST::make(at_block, $1.loc, 
-                 $$ = AST::make(at_ident, $2),
-                 $4);
-}
+
+// blk_primary_expr: tk_LABEL tk_BlkIdent '=' blk_block {
+//   SHOWPARSE("blk_primary_expr -> LABEL Ident = blk_block");
+//   $$ = AST::make(at_block, $1.loc, 
+//                  $$ = AST::make(at_ident, $2),
+//                  $4);
+// }
+
 sxp_unqual_expr: '(' tk_BLOCK sxp_ident sxp_block ')' {
   SHOWPARSE("sxp_unqual_expr -> (BLOCK sxp_ident sxp_block)");
   $$ = AST::make(at_block, $2.loc, $3, $4);
@@ -3417,11 +3427,6 @@ sxp_unqual_expr: '(' tk_RETURN sxp_expr ')' {
 }
 
 // APPLICATION [7.14]         
-blk_postfix_expr: blk_postfix_expr '(' blk_actual_params ')' %prec '(' { /* apply to zero or more args */
-  SHOWPARSE("blk_postfix_expr -> blk_postfix_expr ( blk_actual_params )");
-  $$ = AST::make(at_apply, $1->loc, $1);
-  $$->addChildrenFrom($3);
-};
 sxp_unqual_expr: '(' sxp_expr sxp_actual_params ')' { /* apply to zero or more args */
   SHOWPARSE("sxp_unqual_expr -> ( sxp_expr sxp_actual_params )");
   $$ = AST::make(at_apply, $2->loc, $2);
@@ -3429,13 +3434,13 @@ sxp_unqual_expr: '(' sxp_expr sxp_actual_params ')' { /* apply to zero or more a
 };
 
 // IF [7.15.1]
-blk_expr: tk_IF blk_expr tk_THEN ILCB blk_expr_seq IRCB tk_ELSE ILCB blk_expr_seq IRCB %prec tk_ELSE {
-  SHOWPARSE("blk_expr -> IF blk_expr THEN { blk_expr_seq } ELSE { blk_expr_seq }");
-  $$ = AST::make(at_if, $1.loc, $2, $5, $9);
+blk_expr: tk_IF blk_expr tk_THEN blk_ieblock tk_ELSE blk_iblock {
+  SHOWPARSE("blk_expr -> IF blk_expr THEN blk_ieblock ELSE blk_iblock");
+  $$ = AST::make(at_if, $1.loc, $2, $4, $6);
 };
-blk_expr: tk_IF blk_expr tk_THEN ILCB blk_expr_seq IRCB %prec tk_THEN {
-  SHOWPARSE("blk_expr -> IF blk_expr THEN { blk_expr_seq }");
-  $$ = AST::make(at_when, $1.loc, $2, $5);
+blk_expr: tk_IF blk_expr tk_THEN blk_iblock {
+  SHOWPARSE("blk_expr -> IF blk_expr THEN blk_iblock");
+  $$ = AST::make(at_when, $1.loc, $2, $4);
 };
 sxp_unqual_expr: '(' tk_IF sxp_expr sxp_expr sxp_expr ')' {
   SHOWPARSE("sxp_unqual_expr -> (IF sxp_expr sxp_expr sxp_expr )");
@@ -3452,43 +3457,10 @@ sxp_unqual_expr: '(' tk_WHEN sxp_expr sxp_block ')' {
   $$ = AST::make(at_when, $2.loc, $3, $4);
 };
 
-// Unary negation - block syntax only:
-blk_prefix_expr: '-' blk_prefix_expr  {
-  SHOWPARSE("blk_prefix_expr -> - blk_prefix_expr");
-  $$ = AST::make(at_apply, $1.loc, 
-                 AST::make(at_ident, 
-                           LToken(tk_BlkIdent, $1.loc, $1.endLoc, "negate")), $2);
-};
-
-// Bitwise negation - block syntax only:
-blk_prefix_expr: '~' blk_prefix_expr  {
-  SHOWPARSE("blk_prefix_expr -> ~ blk_prefix_expr");
-  //$$ = AST::make(at_apply, $1.loc, 
-  //                 AST::make(at_ident, $1), $2);
-  $$ = AST::make(at_apply, $1.loc, 
-                 AST::make(at_ident, 
-                           LToken(tk_BlkIdent, $1.loc, $1.endLoc, "bit_not")), $2);
-};
-
 // NOT [7.15.3]
 // in the s-expression version this is just a procedure.
-blk_prefix_expr: tk_NOT blk_prefix_expr  {
-  SHOWPARSE("blk_prefix_expr -> NOT blk_prefix_expr");
-  $$ = AST::make(at_apply, $1.loc, AST::make(at_ident, $1), $2);
-};
-blk_prefix_expr: '!' blk_prefix_expr  {
-  SHOWPARSE("blk_prefix_expr -> !blk_prefix_expr");
-  $$ = AST::make(at_apply, $1.loc, AST::make(at_ident, $1), $2);
-};
 
 // AND [7.15.4]                 
-blk_infix_expr: blk_infix_expr tk_AND blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr && blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, 
-                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "and")),
-                 $1, $3);
-  // $$ = AST::make(at_and, $2.loc, $1, $3);
-};
 sxp_unqual_expr: '(' tk_AND sxp_nonempty_params ')'  {
   SHOWPARSE("sxp_unqual_expr -> ( AND sxp_nonempty_params )");
   $$ = $3;
@@ -3497,91 +3469,11 @@ sxp_unqual_expr: '(' tk_AND sxp_nonempty_params ')'  {
 };
 
 // OR [7.15.5]
-blk_infix_expr: blk_infix_expr tk_OR blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr || blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, 
-                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "or")),
-                 $1, $3);
-  // $$ = AST::make(at_or, $2.loc, $1, $3);
-};
 sxp_unqual_expr: '(' tk_OR sxp_nonempty_params ')'  {
   SHOWPARSE("sxp_unqual_expr -> ( OR sxp_nonempty_params )");
   $$ = $3;
   $$->loc = $2.loc;
   $$->astType = at_or;
-};
-
-// OTHER BLOCK INFIX OPERATORS
-blk_infix_expr: blk_infix_expr '|' blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr | blk_infix_expr");
-  // $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-  $$ = AST::make(at_apply, $2.loc, 
-                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "bit_or")),
-                 $1, $3);
-};
-blk_infix_expr: blk_infix_expr '^' blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr ^ blk_infix_expr");
-  //$$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-  $$ = AST::make(at_apply, $2.loc, 
-                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "bit_xor")), $1, $3);
-};
-blk_infix_expr: blk_infix_expr '&' blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr & blk_infix_expr");
-  //$$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-  $$ = AST::make(at_apply, $2.loc, 
-                 AST::make(at_ident, LToken(tk_BlkIdent, $2.loc, $2.endLoc, "bit_and")), $1, $3);
-};
-blk_infix_expr: blk_infix_expr tk_EQUALS blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr == blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr tk_NOTEQUALS blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr != blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr '<' blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr < blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr '>' blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr > blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr tk_LE blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr <= blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr tk_GE blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr >= blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr tk_LSHIFT blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr << blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr tk_RSHIFT blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr >> blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr '+' blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr + blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr '-' blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr - blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr '*' blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr * blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr '/' blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr / blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
-};
-blk_infix_expr: blk_infix_expr '%' blk_infix_expr  {
-  SHOWPARSE("blk_infix_expr -> blk_infix_expr % blk_infix_expr");
-  $$ = AST::make(at_apply, $2.loc, AST::make(at_ident, $2), $1, $3);
 };
 
 // COND [7.15.6]          
@@ -3609,14 +3501,14 @@ sxp_condcase: '(' sxp_expr sxp_block ')'  {
 };
 
 // SET! [7.16]                
-blk_expr: blk_postfix_expr tk_ASSIGN blk_expr {
+blk_expr: blk_mixfix_expr tk_ASSIGN blk_expr %prec tk_ASSIGN {
   /* Strictly speaking, RHS could be a higher-level parse form,, but
    * none of those are l-values in any case. Need postfix_expr in
    * order to pick up things like 'a.b'. There is a location check
    * later in the compiler, but might as well reject what we can
    * early.
    */
-  SHOWPARSE("blk_assignment -> blk_postfix_expr := blk_expr");
+  SHOWPARSE("blk_assignment -> blk_mixfix_expr := blk_expr");
   $$ = AST::make(at_setbang, $2.loc, $1, $3);
 };
 sxp_unqual_expr: '(' tk_SET sxp_expr sxp_expr ')' {
@@ -3625,11 +3517,32 @@ sxp_unqual_expr: '(' tk_SET sxp_expr sxp_expr ')' {
 };
 
 // SWITCH
-blk_expr: tk_SWITCH blk_expr ILCB blk_sw_legs blk_opt_otherwise IRCB {
-  SHOWPARSE("blk_expr -> SWITCH blk_expr blk_sw_legs blk_opt_otherwise");
-  $$ = AST::make(at_uswitch, $1.loc, 
-                 AST::make(at_ident, LToken(tk_BlkIdent, "__dummy")),
-                 $2, $4, $5);
+// blk_expr: tk_SWITCH blk_expr OptLCB blk_sw_legs blk_opt_otherwise OptRCB {
+//   SHOWPARSE("blk_expr -> SWITCH blk_expr IN blk_sw_legs blk_opt_otherwise");
+//   $$ = AST::make(at_uswitch, $1.loc, 
+//                  AST::make(at_ident, LToken(tk_BlkIdent, "__dummy")),
+//                  $2, $4, $5);
+// }
+// FIX: For the moment, cannot use blk_letbinding here, because that
+// admits a type qualifier on the bound identifier. I don't want to
+// deal with that complication in the type inference engine just at
+// the moment.
+blk_expr: tk_SWITCH ILCB blk_ident '=' blk_expr OptRCB blk_sw_legs blk_opt_otherwise {
+  SHOWPARSE("blk_expr -> SWITCH { blk_letbinding } blk_sw_legs blk_opt_otherwise");
+
+  $$ = AST::make(at_uswitch, $1.loc, $3, $5, $7, $8);
+
+  // Inject the ident down into the case legs:
+  for (size_t c =0; c < $7->children.size(); c++) {
+    shared_ptr<AST> sw_leg = $7->child(c);
+    sw_leg->children.insert(sw_leg->children.begin(),
+                            $3->getDeepCopy());
+  }
+  if ($8->astType == at_otherwise) {
+    shared_ptr<AST> ow = $8;
+    ow->children.insert(ow->children.begin(),
+                        $3->getDeepCopy());
+  }
 }
 
 sxp_unqual_expr: '(' tk_SWITCH sxp_ident sxp_expr sxp_sw_legs sxp_opt_otherwise ')' {
@@ -3657,18 +3570,22 @@ sxp_sw_legs: sxp_sw_legs sxp_sw_leg {
   $$->addChild($2);
 };
 
-blk_sw_legs: blk_sw_legs SC blk_sw_leg {
-  SHOWPARSE("blk_sw_legs -> blk_sw_legs SC blk_sw_leg");
+blk_sw_legs: blk_sw_legs blk_sw_leg {
+  SHOWPARSE("blk_sw_legs -> blk_sw_legs blk_sw_leg");
   $$ = $1;
-  $1->addChild($3);
+  $1->addChild($2);
 }
 blk_sw_legs: blk_sw_leg {
   SHOWPARSE("blk_sw_legs -> blk_sw_leg");
   $$ = AST::make(at_usw_legs, $1->loc, $1);
 }
-blk_sw_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_block {
-  SHOWPARSE("blk_sw_leg -> CASE { blk_ident AS blk_type } blk_block");
-  $$ = AST::make(at_usw_leg, $1.loc, $3, $8, $5);
+//blk_sw_leg: tk_CASE OptLCB blk_ident tk_AS blk_switch_match OptRCB tk_IN blk_block {
+//  SHOWPARSE("blk_sw_leg -> CASE { blk_ident AS blk_type } blk_block");
+//  $$ = AST::make(at_usw_leg, $1.loc, $3, $8, $5);
+//}
+blk_sw_leg: tk_CASE blk_switch_match tk_IN blk_iblock {
+  SHOWPARSE("blk_sw_leg -> CASE blk_switch_match IN blk_iblock");
+  $$ = AST::make(at_usw_leg, $1.loc, $4, $2);
 }
 
 sxp_sw_leg: '(' sxp_switch_match sxp_block ')'  {
@@ -3735,17 +3652,16 @@ sxp_switch_match: sxp_ident '.' sxp_ident '.' sxp_ident {
   $$ = AST::make(at_select, $1->loc, usesel, $5);
 };
 
-// These precedences are re-used from the productions that favor
-// application over bare expressions
+// This is just like dangling ELSE...
 blk_opt_otherwise: blk_otherwise {
   SHOWPARSE("blk_opt_otherwise -> blk_otherwise");
   $$ = $1;
 };
-blk_opt_otherwise: { //empty
+blk_opt_otherwise: %prec prec_PreferShift { //empty
   SHOWPARSE("blk_opt_otherwise -> ");
   $$ = AST::make(at_Null);
 };
-blk_otherwise: tk_OTHERWISE blk_expr {
+blk_otherwise: tk_OTHERWISE blk_iblock %prec tk_OTHERWISE {
   SHOWPARSE("blk_otherwise -> OTHERWISE blk_expr");
   $$ = AST::make(at_otherwise, $1.loc, $2);
 };
@@ -3785,30 +3701,34 @@ typecase_leg: '(' sxp_bindingpattern sxp_expr ')'  {
   }; */
 
 // TRY/CATCH [7.19.1]
-blk_expr: tk_TRY blk_expr tk_HANDLE ILCB blk_catch_legs blk_opt_otherwise IRCB {
-  SHOWPARSE("blk_expr -> TRY blk_expr blk_catch_legs blk_opt_otherwise");
+blk_expr: tk_TRY blk_expr tk_CATCH blk_ident blk_sw_legs blk_opt_otherwise {
+  SHOWPARSE("blk_expr -> TRY blk_expr CATCH blk_ident blk_sw_legs blk_opt_otherwise");
   $$ = AST::make(at_try, $1.loc, $2, 
                  AST::make(at_ident, LToken(tk_BlkIdent, "__dummy")),
                  $5, $6);
 
-  // In the S-expr syntax, there is a loop here that inserts the ident
-  // into each leg, and then in the otherwise clause. In the block
-  // syntax we have the ident explicitly in each leg, so we don't do
-  // that.
+  for (size_t c =0; c < $5->children.size(); c++) {
+    shared_ptr<AST> sw_leg = $5->child(c);
+    sw_leg->children.insert(sw_leg->children.begin(),
+                            $4->getDeepCopy());
+  }
+  if ($6->astType == at_otherwise) {
+    shared_ptr<AST> ow = $6;
+    ow->children.insert(ow->children.begin(),
+                        $4->getDeepCopy());
+  }
 }
+
 blk_expr: tk_TRY blk_expr blk_otherwise {
-  SHOWPARSE("blk_expr -> TRY blk_expr blk_catch_legs blk_otherwise");
+  SHOWPARSE("blk_expr -> TRY blk_expr blk_otherwise");
   shared_ptr<AST> dummyID = 
     AST::make(at_ident, LToken(tk_BlkIdent, "__dummy"));
   $$ = AST::make(at_try, $1.loc, $2, dummyID,
                  AST::make(at_usw_legs, $3->loc), $3);
 
-  // In the S-expr syntax, there is a loop here that inserts the ident
-  // into each leg, and then in the otherwise clause. In the block
-  // syntax we have the ident explicitly in each leg, so we don't do
-  // that.
+  shared_ptr<AST> ow = $3;
+  ow->children.insert(ow->children.begin(), dummyID);
 }
-
 
 //HERE
 //blk_opt_catch_legs: {
@@ -3826,22 +3746,6 @@ blk_expr: tk_TRY blk_expr blk_otherwise {
 //  shared_ptr<AST> bindings = AST::make(at_letbindings, $2->loc, $2);
 //  $$ = AST::make(at_kennedy_try, $1.loc, bindings, $4);
 //}
-
-blk_catch_leg: tk_CASE ILCB blk_ident tk_AS blk_switch_match IRCB tk_IN blk_block {
-  SHOWPARSE("blk_catch_leg -> CATCH { blk_ident AS blk_type } IN blk_block");
-  //  $$ = AST::make(at_catchleg, $1.loc, $2, $4, $6);
-  $$ = AST::make(at_usw_leg, $1.loc, $3, $5, $8);
-}
-
-blk_catch_legs: blk_catch_legs blk_catch_leg {
-  SHOWPARSE("blk_catch_legs -> blk_catch_legs blk_catch_leg");
-  $$ = $1;
-  $1->addChild($2);
-}
-blk_catch_legs: blk_catch_leg {
-  SHOWPARSE("blk_catch_legs -> blk_catch_leg");
-  $$ = AST::make(at_usw_legs, $1->loc, $1);
-}
 
 sxp_unqual_expr: '(' tk_TRY sxp_expr '(' tk_CATCH  sxp_ident sxp_sw_legs sxp_opt_otherwise ')' ')'  {
   SHOWPARSE("sxp_unqual_expr -> ( TRY sxp_expr ( CATCH sxp_ident sxp_sw_legs sxp_opt_otherwise) )");
@@ -3872,8 +3776,8 @@ sxp_unqual_expr: '(' tk_TRY sxp_expr '(' tk_CATCH sxp_ident sxp_otherwise ')' ')
 };
 
 // THROW  [7.19.2]              
-blk_prefix_expr: tk_THROW blk_prefix_expr {
-  SHOWPARSE("blk_prefix_expr -> THROW blk_prefix_expr");
+blk_expr: tk_THROW blk_iblock {
+  SHOWPARSE("blk_prefix_expr -> THROW blk_iblock");
   $$ = AST::make(at_throw, $1.loc, $2);
 }
 
@@ -3890,8 +3794,8 @@ sxp_unqual_expr: sxp_let_eform {
 };
 
 // LET [5.3.1]                 
-blk_expr: tk_LET ILCB blk_letbindings IRCB tk_IN blk_block {
-  SHOWPARSE("blk_expr -> LET { blk_letbindings } IN  blk_block");
+blk_expr: tk_LET ILCB blk_letbindings OptRCB tk_IN blk_iblock {
+  SHOWPARSE("blk_expr -> LET { blk_letbindings } IN blk_iblock");
 
   $$ = AST::make(at_let, $1.loc, $3, $6);
   $$->addChild(AST::make(at_constraints));
@@ -3933,8 +3837,8 @@ sxp_letbinding: '(' sxp_bindingpattern sxp_expr ')' {
 };
 
 // LETREC [5.3.2]              
-blk_expr: tk_LETREC ILCB blk_letbindings IRCB tk_IN blk_block {
-  SHOWPARSE("blk_expr -> LETREC { blk_letbindings } IN blk_block");
+blk_expr: tk_LETREC ILCB blk_letbindings OptRCB tk_IN blk_iblock {
+  SHOWPARSE("blk_expr -> LETREC { blk_letbindings } IN blk_iblock");
 
   $$ = AST::make(at_letrec, $1.loc, $3, $6);
   $$->addChild(AST::make(at_constraints));
@@ -3951,25 +3855,29 @@ sxp_let_eform: '(' tk_LETREC '(' sxp_letbindings ')' sxp_block ')' {
   $$->addChild(AST::make(at_constraints));
 };
 
-blk_expr: tk_LOOP blk_loopbindings tk_UNTIL blk_expr blk_giving blk_block {
-  SHOWPARSE("blk_expr -> LOOP blk_loopbindings UNTIL blk_expr blk_giving blk_block");
+// FIX: Need to reconcile this with until e do { ... }, where we need
+// the semicolon to be inserted at start of statement. The problem
+// here is that UNTIL can either be a leading keyword or an internal
+// keyword, but not both.
+blk_expr: tk_LOOP ILCB blk_loopbindings OptRCB tk_UNTIL blk_expr blk_giving tk_IN blk_iblock {
+  SHOWPARSE("blk_expr -> LOOP blk_loopbindings UNTIL blk_expr blk_giving IN blk_iblock");
 
   // In the block syntax, I didn't fabricate the test AST in a
   // separate production:
-  shared_ptr<AST> iLoopTest = AST::make(at_looptest, $3.loc, $4, $5);
+  shared_ptr<AST> iLoopTest = AST::make(at_looptest, $5.loc, $6, $7);
 
   // The body is executed for side effects. We need to know its result
   // type so that the CONTINUE block will be properly typed. Since we
   // are only running the body for side effects, force the result sxp_type
   // to be unit by appending a unit sxp_constructor at the end of the
   // expression sequence:
-  $6->addChild(AST::make(at_unit, $6->loc));
+  $9->addChild(AST::make(at_unit, $9->loc));
 
   shared_ptr<AST> iContinueBlock =
     AST::make(at_block, $1.loc,
               AST::make(at_ident, LToken(tk_BlkIdent, "__continue")),
-              $6);
-  $$ = AST::make(at_loop, $1.loc, $2, iLoopTest, iContinueBlock);
+              $9);
+  $$ = AST::make(at_loop, $1.loc, $3, iLoopTest, iContinueBlock);
 }
 
 blk_loopbindings: {
@@ -3984,13 +3892,17 @@ blk_nonempty_loopbindings: blk_loopbinding {
   SHOWPARSE("blk_nonempty_loopbindings -> blk_loopbinding");
   $$ = AST::make(at_loopbindings, $1->loc, $1);
 };
-blk_nonempty_loopbindings: blk_nonempty_loopbindings blk_loopbinding {
-  SHOWPARSE("blk_nonempty_loopbindings -> blk_nonempty_loopbindings blk_loopbinding");
+blk_nonempty_loopbindings: blk_nonempty_loopbindings SC blk_loopbinding {
+  SHOWPARSE("blk_nonempty_loopbindings -> blk_nonempty_loopbindings SC blk_loopbinding");
   $$ = $1;
-  $$->addChild($2);
+  $$->addChild($3);
 };
-blk_loopbinding: blk_bindingpattern '=' blk_expr tk_THEN blk_expr {
-  SHOWPARSE("blk_loopbinding -> blk_bindingpattern = blk_expr THEN blk_expr");
+// Fix: the fact that the first is expr and the second is iblock is an
+// artifact of layout due to an interaction with the THEN
+// keyword. This is quite irritating, and we should probably change
+// the keyword here.
+blk_loopbinding: blk_bindingpattern '=' blk_expr tk_THEN blk_iblock {
+  SHOWPARSE("blk_loopbinding -> blk_bindingpattern = blk_expr THEN blk_iblock");
   $$ = AST::make(at_loopbinding, $1->loc, $1, $3, $5);
 };
 
@@ -4106,6 +4018,19 @@ blk_ident: tk_BlkIdent {
   SHOWPARSE("blk_ident -> <Ident " + $1.str + ">");
   $$ = AST::make(at_ident, $1);
 };
+blk_ident: tk_EQUALS {
+  SHOWPARSE("blk_ident -> <Ident \"" + $1.str + "\">");
+  $$ = AST::make(at_ident, $1);
+};
+// These two remain keywords until we are done with the S-expression syntax:
+blk_ident: tk_AND {
+  SHOWPARSE("blk_ident -> <Ident " + $1.str + ">");
+  $$ = AST::make(at_ident, $1);
+};
+blk_ident: tk_OR {
+  SHOWPARSE("blk_ident -> <Ident " + $1.str + ">");
+  $$ = AST::make(at_ident, $1);
+};
 blk_ident: tk_ReservedWord {
   SHOWPARSE("blk_ident -> <RESERVED=" + $1.str + ">");
   cerr << $1.loc.asString() << ": The token \"" << $1.str
@@ -4127,26 +4052,15 @@ sxp_ident: tk_SxpReservedWord {
   $$ = AST::make(at_ident, $1);
 };
 
-blk_useident: blk_ident {
+blk_useident: blk_ident %prec PreferShift {
   SHOWPARSE("blk_useident -> blk_ident");
   $$ = $1;
 };
 
-blk_useident: blk_ident '.' blk_ident {
-  SHOWPARSE("blk_useident -> blk_ident . blk_ident");
+blk_useident: blk_useident '.' blk_ident %prec '.' {
+  SHOWPARSE("blk_useident -> blk_useident . blk_ident");
   shared_ptr<AST> usesel = AST::make(at_usesel, $2.loc, $1, $3); 
   usesel->s = $1->s + "." + $3->s;
-  $$ = usesel;
-};
-
-blk_useident: blk_ident '.' blk_ident '.' blk_ident {
-  SHOWPARSE("blk_useident -> blk_ident . blk_ident . blk_ident");
-
-  shared_ptr<AST> lhs = AST::make(at_usesel, $2.loc, $1, $3);
-  lhs->s = $1->s + "." + $3->s;
-
-  shared_ptr<AST> usesel = AST::make(at_usesel, $4.loc, lhs, $5); 
-  usesel->s = lhs->s + "." + $5->s;
   $$ = usesel;
 };
 
@@ -4155,23 +4069,23 @@ sxp_useident: sxp_ident {
   $$ = $1;
 };
 
-sxp_useident: sxp_ident '.' sxp_ident {
-  SHOWPARSE("sxp_useident -> sxp_ident . sxp_ident");
+sxp_useident: sxp_useident '.' sxp_ident {
+  SHOWPARSE("sxp_useident -> sxp_useident . sxp_ident");
   shared_ptr<AST> usesel = AST::make(at_usesel, $2.loc, $1, $3); 
   usesel->s = $1->s + "." + $3->s;
   $$ = usesel;
 };
 
-sxp_useident: sxp_ident '.' sxp_ident '.' sxp_ident {
-  SHOWPARSE("sxp_useident -> sxp_ident . sxp_ident . sxp_ident");
-
-  shared_ptr<AST> lhs = AST::make(at_usesel, $2.loc, $1, $3);
-  lhs->s = $1->s + "." + $3->s;
-
-  shared_ptr<AST> usesel = AST::make(at_usesel, $4.loc, lhs, $5); 
-  usesel->s = lhs->s + "." + $5->s;
-  $$ = usesel;
-};
+// sxp_useident: sxp_ident '.' sxp_ident '.' sxp_ident {
+//   SHOWPARSE("sxp_useident -> sxp_ident . sxp_ident . sxp_ident");
+// 
+//  shared_ptr<AST> lhs = AST::make(at_usesel, $2.loc, $1, $3);
+//   lhs->s = $1->s + "." + $3->s;
+// 
+//   shared_ptr<AST> usesel = AST::make(at_usesel, $4.loc, lhs, $5); 
+//   usesel->s = lhs->s + "." + $5->s;
+//   $$ = usesel;
+//};
 
 //sxp_defident: sxp_ident {
 //  SHOWPARSE("sxp_defident -> sxp_ident ");
@@ -4240,26 +4154,32 @@ strLit: tk_String {
 };
 
 // These are for transitional documentation purposes:
-IsILCB: '{' {
-  $$ = $1;
-}
-IsILCB: tk_IS ILCB {
-  $$ = $2;
-}
-
 ILCB: '{' {
   $$ = $1;
 }
-ILCB: error {
-  yyerrok;
+IRCB: '}' {
+  $$ = $1;
+}
 
+//IsErrLCB: '{' {
+//  $$ = $1;
+//}
+//IsErrLCB: tk_IS ErrLCB {
+//  $$ = $2;
+//}
+
+// OptLCB: {
+// }
+// OptLCB: ILCB {
+// }
+OptRCB: {
   assert(yychar != YYEMPTY);
 
   yylval.tok.flags |= TF_REPROCESS;
 
-  LToken tok = LToken('{', yylval.tok.loc, yylval.tok.loc, "{");
+  LToken tok = LToken('}', yylval.tok.loc, yylval.tok.loc, "}");
   tok.prevTokType = yylval.tok.prevTokType;
-  yylval.tok.prevTokType = '{';
+  yylval.tok.prevTokType = '}';
   tok.flags |= (TF_INSERTED|TF_BY_PARSER);
 
   lexer->pushTokenBack(yylval.tok, true);
@@ -4271,15 +4191,57 @@ ILCB: error {
   if (yychar != YYEMPTY)
     yyclearin;
 
-  lexer->showNextError = false;
   $$ = tok;
 }
-
-IRCB: '}' {
+OptRCB: IRCB {
   $$ = $1;
 }
-IRCB: error {
+
+IsILCB: tk_IS ILCB {
+  $$ = $2;
+}
+
+IsILCB: '{' {
+  $$ = $1;
+}
+
+//ErrLCB: '{' {
+//  $$ = $1;
+//}
+//ErrLCB: error {
+//  yyerrok;
+//
+//  assert(yychar != YYEMPTY);
+//
+//  yylval.tok.flags |= TF_REPROCESS;
+//
+//  LToken tok = LToken('{', yylval.tok.loc, yylval.tok.loc, "{");
+//  tok.prevTokType = yylval.tok.prevTokType;
+//  yylval.tok.prevTokType = '{';
+//  tok.flags |= (TF_INSERTED|TF_BY_PARSER);
+//
+//  lexer->pushTokenBack(yylval.tok, true);
+//  lexer->pushTokenBack(tok, true);
+//  lexer->lex(&yylval);    /* re-read for side effects */
+//
+//  // Force parser to re-fetch the lookahead token after we reduce,
+//  // since it may have changed because of the layout rules:
+//  if (yychar != YYEMPTY)
+//    yyclearin;
+//
+//  lexer->showNextError = false;
+//  $$ = tok;
+//}
+
+ErrRCB: '}' {
+  $$ = $1;
+}
+ErrRCB: error {
   yyerrok;
+
+  //  std::cerr << "Error action triggered at " 
+  //          << yylval.tok.loc
+  //          << endl;
 
   assert(yychar != YYEMPTY);
 

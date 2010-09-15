@@ -430,11 +430,11 @@ DEFORD(bitc_char_t,_4char);
 DEFORD(bitc_bool_t,_4bool);
 
 INLINE bitc_bool_t
-DEFUN(_14bitc_DTprelude_CN_EX_SHFN1_4bool_4bool, bitc_bool_t arg)
+DEFUN(_16bitc_DTprelude_CNnot_SHFN1_4bool_4bool, bitc_bool_t arg)
 {
   return(!arg);
 }
-DEFCLOSURE_INLINE(_14bitc_DTprelude_CN_EX_SHFN1_4bool_4bool);
+DEFCLOSURE_INLINE(_16bitc_DTprelude_CNnot_SHFN1_4bool_4bool);
 
 /* String type is ORD, but requires special comparator: */
 INLINE bitc_bool_t

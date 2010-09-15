@@ -7,17 +7,21 @@
  *
  * @section MixFixWhatIs What is MixFix?
  *
- * A mixfix declaration takes one of the forms:
+ * A ``classic'' mixfix declaration takes one of the forms:
  *
  * @verbatim
-mixfix _+_   5     // infix
-mixfix _!    9     // postfix
-mixfix not_  6     // prefix
-mixfix (_)   6     // outfix  (term?)
-mixfix _[_]  6     // postfix with multiple expressions
+mixfix _+_   5     // infix   (starts and ends with an expression)
+mixfix _!    9     // postfix (starts with a expression)
+mixfix not_  6     // prefix  (ends with an expression)
+mixfix (_)   6     // closed  (starts and ends with a quasi-keyword)
+mixfix _[_]  6     // multi-part postfix
 @endverbatim
  *
- * These declarations have the effect of augmenting the expression
+ * A given mixfix specification can have an arbitrary number of
+ * expression ``holes.'' Holes may not be adjacent. The mixfix syntax
+ * adopted in Agda is typical of the breed.
+ *
+ * Mixfix declarations have the effect of augmenting the expression
  * grammar. Expressions in the primary grammar have some "primary"
  * cases that are higher precedence than any mixfix production
  * (e.g. "a.b"). When the primary parser processes the mixfix_expr
@@ -26,21 +30,52 @@ mixfix _[_]  6     // postfix with multiple expressions
  * resulted from primary expression parsing. Most are
  * identifiers. Some of the identifiers turn out to be mixfix
  * quasi-keywords introduced by mixfix declarations. Those will be
- * processed/rearranged by the mixfix processor here.
+ * processed/rearranged by the mixfix processor.
  *
- * The BitC mixfix design borrows syntax from the Agda programming
- * language. It also borrows the idea that "interior" (fully
- * bracketed) holes can accept expressions having any precedence. That
- * is: precedence rules are only applied at edge holes. In contrast to
- * Agda, we retain the tradition that precedence relations are
- * transitive. While we treat quasi-keywords as keywords while they
- * are in scope (meaning mainly that they cannot be rebound), we do
- * <em>not</em> require that they be unique. In particular, it is
- * perfectly okay in BitC to introduce the mixfix rules:
+ * BitC augments the Agda-style mixfix syntax in two ways:
+ * <ul>
+ * <li>
+ * Two (or more) quasi-keywords can appear in sequence:
  *
  * @verbatim
-mixfix while_do_  5
-mixfix until_do_  5
+mixfix _and@not_   5     // infix
+...
+cond1 and not cond2
+@endverbatim
+ *
+ * </li>
+ * <li>
+ *
+ * A expression parameter can be specified as ``thunked'', providing
+ * lazy evaluation:
+ *
+ * @verbatim
+mixfix _and#_   5     // infix
+...
+cond1 and cond2
+... gives ...
+_and#_(cond1, lambda () cond2 )
+@endverbatim
+ *
+ * with the consequence that many of the traditional ``syntactic
+ * forms'' can be expressed as mixfix rewrites.
+ * </li>
+ * </ul>
+ *
+ * The BitC mixfix design borrows two elements from Agda: (1) the
+ * ability to specify mixfix rather than just infix operators, and (2)
+ * the notion that "interior" (fully bracketed) expressions can be of
+ * any precedence. That is: precedence relations are only checked at
+ * edge holes. In contrast to Agda, we retain the tradition that
+ * precedence relations are transitive. While we treat quasi-keywords
+ * as keywords while they are in scope (meaning mainly that they
+ * cannot be rebound), we do <em>not</em> require that they be
+ * unique. In particular, it is perfectly okay in BitC to introduce
+ * the mixfix rules:
+ *
+ * @verbatim
+mixfix while_do#_  5
+mixfix until_do#_  5
 @endverbatim
  *
  * even though they both use "do" as a quasi-keyword. The fact that
@@ -57,16 +92,17 @@ mixfix until_do_  5
  * @section MixFixPrecedence Handling of Precedence
  *
  * One of the back-and-forth discussions in the literature is whether
- * precedence relations in mixfix should be transitive. For
- * example, if we know <code>_AND_ &lt; _==_</code> and <code>_==_
- * &lt; _+_</code>, does it follow that <code>_AND_ &lt; _+_</code>
- * (which is arguably nonsense)? Danielsson argues that this is undesirable,
- * because transitive precedence can lead to some odd cases. My view
- * is that uses of mixfix tend to fall into two cases:
+ * precedence relations in mixfix should be transitive. For example,
+ * if we know <code>_AND_ &lt; _==_</code> and <code>_==_ &lt;
+ * _+_</code>, does it follow that <code>_AND_ &lt; _+_</code> (which
+ * is arguably nonsense)? Danielsson argues that transitive precedence
+ * relations are undesirable, because they can lead to this sort of
+ * meaningless outcome. My view is that uses of mixfix tend to fall
+ * into two cases:
  *
  * - Most uses of mixfix "fit" the regular precedence hierarchy
  *   comfortably. That is: you can find an available spot for them in
- *   the available precedence hierarchy *and* applying the precedence
+ *   the available precedence hierarchy and applying the precedence
  *   rules in a transitive way doesn't result in any surprises.
  * - A few uses of mixfix are sophisticated, and are introducing
  *   completely different syntactic schemas than the ones that are
@@ -90,7 +126,8 @@ mixfix until_do_  5
  *
  * MixFix itself is conceptually straightforward, but not documented
  * in a way that is particularly accessible to first-time implementors
- * (like myself). We are presented with a linear list of expressions,
+ * (like myself). The ``main'' parser (e.g. one built in bison) has
+ * expression productions that construct a linear list of expressions,
  * some of which are quasi-keywords. For example, the mixfix rule:
  *
  * @verbatim
@@ -115,14 +152,7 @@ mixfix_expr: mixfix_expr '[' mixfix_expr ']'  %prec 6
  * assume - haven't checked) flushes the memoization cache when a
  * production is removed.
  *
- * The implementation chosen here here is simply to do an
- * interpretive, back-tracking GLR parser. This avoids all (or at
- * least most) of the challenges of inserting and removing
- * productions. Reading between the lines, I think there is a concern
- * among implementors that this is an O(N<sup>3</sup>) algorithm, but
- * it's important to remember that this is an asymptotic worst case
- * rather than the typical case. In the context of a mixfix
- * implementation, several factors mitigate this bound:
+ * A mixfix grammar is qualitatively simpler than a CFG:
  *
  * - Two "holes" are never adjacent.
  * - No eta-productions (rules matching empty) are present.
@@ -137,10 +167,32 @@ mixfix_expr: mixfix_expr '[' mixfix_expr ']'  %prec 6
  * - For human reasons, expressions don't tend to get too large before
  *   parenthesis start to appear. This has the effect of bounding N.
  *
- * I could be completely wrong about the combined impact of this on
- * the observed complexity, but I'm going to give it a try anyway. If
- * nothing else, it will be interesting to measure how much
- * back-tracking actually occurs on real input.
+ * The implementation chosen here here is a variant on a back-tracking
+ * left-corner parser. We first seek a highest-precedence reduction in
+ * the left corner, use recursive descent in internal expressions, and
+ * then do a precedence-constrained recursive descent parse on the
+ * right corner. Back-tracking can occur in internal positions, and in
+ * the right-most position when the right-side construction proves to
+ * be right-associative. The parser itself is interpreted in order to
+ * avoid the challenges of inserting and removing productions from a
+ * table-driven parser.
+ *
+ * Further optimizations are possible to control the cost of
+ * back-tracking if this becomes necessary. In particular, observe
+ * that if a given input position corresponds to the beginning of an
+ * expression, the position may or may not ultimately be the start of
+ * an expression, but if it <em>is</em> the start of an expression,
+ * the input from that point will always parse the same way. This is
+ * true because a mixfix parser only has one syntactic category
+ * (i.e. non-terminal). It means that parse sub-trees constructed in
+ * previous passes can be retained in pack-rat style.
+ *
+ * In the present parser, I haven't implemented the pack-rat
+ * optimization for several reasons:
+ * # right-associative expressions are very rare
+ * # some amount of syntactic category structure is imposed in the
+ *   bison parser, with the effect that most mixfix parses occur over
+ *   very simple trees.
  *
  * @subsection MixFixParseDataStructures Supporting Data Structures
  *
@@ -304,4 +356,42 @@ a + (b-1)
  * an identifier, and leave the syntactic issue to be diagnosed in the
  * mixfix handler through the absence of any <code>,_</code> or
  * <code>_,</code> productions.
+ *
+ * @subsection MixFixParser The Parser
+ *
+ * The parser a performs a mix of bottom-up and top-down parsing. It
+ * is bottom-up on the left and top-down on the right. While
+ * attempting to match a rule, a conventional recursive-descent parser
+ * can end up testing both left-side and right-side rules
+ * repeatedly. The intuition here is that on the left-hand side of the
+ * input we are necessarily going to end up reducing the
+ * highest-precedence production that matches the leading input, so we
+ * might as well reduce that eagerly without redundant effort. That is
+ * the bottom-up part of the strategy.
+ *
+ * But in order to do that, we need to make sure that any hole
+ * appearing on the right of the candidate production is matched. This
+ * means that we need to do a recursive-descent style parse when we
+ * encounter a right-side hole. The interesting case there is when we
+ * have a "left rule" of the form ...left_ and a "right rule" of the
+ * form _right.... Because of precedence and associativity, these
+ * might combine in three ways:
+ *
+ * @verbatim
+left_
+    \         right rule has higher precedence,
+    _right    or right-associative
+
+    _right    left rule has higher precedence,
+    /         or left-associative
+left_
+
+left_ <=> _right  non-associative; no parse
+@endverbatim
+ *
+ * Only the first case allows us to combine the two productions into a
+ * single case. What we do is a precedence-constrained right
+ * recursion. In the other two cases, we simply shift the intervening
+ * hole, reduce, push the resulting parse sub-tree back onto the
+ * input, and proceed again to attempt a left-corner reduction.
  */

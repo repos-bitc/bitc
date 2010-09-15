@@ -108,15 +108,13 @@ interface bitc.stdio {
     def log = 1
 
     loop y = x then y / base
-      until (y / base) == 0 {
-        log := log * base
-      }
+    until (y / base) == 0
+    in log := log * base
   
     loop x = x then x - ((x / log) * log)
          log = log then log / base
-      until log == 0 {
-        write_char(ostream, digits[convert(x/log)])
-      }
+    until log == 0
+    in write_char(ostream, digits[convert(x/log)])
   }
 
   // Read a string from an input stream.

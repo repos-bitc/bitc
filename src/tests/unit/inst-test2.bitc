@@ -43,7 +43,7 @@ bitc version 0.11
 (define (eeq x:unin y:unin) true)
 (define (neq x:unin y:unin) false)
 
-(definstance (Eq unin) (== = eeq) (!= = neq))
+(definstance (Eq unin) (_==_ = eeq) (_!=_ = neq))
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

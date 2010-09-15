@@ -49,10 +49,10 @@ bitc version 0.11
 (define (returnFalse x y) false)
 
 (definstance (Eq (ref (pair bool bool)))
-  (== = returnTrue) (!= = returnTrue))
+  (_==_ = returnTrue) (_!=_ = returnTrue))
 
 (definstance (Eq (ref (pair (mutable bool) (mutable bool))))
-  (== = returnFalse) (!= = returnFalse))
+  (_==_ = returnFalse) (_!=_ = returnFalse))
 
 (define p (dup (true, false)))
 (define mp:(ref (pair (mutable bool) (mutable bool))) 

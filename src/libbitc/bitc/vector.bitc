@@ -44,9 +44,8 @@ interface bitc.vector {
   def vector_map(vec, f)
     "Apply procedure f to each element of vector."
     = loop pos = 0 then 1 + pos
-      until pos == vec.length {
-        f(vec[pos])
-      }
+      until pos == vec.length
+      in f(vec[pos])
 
   // BUG: This was intended to be tail recursive!
   def vectorToList(vec : 'a[]) 
@@ -71,4 +70,3 @@ interface bitc.vector {
     "Given a list, return a vector of its elements."
     = MakeVector(length(l), lambda(n) {lst.list_nth(l, n)})
 }
-

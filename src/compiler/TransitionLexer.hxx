@@ -81,16 +81,19 @@ struct LayoutFrame : public boost::enable_shared_from_this<LayoutFrame> {
   bool inserted;              // true IFF left curly was inserted
   unsigned column;            // column of first token after '{'
   int precedingToken;         // token that preceded this '{'
+  sherpa::LToken tok;         // copy of opening { token, for location
 
   boost::shared_ptr<LayoutFrame> next;
 
   static inline boost::shared_ptr<LayoutFrame>
-  make(int _precedingToken, bool _inserted, unsigned _column) {
+  make(int _precedingToken, bool _inserted, unsigned _column, 
+       const sherpa::LToken& tok) {
     LayoutFrame *lf = new LayoutFrame;
 
     lf->inserted = _inserted;
     lf->precedingToken = _precedingToken;
     lf->column = _column;
+    lf->tok = tok;
 
     return boost::shared_ptr<LayoutFrame>(lf);
   }

@@ -40,12 +40,12 @@ bitc version 0.11
 (provide bitc.main main)
 
 (deftypeclass (EQL 'a)
-  ===: (fn 'a 'a -> bool)
+  === : (fn 'a 'a -> bool)
   )
 
 (forall ((EQL 'a)) 
   (deftypeclass (ORD 'a)
-    <<==: (fn 'a 'a -> bool)
+    <<== : (fn 'a 'a -> bool)
   ))
 
 //(definstance (EQL 'a) ==)
@@ -68,8 +68,8 @@ bitc version 0.11
 //(define RPQ (<<== (the int64 123) 456)) 
 
 (definstance (Eq (list 'a)) 
-  (== = (lambda (x y) true))
-  (!= = (lambda (x y) false)))
+  (_==_ = (lambda (x y) true))
+  (_!=_ = (lambda (x y) false)))
 
 (definstance (EQL (list 'a)) (=== = ==))
 (define (f x:(list 'a)) (=== x x))

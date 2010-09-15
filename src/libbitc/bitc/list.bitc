@@ -46,29 +46,26 @@ interface bitc.list {
 
   def map(f, lst:list('a))
     "Apply procedure f to each element of list."
-    = switch lst {
-      case x as nil  in true
-      case x as cons in
+    = switch x = lst
+      case nil  in true
+      case cons in
         f(x.car)
         map(f, x.cdr)
-    }
 
   // These are included for convenience, but it is probably not
   // advisable to use them, because it is difficult to show that no
   // exceptions are thrown.
   def car(lst)
     "Return first element of list (if non-empty)."
-    = switch lst {
-      case x as nil  in throw IndexBoundsError
-      case x as cons in x.car
-    }
+    = switch x = lst
+      case nil  in throw IndexBoundsError
+      case cons in x.car
 
   def cdr(lst)
     "Return rest of list (if non-empty)."
-    = switch lst {
-      case x as nil  in throw IndexBoundsError
-      case x as cons in x.cdr
-    }
+    = switch x = lst
+      case nil  in throw IndexBoundsError
+      case cons in x.cdr
 
   def list_nth(lst, n)
     "Return nth element of list."

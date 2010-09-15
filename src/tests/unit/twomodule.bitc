@@ -47,5 +47,5 @@ module MainModule is
       (stdio.write_char stdio.stdout '\linefeed')
       0))
 
-module AnotherModule
+module AnotherModule is
   (define (f x:int32) x)

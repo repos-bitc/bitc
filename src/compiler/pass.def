@@ -57,9 +57,12 @@ PASS(beginSimp,     "beginsimp",    "Some simplifications in the begining")
 // are met when the corresponding definition is encountered.
 PASS(methDecl,      "methdecl",     "Inject method function proclaims")
 
-// We decided to do MixFix processing in the symbol resolution
-// pass. This seems to be the cleanest way to treat operator binding
-// forms in a way that is consistent with other binding forms.
+// We had originally planned to do MixFix processing in the symbol
+// resolution pass, but that doesn't work out well. There are
+// quasi-keywords and syntactic tokens '.', ',' and so forth that are
+// still marked as identifiers in the at_mixExpr children. We don't
+// want those to be touched by the resolver, so we need to clean up
+// the at_mixExpr nodes before we try to resolve.
 //
 // The introduction of mixfix caused me to change the processing of
 // AND and OR. The problem is that these they sit in the middle
@@ -70,6 +73,8 @@ PASS(methDecl,      "methdecl",     "Inject method function proclaims")
 // primitive form as a special case. If we eventually add thunkification,
 // they will cease to be primitive, and we'll be able to eliminate the
 // special handling.
+PASS(mixfix,        "mixfix",       "MixFix Processing")
+
 PASS(symresolve,    "symresolve",   "Symbol Resolution")
 
 // Below here, MixFix nodes have been converted to normal expression
