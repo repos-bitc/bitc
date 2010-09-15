@@ -72,7 +72,7 @@ bitc version 0.11
     (stdio.write_char stdio.stdout '\tab')
     (loop ((i:word 0 (+ i 1)))
 	((>= i 20) ())
-	(stdio.write_int stdio.stdout (nth digest i) 16)
+	(stdio.write_int stdio.stdout digest[i] 16)
 	(stdio.write_char stdio.stdout '\space'))
     (stdio.write_char stdio.stdout '\linefeed')
     

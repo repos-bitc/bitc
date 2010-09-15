@@ -43,5 +43,5 @@ bitc version 0.11
 (define V2  (vector p))
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (nth V1 0)
+    V1[0]
     0))

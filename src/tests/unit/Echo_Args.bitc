@@ -46,6 +46,6 @@ bitc version 0.11
     (loop ((i:word 0 (+ i 1)))
   	((== i argvec.length) ())
 	(begin
-	  (stdio.write_string stdio.stdout (nth argvec i))
+	  (stdio.write_string stdio.stdout argvec[i])
 	  (stdio.write_char stdio.stdout '\linefeed')))
     0))

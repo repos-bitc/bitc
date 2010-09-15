@@ -46,6 +46,6 @@ bitc version 0.11
 (define a1 (array i0 i1 i2))
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (begin (try (nth a1 25) 
+    (begin (try a1[25] 
 		(catch xyz (IndexBoundsError -1))))
     i0))

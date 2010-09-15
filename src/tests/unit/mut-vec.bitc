@@ -39,7 +39,7 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (f x:(vector int32)) (nth x 0))
+(define (f x:(vector int32)) x[0])
 
 (define vec1:(vector int32) (vector 1 2 3))
 (define vec2:(mutable (vector int32)) (vector 1 2 3)) 

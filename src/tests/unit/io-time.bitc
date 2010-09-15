@@ -66,7 +66,7 @@ bitc version 0.11
   //(TS "Print to stdout: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (define iStream (stdio.open (nth argvec 1) "r"))
+    (define iStream (stdio.open argvec[1] "r"))
     (set! stop (stdlib.getTimeStamp)) 
   //(TS "Open Read Stream: " (- stop start))
     
@@ -83,21 +83,21 @@ bitc version 0.11
     (set! start (stdlib.getTimeStamp))
     (loop ((i 0 (+ i 1)))
 	((>= i len) ())
-	(set! (nth vec i) (stdio.read_byte iStream)))  
+	(set! vec[i] (stdio.read_byte iStream)))  
     (set! stop (stdlib.getTimeStamp)) 
   //(TS "Input from File: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
     (loop ((i 0 (+ i 1)))
 	((>= i len) ())
-	(stdio.write_byte stdio.stdout (nth vec i)))  
+	(stdio.write_byte stdio.stdout vec[i]))  
     (set! stop (stdlib.getTimeStamp)) 
   //(TS "Write to stdout: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
     (loop ((i 0 (+ i 1)))
 	((>= i len) ())
-	(set!  (nth vec i)
+	(set!  vec[i]
 	       (if (not (stdio.isEOF iStream))
 		   (stdio.read_byte iStream) 0)))  
     (set! stop (stdlib.getTimeStamp)) 
@@ -106,7 +106,7 @@ bitc version 0.11
     (set! start (stdlib.getTimeStamp))
     (loop ((i 0 (+ i 1)))
 	((>= i len) ())
-	(stdio.write_byte oStream (nth vec i)))  
+	(stdio.write_byte oStream vec[i]))  
     (set! stop (stdlib.getTimeStamp)) 
   //(TS "Write to file: " (- stop start))
     

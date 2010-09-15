@@ -43,7 +43,7 @@ bitc version 0.11
   x.length)
 
 (define (f x:(ArrayRef 'a)) 
-  (nth x (/ (g x) 2)))
+  x[(/ (g x) 2)])
 
 (define arr (array 1 2 3 4 5 6 7 8 9 10))
 

@@ -279,7 +279,6 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "module",           lf_transition,        tk_MODULE ),
   TransitionLexer::KeyWord( "mutable",          lf_transition,        tk_MUTABLE ),
   TransitionLexer::KeyWord( "namespace",        lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "nth",              lf_sexpr,             tk_NTH ),
   TransitionLexer::KeyWord( "object",           lf_block,             tk_OBJECT ),
   TransitionLexer::KeyWord( "opaque",           lf_transition,        tk_OPAQUE ),
   TransitionLexer::KeyWord( "or",               lf_transition,        tk_OR ),

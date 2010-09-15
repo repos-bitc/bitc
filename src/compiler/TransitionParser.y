@@ -273,7 +273,6 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_VECTOR
 %token <tok> tk_ARRAY
 %token <tok> tk_MAKE_VECTOR
-%token <tok> tk_NTH
 
 // Block syntax:
 %token <tok> tk_STRUCT
@@ -3236,10 +3235,6 @@ sxp_unqual_expr: '(' tk_MEMBER sxp_expr sxp_ident ')' {
 sxp_unqual_expr: sxp_expr '[' sxp_expr ']' {
   SHOWPARSE("sxp_unqual_expr -> sxp_expr [ sxp_expr ]");
   $$ = AST::make(at_nth, $1->loc, $1, $3);
-};
-sxp_unqual_expr: '(' tk_NTH sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> ( NTH sxp_expr sxp_expr )");
-  $$ = AST::make(at_nth, $2.loc, $3, $4);
 };
 
 // DUP [7.17.1]

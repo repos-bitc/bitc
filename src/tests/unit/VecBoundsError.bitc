@@ -43,5 +43,5 @@ bitc version 0.11
   (lambda (argvec) 
     // The following *should* cause an exception:
     (let ((v (MakeVector 10 (lambda (n) 'c'))))
-      (nth v 12))
+      v[12])
     0))
