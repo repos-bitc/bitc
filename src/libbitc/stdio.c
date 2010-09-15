@@ -99,10 +99,10 @@ ty_bitc_stdioStream *bitc_stdio_stderr = &our_stderr;
 ty_bitc_stdioStream *
 DEFUN(bitc_stdio_open, bitc_string_t *nm, bitc_string_t *mode)
 {
-  ty_bitc_stdioStream *ios = bitc_malloc_atomic(sizeof(ty_bitc_stdioStream));
+  ty_bitc_stdioStream *ios = GC_MALLOC_ATOMIC(sizeof(ty_bitc_stdioStream));
   ios->f = fopen(nm->s, mode->s);
   if (ios->f == NULL)
-    bitc_throw(&val_ExNoPermission);
+    BITC_THROW(&val_ExNoPermission);
 
   ios->isInit = true;
 
@@ -141,12 +141,12 @@ DEFUN(bitc_stdio_read_char, ty_bitc_stdioStream *ios)
   fix_stdio_stream(ios);
 
   if (ios->f == NULL)
-    bitc_throw(&val_ExFileIsClosed);
+    BITC_THROW(&val_ExFileIsClosed);
 
   // Read the first char:
   result = fread(&encoded[0], 1, 1, ios->f);
   if (result != 1)
-    bitc_throw(&val_ExAtEOF);
+    BITC_THROW(&val_ExAtEOF);
 
   if (encoded[0] <= 127) {
     ucs4 = encoded[0];
@@ -154,7 +154,7 @@ DEFUN(bitc_stdio_read_char, ty_bitc_stdioStream *ios)
   else if (encoded[0] <= 223) {
     result = fread(&encoded[1], 1, 1, ios->f);
     if (result != 1)
-      bitc_throw(&val_ExAtEOF);
+      BITC_THROW(&val_ExAtEOF);
     ucs4 = 
       (encoded[0] - 192)*64 
       + (encoded[1]-128);
@@ -162,7 +162,7 @@ DEFUN(bitc_stdio_read_char, ty_bitc_stdioStream *ios)
   else if (encoded[0] <= 239) {
     result = fread(&encoded[1], 2, 1, ios->f);
     if (result != 1)
-      bitc_throw(&val_ExAtEOF);
+      BITC_THROW(&val_ExAtEOF);
     ucs4 = 
       (encoded[0] - 224)*4096 
       + (encoded[1]-128)*64
@@ -171,7 +171,7 @@ DEFUN(bitc_stdio_read_char, ty_bitc_stdioStream *ios)
   else if (encoded[0] <= 247) {
     result = fread(&encoded[1], 3, 1, ios->f);
     if (result != 1)
-      bitc_throw(&val_ExAtEOF);
+      BITC_THROW(&val_ExAtEOF);
     ucs4 = 
       (encoded[0] - 240)*262144
       + (encoded[1]-128)*4096
@@ -181,7 +181,7 @@ DEFUN(bitc_stdio_read_char, ty_bitc_stdioStream *ios)
   else if (encoded[0] <= 251) {
     result = fread(&encoded[1], 4, 1, ios->f);
     if (result != 1)
-      bitc_throw(&val_ExAtEOF);
+      BITC_THROW(&val_ExAtEOF);
     ucs4 = 
       (encoded[0] - 248)*16777216 
       + (encoded[1]-128)*262144
@@ -192,7 +192,7 @@ DEFUN(bitc_stdio_read_char, ty_bitc_stdioStream *ios)
   else if (encoded[0] <= 253) {
     result = fread(&encoded[1], 5, 1, ios->f);
     if (result != 1)
-      bitc_throw(&val_ExAtEOF);
+      BITC_THROW(&val_ExAtEOF);
     ucs4 = 
       (encoded[0] - 252)*1073741824
       + (encoded[1]-128)*16777216 
@@ -202,7 +202,7 @@ DEFUN(bitc_stdio_read_char, ty_bitc_stdioStream *ios)
       + (encoded[5]-128);
   }
   else
-    bitc_throw(&val_ExNotUTF8);
+    BITC_THROW(&val_ExNotUTF8);
 
   return ucs4;
 }
@@ -217,7 +217,7 @@ DEFUN(bitc_stdio_write_char, ty_bitc_stdioStream *ios, bitc_char_t ucs4)
   fix_stdio_stream(ios);
 
   if (ios->f == NULL)
-    bitc_throw(&val_ExFileIsClosed);
+    BITC_THROW(&val_ExFileIsClosed);
 
   bitc_uns8_t encoded[6];
   bitc_uns8_t *utf8 = encoded;
@@ -259,9 +259,9 @@ DEFUN(bitc_stdio_write_char, ty_bitc_stdioStream *ios, bitc_char_t ucs4)
   result = fwrite(encoded, utf8-encoded, 1, ios->f);
 
   if (result == 0)
-    bitc_throw(&val_ExAtEOF);
+    BITC_THROW(&val_ExAtEOF);
   else if (result < 0)
-    bitc_throw(&val_ExNoPermission);
+    BITC_THROW(&val_ExNoPermission);
 }
 DEFCLOSURE(bitc_stdio_write_char);
 
@@ -275,10 +275,10 @@ DEFUN(bitc_stdio_read_byte, ty_bitc_stdioStream *ios)
   fix_stdio_stream(ios);
 
   if (ios->f == NULL)
-    bitc_throw(&val_ExFileIsClosed);
+    BITC_THROW(&val_ExFileIsClosed);
 
   if ( fread(&c, 1, 1, ios->f) != 1 )
-    bitc_throw(&val_ExNoPermission);
+    BITC_THROW(&val_ExNoPermission);
 
   return c;
 }
@@ -292,10 +292,10 @@ DEFUN(bitc_stdio_write_byte, ty_bitc_stdioStream *ios, bitc_uns8_t c)
   fix_stdio_stream(ios);
 
   if (ios->f == NULL)
-    bitc_throw(&val_ExFileIsClosed);
+    BITC_THROW(&val_ExFileIsClosed);
 
   if ( fwrite(&c, 1, 1, ios->f) != 1 )
-    bitc_throw(&val_ExNoPermission);
+    BITC_THROW(&val_ExNoPermission);
 }
 DEFCLOSURE(bitc_stdio_write_byte);
 
@@ -305,7 +305,7 @@ DEFUN(bitc_stdio_eofp, ty_bitc_stdioStream *ios)
   fix_stdio_stream(ios);
 
   if (ios->f == NULL)
-    bitc_throw(&val_ExFileIsClosed);
+    BITC_THROW(&val_ExFileIsClosed);
 
   return (feof(ios->f) ? true : false);
 }

@@ -1687,6 +1687,9 @@ toc(std::ostream& errStream,
       if (ast->children.size() > 1) {
         out << "typedef struct {" << endl;
         out.more();
+        out << "const char *__fileName;" << endl;
+        out << "int __line;" << endl;
+
         out << "const char* __name;" << endl;
         for (size_t c = 1; c < ast->children.size(); c++) {
           shared_ptr<AST> field = ast->child(c);
@@ -1729,7 +1732,7 @@ toc(std::ostream& errStream,
           out << "bitc_exception_t " << CVAL_PFX << CMangle(ident)
               << " = { " << endl;
           out.more();
-          out << TAG_PFX << CMangle(ident) << endl;
+          out << ".__name = " << TAG_PFX << CMangle(ident) << endl;
           out.less();
           out << "};" << endl << endl;
         }
@@ -2463,7 +2466,10 @@ toc(std::ostream& errStream,
       // instance. Both have the same underlying representation, but
       // emit an explicit cast to suppress complaint from the
       // high-level macroassembler. Er, um, I mean the C compiler.
-      out << "bitc_throw((bitc_exception_t *) ";
+      out << "bitc_throw(\""
+          << ast->loc.origin << "\", "
+          << ast->loc.line << ", "
+          << "(bitc_exception_t *) ";
       TOC(errStream, uoc, ast->child(0), out, IDname, decls,
           ast, 0, flags);
       out <<");" << endl;
@@ -3210,8 +3216,8 @@ EmitMain(INOstream &out)
   out << "}" << endl;
   out << "else {" << endl;
   out.more();
-  out << "printf(\"Uncaught Exception: %s\\n\", "
-      << "curException->__name);" << endl
+  out << "printf(\"Uncaught %s exception raised at %s:%d\\n\", "
+      << "curException->__name, curException->__fileName, curException->__line);" << endl
       << "exit(1);" << endl;
   out.less();
   out << "}" << endl;

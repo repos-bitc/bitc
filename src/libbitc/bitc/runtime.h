@@ -115,6 +115,9 @@ typedef long double bitc_quad_t;
 /// integer, which <em>must</em> be merged by the linker, and use the
 /// address of that symbol as the exception ID.
 typedef struct bitc_exception_t {
+  const char *__fileName;
+  int __line;
+
   const char *__name;
 } bitc_exception_t;
 
@@ -122,10 +125,15 @@ extern jmp_buf firstJB;
 extern jmp_buf *curCatchBlock;
 extern bitc_exception_t *curException;
 
-#define bitc_throw(x) do {		       \
-    curException = (bitc_exception_t *) x;     \
-    longjmp(*curCatchBlock, 1);		       \
-  }while(0)
+#define bitc_throw(fileName, line, x)                 \
+  do {                                                \
+    curException = (bitc_exception_t *) x;            \
+    curException->__fileName = fileName;              \
+    curException->__line = line;                      \
+    longjmp(*curCatchBlock, 1);                       \
+  } while(0)
+
+#define BITC_THROW(x) bitc_throw(__FILE__, __LINE__, x)
 
 /// @brief Raised when an attempt to allocate heap memory fails.
 extern bitc_exception_t val_ExOutOfMemory;
@@ -135,8 +143,8 @@ extern bitc_exception_t val_ExIndexBoundsError;
 
 #define TY_VECTOR_OF_STRINGS K_6string
 
-#define GC_ALLOC(x) bitc_malloc(x)
-#define GC_ALLOC_ATOMIC(x) bitc_malloc_atomic(x)
+#define GC_ALLOC(x) bitc_malloc(__FILE__, __LINE__, x)
+#define GC_ALLOC_ATOMIC(x) bitc_malloc_atomic(__FILE__, __LINE__, x)
 
 /// @brief Trivial wrapper for allocating storage that may contain
 /// pointers.
@@ -144,11 +152,11 @@ extern bitc_exception_t val_ExIndexBoundsError;
 /// This exists to let us convert malloc failures into BitC
 /// exceptions.
 INLINE void *
-bitc_malloc(size_t sz)
+bitc_malloc(const char * fileName, int line, size_t sz)
 {
   void *ptr = GC_malloc(sz);
   if(ptr == NULL)
-    bitc_throw(&val_ExOutOfMemory);
+    bitc_throw(fileName, line, &val_ExOutOfMemory);
 
   return ptr;
 }
@@ -159,11 +167,11 @@ bitc_malloc(size_t sz)
 /// This exists to let us convert malloc failures into BitC
 /// exceptions.
 INLINE void *
-bitc_malloc_atomic(size_t sz)
+bitc_malloc_atomic(const char *fileName, int line, size_t sz)
 {
   void *ptr = GC_malloc_atomic(sz);
   if(ptr == NULL)
-    bitc_throw(&val_ExOutOfMemory);
+    bitc_throw(fileName, line, &val_ExOutOfMemory);
 
   return ptr;
 }

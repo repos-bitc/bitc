@@ -174,7 +174,7 @@ DEFUN(bitc_string_nth, bitc_string_t *str, bitc_word_t ndx)
   }
 
   if (*s == 0)
-    bitc_throw(&val_ExIndexBoundsError);
+    BITC_THROW(&val_ExIndexBoundsError);
 
   return utf8_decode(s, 0);
 }
