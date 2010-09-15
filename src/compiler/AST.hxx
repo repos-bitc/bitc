@@ -44,6 +44,7 @@
 #include <stdint.h>
 
 #include "libsherpa/EnumSet.hxx"
+#include "libsherpa/INOstream.hxx"
 
 #include "FQName.hxx"
 #include "LitValue.hxx"
@@ -1033,6 +1034,9 @@ public:
   /// type if @p showTypes is true, and appending a final end of line
   /// of @p endline is true.
   void PrettyPrint(std::ostream& out, bool showTypes = false,
+                   bool endline=true) const;
+
+  void PrettyPrint(sherpa::INOstream& out, bool showTypes = false,
                    bool endline=true) const;
 
   // For use in GDB:
