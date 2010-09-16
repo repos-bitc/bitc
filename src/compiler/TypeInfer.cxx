@@ -2304,10 +2304,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
                                   ti_flags | TI_TYP_EXP, ident->symType));
       ident->scheme = sigma;
 
-      // Category keywork at position 2
+      // Category keyword at position 2
 
       // Type all constraints
-      TYPEINFER(ast->child(3), gamma, instEnv, impTypes, 
+      shared_ptr<AST> constraints = ast->child(3);
+      TYPEINFER(constraints, gamma, instEnv, impTypes, 
                 sigma->tcc, trail, mode, TI_CONSTRAINT);
 
       // Solve current Predicates.
