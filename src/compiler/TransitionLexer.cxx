@@ -1477,6 +1477,18 @@ TransitionLexer::getNextInputToken()
   while(c == '_')
     c = getChar();
 
+  // Match leading separator
+  if (c == '#') {
+    c = getChar();
+    if (c != '_') {
+      ungetChar(c);
+      c = '#';
+      goto ident_done;
+    }
+
+    c = getChar();
+  }
+
   while (valid_ident_start(c) || valid_operator_start(c) || c == '_') {
     // Grab an alpha chunk or a punctuation chunk:
     if (valid_ident_start(c)) {
@@ -1501,23 +1513,28 @@ TransitionLexer::getNextInputToken()
       RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
     }
 
-    // Check if this is a multi-part token:
-    if (c == '_') {
-      do {
-        c = getChar();
-      } while (c == '_');
-      continue;
+    if ((c != '#') && (c != '_') && (c != '@'))
+      goto ident_done;
+
+    // Match internal or trailing separator*
+    if (c == '#') {
+      c = getChar();
+      if (c != '_') {
+        ungetChar(c);
+        c = '#';
+        goto ident_done;
+      }
     }
-    else {
-      // Can't continue the loop here, since we might have seen
-      // something like !b, and we don't want to accept the trailing
-      // 'b' in the absence of an intervening '_'.
-      break;
-    }
+    c = getChar();
   }
+ ident_done:
 
   // We have gone one too far.
   ungetChar(c);
+
+  // Might have matched trailing '@' in error. If so, back it out:
+  if (thisToken[thisToken.size()-1] == '@')
+    ungetChar('@');
 
   int tokType = kwCheck(thisToken.c_str(), tk_BlkIdent);
   endLoc.updateWith(thisToken);

@@ -42,7 +42,7 @@ bitc version 0.11
 (define i0 (the int32 0))
  
 (deftypeclass (TC2 'a 'b)
- @: (fn 'a 'b -> bool)
+ *!*: (fn 'a 'b -> bool)
  )
 
 (forall ((TC2 'a 'b))
@@ -58,7 +58,7 @@ bitc version 0.11
     $: (fn 'a 'b -> 'c)
     ))
 
-(definstance (TC2 'a 'a) (@ = (lambda (x y) true)))
+(definstance (TC2 'a 'a) (*!* = (lambda (x y) true)))
 
 (forall ((TC2 'a 'b))
   (proclaim abc:  (fn 'a 'b -> bool)))
@@ -67,7 +67,7 @@ bitc version 0.11
   (define abc:(fn 'a 'b -> bool)
     (lambda (x y) true)))
 
-(define Q @)
+(define Q *!*)
 
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)

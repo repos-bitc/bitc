@@ -362,33 +362,63 @@ def fact x =
       <sect2 id="identifiers">
 	<title>Identifiers</title>
 	<p>
-	  BitC identifiers are case sensitive. An identifier may start
-	  with any ``identifier character'' (Unicode 4.1.0 <cite
-	  ref="unicode410"/> character class XID_Start), followed by
-	  any number of optional ``identifier continue characters''
-	  (Unicode 4.1.0 character class XID_Continue). In type
-	  variable identifiers, an underscore may appear in any
-	  position (``_''). In other identifiers, the following
-	  ``extended alphabetic characters'' may appear in any
-	  position:
-	</p>
-	<literallayout>
-! $ % &amp; | * + - / \ &lt; = &gt; ? @ _ ~</literallayout>
-<!--         <p> -->
-<!--           An identifier may be optionally qualified by an interface -->
-<!--           binding name followed by a period (``.'').  -->
-<!--           Thus, the most general form of an -->
-<!--           identifier is: -->
-<!--         </p> -->
-<!--         <literallayout> -->
-<!-- [<em>Identifier</em>.]<em>Identifier</em></literallayout> -->
-	<p>
-	  Identifiers beginning with two leading underscores are
-	  reserved for use by the runtime system.
-	</p>
-	<p>
-          Reserved words are not identifiers.
-	</p>
+          Because of BitC's support for user-defined expression syntax
+          (mixfix), the definition of a well-formed identifier is
+          regrettably more complicated than in most languages.
+          We
+          begin by defining three lexical classes:
+        </p>
+        <ul>
+          <li>
+            <p>
+              Any sequence of code points beginning with an
+              ``identifier character'' (Unicode 4.1.0 <cite
+                ref="unicode410"/> character class XID_Start), followed
+              by any number of optional ``identifier continue
+              characters'' (Unicode 4.1.0 character class
+              XID_Continue) is a <em>alphanumeric identifier fragment</em>.
+            </p>
+          </li>
+          <li>
+            <p>
+              Any sequence of the following characters is a valid
+              <em>operator identifier fragment</em>:
+            </p>
+            <literallayout>
+! $ % &amp; * + - / &lt; = &gt; ? ^ | ~</literallayout>
+          </li>
+          <li>
+            <p>
+              An underscore (U+005F, ``_''), sharp underscore (U+005F
+              U+0023, ``#_''), or the at-sign (U+0040, ``@'') is a
+              valid <em>separator</em>.
+            </p>
+          </li>
+        </ul>
+        <p>
+          A well-formed identifier matches the regular expression:
+        </p>
+        <literallayout>
+<b>_</b><sup>*</sup>(<b>#_</b>)<sup>?</sup><em>fragment</em>((<b>_</b>|<b>#_</b>|<b>@</b>)<em>fragment</em>)<sup>*</sup>(<b>#_</b>|<b>_</b>)<sup>?</sup></literallayout>
+        <p indent="no">
+          that is: a sequence of alphanumeric or punctuation fragments
+          that are joined by separators with an optional leading and
+          trailing separator, with the whole optionally preceded by an
+          arbitrary number of underscores. Each fragment is either an
+          alphanumeric or a punctuation sequence.
+        </p>
+        <p>
+          Identifiers are case sensitive.  Reserved words are not
+          identifiers.  Identifiers starting with <em>two or more</em>
+          leading underscores (U+005F, ``_'') are reserved for use by
+          the runtime system.  Non-reservedIdentifiers are valid for
+          use as mixfix identifiers.
+        </p>
+        <p>
+          The sheer perverse obscurity of the specification for
+          identifiers is motivated by mixfix support, and will
+          hopefully make more sense after a review of that section.
+        </p>
       </sect2>
       <sect2 id="if-identifiers">
 	<title>Interface Names and Identifiers</title>
@@ -428,6 +458,16 @@ def fact x =
           Reserved words are <em>permitted</em> as interface
           identifiers.
 	</p>
+        <p>
+          While BitC treats interface identifiers as case-sensitive,
+          it is <em>strongly discouraged</em> for source code to rely
+          solely on case distinctions to discriminate between
+          interface names. The choice of legal interface identifiers
+          is intentionally chosen to support a direct mapping to file
+          names across a wide range of file systems. At least one
+          pervasively used file system provides only haphazard support
+          for case sensitivity in file names.
+        </p>
       </sect2>
       <sect2>
 	<title>Reserved Words</title>
@@ -436,7 +476,7 @@ def fact x =
 	  be rebound:
 	</p>
 	<literallayout indent="no">
-#f            #t            -&gt;
+false         true          -&gt;
 and           apply         array         
 array-length  array-nth     array-ref
 array-ref-length  array-ref-nth  begin         
@@ -479,9 +519,9 @@ deftype       defvariant    do*
 import!       indset        inner-ref     
 int           let*          list          
 location      module        namespace     
-nth           read-only     require       
-sensory       super         tycon         
-using         value-at</literallayout>
+read-only     require       sensory       
+super         tycon         using         
+value-at</literallayout>
 	<p>
           In addition to the reserved words identified above, all
 	  definitions provided in the standard prelude are implicitly
@@ -518,8 +558,8 @@ using         value-at</literallayout>
 <!-- 	<sect3> -->
 <!-- 	  <title>Boolean Literals</title> -->
 <!-- 	  <p> -->
-<!-- 	    The boolean literals are <progident>#f</progident> and -->
-<!-- 	    <progident>#t</progident>, respectively denoting false and -->
+<!-- 	    The boolean literals are <progident>false</progident> and -->
+<!-- 	    <progident>true</progident>, respectively denoting false and -->
 <!-- 	    true. -->
 <!-- 	  </p> -->
 <!-- 	</sect3> -->
@@ -1095,8 +1135,8 @@ a b c /*
  	    <label><term>bool</term></label>
  	    <li>
  	      <p>
-                 A boolean value, either <progident>#f</progident> or
- 		<progident>#t</progident>. The representation of this
+                 A boolean value, either <progident>false</progident> or
+ 		<progident>true</progident>. The representation of this
  		type is a single byte, aligned at a byte boundary.
                </p>
  	    </li>
@@ -1140,7 +1180,7 @@ a b c /*
 <!--                 Legal values for <em>align</em> are 8, 16, 32, and -->
 <!--                 64. The value of <em>size</em> must be less than or -->
 <!--                 equal to the value of <em>align</em>. The value of -->
-<!--                 <em>signed</em> must be either #f or #t. The arguments -->
+<!--                 <em>signed</em> must be either false or true. The arguments -->
 <!--                 to the <progident>fixint</progident> form must be -->
 <!--                 literals. Type equivalence for -->
 <!--                 <progident>fixint</progident> types is determined -->
@@ -1151,7 +1191,7 @@ a b c /*
 <!-- 	      </p> -->
 <!-- 	      <p>The form</p> -->
 <!-- 	      <literallayout> -->
-<!-- (fixint 4 32 #t) -->
+<!-- (fixint 4 32 true) -->
 <!-- </literallayout> -->
 <!-- 	      <p indent="no"> -->
 <!-- 		describes a two's complement four bit field placed -->
@@ -1159,7 +1199,7 @@ a b c /*
 <!-- 		<progident>int32</progident> is internally defined as -->
 <!-- 	      </p> -->
 <!-- 	      <literallayout> -->
-<!-- (fixint 32 32 #t) -->
+<!-- (fixint 32 32 true) -->
 <!-- </literallayout> -->
 <!-- 	    </li> -->
 <!-- 	  </defli> -->
@@ -2325,7 +2365,7 @@ inc: (fn (int32) int32)</literallayout>
 (define (foo f)
   (pair
     (f (cons 1 (cons 2 nil)))
-    (f (cons #t (cons #f nil)))))</literallayout>
+    (f (cons true (cons false nil)))))</literallayout>
       </sect2>
     </sect1>
     <sect1>
@@ -2989,14 +3029,14 @@ id : T
 (letrec
   ((odd
      (lambda (x) ; odd
-       (cond ((= x 0) #f)
+       (cond ((= x 0) false)
              ((&lt; x 0) (odd (- x)))
              (otherwise
                (not
                  (even (- x 1)))))))
    (even
      (lambda (x) ; even
-       (cond ((= x 0) #t)
+       (cond ((= x 0) true)
              ((&lt; x 0) (even (- x)))
              (otherwise
                (not
@@ -3571,7 +3611,7 @@ bitsizeof(<em>T</em>)</literallayout>
         <p>
           At the start of each pass over the body, the expression
           <progident><em>e<sub>test</sub></em></progident> is
-          evaluated. If this expression returns <b>#t</b>, then
+          evaluated. If this expression returns <b>true</b>, then
           <progident><em>e<sub>result</sub></em></progident> is
           evaluated and its result returned. Otherwise, the expresions
           of the body are evaluated in sequence.
@@ -3935,12 +3975,12 @@ bitsizeof(<em>T</em>)</literallayout>
           <literallayout>
 (if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em> <em>e<sub>else</sub></em>) =&gt;
 (case <em>e<sub>test</sub></em>
-  (#t <em>e<sub>then</sub></em>)
-  (#f <em>e<sub>else</sub></em>))
+  (true <em>e<sub>then</sub></em>)
+  (false <em>e<sub>else</sub></em>))
 (if <em>e<sub>test</sub></em> <em>e<sub>then</sub></em>) =&gt;
 (case <em>e<sub>test</sub></em>
-  (#t <em>e<sub>then</sub></em> ())
-  (#f ())</literallayout>
+  (true <em>e<sub>then</sub></em> ())
+  (false ())</literallayout>
         </sect3>
         <sect3 id="condexec:when">
           <title>when</title>
@@ -3971,7 +4011,7 @@ bitsizeof(<em>T</em>)</literallayout>
             <progident><em>e<sub>then</sub></em></progident> forms are
             evaluated only if the value of the 
             <progident><em>e<sub>test</sub></em></progident> form is
-            <progident>#t</progident>.
+            <progident>true</progident>.
           </p>
           <p>
             <leadin>Derivation</leadin> The canonical rewriting of
@@ -3980,8 +4020,8 @@ bitsizeof(<em>T</em>)</literallayout>
           <literallayout>
 (when <em>e<sub>test</sub></em> <em>e<sub>then</sub></em> ...) =&gt;
 (case <em>e<sub>test</sub></em>
-  (#t <em>e<sub>then</sub></em> ... ())
-  (#f ()))</literallayout>
+  (true <em>e<sub>then</sub></em> ... ())
+  (false ()))</literallayout>
         </sect3>
 	<sect3 id="condexec:not">
 	  <title>not</title>
@@ -4004,7 +4044,7 @@ bitsizeof(<em>T</em>)</literallayout>
           </p>
           <literallayout>
 (not <em>e</em>) =&gt;
-(if <em>e</em> #f #t)</literallayout>
+(if <em>e</em> false true)</literallayout>
         </sect3>
 	<sect3 id="condexec:and">
 	  <title>and</title>
@@ -4024,7 +4064,7 @@ bitsizeof(<em>T</em>)</literallayout>
 	    true. Expressions are evaluated left to right. Each
 	    expression must return a result of type
 	    <progident>bool</progident>. If any expression evaluates as
-	    <progident>#f</progident>, no further expressions are
+	    <progident>false</progident>, no further expressions are
 	    evaluated. For this reason, the <progident>and</progident>
 	    form cannot be implemented as a procedure.
 	  </p>
@@ -4044,7 +4084,7 @@ bitsizeof(<em>T</em>)</literallayout>
           </p>
           <literallayout>
 (and <em>e<sub>1</sub></em> <em>e<sub>2</sub></em>) =&gt;
-(if <em>e<sub>1</sub></em> <em>e<sub>2</sub></em> #f)</literallayout>
+(if <em>e<sub>1</sub></em> <em>e<sub>2</sub></em> false)</literallayout>
 	</sect3>
 	<sect3 id="condexec:or">
 	  <title>or</title>
@@ -4064,7 +4104,7 @@ bitsizeof(<em>T</em>)</literallayout>
 	    true. Expressions are evaluated left to right. Each
 	    expression must return a result of type
 	    <progident>bool</progident>. If any expression evaluates
-	    as <progident>#t</progident>, no further expressions are
+	    as <progident>true</progident>, no further expressions are
 	    evaluated. For this reason, the <progident>or</progident>
 	    form cannot be implemented as a procedure.
 	  </p>
@@ -4084,7 +4124,7 @@ bitsizeof(<em>T</em>)</literallayout>
           </p>
           <literallayout>
 (or <em>e<sub>1</sub></em> <em>e<sub>2</sub></em>) =&gt;
-(if <em>e<sub>1</sub></em> #t <em>e<sub>2</sub></em>)</literallayout>
+(if <em>e<sub>1</sub></em> true <em>e<sub>2</sub></em>)</literallayout>
 	</sect3>
 	<sect3 id="condexec:cond">
 	  <title>cond</title>
@@ -5591,7 +5631,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
   | (do ({(<em>bindingpattern</em> <em>expr</em> <em>expr</em>)}<sup>+</sup>)
       (<em>expr</em> <em>expr</em>)
       <em>expr</em>)
-  | () | #f | #t | CharLit | StringLit
+  | () | false | true | CharLit | StringLit
   | IntLit | FloatLit
 <em>switchtags</em> ::= <em>ident</em> | (<em>ident</em><sup>+</sup>)
 <!-- <em>expr</em> ::= Id -->
@@ -5767,7 +5807,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
 	The <progident>defaxiom</progident> form introduces a term
 	rewrite that is accepted as true by the BitC prover. The body
 	of the axiom is a boolean expression that must always return
-	<progident>#t</progident> for all possible variable
+	<progident>true</progident> for all possible variable
 	instantiations:
       </p>
       <literallayout>
@@ -5779,7 +5819,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
 	The <progident>defthm</progident> form introduces a proof
 	obligation that must be discharged by the BitC Prover. The
 	body of a theorem is a boolean expression that is considered
-	to be discharged if its result is <progident>#t</progident>
+	to be discharged if its result is <progident>true</progident>
 	for all possible variable instantiations:
       </p>
       <literallayout>
@@ -5793,7 +5833,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
 	all sequence points where it is not explicitly suspended. The
 	body of an invariant is a boolean expression that is
 	considered to be discharged if its result is
-	<progident>#t</progident> for all possible variable
+	<progident>true</progident> for all possible variable
 	instantiations:
       </p>
       <literallayout>
