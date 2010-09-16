@@ -182,7 +182,7 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
     for (size_t i=0; i < t->components.size(); i++) {
       if (i > 0) ss << " ";
       if (t->CompFlags(i) & COMP_BYREF)
-        ss << "(by-ref " << t->CompType(i)->asSexprString(tvP, options)
+        ss << "(ByRef " << t->CompType(i)->asSexprString(tvP, options)
            << ")";
       else           
         ss << t->CompType(i)->asSexprString(tvP, options);
@@ -322,11 +322,11 @@ Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
     break;
 
   case ty_byref:
-    ss << "(by-ref " << t->Base()->asSexprString(tvP, options) << ")";
+    ss << "(ByRef " << t->Base()->asSexprString(tvP, options) << ")";
     break;
 
   case ty_array_ref:
-    ss << "(array-ref " << t->Base()->asSexprString(tvP, options) << ")";
+    ss << "(ArrayRef " << t->Base()->asSexprString(tvP, options) << ")";
     break;
 
  case ty_mbFull:

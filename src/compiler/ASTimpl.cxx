@@ -268,10 +268,10 @@ AST::atKwd() const
     return "bitfield";
 
   case at_byRefType:
-    return "by-ref";
+    return "ByRef";
 
   case at_arrayRefType:
-    return "array-ref";
+    return "ArrayRef";
 
   case at_refType:
     return "ref";
@@ -347,7 +347,7 @@ AST::atKwd() const
     return "dup";
 
   case at_makevectorL:
-    return "make-vectorL";
+    return "MakeVector";
 
   case at_vector:
     return "vector";
