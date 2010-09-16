@@ -100,9 +100,8 @@ INC+=$(GC_INC)
 # If a test case is temporarily broken, add it to BROKEN_SOURCE via
 #  make BROKEN_SOURCE="bad-test.bitc bad-test2.bitc"
 BROKEN_SOURCE=
-LIBPRETTYA_SOURCE=$(filter-out $(BROKEN_SOURCE),$(wildcard *.bits))
-SOURCE=$(filter-out $(BROKEN_SOURCE),$(wildcard *.bitc))
-TARGETS=$(SOURCE:%.bitc=BUILD/%)
+SOURCE=$(filter-out $(BROKEN_SOURCE),$(wildcard *.bits))
+TARGETS=$(SOURCE:%.bits=BUILD/%)
 BITCC=@top_srcdir@/compiler/BUILD/bitcc
 RUN_BITCC=$(BITCC) -O -I $(LIBBITC_SRC) --nostdlib
 
@@ -121,14 +120,14 @@ all:  $(TARGETS)
 # test executions get interleaved with the compiles. By adding "all"
 # as a precondition, we ensure that the compile phase happens first
 # so that all of the results are reported together.
-test: all $(SOURCE:%.bitc=%.test)
+test: all $(SOURCE:%.bits=%.test)
 
 quietly:
 	$(MAKE) TESTOPTS=-q test
 
 install: all test
 
-c-source: $(SOURCE:%.bitc=%.c)
+c-source: $(SOURCE:%.bits=%.c)
 objects: $(OBJECTS)
 
 comp:
@@ -161,16 +160,14 @@ $(LIBBITC_NO_GC): $(BITCC)
 $(BITCC):
 	make -C $(BITCC_SRC) BUILD/bitcc
 
-BUILD/libpretty.bita: $(BITCC) $(LIBPRETTYA_SOURCE) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o $(EXPECT_OUTPUT) $(RUN_BITCC) $(INC) -c -o $@ $(LIBPRETTYA_SOURCE)
+BUILD/%.bita: %.bits $(BITCC) $(LIBPRETTYA_SOURCE) | BUILD
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o $(EXPECT_OUTPUT) $(RUN_BITCC) $(INC) -c -o $@ $<
 
 %.test: BUILD/% | BUILD
 	@../testit.sh -m ${TEST_MODE} ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "./$< --dumpafter parser --stopafter parser $(ARGS)"
 
-BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) BUILD/libpretty.bita | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< BUILD/libpretty.bita $(LIBBITC_C_RUNTIME)
-
-BUILD/parser: parser.bitc $(BITCC) BUILD/libbitc.bita | BUILD
+BUILD/%: %.bits driver.bitc BUILD/%.bita $(BITCC) $(LIBBITC_C_RUNTIME) | BUILD
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@ driver.bitc $@.bita $(LIBBITC_C_RUNTIME)
 
 #BUILD/%.c: %.bitc  $(BITCC)
 #	$(RUN_BITCC) $(BITCOPT) $(INC) --emit c -o $@ $<
