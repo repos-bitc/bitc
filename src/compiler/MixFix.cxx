@@ -100,6 +100,7 @@ template<class T>
 static inline
 const T& top(const std::vector<T>& vec)
 {
+  assert(vec.size() >= 1);
   return vec[vec.size()-1];
 }
 
@@ -107,6 +108,7 @@ template<class T>
 static inline
 T& top(std::vector<T>& vec)
 {
+  assert(vec.size() >= 1);
   return vec[vec.size()-1];
 }
 
@@ -114,6 +116,7 @@ template<class T>
 static inline
 const T& topNext(const std::vector<T>& vec)
 {
+  assert(vec.size() >= 2);
   return vec[vec.size()-2];
 }
 
@@ -283,6 +286,7 @@ struct MixFixNode {
   }
 
   bool matchesKwd(const std::string& kwd) const {
+    assert(ast);
     return (ast->astType == at_ident &&
             ast->s == kwd);
   }
@@ -911,6 +915,12 @@ MixContext::ParseOneMixFix(INOstream& errStream, MixInput& origInput,
     push(shunt, pop(input));
 
     for (size_t pos = 1; pos < rule->rhs.size(); pos++) {
+      // Parsing of expressions can cause the remaining input to
+      // become too small for this rule to succeed. Need to check here
+      // to avoid a range overrun on the input:
+      if (input.size() < (rule->rhs.size() - pos))
+        break;
+
       // Note that if matchesKwd() passes then we know the node
       // actually *was* a keyword by virtue of the fact that we are
       // matching a keyword position in the rule. There is no need
