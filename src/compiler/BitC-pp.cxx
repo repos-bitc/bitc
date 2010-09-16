@@ -542,7 +542,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       sxp_BitcP(out, ast->child(0), showTypes);
       out << endl;
-      sxp_doChildren(out, ast->child(1), 0, false, showTypes);
+      sxp_doChildren(out, ast, 1, false, showTypes);
       out << ")";
       break;
     }
