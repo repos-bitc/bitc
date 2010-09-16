@@ -1031,6 +1031,11 @@ TransitionLexer::getNextToken()
   if (tok.flags & TF_FIRST_ON_LINE) {
     bool wantAutoSemi = !(lastTokType == ';' ||
                           lastTokType == '{' ||
+                          lastTokType == ',' ||
+                          lastTokType == '(' ||
+                          lastTokType == '[' ||
+                          tok.tokType == ')' ||
+                          tok.tokType == ']' ||
                           tok.tokType == ';' ||
                           tok.tokType == '}' ||
                           tok.tokType == tk_THEN ||
