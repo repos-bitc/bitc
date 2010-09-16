@@ -256,7 +256,14 @@ UocInfo::importInterface(std::ostream& errStream,
     exit(1);
   }
 
-  CompileFromFile(path, false);
+  if (!CompileFromFile(path, false)) {
+    errStream
+      << loc.asString() << ": "
+      << "Import failed for interface \"" << ifName << "\".\n"
+      << "Imported interface did not compile.\n";
+
+    exit(1);
+  }
 
   // If we survived the compile, the interface is now in the ifList
   // and can be found.

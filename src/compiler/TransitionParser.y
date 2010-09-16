@@ -1641,35 +1641,51 @@ sxp_value_declaration: LP tk_PROCLAIM sxp_defident ':' sxp_type trn_optdocstring
 blk_import_definition: tk_IMPORT blk_ifident tk_AS blk_ident {
   SHOWPARSE("blk_import_definition -> IMPORT blk_ifident AS blk_ident;");
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $2);
-  UocInfo::importInterface(lexer->errStream, $2.loc, $2.str);
+  if (!UocInfo::importInterface(lexer->errStream, $2.loc, $2.str)) {
+    std::string err = "Unable to import " + $2.str;
+    lexer->ReportParseError($1.loc, err);
+  }
+
   $$ = AST::make(at_importAs, $1.loc, ifIdent, $4);
 }
 
 sxp_import_definition: LP tk_IMPORT sxp_ifident tk_AS sxp_ident RP {
   SHOWPARSE("sxp_import_definition -> ( IMPORT sxp_ifident AS sxp_ident )");
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
+    std::string err = "Unable to import " + $3.str;
+    lexer->ReportParseError($2.loc, err);
+  }
   $$ = AST::make(at_importAs, $2.loc, ifIdent, $5);
 };
 
 blk_import_definition: tk_IMPORT blk_ifident {
   SHOWPARSE("blk_import_definition -> IMPORT blk_ifident;");
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $2);
-  UocInfo::importInterface(lexer->errStream, $2.loc, $2.str);
+  if (!UocInfo::importInterface(lexer->errStream, $2.loc, $2.str)) {
+    std::string err = "Unable to import " + $2.str;
+    lexer->ReportParseError($1.loc, err);
+  }
   $$ = AST::make(at_import, $1.loc, ifIdent);
 };
 
 sxp_import_definition: LP tk_IMPORT sxp_ifident RP {
   SHOWPARSE("sxp_import_definition -> (IMPORT sxp_ifident)");
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
+    std::string err = "Unable to import " + $3.str;
+    lexer->ReportParseError($2.loc, err);
+  }
   $$ = AST::make(at_import, $2.loc, ifIdent);
 };
 
 blk_import_definition: tk_IMPORT blk_ifident blk_importList {
   SHOWPARSE("blk_import_definition -> IMPORT blk_ifident blk_importList;");
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $2);
-  UocInfo::importInterface(lexer->errStream, $2.loc, $2.str);
+  if (!UocInfo::importInterface(lexer->errStream, $2.loc, $2.str)) {
+    std::string err = "Unable to import " + $2.str;
+    lexer->ReportParseError($1.loc, err);
+  }
   $$ = AST::make(at_import, $1.loc, ifIdent);
   $$->addChildrenFrom($3);
 };
@@ -1677,7 +1693,10 @@ blk_import_definition: tk_IMPORT blk_ifident blk_importList {
 sxp_import_definition: LP tk_IMPORT sxp_ifident sxp_importList RP {
   SHOWPARSE("sxp_import_definition -> (IMPORT sxp_ifident sxp_importList)");
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+  if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
+    std::string err = "Unable to import " + $3.str;
+    lexer->ReportParseError($2.loc, err);
+  }
   $$ = AST::make(at_import, $2.loc, ifIdent);
   $$->addChildrenFrom($4);
 };

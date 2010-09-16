@@ -772,18 +772,20 @@ main(int argc, char *argv[])
   /************************************************************/
   // Process the Prelude:
 
+  /* Per-file backend output after processing frontend, if any */
+  bool doFinal = true;
+
   // FIX: TEMPORARY
   if (!Options::noPrelude) {
     sherpa::LexLoc loc = LexLoc();
-    (void) UocInfo::importInterface(std::cerr, loc, "bitc.prelude");
+    if (!UocInfo::importInterface(std::cerr, loc, "bitc.prelude"))
+      doFinal = false;
   }
 
   // Compile everything
   for (size_t i = 0; i < Options::inputs.size(); i++)
-    UocInfo::CompileFromFile(Options::inputs[i], true);
-
-  /* Per-file backend output after processing frontend, if any */
-  bool doFinal = true;
+    if (!UocInfo::CompileFromFile(Options::inputs[i], true))
+      doFinal = false;
 
   /* Backend-defined processing for each interface module */
   for (UocMap::iterator itr = UocInfo::ifList.begin();
