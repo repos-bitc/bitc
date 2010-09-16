@@ -100,7 +100,8 @@ INC+=$(GC_INC)
 # If a test case is temporarily broken, add it to BROKEN_SOURCE via
 #  make BROKEN_SOURCE="bad-test.bitc bad-test2.bitc"
 BROKEN_SOURCE=
-SOURCE= $(filter-out $(BROKEN_SOURCE),$(wildcard *.bitc))
+LIBPRETTYA_SOURCE=$(filter-out $(BROKEN_SOURCE),$(wildcard *.bits))
+SOURCE=$(filter-out $(BROKEN_SOURCE),$(wildcard *.bitc))
 TARGETS=$(SOURCE:%.bitc=BUILD/%)
 BITCC=@top_srcdir@/compiler/BUILD/bitcc
 RUN_BITCC=$(BITCC) -O -I $(LIBBITC_SRC) --nostdlib
@@ -139,7 +140,7 @@ comp:
 EXPECT_STATUS=0
 EXPECT_OUTPUT=/dev/null
 COMPILE_OUTPUT=/dev/null
-TEST_MODE=exec
+TEST_MODE=compile
 USE_INPUT=/dev/null
 ARGS=""
 TESTOPTS=-v
@@ -160,60 +161,16 @@ $(LIBBITC_NO_GC): $(BITCC)
 $(BITCC):
 	make -C $(BITCC_SRC) BUILD/bitcc
 
+BUILD/libpretty.bita: $(LIBPRETTYA_SOURCE) | BUILD
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} $(RUN_BITCC) $(INC) -c -o $@ $(LIBPRETTYA_SOURCE)
+
 %.test: BUILD/% | BUILD
-	@../testit.sh -m ${TEST_MODE} ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "./$< $(ARGS)"
+	@../testit.sh -m ${TEST_MODE} ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "./$< --dumpafter parser --stopafter parser $(ARGS)"
 
-clconv1.test: EXPECT_STATUS=1
-closure.test: EXPECT_STATUS=3
-AppLoc.test: EXPECT_STATUS=3
-newException.test: EXPECT_STATUS=1
-newException.test: EXPECT_OUTPUT=newException.stdout
-VecBoundsError.test: EXPECT_STATUS=1
-VecBoundsError.test: EXPECT_OUTPUT=VecBoundsError.stdout
-UncaughtException.test: EXPECT_STATUS=1
-UncaughtException.test: EXPECT_OUTPUT=UncaughtException.stdout
-wchar.test: EXPECT_OUTPUT=wchar.stdout
-odd_even_letrec.test: EXPECT_STATUS=139
-Echo_Args.test: EXPECT_OUTPUT=Echo_Args.stdout
-echo-char.test: USE_INPUT=echo-char.stdin
-echo-char.test: EXPECT_OUTPUT=echo-char.stdout
-hello.test: EXPECT_OUTPUT=hello.stdout
-Fact-Rec.test: EXPECT_STATUS=120
-Fact-Loop.test: EXPECT_STATUS=120
-Fact-Mut.test: EXPECT_STATUS=120
-intout.test: EXPECT_OUTPUT=intout.stdout
-io-time.test: ARGS=file.input
-io-time.test: EXPECT_OUTPUT=io-time.stdout
-sha1-file.test: ARGS="file.input 128028"
-sha1-file.test: EXPECT_OUTPUT=sha1-file.stdout
-sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout 
-twomodule.test: EXPECT_OUTPUT=twomodule.stdout 
-sizeof.test: EXPECT_STATUS=4
-bitsizeof.test: EXPECT_STATUS=1
-bitset.test: EXPECT_OUTPUT=bitset.stdout
-array-byref.test: EXPECT_STATUS=6
-vec-badly-typed.test: TEST_MODE=compile
-BUILD/vec-badly-typed: TEST_MODE=compile
-BUILD/vec-badly-typed: EXPECT_STATUS=1
-badsyntax.test: TEST_MODE=compile
-BUILD/badsyntax: TEST_MODE=compile
-BUILD/badsyntax: EXPECT_STATUS=1
+BUILD/%: %.bitc $(BITCC) BUILD/libpretty.bita | BUILD
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< BUILD/libpretty.bita $(LIBBITC_C_RUNTIME)
 
-BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME)
-
-# .PRECIOUS: $(SOURCE:%.bitc=%.c)
-
-LIBBITC_SHA1_SRC=@top_srcdir@/libbitc/crypt/sha1.bits
-
-BUILD/sha1-test: sha1-test.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
-
-BUILD/sha1-file: sha1-file.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
-
-BUILD/libbitc-bita: libbitc-bita.bitc  $(BITCC) $(LIBBITC_BITA) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_BITA) $(LIBBITC_C_RUNTIME)
+BUILD/parser: parser.bitc $(BITCC) BUILD/libbitc.bita | BUILD
 
 #BUILD/%.c: %.bitc  $(BITCC)
 #	$(RUN_BITCC) $(BITCOPT) $(INC) --emit c -o $@ $<

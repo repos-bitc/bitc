@@ -105,7 +105,7 @@ FLAGS_TO_PASS = \
 
 default: all
 
-SUBDIRS=unit n-unit
+SUBDIRS=unit n-unit pretty
 
 .PHONY: all install uninstall installdirs
 all install uninstall installdirs: Makefile all-local

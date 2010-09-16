@@ -139,6 +139,7 @@ AC_CONFIG_FILES([Makefile]
 		[man/Makefile]
                 [tests/Makefile]
                 [tests/unit/Makefile]
+                [tests/pretty/Makefile]
                 [tests/n-unit/Makefile])
 
 AC_OUTPUT

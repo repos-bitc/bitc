@@ -16,6 +16,7 @@ src/libbitc/Makefile
 src/man/Makefile
 src/tests/Makefile
 src/tests/unit/Makefile
+src/tests/pretty/Makefile
 src/tests/n-unit/Makefile
 src/tests/grammars/*.cxx
 src/tests/grammars/*.hxx
