@@ -2851,7 +2851,7 @@ sxp_lambdapattern: '(' tk_THE '(' tk_ARRAY_REF sxp_type ')' sxp_ident ')' {
 
 // MIXFIX: This needs a replacement...
 blk_primary_expr: blk_iblock {
-  SHOWPARSE("blk_expr -> blk_iblock");
+  SHOWPARSE("blk_primary_expr -> blk_iblock");
   $$ = $1;
 }
 
