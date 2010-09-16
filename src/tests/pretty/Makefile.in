@@ -161,13 +161,13 @@ $(LIBBITC_NO_GC): $(BITCC)
 $(BITCC):
 	make -C $(BITCC_SRC) BUILD/bitcc
 
-BUILD/libpretty.bita: $(LIBPRETTYA_SOURCE) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} $(RUN_BITCC) $(INC) -c -o $@ $(LIBPRETTYA_SOURCE)
+BUILD/libpretty.bita: $(BITCC) $(LIBPRETTYA_SOURCE) | BUILD
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o $(EXPECT_OUTPUT) $(RUN_BITCC) $(INC) -c -o $@ $(LIBPRETTYA_SOURCE)
 
 %.test: BUILD/% | BUILD
 	@../testit.sh -m ${TEST_MODE} ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "./$< --dumpafter parser --stopafter parser $(ARGS)"
 
-BUILD/%: %.bitc $(BITCC) BUILD/libpretty.bita | BUILD
+BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) BUILD/libpretty.bita | BUILD
 	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< BUILD/libpretty.bita $(LIBBITC_C_RUNTIME)
 
 BUILD/parser: parser.bitc $(BITCC) BUILD/libbitc.bita | BUILD
