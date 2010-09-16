@@ -56,7 +56,13 @@ module sha1_impl is
     a : 'a
     f : float
     
-  unboxed struct constrained('a) where Eq('a) is
+  //(forall ((Eq 'a))
+  //   (defstruct (constrained 'a) :ref))
+
+  //boxed struct constrained('a)
+  //  where Eq('a)
+
+  boxed struct constrained('a) where Eq('a) is
     a : 'a
     f : float
     

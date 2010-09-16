@@ -218,8 +218,9 @@ AST::atKwd() const
 
 
   case at_defstruct:
-  case at_declstruct:
     return "defstruct";
+  case at_declstruct:
+    return "struct";
 
   case at_defobject:
     return "defobject";

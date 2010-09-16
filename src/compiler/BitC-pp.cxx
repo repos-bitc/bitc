@@ -121,6 +121,21 @@ sxp_doChildren(INOstream& out, shared_ptr <const AST> ast, size_t from,
              showTypes);
 }
 
+/// @brief Called to emit the constraints on a type declaration or definition.
+/// 
+/// If no constraints are in force, emits " " so that the succeeding
+/// "is", if present, will not abut the type name.
+static void
+blk_pp_constraints(INOstream& out, shared_ptr<const AST> constraints,
+                     const bool showTypes)
+{
+  if (constraints->children.size() == 0)
+    return;
+
+  out << endl << "where";
+  doChildren(blk_BitcP, out, constraints, 0, " ", ", ", showTypes);
+}
+
 static void
 sxp_maybe_open_quantifier(INOstream& out, shared_ptr<const AST> defn,
                       const bool showTypes)
@@ -212,13 +227,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       else
         out << " is";
 
-      /* Dont call doChildren; that will put spaces in front
-         of the top level forms. Remember, bitc-version has
-         already been emitted without a space */
-      for (size_t i = start; i < ast->children.size(); i++) {
-        out << std::endl;
-        blk_BitcP(out, ast->child(i), showTypes);
-      }
+      doChildren(blk_BitcP, out, ast, start, "\n", "\n", showTypes);
 
       out.less();
       break;
@@ -234,18 +243,75 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       blk_BitcP(out, ast->child(0), showTypes);
       out << " is";
 
-      /* Dont call doChildren; that will put spaces in front
-         of the top level forms. Remember, bitc-version has
-         already been emitted without a space */
-      for (size_t i = 1; i < ast->children.size(); i++) {
-        out << std::endl;
-        blk_BitcP(out, ast->child(i), showTypes);
-      }
+      doChildren(blk_BitcP, out, ast, 1, "\n", "\n", showTypes);
 
       out.less();
 
       break;
     }
+
+  case at_declstruct:
+    {
+      shared_ptr<AST> ident = ast->child(0);
+      shared_ptr<AST> tvlist = ast->child(1);
+      shared_ptr<AST> category = ast->child(2);
+      shared_ptr<AST> constraints = ast->child(3);
+
+      blk_BitcP(out, category, showTypes);
+      out << " " << ast->atKwd() << " ";
+      blk_BitcP(out, ident, showTypes);
+
+      out.more();
+      blk_pp_constraints(out, constraints, showTypes);
+      out.less();
+
+
+      break;
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    // Things that are still implemented in sxp_BitcP in support of
+    // something that hasn't moved yet:
+    ////////////////////////////////////////////////////////////////////
+  case at_ident:
+  case at_ifident:
+    out << ast->s;
+    if (Options::ppFQNS) {
+      out << " /*" << ast->fqn;
+      if (ast->externalName.size()) {
+        out << "," << ast->externalName;
+      }
+      out << "*/";
+    }
+
+    if (showTypes) print_type(out, ast);
+
+    break;
+
+  case at_usesel:
+    blk_BitcP(out, ast->child(0), showTypes);
+    out << ".";
+    blk_BitcP(out, ast->child(1), showTypes);
+    break;
+
+
+  case at_refCat:
+  case at_boxedCat:
+    if (!(ast->printVariant & pf_IMPLIED))
+      out << "boxed";
+    break;
+  case at_valCat:
+  case at_unboxedCat:
+    out << "unboxed";
+    break;
+  case at_opaqueCat:
+    out << "opaque";
+    break;
+
+  case at_closed:
+    out << "closed";
+    break;
+
 
     // Things that (for the moment) we pass back to the s-expression printer:
   case at_import:
@@ -260,11 +326,10 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_definstance:
   case at_defexception:
   case at_defrepr:
-  case at_defunion:
   case at_defstruct:
+  case at_defunion:
 
   case at_declunion:
-  case at_declstruct:
   case at_declrepr:
       sxp_BitcP(out, ast, showTypes);
       break;
@@ -297,21 +362,10 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_docString:
-    sxp_doChildren(out, ast, 0, true, showTypes);
-    break;
-
-  case at_Null:
-    break;
-
-  case at_mixExpr:
-    out << "(" << ast->atKwd();
-    out.more();
-    sxp_doChildren(out, ast, 0, true, showTypes);
-    out << ")";
-    out.less();
-    break;
-
+    ////////////////////////////////////////////////////////////////////
+    // Things that are implemented in blk_BitcP, but still need to be
+    // here in support of something that hasn't moved yet:
+    ////////////////////////////////////////////////////////////////////
   case at_refCat:
   case at_boxedCat:
     if (!(ast->printVariant & pf_IMPLIED))
@@ -327,6 +381,24 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
   case at_closed:
     out << ":closed";
+    break;
+
+    //////////////////////////////////////////////
+    // Things that still need to be migrated:
+    //////////////////////////////////////////////
+  case at_docString:
+    sxp_doChildren(out, ast, 0, true, showTypes);
+    break;
+
+  case at_Null:
+    break;
+
+  case at_mixExpr:
+    out << "(" << ast->atKwd();
+    out.more();
+    sxp_doChildren(out, ast, 0, true, showTypes);
+    out << ")";
+    out.less();
     break;
 
   case at_boolLiteral:
