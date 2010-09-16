@@ -949,12 +949,18 @@ GROUP if_definition = proclaim | import
                     | declare;
 
 // NEWUNION TYPES [3.6.2]
+// 9/16/2010: updated declunion to match the shape of defunion in
+// order to regularize processing. Declares and constructors nodes are
+// present on the declaration, but have no children.
 AST defunion = ident tvlist category declares constructors constraints;
-AST declunion = ident tvlist category constraints;
+AST declunion = ident tvlist category declares constructors constraints;
 
 // STRUCTURE TYPES [3.6.1]
+// 9/16/2010: updated declstruct to match the shape of defunion in
+// order to regularize processing. Declares and constructors nodes are
+// present on the declaration, but have no children.
 AST defstruct = ident tvlist category declares fields constraints;
-AST declstruct = ident tvlist category constraints;
+AST declstruct = ident tvlist category declares fields constraints;
 
 // OBJECT TYPES [3.6.1]
 AST defobject = ident tvlist category declares fields constraints;
@@ -967,8 +973,14 @@ AST defobject = ident tvlist category declares fields constraints;
 //AST reprcase = reprcaselegR+;
 //AST reprcaselegR = reprbody ident+;        // note reversal!
 //AST reprtag = ident+;
-AST defrepr = ident category declares reprctrs;
-AST declrepr = ident category;
+
+// 9/16/2010: updated declrepr to match the shape of defunion in order
+// to regularize processing. declares and reprctrs nodes are present
+// on the declaration, but have no children. Note that constraints are
+// not permitted on a REPR, so the constraints node will always be
+// empty. Similarly, the tvlist nodes will be empty.
+AST defrepr = ident tvlist category declares reprctrs constraints;
+AST declrepr = ident tvlist category declares reprctrs constraints;
 AST reprctrs = reprctr+;
 AST reprctr = constructor reprrepr+;
 AST reprrepr = ident intLiteral;
@@ -986,7 +998,13 @@ LEAF closed;
 GROUP openclosed = closed | Null;
 
 // EXCEPTION DEFINITION [3.10]
-AST defexception = ident field*;
+// 9/16/2010: updated defexception to match the shape of other
+// type-defining ASTa in order to regularize processing. Declares
+// field is present on the definition, but has no children. Category
+// for defexception is always "boxed". Exceptions are currently not
+// permitted to be polymorphic, so the constraints node will always be
+// empty. Similarly, the tvlist nodes will be empty.
+AST defexception = ident tvlist category declares fields constraints;
 
 // // TYPE ALIASES (deftype)  [13]
 // AST deftype = ident tvlist type;

@@ -1684,14 +1684,20 @@ toc(std::ostream& errStream,
             << "\"" << ident->fqn.ident << "\"" << ";" << endl;
       }
 
-      if (ast->children.size() > 1) {
+      shared_ptr<AST> fields = ast->child(4);
+
+      if (fields->children.size() > 1) {
         out << "typedef struct {" << endl;
         out.more();
         out << "const char *__fileName;" << endl;
         out << "int __line;" << endl;
 
         out << "const char* __name;" << endl;
-        for (size_t c = 1; c < ast->children.size(); c++) {
+
+        TOC(errStream, uoc, fields, out, IDname, decls, ast, 4, flags);
+
+#if 0
+        for (size_t c = 0; c < ast->children.size(); c++) {
           shared_ptr<AST> field = ast->child(c);
           if (field->astType == at_fill)
             continue;
@@ -1700,6 +1706,8 @@ toc(std::ostream& errStream,
                       field->child(0)->s, true)
               << ";" << endl;        
         }
+#endif
+
         out.less();
         out << "} " << TY_PFX << CMangle(ident) << ";" << endl << endl;
 
@@ -1707,14 +1715,15 @@ toc(std::ostream& errStream,
         out << "INLINE " << TY_PFX << CMangle(ident) << "*" << endl
             << CTOR_PFX << CMangle(ident) << " ";
 
-        emit_ct_args(out, ast, 1);
+        emit_ct_args(out, fields);
         out << "{" << endl;
         out.more();
         out << TY_PFX << CMangle(ident) << "* val = (" << TY_PFX << CMangle(ident) << "*)"
             << "GC_ALLOC(sizeof(" << TY_PFX << CMangle(ident) << "));" << endl;
         out << "val->__name = " << TAG_PFX << CMangle(ident) << ";" << endl;
         
-        emit_ct_inits(out, ast, "val->", 1);
+        emit_ct_inits(out, fields, "val->", 1);
+
         out << "return val;" << endl;
         out.less();
         out << "}" << endl << endl;

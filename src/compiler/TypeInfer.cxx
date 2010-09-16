@@ -2305,9 +2305,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ident->scheme = sigma;
 
       // Category keyword at position 2
+      // Empty declares at position 3
+      // Empty fields/ctors at position 4
 
       // Type all constraints
-      shared_ptr<AST> constraints = ast->child(3);
+      shared_ptr<AST> constraints = ast->child(5);
       TYPEINFER(constraints, gamma, instEnv, impTypes, 
                 sigma->tcc, trail, mode, TI_CONSTRAINT);
 
@@ -2531,10 +2533,10 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       sigma->tcc = myTcc;
       
       shared_ptr<Type> t = ctr->symType->getType();
-      for (size_t c = 1; c < ast->children.size(); c++) {
-        shared_ptr<AST> field = ast->child(c);        
-        if (field->astType == at_fill)
-          continue;
+
+      shared_ptr<AST> fields = ast->child(4);
+      for (size_t c = 0; c < fields->children.size(); c++) {
+        shared_ptr<AST> field = fields->child(c);        
 
         TYPEINFER(field, defGamma, instEnv, impTypes, 
                   sigma->tcc,

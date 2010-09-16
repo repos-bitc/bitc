@@ -75,9 +75,9 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       unin->addChild(ast->child(0)); // identifier
       unin->child(0)->flags |= UNION_IS_REPR;
       unin->addChild(AST::make(at_tvlist, ast->loc)); // empty tvlist
-      unin->addChild(ast->child(1));  // category
-      unin->addChild(reprXform(ast->child(2), errStream, errFree));  // declares
-      unin->addChild(reprXform(ast->child(3), errStream, errFree)); // constructors
+      unin->addChild(ast->child(2));  // category
+      unin->addChild(reprXform(ast->child(3), errStream, errFree));  // declares
+      unin->addChild(reprXform(ast->child(4), errStream, errFree)); // constructors
       unin->addChild(AST::make(at_constraints, ast->loc)); // constraints
       ast = unin;
 
@@ -145,6 +145,8 @@ reprXform(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       unin->addChild(ast->child(0)); // identifier
       unin->addChild(AST::make(at_tvlist)); // empty tvlist
       unin->addChild(ast->child(1));  // category
+      unin->addChild(AST::make(at_declares));  // empty declares
+      unin->addChild(AST::make(at_reprctrs));  // empty repr constructors
       unin->addChild(AST::make(at_tvlist, ast->loc)); // constraints
       ast = unin;
       break;

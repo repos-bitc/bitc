@@ -586,8 +586,8 @@ clearConstraints(shared_ptr<AST> ast)
 
   case at_declstruct:
   case at_declunion:
-    assert(ast->child(3)->astType == at_constraints);
-    ast->child(3)->children.clear();
+    assert(ast->child(5)->astType == at_constraints);
+    ast->child(5)->children.clear();
     break;
 
   case at_defstruct:
@@ -779,20 +779,24 @@ buildNewDeclaration(shared_ptr<AST> def, shared_ptr<Type> typ)
   case at_proclaim:
   case at_defexception:
     decl = AST::make(at_proclaim, def->loc, ident,
-                   typeAsAst(typ, ident->loc),
-                   AST::make(at_constraints, def->loc));
+                     typeAsAst(typ, ident->loc),
+                     AST::make(at_constraints, def->loc));
     break;
 
   case at_declstruct:
     decl = AST::make(at_declstruct, def->loc, ident,
-                   AST::make(at_tvlist, ident->loc),
-                   AST::make(at_constraints, def->loc));
+                     AST::make(at_tvlist, ident->loc),
+                     AST::make(at_declares),
+                     AST::make(at_fields),
+                     AST::make(at_constraints, def->loc));
     break;
 
   case at_declunion:
     decl = AST::make(at_declunion, def->loc, ident,
-                   AST::make(at_tvlist, ident->loc),
-                   AST::make(at_constraints, def->loc));
+                     AST::make(at_tvlist, ident->loc),
+                     AST::make(at_declares),
+                     AST::make(at_constructors),
+                     AST::make(at_constraints, def->loc));
     break;
 
   default:
@@ -1900,7 +1904,7 @@ UocInfo::doInstantiate(ostream &errStream,
   case at_declstruct:
   case at_declunion:
     {
-      // Even lesser work here, remove any type variables, and we are
+      // Even less work here, remove any type variables, and we are
       // done (possibly polymorphic -> concrete).
       copy->child(1)->children.clear();
       break;
@@ -2047,26 +2051,18 @@ UocInfo::doInstantiate(ostream &errStream,
   case at_declstruct:
   case at_declunion:
     {
-      // Even lesser work here
+      // Even less work here
       break;
     }
 
   case at_defunion:
   case at_defstruct:
+  case at_defexception:
     {
       shared_ptr<AST> copyFieldsCtr = copy->child(4);
       copy->child(4) = recInstantiate(errStream,
                                       copyFieldsCtr,
                                       errFree, worklist);
-      break;
-    }
-
-  case at_defexception:
-    {
-      // Instantiate the fields, if any
-      for (size_t c=1; c < copy->children.size(); c++)
-        copy->child(c) = recInstantiate(errStream, copy->child(c),
-                                        errFree, worklist);
       break;
     }
 

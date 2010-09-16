@@ -1518,6 +1518,30 @@ AST::isValid() const
     }
     c++;
 
+    // match at_declares
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_declares], child(c)->astType)) {
+      astChTypeError(*this, at_declares, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_constructors
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_constructors], child(c)->astType)) {
+      astChTypeError(*this, at_constructors, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
     // match at_constraints
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
@@ -1652,6 +1676,30 @@ AST::isValid() const
     }
     c++;
 
+    // match at_declares
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_declares], child(c)->astType)) {
+      astChTypeError(*this, at_declares, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_fields
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_fields], child(c)->astType)) {
+      astChTypeError(*this, at_fields, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
     // match at_constraints
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
@@ -1762,6 +1810,18 @@ AST::isValid() const
     }
     c++;
 
+    // match at_tvlist
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_tvlist], child(c)->astType)) {
+      astChTypeError(*this, at_tvlist, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
     // match agt_category
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
@@ -1798,6 +1858,18 @@ AST::isValid() const
     }
     c++;
 
+    // match at_constraints
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_constraints], child(c)->astType)) {
+      astChTypeError(*this, at_constraints, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
     if(c != children.size()) {
       astChNumError(*this, c, children.size());
       errorsPresent = true;
@@ -1817,6 +1889,18 @@ AST::isValid() const
     }
     c++;
 
+    // match at_tvlist
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_tvlist], child(c)->astType)) {
+      astChTypeError(*this, at_tvlist, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
     // match agt_category
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
@@ -1825,6 +1909,42 @@ AST::isValid() const
     }
     if (!ISSET(astMembers[agt_category], child(c)->astType)) {
       astChTypeError(*this, agt_category, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_declares
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_declares], child(c)->astType)) {
+      astChTypeError(*this, at_declares, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_reprctrs
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_reprctrs], child(c)->astType)) {
+      astChTypeError(*this, at_reprctrs, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_constraints
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_constraints], child(c)->astType)) {
+      astChTypeError(*this, at_constraints, child(c)->astType, c);
       errorsPresent = true;
     }
     c++;
@@ -1979,12 +2099,65 @@ AST::isValid() const
     }
     c++;
 
-    // match at_field*
-    while (c < children.size()) {
-      if (!ISSET(astMembers[at_field], child(c)->astType))
-        astChTypeError(*this, at_field, child(c)->astType, c);
-      c++;
+    // match at_tvlist
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
     }
+    if (!ISSET(astMembers[at_tvlist], child(c)->astType)) {
+      astChTypeError(*this, at_tvlist, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match agt_category
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[agt_category], child(c)->astType)) {
+      astChTypeError(*this, agt_category, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_declares
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_declares], child(c)->astType)) {
+      astChTypeError(*this, at_declares, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_fields
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_fields], child(c)->astType)) {
+      astChTypeError(*this, at_fields, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
+
+    // match at_constraints
+    if(c >= children.size()) {
+      astChNumError(*this, c+1, children.size());
+      errorsPresent = true;
+      break;
+    }
+    if (!ISSET(astMembers[at_constraints], child(c)->astType)) {
+      astChTypeError(*this, at_constraints, child(c)->astType, c);
+      errorsPresent = true;
+    }
+    c++;
 
     if(c != children.size()) {
       astChNumError(*this, c, children.size());

@@ -159,9 +159,9 @@ reprCheck(std::ostream& errStream, shared_ptr<AST> ast)
   bool errFree = true;
   switch(ast->astType) {
   case at_defrepr:
+  case at_declrepr:
   case at_reprctrs:
   case at_reprctr:
-  case at_declrepr:
     assert(false);
     break;
 

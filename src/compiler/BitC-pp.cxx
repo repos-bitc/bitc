@@ -255,7 +255,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> tvlist = ast->child(1);
       shared_ptr<AST> category = ast->child(2);
-      shared_ptr<AST> constraints = ast->child(3);
+      shared_ptr<AST> constraints = ast->child(5);
 
       blk_BitcP(out, category, showTypes);
       out << " " << ast->atKwd() << " ";
@@ -993,9 +993,10 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_defrepr:
     {
       shared_ptr<AST> ident = ast->child(0);
-      shared_ptr<AST> category = ast->child(1);
-      shared_ptr<AST> declares = ast->child(2);
-      shared_ptr<AST> body = ast->child(3);
+      // child(1) is empty tvlist
+      shared_ptr<AST> category = ast->child(2);
+      shared_ptr<AST> declares = ast->child(3);
+      shared_ptr<AST> body = ast->child(4);
 
       out << "(" << ast->atKwd() << " ";
       sxp_BitcP(out, ident, showTypes);
@@ -1075,7 +1076,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> tvlist = ast->child(1);
       shared_ptr<AST> category = ast->child(2);
-      shared_ptr<AST> constraints = ast->child(3);
+      shared_ptr<AST> constraints = ast->child(5);
 
       sxp_maybe_open_quantifier(out, ast, showTypes);
 
@@ -1283,7 +1284,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case agt_openclosed:
   case agt_uselhs:
 #if 0
-  case at_xdefrepr:
+  case at_defrepr:
   case at_reprcase:
   case at_reprcaselegR:
   case at_reprtag:

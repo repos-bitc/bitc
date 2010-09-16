@@ -358,12 +358,12 @@ isExpansive(std::ostream& errStream,
   case at_module:
   case at_define:
   case at_recdef:
-  case at_defunion:
-  case at_declunion:
   case at_defrepr:
   case at_defstruct:
-  case at_declstruct:
+  case at_defunion:
   case at_declrepr:
+  case at_declstruct:
+  case at_declunion:
   case at_declares:
   case at_declare:
   case at_tvlist:

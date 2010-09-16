@@ -705,6 +705,7 @@ sxp_constrained_definition: LP tk_FORALL sxp_constraints sxp_type_val_definition
   uint32_t nChildren = $4->children.size();
 
   shared_ptr<AST> tvConstraints= $4->child(nChildren-1);
+  assert(tvConstraints);
   tvConstraints->addChildrenFrom($3);
   $$ = $4;
 };
@@ -989,18 +990,27 @@ sxp_type_definition: LP tk_DEFSTRUCT sxp_ptype_name sxp_val trn_optdocstring sxp
 blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares IsILCB blk_constructors IRCB {
   SHOWPARSE("blk_type_definition -> blk_val UNION blk_ptype_name blk_constraints "
             "trn_optdocstring blk_opt_declares { blk_constructors }");
-  $$ = AST::make(at_defunion, $2.loc, $3->child(0), $3->child(1), $1,
-                 $6, $8, $4);
+  $$ = AST::make(at_defunion, $2.loc,
+                 $3->child(0),   /* ident */
+                 $3->child(1),   /* tvlist */
+                 $1,             /* category */
+                 $6,             /* declares */
+                 $8,             /* constructors */
+                 $4);            /* constraints */
   $$->child(0)->defForm = $$;
 }
 
 sxp_type_definition: LP tk_DEFUNION sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_constructors  RP  {
   SHOWPARSE("sxp_type_definition -> ( DEFUNION sxp_ptype_name sxp_val "
             "trn_optdocstring sxp_declares sxp_constructors");
-  $$ = AST::make(at_defunion, $2.loc, $3->child(0), $3->child(1), $4,
-               $6, $7);
+  $$ = AST::make(at_defunion, $2.loc, 
+                 $3->child(0),  /* ident */
+                 $3->child(1),  /* tvlist */
+                 $4,            /* category */
+                 $6,            /* declares */
+                 $7,           /* constructors */
+                 $3->child(2)); /* constraints */
   $$->child(0)->defForm = $$;
-  $$->addChild($3->child(2));
 };
 
 /* // REPR TYPES */
@@ -1082,7 +1092,10 @@ sxp_type_definition: LP tk_DEFUNION sxp_ptype_name sxp_val trn_optdocstring sxp_
 blk_type_definition: blk_val tk_REPR blk_defident trn_optdocstring blk_opt_declares IsILCB blk_repr_constructors IRCB {
   SHOWPARSE("blk_type_definition -> blk_val REPR blk_defident "
             "trn_optdocstring blk_opt_declares { blk_repr_constructors }");
-  $$ = AST::make(at_defrepr, $2.loc, $3, $1, $5, $7);
+  $$ = AST::make(at_defrepr, $2.loc, $3, 
+                 AST::make(at_tvlist), /* empty tvlist */
+                 $1, $5, $7,
+                 AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
 }
 
@@ -1125,7 +1138,10 @@ blk_repr_repr: blk_ident tk_EQUALS intLit {
 sxp_type_definition: LP tk_DEFREPR sxp_defident sxp_val trn_optdocstring sxp_declares sxp_repr_constructors  RP {
   SHOWPARSE("sxp_type_definition -> ( DEFREPR sxp_defident sxp_val "
             "trn_optdocstring sxp_declares sxp_repr_constructors");
-  $$ = AST::make(at_defrepr, $2.loc, $3, $4, $6, $7);
+  $$ = AST::make(at_defrepr, $2.loc, $3, 
+                 AST::make(at_tvlist), /* empty tvlist */
+                 $4, $6, $7,
+                 AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
 };
 
@@ -1207,7 +1223,13 @@ sxp_type_definition: LP tk_DEFOBJECT sxp_ptype_name trn_optdocstring sxp_declare
 // STRUCTURE DECLARATIONS
 blk_type_decl: blk_val tk_STRUCT blk_ptype_name blk_constraints blk_externals {
   SHOWPARSE("blk_type_decl -> blk_val STRUCT blk_ptype_name blk_constraints blk_externals '");
-  $$ = AST::make(at_declstruct, $2.loc, $3->child(0), $3->child(1), $1, $4);
+  $$ = AST::make(at_declstruct, $2.loc, 
+                 $3->child(0),  /* ident */
+                 $3->child(1),  /* tvlist */
+                 $1,            /* category */
+                 AST::make(at_declares), /* empty declares */
+                 AST::make(at_fields), /* empty fields */
+                 $4);                  /* constraints */
   $$->child(0)->defForm = $$;
   $$->flags |= $5->flags;
   $$->getID()->flags |= $5->flags;
@@ -1216,8 +1238,13 @@ blk_type_decl: blk_val tk_STRUCT blk_ptype_name blk_constraints blk_externals {
 
 sxp_type_decl: LP tk_DEFSTRUCT sxp_ptype_name sxp_val sxp_externals RP {
   SHOWPARSE("sxp_type_decl -> ( DEFSTRUCT sxp_ptype_name sxp_val sxp_externals )");
-  $$ = AST::make(at_declstruct, $2.loc, $3->child(0), $3->child(1), $4,
-               $3->child(2));
+  $$ = AST::make(at_declstruct, $2.loc, 
+                 $3->child(0),  /* ident */
+                 $3->child(1),  /* tvlist */
+                 $4,            /* category */
+                 AST::make(at_declares), /* empty declares */
+                 AST::make(at_fields), /* empty fields */
+                 $3->child(2));        /* constraints */
   $$->child(0)->defForm = $$;
   $$->flags |= $5->flags;
   $$->getID()->flags |= $5->flags;
@@ -1227,7 +1254,13 @@ sxp_type_decl: LP tk_DEFSTRUCT sxp_ptype_name sxp_val sxp_externals RP {
 // UNION DECLARATIONS
 blk_type_decl: blk_val tk_UNION blk_ptype_name blk_constraints blk_externals {
   SHOWPARSE("blk_type_decl -> blk_val UNION blk_ptype_name blk_externals");
-  $$ = AST::make(at_declunion, $2.loc, $3->child(0), $3->child(1), $1, $4);
+  $$ = AST::make(at_declunion, $2.loc, 
+                 $3->child(0),  /* ident */
+                 $3->child(1),  /* tvlist */
+                 $1,            /* category */
+                 AST::make(at_declares), /* empty declares */
+                 AST::make(at_constructors), /* empty constructors */
+                 $4);                        /* constraints */
   $$->child(0)->defForm = $$;
   $$->flags |= $5->flags;
   $$->getID()->flags |= $5->flags;
@@ -1236,8 +1269,13 @@ blk_type_decl: blk_val tk_UNION blk_ptype_name blk_constraints blk_externals {
 
 sxp_type_decl: LP tk_DEFUNION sxp_ptype_name sxp_val sxp_externals RP {
   SHOWPARSE("sxp_type_decl -> ( DEFUNION sxp_ptype_name sxp_val sxp_externals )");
-  $$ = AST::make(at_declunion, $2.loc, $3->child(0), $3->child(1), $4,
-               $3->child(2));
+  $$ = AST::make(at_declunion, $2.loc, 
+                 $3->child(0), 
+                 $3->child(1), 
+                 $4,
+                 AST::make(at_declares), /* empty declares */
+                 AST::make(at_constructors), /* empty constructors */
+                 $3->child(2));              /* constraints */
   $$->child(0)->defForm = $$;
   $$->flags |= $5->flags;
   $$->getID()->flags |= $5->flags;
@@ -1247,7 +1285,12 @@ sxp_type_decl: LP tk_DEFUNION sxp_ptype_name sxp_val sxp_externals RP {
 // REPR DECLARATIONS
 blk_type_decl: blk_val tk_REPR blk_defident blk_externals {
   SHOWPARSE("blk_type_decl -> blk_val REPR blk_defident blk_externals )");
-  $$ = AST::make(at_declrepr, $2.loc, $3, $1);
+  $$ = AST::make(at_declrepr, $2.loc, $3, 
+                 AST::make(at_tvlist), /* empty tvlist */
+                 $1,                   /* category */
+                 AST::make(at_declares), /* empty declares */
+                 AST::make(at_reprctrs), /* empty constructors */
+                 AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
   $$->flags |= $4->flags;
   $$->getID()->flags |= $4->flags;
@@ -1256,7 +1299,12 @@ blk_type_decl: blk_val tk_REPR blk_defident blk_externals {
 
 sxp_type_decl: LP tk_DEFREPR sxp_defident sxp_val sxp_externals RP {
   SHOWPARSE("sxp_type_decl -> ( DEFREPR sxp_defident sxp_val sxp_externals )");
-  $$ = AST::make(at_declrepr, $2.loc, $3, $4);
+  $$ = AST::make(at_declrepr, $2.loc, $3, 
+                 AST::make(at_tvlist), /* empty tvlist */
+                 $4,                   /* category */
+                 AST::make(at_declares), /* empty declares */
+                 AST::make(at_reprctrs), /* empty constructors */
+                 AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
   $$->flags |= $5->flags;
   $$->getID()->flags |= $5->flags;
@@ -1326,31 +1374,53 @@ sxp_openclosed: ':' tk_CLOSED {
 blk_type_definition: tk_EXCEPTION blk_ident trn_optdocstring {
   SHOWPARSE("blk_type_definition -> EXCEPTION blk_ident");
   $2->flags |= ID_IS_GLOBAL;
-  $$ = AST::make(at_defexception, $1.loc, $2);
+  $$ = AST::make(at_defexception, $1.loc, 
+                 $2,            /* ident */
+                 AST::make(at_tvlist), /* empty tvlist */
+                 AST::make(at_boxedCat), /* category */
+                 AST::make(at_declares), /* empty declares */
+                 AST::make(at_fields), /* empty fields */
+                 AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
 };
 
 sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident trn_optdocstring RP {
   SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident )");
   $3->flags |= ID_IS_GLOBAL;
-  $$ = AST::make(at_defexception, $2.loc, $3);
+  $$ = AST::make(at_defexception, $2.loc, 
+                 $3,                         /* ident */
+                 AST::make(at_tvlist), /* empty tvlist */
+                 AST::make(at_boxedCat), /* category */
+                 AST::make(at_declares), /* empty declares */
+                 AST::make(at_fields), /* empty fields */
+                 AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
 };
 
 blk_type_definition: tk_EXCEPTION blk_ident trn_optdocstring IsILCB blk_fields IRCB {
   SHOWPARSE("blk_type_definition -> exception blk_ident { blk_fields }");
   $2->flags |= ID_IS_GLOBAL;
-  $$ = AST::make(at_defexception, $1.loc, $2);
+  $$ = AST::make(at_defexception, $1.loc, 
+                 $2,
+                 AST::make(at_tvlist), /* empty tvlist */
+                 AST::make(at_boxedCat), /* category */
+                 AST::make(at_declares), /* empty declares */
+                 $5,                     /* fields */
+                 AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
-  $$->addChildrenFrom($5);
 };
 
 sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident trn_optdocstring sxp_fields RP {
   SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident sxp_fields )");
   $3->flags |= ID_IS_GLOBAL;
-  $$ = AST::make(at_defexception, $2.loc, $3);
+  $$ = AST::make(at_defexception, $2.loc,
+                 $3,             /* ident */
+                 AST::make(at_tvlist), /* empty tvlist */
+                 AST::make(at_boxedCat), /* category */
+                 AST::make(at_declares), /* empty declares */
+                 $5,                     /* fields */
+                 AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
-  $$->addChildrenFrom($5);
 };
 
 // TYPE CLASSES [4]

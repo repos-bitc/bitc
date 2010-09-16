@@ -756,9 +756,9 @@ AST::getID()
 
   case at_defstruct:
   case at_defunion:
-  case at_proclaim:
   case at_declstruct:
   case at_declunion:
+  case at_proclaim:
   case at_defexception:
   case at_deftypeclass:
     return child(0);

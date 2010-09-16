@@ -151,6 +151,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_constType:
   case at_defunion:
   case at_defstruct:
+  case at_defrepr:
   case at_constructors:
   case at_fields:
   case at_constructor:
@@ -166,7 +167,6 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_qualType:
   case at_constraints:
   case at_identList:
-  case at_defrepr:
     //case at_reprbody:
     //case at_reprcase:
     //case at_reprcaselegR:

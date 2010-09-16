@@ -342,6 +342,7 @@ ssa(std::ostream& errStream,
     
   case at_defunion:
   case at_defstruct:
+  case at_defrepr:
   case at_declunion:
   case at_declstruct:
   case at_declrepr:
@@ -355,7 +356,6 @@ ssa(std::ostream& errStream,
   case at_provide:
   case at_import:
   case at_ifsel:
-  case at_defrepr:
     //case at_reprbody:
     //case at_reprcase:
     //case at_reprcaselegR:

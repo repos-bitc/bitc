@@ -118,6 +118,10 @@ warnUnresRef(std::ostream& errStream,
           break;
         }
 
+        /// @bug Swaroop: This appears to be a check that private
+        /// forward references are eventually resolved. If so, the
+        /// diagnostic is awful. That's easy to fix, but am I
+        /// understanding correctly what this is for?
         if (def != NULL) {
           if (def->isDecl) {
             errStream << ast->loc << ": ERROR: declaration of " << ast->child(0)->s
@@ -1068,11 +1072,13 @@ resolve(std::ostream& errStream,
 
   case at_defstruct:
   case at_defobject:
+  case at_defexception:
     {
       shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
       ast->envs.env = tmpEnv;
 
       shared_ptr<AST> category = ast->child(2);
+      shared_ptr<AST> fields = ast->child(4);
 
 #if 0
       if (category->astType == at_boxedCat) {
@@ -1084,8 +1090,18 @@ resolve(std::ostream& errStream,
       }              
 #endif
 
-      IdentType identType = 
-        (ast->astType == at_defstruct) ? id_struct : id_object;
+      IdentType identType;
+      switch(ast->astType) {
+      case at_defstruct:
+        identType = id_struct;
+        break;
+      case at_defobject:
+        identType = id_object;
+        break;
+      case at_defexception:
+        identType = (fields->children.size() == 0) ? id_ucon0 : id_ucon;
+        break;
+      }
 
       // match at_ident
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
@@ -1142,9 +1158,11 @@ resolve(std::ostream& errStream,
               flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
 
       // category keyword at child(2)
+      // empty declares at child(3)
+      // empty fields/ctors at child(4)
       
       // match at_constraints
-      RESOLVE(ast->child(3), tmpEnv, lamLevel, USE_MODE, 
+      RESOLVE(ast->child(5), tmpEnv, lamLevel, USE_MODE, 
               idc_type, ast, 
               flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
@@ -1176,47 +1194,6 @@ resolve(std::ostream& errStream,
       env->mergeBindingsFrom(tmpEnv);
       break;
     }
-
-  case at_defexception:
-    {
-      shared_ptr<ASTEnvironment > tmpEnv = env->newDefScope();
-      ast->envs.env = tmpEnv;
-
-      IdentType it = ((ast->children.size() > 1) ? id_ucon : id_ucon0);
-      
-      RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
-              it, ast,
-              flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)
-              | RSLV_BIND_PUBLIC);
-      // The exception value is defined and is complete
-      
-      // match at_fields+
-      pair< set<string>::iterator, bool > pr;
-      set<string> names;
-
-      names.insert(ast->child(0)->s);
-      for (size_t c = 1; c < ast->children.size(); c++) {
-        shared_ptr<AST> field = ast->child(c);
-        RESOLVE(field, tmpEnv, lamLevel, USE_MODE, 
-                idc_type, ast, 
-                flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
-
-        pr = names.insert(field->child(0)->s);
-
-        if (!pr.second) {
-          errStream << field->child(0)->loc << ": "
-                    << "field name `" << field->child(0)->s
-                    << "' conflicts with another field / "                
-                    << "constructor definition in exception "
-                    << ast->child(0)->s
-                    << std::endl;
-          errorFree = false;
-        }              
-      }
-
-      env->mergeBindingsFrom(tmpEnv);
-      break;
-    }    
 
   case at_recdef:
   case at_define:

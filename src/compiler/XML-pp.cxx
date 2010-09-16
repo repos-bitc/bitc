@@ -255,7 +255,7 @@ XMLtypes(INOstream &out, shared_ptr<AST> ast, bool raw=false)
   case at_defexception:
   case at_deftypeclass:
   case at_defunion:    
-  case at_declunion:    
+  case at_declunion:
   case at_defstruct:
   case at_declstruct:
   case at_define:

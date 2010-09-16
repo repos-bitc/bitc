@@ -199,6 +199,10 @@ TopInit(std::ostream& errStream,
     }
 
   case at_Null: 
+    /// @bug If the following comment is true, that's not a good
+    /// thing. It should be regularized by having the parser build the
+    /// AST with a re-raise in this case!
+
     // switch contains at_Null of otherwise clause is absent. 
   case at_defunion:
   case at_defstruct:
