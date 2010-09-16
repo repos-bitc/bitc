@@ -210,19 +210,17 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
         start = 1;
       }
       else
-        out << " is" << std::endl;
+        out << " is";
 
       /* Dont call doChildren; that will put spaces in front
          of the top level forms. Remember, bitc-version has
          already been emitted without a space */
       for (size_t i = start; i < ast->children.size(); i++) {
-        blk_BitcP(out, ast->child(i), showTypes);
         out << std::endl;
+        blk_BitcP(out, ast->child(i), showTypes);
       }
 
       out.less();
-      out << std::endl;
-
       break;
     }
 
@@ -240,12 +238,11 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
          of the top level forms. Remember, bitc-version has
          already been emitted without a space */
       for (size_t i = 1; i < ast->children.size(); i++) {
-        blk_BitcP(out, ast->child(i), showTypes);
         out << std::endl;
+        blk_BitcP(out, ast->child(i), showTypes);
       }
 
       out.less();
-      out << std::endl;
 
       break;
     }
@@ -1410,7 +1407,7 @@ AST::PrettyPrint(bool decorated) const
 {
   INOstream out(std::cerr);
   sxp_BitcP(out, shared_from_this(), decorated);
-  std::cerr << endl;
+  out << endl;
 }
 
 /// @brief top-level wrapper for the pretty printer
@@ -1421,7 +1418,6 @@ UocInfo::PrettyPrint(std::ostream& out, bool decorated)
           || uocAst->astType == at_interface);
 
   uocAst->PrettyPrint(out, decorated);
-  out << endl;
 }
 
 void
