@@ -74,34 +74,55 @@ print_type(INOstream& out, shared_ptr <const AST> ast)
 }
 
 static void
-BitcP(INOstream& out, shared_ptr <const AST> ast, bool);
+sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool);
+
+static void
+blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool);
 
 /// @brief Wrapper to iterate across all children of @p ast starting
 /// at @p from, optionally padding the first element with leading
 /// white space if @p firstPad is true and optionally printing types
 /// according to @p showTypes.
 static void
-doChildren(INOstream& out, shared_ptr <const AST> ast, size_t from,
-           bool firstPad,
+doChildren(void (*BitcP)(INOstream& out, shared_ptr <const AST> ast, bool),
+           INOstream& out, shared_ptr <const AST> ast, size_t from,
+           const std::string& firstSep,
+           const std::string& sep,
            bool showTypes)
 {
   if (ast->children.size() > 1 || from) {
     for (size_t c = from; c < ast->children.size(); c++) {
-      if (c == from && firstPad)
-        out << " ";
+      if (c == from)
+        out << firstSep;
       else if (c > from)
-        out << " ";
+        out << sep;
       BitcP(out, ast->child(c), showTypes);
     }
   }
   if (ast->children.size() == 1) {
-    if (firstPad) out << " ";
+    out << firstSep;
     BitcP(out, ast->child(0), showTypes);
   };
 }
 
 static void
-maybe_open_quantifier(INOstream& out, shared_ptr<const AST> defn,
+sxp_doChildren(INOstream& out, shared_ptr <const AST> ast, size_t from,
+               bool firstPad,
+               bool showTypes)
+{
+  // Avoid redundant constructions:
+  static std::string space = " ";
+  static std::string empty = "";
+
+  doChildren(sxp_BitcP,
+             out, ast, from, 
+             firstPad ? space : empty, 
+             space,
+             showTypes);
+}
+
+static void
+sxp_maybe_open_quantifier(INOstream& out, shared_ptr<const AST> defn,
                       const bool showTypes)
 {
   size_t nChildren = defn->children.size();
@@ -112,12 +133,12 @@ maybe_open_quantifier(INOstream& out, shared_ptr<const AST> defn,
     return;
 
   out << "(forall ";
-  BitcP(out, constraints, showTypes);
+  sxp_BitcP(out, constraints, showTypes);
   out << " ";
 }
 
 static void
-maybe_close_quantifier(INOstream& out, shared_ptr<const AST> defn,
+sxp_maybe_close_quantifier(INOstream& out, shared_ptr<const AST> defn,
                        const bool showTypes)
 {
   size_t nChildren = defn->children.size();
@@ -130,52 +151,157 @@ maybe_close_quantifier(INOstream& out, shared_ptr<const AST> defn,
 }
 
 static void
-show_qual_name(INOstream &out,  shared_ptr <const AST> ident,
-               shared_ptr <const AST> tvlist,
-               const bool showTypes)
+sxp_show_qual_name(INOstream &out,  shared_ptr <const AST> ident,
+                   shared_ptr <const AST> tvlist,
+                   const bool showTypes)
 {
   bool argsPresent = (tvlist->children.size() > 0);
 
   if (argsPresent) {
     out << "(" ;
-    BitcP(out, ident, showTypes);
+    sxp_BitcP(out, ident, showTypes);
     out << " ";
-    BitcP(out, tvlist, showTypes);
+    sxp_BitcP(out, tvlist, showTypes);
     out << ")" ;
   }
   else {
-    BitcP(out, ident, showTypes);
+    sxp_BitcP(out, ident, showTypes);
   }
 }
 
 #if 0
 static void
-show_qual_name(INOstream &out,  shared_ptr <const AST> tapp,
+sxp_show_qual_name(INOstream &out,  shared_ptr <const AST> tapp,
                shared_ptr <const AST> constraints, bool showTypes)
 {
   bool constraintsPresent = (constraints->children.size() > 0);
   if (constraintsPresent) {
     out << "(forall ";
-    BitcP(out, constraints, showTypes);
+    sxp_BitcP(out, constraints, showTypes);
     out << " ";
   }
 
-  BitcP(out, tapp, showTypes);
+  sxp_BitcP(out, tapp, showTypes);
 
   if (constraintsPresent)
     out << ")";
 }
 #endif
 
+static void
+blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
+{
+  size_t startIndent = out.indentToHere();
+
+    // The following just recurse:
+  switch(ast->astType) {
+  case at_module:
+    {
+      out << ast->atKwd();
+      out.more();
+
+      size_t start = 0;
+
+      if (ast->printVariant != 0) {
+        // explicit module form. Put name on same line:
+        out << " ";
+        blk_BitcP(out, ast->child(0), showTypes);
+        out << " is";
+        start = 1;
+      }
+      else
+        out << " is" << std::endl;
+
+      /* Dont call doChildren; that will put spaces in front
+         of the top level forms. Remember, bitc-version has
+         already been emitted without a space */
+      for (size_t i = start; i < ast->children.size(); i++) {
+        blk_BitcP(out, ast->child(i), showTypes);
+        out << std::endl;
+      }
+
+      out.less();
+      out << std::endl;
+
+      break;
+    }
+
+  case at_interface:
+    {
+      out << ast->atKwd();
+      out.more();
+
+      // Put name on same line:
+      out << " ";
+      blk_BitcP(out, ast->child(0), showTypes);
+      out << " is";
+
+      /* Dont call doChildren; that will put spaces in front
+         of the top level forms. Remember, bitc-version has
+         already been emitted without a space */
+      for (size_t i = 1; i < ast->children.size(); i++) {
+        blk_BitcP(out, ast->child(i), showTypes);
+        out << std::endl;
+      }
+
+      out.less();
+      out << std::endl;
+
+      break;
+    }
+
+    // Things that (for the moment) we pass back to the s-expression printer:
+  case at_import:
+  case at_importAs:
+  case at_provide:
+
+  case at_proclaim:
+  case at_define:
+  case at_recdef:
+
+  case at_deftypeclass:
+  case at_definstance:
+  case at_defexception:
+  case at_defrepr:
+  case at_defunion:
+  case at_defstruct:
+
+  case at_declunion:
+  case at_declstruct:
+  case at_declrepr:
+      sxp_BitcP(out, ast, showTypes);
+      break;
+
+  default:
+    {
+      std::cerr << "blk_BitcP() needs support for AST type " 
+                << ast->atKwd() << std::endl;
+      assert(false);
+    }
+  }
+
+
+  if (showTypes) print_type(out, ast);
+
+  out.setIndent(startIndent);
+}
+
 /// @brief Core of the pretty printer.
 static void
-BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
+sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 {
   size_t startIndent = out.indentToHere();
 
   switch(ast->astType) {
+  case at_module:
+  case at_interface:
+    {
+      blk_BitcP(out, ast, showTypes);
+      break;
+    }
+
   case at_docString:
-    doChildren(out, ast, 0, true, showTypes);
+    sxp_doChildren(out, ast, 0, true, showTypes);
     break;
 
   case at_Null:
@@ -184,7 +310,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_mixExpr:
     out << "(" << ast->atKwd();
     out.more();
-    doChildren(out, ast, 0, true, showTypes);
+    sxp_doChildren(out, ast, 0, true, showTypes);
     out << ")";
     out.less();
     break;
@@ -239,18 +365,18 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     break;
 
   case at_usesel:
-    BitcP(out, ast->child(0), showTypes);
+    sxp_BitcP(out, ast->child(0), showTypes);
     out << ".";
-    BitcP(out, ast->child(1), showTypes);
+    sxp_BitcP(out, ast->child(1), showTypes);
     break;
 
   case at_fqCtr:
   case at_sel_ctr:
   case at_select:
     {
-      BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
       out << ".";
-      BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), showTypes);
     }
     break;
     ///////////////////////////////////////////////////////////
@@ -262,7 +388,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     ///////////////////////////////////////////////////////////
   case at_recdef:
     {
-      maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, showTypes);
 
       out << "(" << ast->atKwd();
 
@@ -271,11 +397,11 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << " (";
 
       // Procedure name:
-      BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
 
       // Procedure arguments:
       shared_ptr<AST> iLambda = ast->child(1);
-      doChildren(out, iLambda->child(0), 0, true, showTypes);
+      sxp_doChildren(out, iLambda->child(0), 0, true, showTypes);
 
       out << ")";
 
@@ -283,54 +409,54 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out.setIndent(oldIndent);
 
       out.more();
-      doChildren(out, iLambda, 1, true, showTypes);
+      sxp_doChildren(out, iLambda, 1, true, showTypes);
       out << ")";
 
-      maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, showTypes);
 
       break;
     }
 
   case at_define:
     {
-      maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, showTypes);
 
       if (ast->child(1)->astType == at_lambda) {
         out << "(" << ast->atKwd() << " ";
 
         // Procedure name:
-        BitcP(out, ast->child(0), showTypes);
+        sxp_BitcP(out, ast->child(0), showTypes);
 
         out << endl;
         out.more();
 
-        doChildren(out, ast, 1, false, showTypes);
+        sxp_doChildren(out, ast, 1, false, showTypes);
         out << ")";
       }
       else {
         // Handle as normal s-expr:
         out << "(" << ast->atKwd();
         out.more();
-        doChildren(out, ast, 0, true, showTypes);
+        sxp_doChildren(out, ast, 0, true, showTypes);
         out << ")";
         out.less();
       }
 
-      maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, showTypes);
       break;
     }
 
   case at_try:
     out << "(" << ast->atKwd() << " ";
-    BitcP(out, ast->child(0), showTypes);
+    sxp_BitcP(out, ast->child(0), showTypes);
     out << endl;
     out.more();
     out << "(catch ";
-    BitcP(out, ast->child(1), showTypes);
+    sxp_BitcP(out, ast->child(1), showTypes);
     out << " ";
-    BitcP(out, ast->child(2), showTypes);
+    sxp_BitcP(out, ast->child(2), showTypes);
     out << " ";
-    BitcP(out, ast->child(3), showTypes);
+    sxp_BitcP(out, ast->child(3), showTypes);
     out << ")";
     out.less();
     out << ")";
@@ -345,12 +471,12 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
   case at_deref:
     if (ast->printVariant && pf_IMPLIED) {
-      doChildren(out, ast, 0, true, showTypes);
+      sxp_doChildren(out, ast, 0, true, showTypes);
       out << "^";
     }
     else {
       out << "(deref ";
-      doChildren(out, ast, 0, false, showTypes);
+      sxp_doChildren(out, ast, 0, false, showTypes);
       out << ")";
     }
     break;
@@ -372,7 +498,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 #endif
         {
           out << "(" << ast->atKwd();
-          doChildren(out, ast, 0, true, showTypes);
+          sxp_doChildren(out, ast, 0, true, showTypes);
           out << ")";
         }
       break;
@@ -393,7 +519,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_ucon_apply:
     {
       out << "(";
-      BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
       out << " ";
       (void) out.indentToHere();
 
@@ -404,7 +530,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
           else
             out << std::endl;
         }
-        BitcP(out, ast->child(c), showTypes);
+        sxp_BitcP(out, ast->child(c), showTypes);
       }
 
       out << ")";
@@ -417,9 +543,9 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       (void) out.indentToHere();
 
-      BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
       out << endl;
-      doChildren(out, ast->child(1), 0, false, showTypes);
+      sxp_doChildren(out, ast->child(1), 0, false, showTypes);
       out << ")";
       break;
     }
@@ -435,14 +561,14 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
           // This is the (block __return <body>) that implicitly wraps
           // every user-introduced lambda body. Simply pretty print the
           // <body>.
-          BitcP(out, ast->child(1), showTypes);
+          sxp_BitcP(out, ast->child(1), showTypes);
           break;
         }
         else {
           // (RETURN expr) is encoded as (RETURN-FROM __return expr).
           // Print it in the form that the user gave:
           out << "(return ";
-          BitcP(out, ast->child(1), showTypes);
+          sxp_BitcP(out, ast->child(1), showTypes);
           out << ")";
         }
 
@@ -452,7 +578,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
         if (ast->astType == at_block) {
           // This is the (block __return <body>) that implicitly wraps
           // every loop body. Simply pretty print the <body>.
-          BitcP(out, ast->child(1), showTypes);
+          sxp_BitcP(out, ast->child(1), showTypes);
           break;
         }
         else {
@@ -481,7 +607,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       for (size_t c = 0; c < ast->children.size(); c++) {
         if (c > 0)
           out << std::endl;
-        BitcP(out, ast->child(c), showTypes);
+        sxp_BitcP(out, ast->child(c), showTypes);
       }
 
       out << ")";
@@ -524,7 +650,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     //case at_reprbody:
     {
       out << "(" << ast->atKwd();
-      doChildren(out, ast, 0, true, showTypes);
+      sxp_doChildren(out, ast, 0, true, showTypes);
       out << ")";
       break;
     }
@@ -534,9 +660,9 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_array_ref_nth:
   case at_vector_nth:
     {
-      BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
       out << "[";
-      BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), showTypes);
       out << "]";
       break;
     }
@@ -546,9 +672,9 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       // Reworked by shap on 10/9/2008 to use arrow syntax
       out << "(" << ast->atKwd();
-      doChildren(out, ast->child(0), 0, true, showTypes);
+      sxp_doChildren(out, ast->child(0), 0, true, showTypes);
       out << " ->";
-      doChildren(out, ast, 1, true, showTypes);
+      sxp_doChildren(out, ast, 1, true, showTypes);
       out << ")";
       break;
     }
@@ -557,7 +683,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       if (ast->children.size() > 0) {
         out << "(";
-        doChildren(out, ast, 0, false, showTypes);
+        sxp_doChildren(out, ast, 0, false, showTypes);
         out << ")";
       }
       break;
@@ -577,7 +703,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
             else
               out << std::endl;
           }
-          BitcP(out, ast->child(c), showTypes);
+          sxp_BitcP(out, ast->child(c), showTypes);
         }
         out << endl;
         out.setIndent(startIndent);
@@ -586,10 +712,10 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       out << "(" << ast->atKwd() << " ";
 
-      BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
       out << endl;
       out.more();
-      BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), showTypes);
 
       out << ")";
 
@@ -613,9 +739,9 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_tqexpr:
     // Argument order was swapped.
     out << "(" << ast->atKwd() << " ";
-    BitcP(out, ast->child(1), showTypes);
+    sxp_BitcP(out, ast->child(1), showTypes);
     out << " ";
-    BitcP(out, ast->child(0), showTypes);
+    sxp_BitcP(out, ast->child(0), showTypes);
     out << ")";
 
     if (showTypes) print_type(out, ast);
@@ -625,7 +751,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_fnargVec:
   case at_argVec:
     out << "(";
-    doChildren(out, ast, 0, false, showTypes);
+    sxp_doChildren(out, ast, 0, false, showTypes);
     out << ")";
 
     if (showTypes) print_type(out, ast);
@@ -639,16 +765,16 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       if (ast->printVariant && pf_IMPLIED) {
         out << "(";
-        BitcP(out, ast->child(0), showTypes);
+        sxp_BitcP(out, ast->child(0), showTypes);
         out << ", ";
-        BitcP(out, ast->child(1), showTypes);
+        sxp_BitcP(out, ast->child(1), showTypes);
         out << ")";
 
         if (showTypes) print_type(out, ast);
       }
       else {
         out << "(" << ast->atKwd();
-        doChildren(out, ast, 0, true, showTypes);
+        sxp_doChildren(out, ast, 0, true, showTypes);
         out << ")";
       }
       break;
@@ -660,9 +786,9 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> idAst = ast->child(1);
 
       out << "(" << ast->atKwd() << " ";
-      BitcP(out, ifAst, showTypes);
+      sxp_BitcP(out, ifAst, showTypes);
       out << " as ";
-      BitcP(out, idAst, showTypes);
+      sxp_BitcP(out, idAst, showTypes);
       out << ")";
       break;
     }
@@ -670,13 +796,13 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_provide:
   case at_defexception:
     out << "(" << ast->atKwd();
-    doChildren(out, ast, 0, true, showTypes);
+    sxp_doChildren(out, ast, 0, true, showTypes);
     out << ")";
     break;
 
   case at_import:
     out << "(" << ast->atKwd();
-    doChildren(out, ast, 0, true, showTypes);
+    sxp_doChildren(out, ast, 0, true, showTypes);
     out << ")";
     break;
 
@@ -697,16 +823,16 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> constraints = ast->child(2);
 
       out << "(" << ast->atKwd() << " ";
-      BitcP(out, ident, showTypes);
+      sxp_BitcP(out, ident, showTypes);
       out << " : ";
-      BitcP(out, proc_type, showTypes);
+      sxp_BitcP(out, proc_type, showTypes);
       if (ident->flags & DEF_IS_EXTERNAL) {
         out << " external";
         if (ident->externalName.size())
           out << " " << ident->externalName;        
       }
 
-      BitcP(out, ast->child(2), showTypes);
+      sxp_BitcP(out, ast->child(2), showTypes);
       out << ")";
     }
     break;
@@ -720,21 +846,21 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> methods = ast->child(4);
       shared_ptr<AST> constraints = ast->child(5);
 
-      maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, showTypes);
 
       out << "(" << ast->atKwd() << " ";
-      show_qual_name(out, ident, tvlist, showTypes);
+      sxp_show_qual_name(out, ident, tvlist, showTypes);
       if(openclosed->astType != at_Null) {
         out << " ";
-        BitcP(out, openclosed, showTypes);
+        sxp_BitcP(out, openclosed, showTypes);
       }
       out << " ";
-      BitcP(out, tcdecls, showTypes);
+      sxp_BitcP(out, tcdecls, showTypes);
       out << " ";
-      BitcP(out, methods, showTypes);
+      sxp_BitcP(out, methods, showTypes);
       out << ")";
 
-      maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, showTypes);
 
       break;
     }
@@ -745,21 +871,21 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> methods = ast->child(1);
       shared_ptr<AST> constraints = ast->child(2);
 
-      maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, showTypes);
 
       out << "(" << ast->atKwd() << " ";
-      BitcP(out, tapp, showTypes);
-      BitcP(out, methods, showTypes);
+      sxp_BitcP(out, tapp, showTypes);
+      sxp_BitcP(out, methods, showTypes);
       out << ")";
 
-      maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, showTypes);
 
       break;
     }
 
   case at_tcmethods:
     {
-      doChildren(out, ast, 0, false, showTypes);
+      sxp_doChildren(out, ast, 0, false, showTypes);
       break;
     }
 
@@ -774,23 +900,23 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_tyfn:
     out << "(" << ast->atKwd();
     out << "(";
-    BitcP(out, ast->child(0), showTypes);
+    sxp_BitcP(out, ast->child(0), showTypes);
     out << ")";
-    BitcP(out, ast->child(1), showTypes);
+    sxp_BitcP(out, ast->child(1), showTypes);
     out << ")";
     break;
 
   case at_method_decl:
-    BitcP(out, ast->child(0), showTypes);
+    sxp_BitcP(out, ast->child(0), showTypes);
     out << " : ";
-    BitcP(out, ast->child(1), showTypes);
+    sxp_BitcP(out, ast->child(1), showTypes);
     break;
 
   case at_qualType:
     {
       out << "(forall ";
-      BitcP(out, ast->child(0), showTypes);
-      BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(1), showTypes);
       out << ")";
       break;
     }
@@ -803,12 +929,12 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> body = ast->child(3);
 
       out << "(" << ast->atKwd() << " ";
-      BitcP(out, ident, showTypes);
-      BitcP(out, category, showTypes);
+      sxp_BitcP(out, ident, showTypes);
+      sxp_BitcP(out, category, showTypes);
       out << " ";
-      BitcP(out, declares, showTypes);
+      sxp_BitcP(out, declares, showTypes);
       out << "(";
-      doChildren(out, body, 0, false, showTypes);
+      sxp_doChildren(out, body, 0, false, showTypes);
       out << "))";
       break;
     }
@@ -817,7 +943,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     //case at_reprcase:
     //     {
     //       out << "(case ";
-    //       doChildren(out, ast, 0, false, showTypes);
+    //       sxp_doChildren(out, ast, 0, false, showTypes);
     //       out << ")";
     //       break;
     //     }
@@ -828,11 +954,11 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     //       out << "(";
     //       if (ast->children.size() > 2)
     //         out << "(";
-    //       doChildren(out, ast, 1, false, showTypes);
+    //       sxp_doChildren(out, ast, 1, false, showTypes);
     //       if (ast->children.size() > 2)
     //         out << ")";
     //       out << " (";
-    //       doChildren(out, body, 0, false, showTypes);
+    //       sxp_doChildren(out, body, 0, false, showTypes);
     //       out << "))";
     //       break;
     //     }
@@ -840,7 +966,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     // case at_reprtag:
     //     {
     //       out << "(tag ";
-    //       doChildren(out, ast, 0, false, showTypes);
+    //       sxp_doChildren(out, ast, 0, false, showTypes);
     //       out << ")";
     //       break;
     //     }
@@ -855,20 +981,20 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> fc = ast->child(4);
       shared_ptr<AST> constraints = ast->child(5);
 
-      maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, showTypes);
 
       out << "(" << ast->atKwd() << " ";
       out.indentToHere();
-      show_qual_name(out, ident, tvlist, showTypes);
-      BitcP(out, category, showTypes);
+      sxp_show_qual_name(out, ident, tvlist, showTypes);
+      sxp_BitcP(out, category, showTypes);
       out << endl;
-      BitcP(out, declares, showTypes);
+      sxp_BitcP(out, declares, showTypes);
       if (declares->children.size())
         out << endl;
-      BitcP(out, fc, showTypes);
+      sxp_BitcP(out, fc, showTypes);
       out << ")";
 
-      maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, showTypes);
 
       break;
     }
@@ -882,11 +1008,11 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> category = ast->child(2);
       shared_ptr<AST> constraints = ast->child(3);
 
-      maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, showTypes);
 
       out << "(" << ast->atKwd() << " ";
-      show_qual_name(out, ident, tvlist, showTypes);
-      BitcP(out, category, showTypes);
+      sxp_show_qual_name(out, ident, tvlist, showTypes);
+      sxp_BitcP(out, category, showTypes);
 
       if (ident->flags & DEF_IS_EXTERNAL) {
         out << " external";
@@ -895,7 +1021,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       }
       out << ")";
 
-      maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, showTypes);
 
       break;
     }
@@ -908,7 +1034,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       for (size_t c = 0; c < ast->children.size(); c++) {
         if (c > 0)
           out << endl;
-        BitcP(out, ast->child(c), showTypes);
+        sxp_BitcP(out, ast->child(c), showTypes);
       }
       out << ")";
 
@@ -927,11 +1053,11 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_tcapp:
     {
       if (ast->printVariant && pf_IMPLIED) {
-        doChildren(out, ast, 1, false, showTypes);
+        sxp_doChildren(out, ast, 1, false, showTypes);
       }
       else {
         out << "(";
-        doChildren(out, ast, 0, false, showTypes);
+        sxp_doChildren(out, ast, 0, false, showTypes);
         out << ")";
         break;
       }
@@ -940,7 +1066,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_otherwise:
     {
       out << "(otherwise ";
-      BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), showTypes);
       out << ")";
       break;
     }
@@ -948,76 +1074,23 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_usw_leg:
     {
       out << "(";
-      doChildren(out, ast, 2, false, showTypes);
+      sxp_doChildren(out, ast, 2, false, showTypes);
       out << " ";
-      BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), showTypes);
       out << ")";
       break;
     }
 
     // The following just recurse:
-  case at_module:
-    {
-      out << ast->atKwd();
-      out.more();
-
-      size_t start = 0;
-
-      if (ast->printVariant != 0) {
-        // explicit module form. Put name on same line:
-        out << " ";
-        BitcP(out, ast->child(0), showTypes);
-        out << " is";
-        start = 1;
-      }
-      else
-        out << " is" << std::endl;
-
-      /* Dont call doChildren; that will put spaces in front
-         of the top level forms. Remember, bitc-version has
-         already been emitted without a space */
-      for (size_t i = start; i < ast->children.size(); i++) {
-        BitcP(out, ast->child(i), showTypes);
-        out << std::endl;
-      }
-
-      out.less();
-      out << std::endl;
-
-      break;
-    }
-
-  case at_interface:
-    {
-      out << ast->atKwd();
-      out.more();
-
-      // Put name on same line:
-      out << " ";
-
-      /* Dont call doChildren; that will put spaces in front
-         of the top level forms. Remember, bitc-version has
-         already been emitted without a space */
-      for (unsigned i = 0; i < ast->children.size(); i++) {
-        BitcP(out, ast->child(i), showTypes);
-        out << std::endl;
-      }
-
-      out.less();
-      out << std::endl;
-
-      break;
-    }
-
   case at_lambda:
     {
       out << "(" << ast->atKwd() << " ";
-      BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
       out.more();
 
       for (size_t c = 1; c < ast->children.size(); c++) {
         out << std::endl;
-        BitcP(out, ast->child(c), showTypes);
+        sxp_BitcP(out, ast->child(c), showTypes);
       }
 
       out << ")";
@@ -1036,7 +1109,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       for (size_t c = 0; c < ast->children.size(); c++) {
         if (c > 0) out << std::endl;
-        BitcP(out, ast->child(c), showTypes);
+        sxp_BitcP(out, ast->child(c), showTypes);
       }
       break;
     }
@@ -1045,7 +1118,7 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_tcdecls:
   case at_fieldType:
     {
-      doChildren(out, ast, 0, false, showTypes);
+      sxp_doChildren(out, ast, 0, false, showTypes);
       break;
     }
 
@@ -1054,21 +1127,21 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       if (ast->children.size() > 1) {
         out << "(";
-        doChildren(out, ast, 0, false, showTypes);
+        sxp_doChildren(out, ast, 0, false, showTypes);
         out << ")";
       }
       else
-        BitcP(out, ast->child(0), showTypes);
+        sxp_BitcP(out, ast->child(0), showTypes);
       break;
     }
 
   case at_field:
   case at_methdecl:
     {
-      BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
       if (ast->children.size() > 1) {
         out << ":";
-        BitcP(out, ast->child(1), showTypes);
+        sxp_BitcP(out, ast->child(1), showTypes);
       }
       break;
     }
@@ -1078,17 +1151,17 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       out << "(";
       out << ast->atKwd();
-      doChildren(out, ast, 0, true, showTypes);
+      sxp_doChildren(out, ast, 0, true, showTypes);
       out << ")";
       break;
     }
 
   case at_identPattern:
     {
-      BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
       if (ast->children.size() > 1) {
         out << ":";
-        BitcP(out, ast->child(1), showTypes);
+        sxp_BitcP(out, ast->child(1), showTypes);
       }
       break;
     }
@@ -1096,15 +1169,15 @@ BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_container:
     {
       out << "({";
-      BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), showTypes);
       out << "} ";
-      BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), showTypes);
       out << ")";
       break;
     }
   case at_identList:
     {
-      doChildren(out, ast, 0, false, showTypes);
+      sxp_doChildren(out, ast, 0, false, showTypes);
       break;
     }
 
@@ -1317,7 +1390,7 @@ AST::PrettyPrint(std::ostream& strm, bool decorated,
                  bool endline) const
 {
   INOstream out(strm);
-  BitcP(out, shared_from_this(), decorated);
+  sxp_BitcP(out, shared_from_this(), decorated);
   if (endline)
     out << std::endl;
 }
@@ -1326,7 +1399,7 @@ void
 AST::PrettyPrint(INOstream& out, bool decorated,
                  bool endline) const
 {
-  BitcP(out, shared_from_this(), decorated);
+  sxp_BitcP(out, shared_from_this(), decorated);
   if (endline)
     out << std::endl;
 }
@@ -1336,7 +1409,7 @@ void
 AST::PrettyPrint(bool decorated) const
 {
   INOstream out(std::cerr);
-  BitcP(out, shared_from_this(), decorated);
+  sxp_BitcP(out, shared_from_this(), decorated);
   std::cerr << endl;
 }
 
