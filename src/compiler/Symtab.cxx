@@ -1076,15 +1076,15 @@ resolve(std::ostream& errStream,
       shared_ptr<AST> category = ast->child(2);
       shared_ptr<AST> fields = ast->child(4);
 
-#if 0
-      if (category->astType == at_boxedCat) {
+      if (ast->astType == at_defexception &&
+          category->astType != at_refCat &&
+          category->astType != at_boxedCat) {
         errStream << ast->loc << ": "
-                  << "struct " << ast->child(0)->s
-                  << ": Structure definitions cannot be boxed."
+                  << "exception " << ast->child(0)->s
+                  << ": Exception definitions must be boxed."
                   << std::endl;
         errorFree = false;
       }              
-#endif
 
       IdentType identType;
       switch(ast->astType) {

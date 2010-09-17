@@ -360,7 +360,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_value_declaration
 %type <ast> blk_value_declaration
 %type <ast> sxp_ptype_name
-%type <ast> sxp_val blk_val
+%type <ast> sxp_val blk_val blk_optval
 %type <ast> sxp_openclosed blk_openclosed
 %type <ast> blk_ptype_name
 %type <ast> sxp_type_definition blk_type_definition
@@ -1313,6 +1313,16 @@ sxp_type_decl: LP tk_DEFREPR sxp_defident sxp_val sxp_externals RP {
 
 // CATEGORIES
 
+blk_optval: {
+  SHOWPARSE("blk_optval ->");
+  $$ = AST::make(at_boxedCat);
+  $$->printVariant = pf_IMPLIED;
+}
+blk_optval: blk_val {
+  SHOWPARSE("blk_optval -> blk_val");
+  $$ = $1;
+}
+
 blk_val: tk_BOXED {
   SHOWPARSE("blk_val -> BOXED");
   $$ = AST::make(at_boxedCat);
@@ -1371,54 +1381,54 @@ sxp_openclosed: ':' tk_CLOSED {
 };
 
 // EXCEPTION DEFINITION [3.10]
-blk_type_definition: tk_EXCEPTION blk_ident trn_optdocstring {
+blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring {
   SHOWPARSE("blk_type_definition -> EXCEPTION blk_ident");
-  $2->flags |= ID_IS_GLOBAL;
-  $$ = AST::make(at_defexception, $1.loc, 
-                 $2,            /* ident */
+  $3->flags |= ID_IS_GLOBAL;
+  $$ = AST::make(at_defexception, $2.loc, 
+                 $3,            /* ident */
                  AST::make(at_tvlist), /* empty tvlist */
-                 AST::make(at_boxedCat), /* category */
+                 $1,                   /* category */
                  AST::make(at_declares), /* empty declares */
                  AST::make(at_fields), /* empty fields */
                  AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
 };
 
-sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident trn_optdocstring RP {
-  SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident )");
+sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident sxp_val trn_optdocstring RP {
+  SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident sxp_val )");
   $3->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $2.loc, 
                  $3,                         /* ident */
                  AST::make(at_tvlist), /* empty tvlist */
-                 AST::make(at_boxedCat), /* category */
+                 $4,                   /* category */
                  AST::make(at_declares), /* empty declares */
                  AST::make(at_fields), /* empty fields */
                  AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
 };
 
-blk_type_definition: tk_EXCEPTION blk_ident trn_optdocstring IsILCB blk_fields IRCB {
+blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring IsILCB blk_fields IRCB {
   SHOWPARSE("blk_type_definition -> exception blk_ident { blk_fields }");
-  $2->flags |= ID_IS_GLOBAL;
-  $$ = AST::make(at_defexception, $1.loc, 
-                 $2,
+  $3->flags |= ID_IS_GLOBAL;
+  $$ = AST::make(at_defexception, $2.loc, 
+                 $3,
                  AST::make(at_tvlist), /* empty tvlist */
-                 AST::make(at_boxedCat), /* category */
+                 $1,                   /* category */
                  AST::make(at_declares), /* empty declares */
-                 $5,                     /* fields */
+                 $6,                     /* fields */
                  AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
 };
 
-sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident trn_optdocstring sxp_fields RP {
-  SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident sxp_fields )");
+sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident sxp_val trn_optdocstring sxp_fields RP {
+  SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident sxp_val sxp_fields )");
   $3->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $2.loc,
                  $3,             /* ident */
                  AST::make(at_tvlist), /* empty tvlist */
-                 AST::make(at_boxedCat), /* category */
+                 $4,                   /* category */
                  AST::make(at_declares), /* empty declares */
-                 $5,                     /* fields */
+                 $6,                     /* fields */
                  AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
 };
