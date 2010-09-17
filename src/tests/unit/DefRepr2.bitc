@@ -49,7 +49,7 @@ bitc version 0.11
   (reserved (bitfield int32 16) 16)
   b:'b)
 
-(defrepr repr:val
+(defrepr theRepr:val
   (Ct1  p:(pr1 bool int32) i:int32 j:bool (where (== i 0)))
   (Ct2  q:(pr2 int32 bool)  i:int32 (where (== i 1))))
  
