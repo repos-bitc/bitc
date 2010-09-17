@@ -184,24 +184,23 @@ sxp_show_qual_name(INOstream &out,  shared_ptr <const AST> ident,
   }
 }
 
-#if 0
 static void
-sxp_show_qual_name(INOstream &out,  shared_ptr <const AST> tapp,
-               shared_ptr <const AST> constraints, bool showTypes)
+blk_show_qual_name(INOstream &out,  shared_ptr <const AST> ident,
+                   shared_ptr <const AST> tvlist,
+                   const bool showTypes)
 {
-  bool constraintsPresent = (constraints->children.size() > 0);
-  if (constraintsPresent) {
-    out << "(forall ";
-    sxp_BitcP(out, constraints, showTypes);
-    out << " ";
+  bool argsPresent = (tvlist->children.size() > 0);
+
+  blk_BitcP(out, ident, showTypes);
+
+  if (argsPresent) {
+    out << "(" ;
+    blk_BitcP(out, tvlist, showTypes);
+    out << ")" ;
   }
-
-  sxp_BitcP(out, tapp, showTypes);
-
-  if (constraintsPresent)
-    out << ")";
+  else {
+  }
 }
-#endif
 
 static void
 blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
@@ -259,7 +258,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       blk_BitcP(out, category, showTypes);
       out << " " << ast->atKwd() << " ";
-      blk_BitcP(out, ident, showTypes);
+      blk_show_qual_name(out, ident, tvlist, showTypes);
 
       out.more();
       blk_pp_constraints(out, constraints, showTypes);
