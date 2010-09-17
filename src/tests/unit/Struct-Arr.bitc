@@ -42,7 +42,7 @@ bitc version 0.11
 (define i0 (the int32 0))
 (define i1 (the int32 1))
 
-(defstruct s:ref)
+boxed struct s
 
 (defstruct s
   a : int32

@@ -365,7 +365,8 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_ptype_name
 %type <ast> sxp_type_definition blk_type_definition
 %type <ast> sxp_typeapp blk_typeapp
-%type <ast> sxp_type_decl blk_type_decl
+%type <ast> blk_type_decl
+// %type <ast> sxp_type_decl
 %type <ast> sxp_externals blk_externals
 %type <ast> sxp_alias blk_alias
 %type <ast> sxp_importList sxp_provideList
@@ -789,10 +790,10 @@ blk_type_val_definition: blk_type_decl {
   $$ = $1;
 };
 
-sxp_type_val_definition: sxp_type_decl {
-  SHOWPARSE("sxp_type_val_definition -> sxp_type_decl");
-  $$ = $1;
-};
+// sxp_type_val_definition: sxp_type_decl {
+//   SHOWPARSE("sxp_type_val_definition -> sxp_type_decl");
+//   $$ = $1;
+// };
 
 blk_type_val_definition: blk_type_definition {
   SHOWPARSE("blk_type_val_definition -> blk_type_definition");
@@ -1236,20 +1237,20 @@ blk_type_decl: blk_val tk_STRUCT blk_ptype_name blk_constraints blk_externals {
   $$->getID()->externalName = $5->externalName;
 };
 
-sxp_type_decl: LP tk_DEFSTRUCT sxp_ptype_name sxp_val sxp_externals RP {
-  SHOWPARSE("sxp_type_decl -> ( DEFSTRUCT sxp_ptype_name sxp_val sxp_externals )");
-  $$ = AST::make(at_declstruct, $2.loc, 
-                 $3->child(0),  /* ident */
-                 $3->child(1),  /* tvlist */
-                 $4,            /* category */
-                 AST::make(at_declares), /* empty declares */
-                 AST::make(at_fields), /* empty fields */
-                 $3->child(2));        /* constraints */
-  $$->child(0)->defForm = $$;
-  $$->flags |= $5->flags;
-  $$->getID()->flags |= $5->flags;
-  $$->getID()->externalName = $5->externalName;
-};
+// sxp_type_decl: LP tk_DEFSTRUCT sxp_ptype_name sxp_val sxp_externals RP {
+//   SHOWPARSE("sxp_type_decl -> ( DEFSTRUCT sxp_ptype_name sxp_val sxp_externals )");
+//   $$ = AST::make(at_declstruct, $2.loc, 
+//                  $3->child(0),  /* ident */
+//                  $3->child(1),  /* tvlist */
+//                  $4,            /* category */
+//                  AST::make(at_declares), /* empty declares */
+//                  AST::make(at_fields), /* empty fields */
+//                  $3->child(2));        /* constraints */
+//   $$->child(0)->defForm = $$;
+//   $$->flags |= $5->flags;
+//   $$->getID()->flags |= $5->flags;
+//   $$->getID()->externalName = $5->externalName;
+// };
 
 // UNION DECLARATIONS
 blk_type_decl: blk_val tk_UNION blk_ptype_name blk_constraints blk_externals {
@@ -1267,20 +1268,20 @@ blk_type_decl: blk_val tk_UNION blk_ptype_name blk_constraints blk_externals {
   $$->getID()->externalName = $5->externalName;
 };
 
-sxp_type_decl: LP tk_DEFUNION sxp_ptype_name sxp_val sxp_externals RP {
-  SHOWPARSE("sxp_type_decl -> ( DEFUNION sxp_ptype_name sxp_val sxp_externals )");
-  $$ = AST::make(at_declunion, $2.loc, 
-                 $3->child(0), 
-                 $3->child(1), 
-                 $4,
-                 AST::make(at_declares), /* empty declares */
-                 AST::make(at_constructors), /* empty constructors */
-                 $3->child(2));              /* constraints */
-  $$->child(0)->defForm = $$;
-  $$->flags |= $5->flags;
-  $$->getID()->flags |= $5->flags;
-  $$->getID()->externalName = $5->externalName;
-};
+// sxp_type_decl: LP tk_DEFUNION sxp_ptype_name sxp_val sxp_externals RP {
+//   SHOWPARSE("sxp_type_decl -> ( DEFUNION sxp_ptype_name sxp_val sxp_externals )");
+//   $$ = AST::make(at_declunion, $2.loc, 
+//                  $3->child(0), 
+//                  $3->child(1), 
+//                  $4,
+//                  AST::make(at_declares), /* empty declares */
+//                  AST::make(at_constructors), /* empty constructors */
+//                  $3->child(2));              /* constraints */
+//   $$->child(0)->defForm = $$;
+//   $$->flags |= $5->flags;
+//   $$->getID()->flags |= $5->flags;
+//   $$->getID()->externalName = $5->externalName;
+// };
 
 // REPR DECLARATIONS
 blk_type_decl: blk_val tk_REPR blk_defident blk_externals {
@@ -1297,19 +1298,19 @@ blk_type_decl: blk_val tk_REPR blk_defident blk_externals {
   $$->getID()->externalName = $4->externalName;
 };
 
-sxp_type_decl: LP tk_DEFREPR sxp_defident sxp_val sxp_externals RP {
-  SHOWPARSE("sxp_type_decl -> ( DEFREPR sxp_defident sxp_val sxp_externals )");
-  $$ = AST::make(at_declrepr, $2.loc, $3, 
-                 AST::make(at_tvlist), /* empty tvlist */
-                 $4,                   /* category */
-                 AST::make(at_declares), /* empty declares */
-                 AST::make(at_reprctrs), /* empty constructors */
-                 AST::make(at_constraints)); /* empty constraints */
-  $$->child(0)->defForm = $$;
-  $$->flags |= $5->flags;
-  $$->getID()->flags |= $5->flags;
-  $$->getID()->externalName = $5->externalName;
-};
+// sxp_type_decl: LP tk_DEFREPR sxp_defident sxp_val sxp_externals RP {
+//   SHOWPARSE("sxp_type_decl -> ( DEFREPR sxp_defident sxp_val sxp_externals )");
+//   $$ = AST::make(at_declrepr, $2.loc, $3, 
+//                  AST::make(at_tvlist), /* empty tvlist */
+//                  $4,                   /* category */
+//                  AST::make(at_declares), /* empty declares */
+//                  AST::make(at_reprctrs), /* empty constructors */
+//                  AST::make(at_constraints)); /* empty constraints */
+//   $$->child(0)->defForm = $$;
+//   $$->flags |= $5->flags;
+//   $$->getID()->flags |= $5->flags;
+//   $$->getID()->externalName = $5->externalName;
+// };
 
 // CATEGORIES
 

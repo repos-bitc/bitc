@@ -1402,7 +1402,7 @@ a b c /*
 	<sect3 id="type:structure">
 	  <title>Structures</title>
 	  <p>
-	    The structure declaration defines a named type whose
+	    A structure definition defines a named type whose
 	    instances are an ordered sequence of named cells. The
 	    syntax of a structure declaration is:
 	  </p>
@@ -1900,24 +1900,30 @@ a b c /*
             The declarations
           </p>
           <literallayout>
-(defstruct <em>nm</em> [<em>qual</em>] [<em>external</em>])
-(defunion <em>nm</em> [<em>qual</em>] [<em>external</em>])
-(defrepr <em>nm</em> [<em>qual</em>] [<em>external</em>])
-(defstruct (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>) 
-          [<em>qual</em>] [<em>external</em>])
-(defunion (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)
-          [<em>qual</em>] [<em>external</em>])
-(defrepr (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)
-          [<em>qual</em>] [<em>external</em>])</literallayout>
+<em>qual</em> struct <em>nm</em> [<em>external</em>];
+<em>qual</em> union <em>nm</em> [<em>external</em>];
+<em>qual</em> repr <em>nm</em> [<em>external</em>];
+<em>qual</em> struct <em>nm</em>(<em>tv<sub>1</sub></em>, ... <em>tv<sub>n</sub></em>) 
+          [<em>external</em>]
+<em>qual</em> union <em>nm</em>(<em>tv<sub>1</sub></em>, ... <em>tv<sub>n</sub></em>)
+          [<em>external</em>]
+<em>qual</em> repr <em>nm</em>(<em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)
+          [<em>external</em>]</literallayout>
           <p indent="no">
             state (respectively) that <progident>nm</progident> is a
             structure (respectively union) reference type of the
             stated arity whose internal structure is not disclosed.
-            If present, the qualifier
-            <progident><em>qual</em></progident> optionally declares
-            the type to be one of ``:ref'', ``:val'', or
-            ``:opaque''. In the absence of qualification, the default
-            is ``:ref''. If present, the <em>external</em> portion
+            The qualifier
+            <progident><em>qual</em></progident> declares
+            the type to be one of ``boxed'', ``unboxed'', or
+            ``opaque''. In the absence of qualification, the default
+            is ``boxed''<footnote>
+              <p>The qualifier is presently mandatory
+            on struct, union, and repr declarations during syntax
+            transition. This requirement will be relaxed in a future
+            revision of the specification.</p>
+            </footnote>
+            If present, the <em>external</em> portion
             consists of the keyword <progident>external</progident>
             followed by an optional identifier (see discussion of
             external identifiers in <progident>proclaim</progident>).
@@ -1928,7 +1934,7 @@ a b c /*
             declare the bignum type:
           </p>
           <literallayout>
-(defstruct int :val external bitc_int)</literallayout>
+unboxed struct int external bitc_int</literallayout>
           <p>
             The structure of these types may optionally be disclosed
             later in the same compilation unit by a type definition
