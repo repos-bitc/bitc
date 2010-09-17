@@ -187,8 +187,9 @@ struct QuasiKeywordMap {
   }
 };
 
+static const std::string ThunkMarker = "#_";
 static const std::string HoleMarker = "_";
-static const std::string KwdSeparator = ";";
+static const std::string KwdSeparator = "@";
 
 struct MixRule : public boost::enable_shared_from_this<MixRule> {
   /// @brief Summary name of this mix rule
@@ -216,20 +217,24 @@ struct MixRule : public boost::enable_shared_from_this<MixRule> {
 
   bool isInitialHole(size_t pos) {
     return ((pos == rhs.size() - 1) &&
-            rhs[pos] == HoleMarker);
+            (rhs[pos] == HoleMarker ||
+             rhs[pos] == ThunkMarker));
   }
 
   bool isFinalHole(size_t pos) {
     return ((pos == rhs.size() - 1) &&
-            rhs[pos] == HoleMarker);
+            (rhs[pos] == HoleMarker ||
+             rhs[pos] == ThunkMarker));
   }
 
   bool isHole(size_t pos) {
-    return (rhs[pos] == HoleMarker);
+    return (rhs[pos] == HoleMarker ||
+            rhs[pos] == ThunkMarker);
   }
 
   bool isKwd(size_t pos) {
-    return (rhs[pos] != HoleMarker);
+    return (rhs[pos] != HoleMarker &&
+            rhs[pos] != ThunkMarker);
   }
 
   bool hasLeadingHole() 
@@ -384,15 +389,19 @@ MixRule::extract()
   
   while(rule.size()) {
     if (rule[0] == HoleMarker[0]) {
-      rhs.push_back(rule.substr(0,1));
+      rhs.push_back(HoleMarker);
       rule = rule.substr(1);
+    }
+    else if (rule.substr(0, 2) == ThunkMarker) {
+      rhs.push_back(ThunkMarker);
+      rule = rule.substr(2);
     }
     else {
       if (rule[0] == KwdSeparator[0])
         rule = rule.substr(1);
 
       // Find the end of this quasi-keyword, or end-of-rule:
-      size_t nxt = rule.find_first_of(HoleMarker + KwdSeparator);
+      size_t nxt = rule.find_first_of("#_@");
 
       if (nxt == string::npos) {
         rhs.push_back(rule);
@@ -576,13 +585,13 @@ CleanMixFix(INOstream& errStream, ASTPtr ast)
       ast->addChild(argAst);
     }
 
-    if (fn == "_(;)") {
+    if (fn == "_(@)") {
       // Rotate the applied function into the proper position
       ast->children[0] = ast->children[1];
       ast->children.erase(ast->children.begin()+1, ast->children.end());
     }
 
-    if (fn == "(;)") {
+    if (fn == "(@)") {
       ast->astType = at_unit;
       ast->children.clear();
     }
@@ -719,27 +728,39 @@ reduce(INOstream& errStream, MixInput& shunt, MixRulePtr rule)
   // Don't build unnecessary apply nodes for the catch-all expression
   // rule.
 
-#if 0
-  // There is a catch: It is possible that we saw input like:
-  //
-  //   1 * 2 + 3
-  //
-  // in which case, we will be asked to build 1 * (2 + 3), which
-  // violates the precedence rules. In that case, we will pivot the
-  // result tree to make matters right, and return the root of the
-  // proper tree.
-#endif
-
   shared_ptr<AST> result = shunt[0].ast; // until proven otherwise
 
-  if (rule->name != "_") {
-    shared_ptr<AST> fnName = 
-      AST::make(at_ident, LToken(tk_BlkIdent, rule->name));
+  shared_ptr<AST> fnName = 
+    AST::make(at_ident, LToken(tk_BlkIdent, rule->name));
 
-    result = AST::make(at_apply, shunt[0].ast->loc, fnName);
-    for(size_t i = 0; i < shunt.size(); i++) {
-      if(!shunt[i].isKwd())
-        result->addChild(shunt[i].ast);
+  result = AST::make(at_apply, shunt[0].ast->loc, fnName);
+
+  assert(rule->rhs.size() == shunt.size());
+
+  for(size_t i = 0; i < shunt.size(); i++) {
+    if (rule->rhs[i] == HoleMarker) {
+      assert(!shunt[i].isKwd());
+      result->addChild(shunt[i].ast);
+    }
+    else if (rule->rhs[i] == ThunkMarker) {
+      assert(!shunt[i].isKwd());
+
+      /// @bug If the thunkified code contains a return, this doesn't
+      /// do the right thing at all, so there is a hygiene failure. We
+      /// need to change the lambda mechanism around so that we can
+      /// let the proper return label be captured as part of the
+      /// thunk's closure.
+      shared_ptr<AST> iRetBody = 
+        AST::make(at_block, shunt[i].ast->loc,
+                  AST::make(at_ident, LToken(tk_BlkIdent, "__return")),
+                  shunt[i].ast);
+
+      shared_ptr<AST> thunk = 
+        AST::make(at_lambda, shunt[i].ast->loc,
+                  AST::make(at_argVec, shunt[i].ast->loc), // empty
+                  iRetBody);
+
+      result->addChild(thunk);
     }
   }
 
@@ -747,46 +768,6 @@ reduce(INOstream& errStream, MixInput& shunt, MixRulePtr rule)
     errStream << "Reduced " <<  rule->name << " giving ";
     result->PrettyPrint(errStream, false, true);
   }
-
-#if 0
-  {
-    bool pivot = false;
-
-    errStream.more();
-
-    // Check for precedence fix-up on the right:
-    if (rule->hasTrailingHole() && top(shunt).rule->hasLeadingHole()) {
-      if (rule->prec > top(shunt).rule->prec) {
-        MIXDEBUG(2) {
-          errStream << "NOTE: Precedence pivot needed on the right." << endl;
-          errStream << "  Rule "
-                    << (*rule)
-                    << " has higher precedence than "
-                    << (*top(shunt).rule)
-                    << endl;
-        }
-        pivot = true;
-      }
-      else if ((rule->prec == top(shunt).rule->prec)
-               && rule->assoc == assoc_left
-               && top(shunt).rule->assoc == assoc_left) {
-        MIXDEBUG(2)
-          errStream << "NOTE: Associativity pivot needed on the right." << endl;
-        pivot = true;
-      }
-    }
-
-    if (pivot) {
-      ASTPtr lastChild = result->children.back();
-      ASTPtr lastChildFirstArg = lastChild->child(1);
-      result->children.back() = lastChildFirstArg;
-      lastChild->children[1] = result;
-      result = lastChild;
-    }
-
-    errStream.less();
-  }
-#endif
 
   return MixFixNode(result, rule);
 }
@@ -1115,17 +1096,14 @@ MixRulePtr MixRules[] =  {
 
   MixRule::make("_,_",  -1, assoc_right), // arg assembly, cpair assembly
 
-  MixRule::make("(;)",   129, assoc_left), // unit constructor
+  MixRule::make("(@)",   129, assoc_left), // unit constructor
 
-  MixRule::make("_(;)",  130, assoc_left), // nullary application
+  MixRule::make("_(@)",  130, assoc_left), // nullary application
   MixRule::make("_(_)",  130, assoc_left), // application
   MixRule::make("_[_]",  130, assoc_left), // array/vector subscript
   MixRule::make("_._",   130, assoc_left), // dot notation (select or usesel)
 
   // Which might quite possibly be a better approach
-
-  // Rule for just grabbing the next input expr:
-  //  MixRule::make("_",    -1, assoc_none),
 };
 static size_t nMixRules = sizeof(MixRules) / sizeof(MixRules[0]);
 
