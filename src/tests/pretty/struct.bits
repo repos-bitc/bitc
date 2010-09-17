@@ -58,7 +58,7 @@ module struct_test is
     a : 'a
     f : float
     
-  unboxed struct boxedpoly('a) is
+  boxed struct boxedpoly('a) is
     a : 'a
     f : float
     

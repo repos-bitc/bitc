@@ -250,6 +250,8 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     }
 
   case at_declstruct:
+  case at_declunion:
+  case at_declrepr:
     {
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> tvlist = ast->child(1);
@@ -262,6 +264,12 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       out.more();
       blk_pp_constraints(out, constraints, showTypes);
+
+      if (ident->flags & DEF_IS_EXTERNAL) {
+        out << " external";
+        if (ident->externalName.size())
+          out << " " << ident->externalName;        
+      }
       out.less();
 
 
@@ -327,11 +335,8 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_defrepr:
   case at_defstruct:
   case at_defunion:
-
-  case at_declunion:
-  case at_declrepr:
-      sxp_BitcP(out, ast, showTypes);
-      break;
+    sxp_BitcP(out, ast, showTypes);
+    break;
 
   default:
     {
@@ -356,6 +361,9 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   switch(ast->astType) {
   case at_module:
   case at_interface:
+  case at_declrepr:
+  case at_declunion:
+  case at_declstruct:
     {
       blk_BitcP(out, ast, showTypes);
       break;
@@ -1068,6 +1076,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
+#if 0
   case at_declunion:
   case at_declstruct:
   case at_declrepr:
@@ -1094,6 +1103,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       break;
     }
+#endif
 
   case at_letbindings:
   case at_cond_legs:

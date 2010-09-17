@@ -517,10 +517,6 @@ resolve(std::ostream& errStream,
     
   case at_ident:
     {
-      // Special handling for infix primitives that interact with MixFix:
-      if (ast->s == "and" || ast->s == "or")
-        break;
-
       // If you change the way this works, see the comment in the
       // at_usesel case first!
       if (!ast->fqn.isInitialized()) {
@@ -1122,7 +1118,7 @@ resolve(std::ostream& errStream,
               id_unresolved, ast, 
               flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));
       
-      // match at at_fields
+      // match at_fields
       RESOLVE(ast->child(4), tmpEnv, lamLevel, DEF_MODE, 
               id_field, ast, 
               flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK));

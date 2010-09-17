@@ -200,10 +200,12 @@ AST::atKwd() const
     return "interface";
 
   case at_defunion:
-  case at_declunion:
     return "defunion";
+  case at_declunion:
+    return "union";
 
   case at_declrepr:
+    return "repr";
   case at_defrepr:
     return "defrepr";
 
