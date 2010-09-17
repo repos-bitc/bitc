@@ -2806,16 +2806,7 @@ AST::isValid() const
     break;
 
   case at_constructors: // normal AST:
-    // match at_constructor+
-    if(c >= children.size()) {
-      astChNumError(*this, c+1, children.size());
-      errorsPresent = true;
-      break;
-    }
-    if (!ISSET(astMembers[at_constructor], child(c)->astType)) {
-      astChTypeError(*this, at_constructor, child(c)->astType, 0);
-      errorsPresent = true;
-    }
+    // match at_constructor*
     while (c < children.size()) {
       if (!ISSET(astMembers[at_constructor], child(c)->astType))
         astChTypeError(*this, at_constructor, child(c)->astType, c);

@@ -1046,7 +1046,7 @@ AST declare = ident type?;
 
 AST tvlist = tvar*;
 
-AST constructors = constructor+;
+AST constructors = constructor*;
 AST constructor = ident fielditem*;
 
 GROUP fielditem = field | methdecl | fill;
