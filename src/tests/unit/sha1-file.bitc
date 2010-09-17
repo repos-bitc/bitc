@@ -43,34 +43,34 @@ bitc version 0.11
 (provide bitc.main main)
 
 
-(define (TS str ts)
+(def (TS str ts)
   (stdio.write_string stdio.stdout str)
   (stdio.write_int stdio.stdout ts 10)  
   (stdio.write_char stdio.stdout '\linefeed'))  
 
-(define (id x) (convert x))
+(def (id x) (convert x))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (define start:(mutable uint64) 0)
-    (define stop:(mutable uint64) 0)
-// (define start (stdlib.getTimeStamp))
-    (define sha (sha1.sha1Context
+    (def start:(mutable uint64) 0)
+    (def stop:(mutable uint64) 0)
+// (def start (stdlib.getTimeStamp))
+    (def sha (sha1.sha1Context
 		 (array 0 0 0 0 0) 0 0 
 		 (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0) 0 false sha1.sha_Success))
     
-    (define digest:(array (mutable uint8) 20)
+    (def digest:(array (mutable uint8) 20)
       (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
-    (define len:word (convert (stdlib.atoi argvec[2])))
- //(define stop (stdlib.getTimeStamp)) 
+    (def len:word (convert (stdlib.atoi argvec[2])))
+ //(def stop (stdlib.getTimeStamp)) 
  //(TS "Initialization: " (- stop start))
     
  //(set! start (stdlib.getTimeStamp))
-    (define iStream (stdio.open argvec[1] "r"))
-    (define input:(vector (mutable uint8)) 
+    (def iStream (stdio.open argvec[1] "r"))
+    (def input:(vector (mutable uint8)) 
       (MakeVector (convert len)
 		   (lambda (i) 
 		     (if (not (stdio.isEOF iStream))
@@ -85,7 +85,7 @@ bitc version 0.11
  //(set! stop (stdlib.getTimeStamp)) 
  //(TS "Input: " (- stop start))
     
-    (define (examine res mesg)
+    (def (examine res mesg)
       (switch x res
 	(sha1.sha_Success ())
 	(otherwise (stdio.write_string stdio.stdout "Failed ")

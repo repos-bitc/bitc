@@ -39,9 +39,9 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (add1 n:(ByRef 'a)) (set! n (+ n 1)) n)
+(def (add1 n:(ByRef 'a)) (set! n (+ n 1)) n)
 
-(define main.main:(fn (vector string) -> int32) 
+(def main.main:(fn (vector string) -> int32) 
   (lambda (argVec)
     (let ((m:(mutable int32) 0))
       (if (== (add1 m) (add1 m)) 1 0))))

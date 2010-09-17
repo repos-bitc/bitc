@@ -39,12 +39,12 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define i0 (the int32 0))
-(define i1 (the int32 1))
-(define i2 (the int32 2))
+(def i0 (the int32 0))
+(def i1 (the int32 1))
+(def i2 (the int32 2))
 
-(define a1 (array i0 i1 i2))
-(define main.main:(fn (vector string) -> int32)
+(def a1 (array i0 i1 i2))
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (begin (try a1[25] 
 		(catch xyz (IndexBoundsError -1))))

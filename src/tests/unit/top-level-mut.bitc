@@ -42,9 +42,9 @@ bitc version 0.11
 // This test case tests that the polyinstantiator does not discard top
 // level unreferenced expressions that might cause state alterations.
 
-(define i:(mutable int32) 1)
+(def i:(mutable int32) 1)
 
-(define a (begin (set! i 0) 1:int32))
+(def a (begin (set! i 0) 1:int32))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) i))

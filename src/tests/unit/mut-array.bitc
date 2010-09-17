@@ -39,9 +39,9 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define x:(array (mutable int32) 3) (array 10 20 30))
-(define y:(array int32 3) x)
-(define main.main:(fn (vector string) -> int32)
+(def x:(array (mutable int32) 3) (array 10 20 30))
+(def y:(array int32 3) x)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (set! x (array 0 0 0))
     // Must not work

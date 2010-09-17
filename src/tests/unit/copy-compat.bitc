@@ -36,14 +36,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(define dupize1 (lambda (x) (dup x)))
+(def dupize1 (lambda (x) (dup x)))
 (forall ((CopyCompat 'a 'b))
-  (define dupize2:(fn 'a -> (boxed 'b))
+  (def dupize2:(fn 'a -> (boxed 'b))
     (lambda (x) (dup x))))
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn (vector string) -> int32) 
+(def main.main:(fn (vector string) -> int32) 
   (lambda (argv)  
     ((dupize1 true), (dupize2 false))
     0))

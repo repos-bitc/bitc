@@ -39,11 +39,11 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defexception Xn)
+(exception Xn)
 
-(defexception Xn2 f1:int32 f2:bool)
+(exception Xn2 f1:int32 f2:bool)
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)   
     (throw Xn)
     (throw (Xn2 10 false))

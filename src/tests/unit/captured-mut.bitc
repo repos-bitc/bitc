@@ -41,7 +41,7 @@ bitc version 0.11
 
 // Test for refization of captured mutables.
 
-(define (f x:(mutable int32)) ((lambda () x)):(mutable int32))
-(define main.main:(fn (vector string) -> int32)
+(def (f x:(mutable int32)) ((lambda () x)):(mutable int32))
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) f 0))
 

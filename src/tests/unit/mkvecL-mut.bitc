@@ -40,11 +40,11 @@ bitc version 0.11
 // This program is intended to test the flow of mutability and
 // interconversion in the presence of the new MakeVector.
 
-(define (id x) x)
+(def (id x) x)
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argv)
     (let ((vec:(vector (mutable int32)) 
 	       (MakeVector 30 (lambda (x) (convert x)))))

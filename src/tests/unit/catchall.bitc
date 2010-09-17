@@ -39,7 +39,7 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     // The pattern being tested here is the "recovery block", wherein
     // some piece of postaction code is supposed to happen even if an

@@ -39,12 +39,12 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define i0 (the int16 0))
-(define i1 (the int16 1))
-(define i2 (the int16 2))
+(def i0 (the int16 0))
+(def i1 (the int16 1))
+(def i2 (the int16 2))
 
-(define (fact x) (if (== x i0) i1 (* x (fact (- x 1)))))
-(define main.main:(fn (vector string) -> int32)
+(def (fact x) (if (== x i0) i1 (* x (fact (- x 1)))))
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (begin 
       (and (== (the int8 0)

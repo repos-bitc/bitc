@@ -39,14 +39,14 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct (St 'a)  f:(const 'a))
+(struct (St 'a)  f:(const 'a))
   
-(define x (St true))
-(define x2 (St true):(St (mutable bool)))
-(define y (St 10:int32))
-(define z (St (lambda (x) x)))
+(def x (St true))
+(def x2 (St true):(St (mutable bool)))
+(def y (St 10:int32))
+(def z (St (lambda (x) x)))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     x
     0))

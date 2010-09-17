@@ -42,21 +42,21 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (define sha (sha1.sha1Context
+    (def sha (sha1.sha1Context
 		 (array 0 0 0 0 0) 0 0 
 		 (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0) 0 false sha1.sha_Success))
     
-    (define digest:(array (mutable uint8) 20)
+    (def digest:(array (mutable uint8) 20)
       (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
     
-    (define input (MakeVector 5 (lambda (i) (convert (+ 100 i)))))
+    (def input (MakeVector 5 (lambda (i) (convert (+ 100 i)))))
     
-    (define (examine res mesg)
+    (def (examine res mesg)
       (switch x res
 	(sha1.sha_Success ())
 	(otherwise (stdio.write_string stdio.stdout "Failed ")

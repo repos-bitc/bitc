@@ -39,45 +39,45 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct Obj:unboxed
+(struct Obj:unboxed
   inc: (fn -> ())
   odd: (fn -> bool)) 
 
-(define (hasOdd oList)
+(def (hasOdd oList)
   (switch x oList 
     (nil false)
     (cons (or (x.car.odd) (hasOdd x.cdr)))))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argVec)
 
     // An object with encapsulated integer state
-    (define obji
+    (def obji
       (begin
-	(define i 10:int32)               //state
-	(define (inc_i) (set! i (+ i 1))) //methods
-	(define (odd_i) (!= (% i 2) 0))
+	(def i 10:int32)               //state
+	(def (inc_i) (set! i (+ i 1))) //methods
+	(def (odd_i) (!= (% i 2) 0))
 	(Obj inc_i odd_i)))
     
     // An object with encapsulated float state
-    (define objf 
+    (def objf 
       (begin
-	(define f 10.0:float)
-	(define (inc_f) (set! f (+ f 1.0)))
-	(define (odd_f) false) // :)
+	(def f 10.0:float)
+	(def (inc_f) (set! f (+ f 1.0)))
+	(def (odd_f) false) // :)
 	(Obj inc_f odd_f)))
 	
     // An object with encapsulated boolean state
-    (define objb
+    (def objb
       (begin
-	(define b true)
-	(define (inc_b) (set! b true))  // :)
-	(define (odd_b) true)           // :)
+	(def b true)
+	(def (inc_b) (set! b true))  // :)
+	(def (odd_b) true)           // :)
 	(Obj inc_b odd_b)))
 
     // All objects have the same type Obj, no way to recover the inner
     // hidden state.
-    (define objList (cons obji (cons objf (cons objb nil))))
+    (def objList (cons obji (cons objf (cons objb nil))))
     
     // Operation on list of objects
     (if (hasOdd objList) 0:int32 1:int32)

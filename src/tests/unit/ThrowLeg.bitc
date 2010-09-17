@@ -39,9 +39,9 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defexception exFred)
+(exception exFred)
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (try 0:int32
 	 (catch id

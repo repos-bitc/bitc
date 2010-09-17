@@ -41,7 +41,7 @@ bitc version 0.11
 
 // suspend cannot be tested until (if at all) we have definvariant
 // definvariant property
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
 // (suspend property i0)
     0))

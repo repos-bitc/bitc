@@ -39,5 +39,5 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (main.main argv:(vector string))
+(def (main.main argv:(vector string))
   0:int32)

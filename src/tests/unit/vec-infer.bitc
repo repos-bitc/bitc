@@ -40,18 +40,18 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (choose_array_nth e:(array 'a 5)) e[4])
+(def (choose_array_nth e:(array 'a 5)) e[4])
 
-(define (choose_array_ref_nth e:(ArrayRef 'a)) e[4])
+(def (choose_array_ref_nth e:(ArrayRef 'a)) e[4])
 
-(define (choose_nth e) e[4])
+(def (choose_nth e) e[4])
 
 // Use these for type matching purposes to check what was inferred above.
-(define (f_a_n f:(fn (array 'a 5) -> 'a)) f)
-(define (f_ar_n f:(fn (ArrayRef 'a) -> 'a)) f)
-(define (f_v_n f:(fn (vector 'a) -> 'a)) f)
+(def (f_a_n f:(fn (array 'a 5) -> 'a)) f)
+(def (f_ar_n f:(fn (ArrayRef 'a) -> 'a)) f)
+(def (f_v_n f:(fn (vector 'a) -> 'a)) f)
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (args)
     (f_a_n choose_array_nth)
     (f_ar_n choose_array_ref_nth)

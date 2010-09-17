@@ -41,11 +41,11 @@ bitc version 0.11
 (provide bitc.main main)
 
 // This should not type check:
-(define (weird-but-correct e)
+(def (weird-but-correct e)
   (let ((tmp e[4]))
     e:(array 'a 5)
     tmp))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (args)
     0))

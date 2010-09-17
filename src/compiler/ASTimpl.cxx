@@ -200,14 +200,12 @@ AST::atKwd() const
     return "interface";
 
   case at_defunion:
-    return "defunion";
   case at_declunion:
     return "union";
 
   case at_declrepr:
-    return "repr";
   case at_defrepr:
-    return "defrepr";
+    return "repr";
 
     //   case at_reprbody:
     //     return "<reprbody>";
@@ -220,16 +218,15 @@ AST::atKwd() const
 
 
   case at_defstruct:
-    return "defstruct";
   case at_declstruct:
     return "struct";
 
   case at_defobject:
-    return "defobject";
+    return "object";
 
   case at_define:
   case at_recdef:
-    return "define";
+    return "def";
 
   case at_declares:
     return "declares";
@@ -475,13 +472,13 @@ AST::atKwd() const
     return "letrec";
 
   case at_deftypeclass:
-    return "deftypeclass";
+    return "trait";
 
   case at_definstance:
-    return "definstance";
+    return "instance";
 
   case at_defexception:
-    return "defexception";
+    return "exception";
 
   case at_exceptionType:
     return "exception";

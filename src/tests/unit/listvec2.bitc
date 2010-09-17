@@ -38,15 +38,15 @@
 bitc version 0.11
 (import bitc.vector listToVector)
 
-(define (lv_m lst:(list (mutable char)))
+(def (lv_m lst:(list (mutable char)))
   (listToVector lst))
 
-(define (lv_nm lst:(list char))
+(def (lv_nm lst:(list char))
   (listToVector lst))
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argv)
     (let ((vec (MakeVector 10 (lambda (x) x))))
       vec) 0))

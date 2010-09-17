@@ -38,13 +38,13 @@
 bitc version 0.11
 
 // Implementation of factorial using mutation
-(define (fact x) (loop ((ans 1 ans) 
+(def (fact x) (loop ((ans 1 ans) 
 		        (i x (- i 1)))
 		     ((== i 0) ans)
 		     (set! ans (* ans i))))
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (fact 5)))

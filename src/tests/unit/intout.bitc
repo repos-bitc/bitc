@@ -40,9 +40,9 @@ bitc version 0.11
 (provide bitc.main main)
 (import bitc.stdio as stdio)
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (define (endl) (stdio.write_char stdio.stdout '\linefeed'))
+    (def (endl) (stdio.write_char stdio.stdout '\linefeed'))
     (stdio.write_int stdio.stdout 10:int32 10) (endl)
     (stdio.write_int stdio.stdout 0xfaceabcd:uint32 16) (endl)
     (stdio.write_int stdio.stdout 100000:int64 8) (endl)

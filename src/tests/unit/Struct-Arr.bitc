@@ -39,16 +39,16 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define i0 (the int32 0))
-(define i1 (the int32 1))
+(def i0 (the int32 0))
+(def i1 (the int32 1))
 
 boxed struct s
 
-(defstruct s
+(struct s
   a : int32
   b : (array int32 3))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (let ((s_instance (s 1 (array 1 2 3))))
       (begin (cons i0 (cons i1 nil))

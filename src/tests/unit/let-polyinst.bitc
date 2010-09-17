@@ -40,13 +40,13 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (abc x)
+(def (abc x)
   (let ((id (lambda (y) y)))
     (id 1:int32)
     (id true)
     (id x)))
  
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (abc 10:int32) 
     (abc 10:int64) 

@@ -43,7 +43,7 @@ bitc version 0.11
 // This test case is expected to segfault due to infinite recursion at
 // initialization of oe.
 
-(define oe
+(def oe
   (letrec ((odd (lambda (x) (even x)))
 	   (even (lambda(x) (odd x))))
     (odd true):bool
@@ -51,5 +51,5 @@ bitc version 0.11
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 0))

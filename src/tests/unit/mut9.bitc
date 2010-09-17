@@ -43,7 +43,7 @@ bitc version 0.11
 // the letrec. But at the top level expression `p', the copy of f need
 // not be mutable and the type of p is generalized.
 
-(define p
+(def p
  (letrec ((f (lambda (x) x))
 	   (g (lambda (x) (vector f)))
 	   (h (lambda (x) f:(mutable 'a))))
@@ -58,6 +58,6 @@ bitc version 0.11
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 0))
 

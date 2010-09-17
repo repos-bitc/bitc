@@ -39,28 +39,28 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (addone x) (+ x 1))
+(def (addone x) (+ x 1))
 
-(define (addtwo x) (+ x 2.0))
+(def (addtwo x) (+ x 2.0))
 
-(define XYZ
+(def XYZ
   (begin
     (addone (the int32 10))
     (addone (the int64 20))))
 
-(define ABC
+(def ABC
   (begin
     (addone (the int32 10))
     (addone (the int64 20))))
 
 // should not work
 // XXYYZZ will be given dummy types
-//(define XXYYZZ
+//(def XXYYZZ
 //  (begin
 //    (let ((p 25))
 //      p)))
   
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     XYZ ABC 0))
 

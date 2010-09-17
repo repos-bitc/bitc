@@ -39,30 +39,30 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define i0 0:int32)
+(def i0 0:int32)
 
-//(define p (if true:'a 10:int32 20))
+//(def p (if true:'a 10:int32 20))
 
-(define p1 (let ((l:'a (lambda (x) x))) (l true) (l i0) ))
+(def p1 (let ((l:'a (lambda (x) x))) (l true) (l i0) ))
 
-(define p2 (let ((l (lambda (x:'a) x))) (l true) (l ()) ))
+(def p2 (let ((l (lambda (x:'a) x))) (l true) (l ()) ))
 
-(define p3 (let ((l (lambda (x) x))) (l:'a true) (l i0) ))
-
-// MUST NOT WORK
-//(define p4 (let ((l:'a (lambda (x) x))) (l:'a true) (l i0) ))
+(def p3 (let ((l (lambda (x) x))) (l:'a true) (l i0) ))
 
 // MUST NOT WORK
-//(define p5 (let ((m:'a (lambda (x) x)))
+//(def p4 (let ((l:'a (lambda (x) x))) (l:'a true) (l i0) ))
+
+// MUST NOT WORK
+//(def p5 (let ((m:'a (lambda (x) x)))
 //	     (let ((n:'a (lambda (x) x))) true)
 //	     (m true) (m i0) ))
 
 
 // FIX: Polyinstantiator isue with tvar scoping
-//(define p6 (let ((m:'a (let ((n:'a (lambda (x) x))) n)))
+//(def p6 (let ((m:'a (let ((n:'a (lambda (x) x))) n)))
 //	     (m true) (m i0) ))
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)  0))

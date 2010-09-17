@@ -42,22 +42,22 @@ bitc version 0.11
 (provide bitc.main main)
 
 
-(define (TS str ts)
+(def (TS str ts)
   (stdio.write_string stdio.stdout str)
   (stdio.write_int stdio.stdout ts 10)  
   (stdio.write_char stdio.stdout '\linefeed'))  
 
-(define (zero x) 0)
+(def (zero x) 0)
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (define len:word 5000)
-    (define first (stdlib.getTimeStamp))
-    (define start (stdlib.getTimeStamp)) 
-    (define stop (stdlib.getTimeStamp)) 
+    (def len:word 5000)
+    (def first (stdlib.getTimeStamp))
+    (def start (stdlib.getTimeStamp)) 
+    (def stop (stdlib.getTimeStamp)) 
   //(TS "Time Stamping: " (- stop start))
     
-    (define vec:(vector (mutable uint8))
+    (def vec:(vector (mutable uint8))
       (MakeVector len zero))
     
     (set! start (stdlib.getTimeStamp))
@@ -66,17 +66,17 @@ bitc version 0.11
   //(TS "Print to stdout: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (define iStream (stdio.open argvec[1] "r"))
+    (def iStream (stdio.open argvec[1] "r"))
     (set! stop (stdlib.getTimeStamp)) 
   //(TS "Open Read Stream: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (define oStream (stdio.open "BUILD/_WRITE_" "w"))
+    (def oStream (stdio.open "BUILD/_WRITE_" "w"))
     (set! stop (stdlib.getTimeStamp)) 
   //(TS "Open Write Stream: " (- stop start))
     
     (set! start (stdlib.getTimeStamp))
-    (define temp (stdio.read_byte iStream))
+    (def temp (stdio.read_byte iStream))
     (set! stop (stdlib.getTimeStamp)) 
   //(TS "Read 1 Byte from file: " (- stop start))
     

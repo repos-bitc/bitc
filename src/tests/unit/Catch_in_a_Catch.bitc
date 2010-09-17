@@ -39,19 +39,19 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define i0 (the int32 0))
-(define i1 (the int32 1))
-(define i2 (the int32 2))
+(def i0 (the int32 0))
+(def i1 (the int32 1))
+(def i2 (the int32 2))
 
-(defexception Xn1)
-(defexception Xn2 a:int32 b:char)
-(defexception Xn3)
+(exception Xn1)
+(exception Xn2 a:int32 b:char)
+(exception Xn3)
 
-(define (f) (try (try (throw Xn3)
+(def (f) (try (try (throw Xn3)
 		      (catch xyz 
 			     (Xn1 i1)
 			     (Xn2 xyz.a)))
 		 (catch pqr (Xn3 1000))))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) (f) i0))

@@ -39,12 +39,12 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
  
-(defunion unin C)
-(definstance (Eq unin) 
+(union unin C)
+(instance (Eq unin) 
   (_==_ = (lambda (x y) true))
   (_!=_ = (lambda (x y) false)))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (== C C) 0))
 

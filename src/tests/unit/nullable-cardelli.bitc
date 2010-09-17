@@ -46,19 +46,19 @@ bitc version 0.11
 
 
 // Evident Reference type
-(defunion un_ref:unboxed 
+(union un_ref:unboxed 
   en11 en12 (ptr1 p:(boxed int32)))
 
 // Constrained Reference type
 (forall ((RefTypes 'a)) 
-  (defunion (un_ct_ref 'a):unboxed 
+  (union (un_ct_ref 'a):unboxed 
     en21 en22 (ptr2 p:'a)))
 
 // Nullable type
-(defunion un_nul:unboxed 
+(union un_nul:unboxed 
   en31 en32 (ptr3 p:(nullable (boxed int32))))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (let ((n (dup 10)))
       (ptr1 n)

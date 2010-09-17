@@ -45,20 +45,20 @@ bitc version 0.11
 // rec-instantiated, the application of the method still works on the 
 // original type. 
 
-(define (returnTrue x y) true)
-(define (returnFalse x y) false)
+(def (returnTrue x y) true)
+(def (returnFalse x y) false)
 
-(definstance (Eq (boxed (pair bool bool)))
+(instance (Eq (boxed (pair bool bool)))
   (_==_ = returnTrue) (_!=_ = returnTrue))
 
-(definstance (Eq (boxed (pair (mutable bool) (mutable bool))))
+(instance (Eq (boxed (pair (mutable bool) (mutable bool))))
   (_==_ = returnFalse) (_!=_ = returnFalse))
 
-(define p (dup (true, false)))
-(define mp:(boxed (pair (mutable bool) (mutable bool))) 
+(def p (dup (true, false)))
+(def mp:(boxed (pair (mutable bool) (mutable bool))) 
   (dup (true, false)))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (if (== mp mp) 0:int32 1)
     (if (== p p) 0 1)

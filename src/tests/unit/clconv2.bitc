@@ -46,14 +46,14 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (id x) x)
+(def (id x) x)
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (define i:int32 0)
-    (define l:(list bool) nil)
-    (define out stdio.stdout)
-    (define (f) (id (i, l, out)))
+    (def i:int32 0)
+    (def l:(list bool) nil)
+    (def out stdio.stdout)
+    (def (f) (id (i, l, out)))
     
     0))
 

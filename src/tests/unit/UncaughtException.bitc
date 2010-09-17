@@ -39,14 +39,14 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define i0 (the int32 0))
-(define i1 (the int32 1))
+(def i0 (the int32 0))
+(def i1 (the int32 1))
 
-(defexception exFred)
+(exception exFred)
 
-(define somelist (cons i0 (cons i1 nil)))
+(def somelist (cons i0 (cons i1 nil)))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (begin (throw exFred)
 	   somelist i0)))

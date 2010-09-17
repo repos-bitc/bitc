@@ -39,22 +39,22 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define i0 (the int32 0))
+(def i0 (the int32 0))
  
-(define (FUN x:'a y:'a) true)
+(def (FUN x:'a y:'a) true)
 
-(deftypeclass (ABC 'a)
+(trait (ABC 'a)
   FN: (fn 'a 'a -> bool))
 
 (forall ((IntLit 'a)) 
-  (definstance (ABC 'a)
+  (instance (ABC 'a)
     (FN = FUN)))
 
 // must not work
-//(definstance  (ABC int32)
+//(instance  (ABC int32)
 // FUN)
   
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (FN i0 i0) i0))
 

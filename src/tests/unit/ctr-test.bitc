@@ -39,12 +39,12 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defunion (unin 'a 'b) (C1 c1:'a c11:'b) (C2 c2:'a))
+(union (unin 'a 'b) (C1 c1:'a c11:'b) (C2 c2:'a))
  
-(define value (C2 0:int32)) 
+(def value (C2 0:int32)) 
   
-(define bVal value.C2)
-(define main.main:(fn (vector string) -> int32)
+(def bVal value.C2)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (if bVal value.C1 value.C2) 0))
 

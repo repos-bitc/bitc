@@ -39,12 +39,12 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct S
+(struct S
   i: int32
   m: (method -> bool))
 
-(define (S.m s:S) true)
+(def (S.m s:S) true)
 
-(define (main.main argv:(vector string))
+(def (main.main argv:(vector string))
   ((S 32).m)
   0:int32)

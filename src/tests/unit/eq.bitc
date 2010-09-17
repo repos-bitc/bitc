@@ -39,42 +39,42 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(deftypeclass (EQL 'a)
+(trait (EQL 'a)
   === : (fn 'a 'a -> bool)
   )
 
 (forall ((EQL 'a)) 
-  (deftypeclass (ORD 'a)
+  (trait (ORD 'a)
     <<== : (fn 'a 'a -> bool)
   ))
 
-//(definstance (EQL 'a) ==)
-(definstance (EQL bool) (=== = ==))
-(definstance (EQL int32) (=== = ==))
-(definstance (ORD int32) (<<== = <=))
-//(definstance (ORD int64) (lambda (x y) (<= x y)))
+//(instance (EQL 'a) ==)
+(instance (EQL bool) (=== = ==))
+(instance (EQL int32) (=== = ==))
+(instance (ORD int32) (<<== = <=))
+//(instance (ORD int64) (lambda (x y) (<= x y)))
  
 
-(define P ===)
-(define (T a b) (and (<<== a b) (=== a b)))
-(define (U a) (<<== a a))
-//(define R (P (the int32 123) 456))
+(def P ===)
+(def (T a b) (and (<<== a b) (=== a b)))
+(def (U a) (<<== a a))
+//(def R (P (the int32 123) 456))
 
 // Should not work
-//(define RR (P (the int64 123) 456))
+//(def RR (P (the int64 123) 456))
 
 // Should not work
-//(definstance (ORD int64) <=)
-//(define RPQ (<<== (the int64 123) 456)) 
+//(instance (ORD int64) <=)
+//(def RPQ (<<== (the int64 123) 456)) 
 
-(definstance (Eq (list 'a)) 
+(instance (Eq (list 'a)) 
   (_==_ = (lambda (x y) true))
   (_!=_ = (lambda (x y) false)))
 
-(definstance (EQL (list 'a)) (=== = ==))
-(define (f x:(list 'a)) (=== x x))
+(instance (EQL (list 'a)) (=== = ==))
+(def (f x:(list 'a)) (=== x x))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (=== (the int32 10) 20)
     (=== true false)

@@ -39,15 +39,15 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct S1 f: (fn -> int32))
-(defstruct S2 i:int32 f: (method -> int32))
+(struct S1 f: (fn -> int32))
+(struct S2 i:int32 f: (method -> int32))
 
-(define (S2.f s:S2) s.i)
-(define (zero) 0:int32)
+(def (S2.f s:S2) s.i)
+(def (zero) 0:int32)
 
-(define (fm_poly s) (s.f))
+(def (fm_poly s) (s.f))
 
-(define (main.main argv:(vector string))
+(def (main.main argv:(vector string))
   (fm_poly (S1 zero))
   (fm_poly (S2 0))
   )

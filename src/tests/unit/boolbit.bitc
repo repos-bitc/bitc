@@ -38,9 +38,9 @@
 bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
-(defstruct bst f1:(bitfield bool 1) (fill (bitfield uint32 31)))
+(struct bst f1:(bitfield bool 1) (fill (bitfield uint32 31)))
 
-(define bstv (bst true))
-(define main.main:(fn (vector string) -> int32)
+(def bstv (bst true))
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (if bstv.f1 0 1)))

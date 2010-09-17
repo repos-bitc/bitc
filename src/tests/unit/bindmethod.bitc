@@ -39,9 +39,9 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define a23 ==)
+(def a23 ==)
 
-(define main.main:(fn (vector string) -> int32)  
+(def main.main:(fn (vector string) -> int32)  
   (lambda (argVec)
     (a23 true true)
     0:int32))

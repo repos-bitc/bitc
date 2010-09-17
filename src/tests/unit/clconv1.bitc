@@ -39,11 +39,11 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
  
-(define AddOne (lambda (x) (+ x 1)))
+(def AddOne (lambda (x) (+ x 1)))
 
-(define f (let ((x 1))
+(def f (let ((x 1))
 	    (lambda (y:int32) (+ x y))))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (f 0)))

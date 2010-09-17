@@ -38,16 +38,16 @@
 bitc version 0.11
 
 (forall ((CopyCompat 'a 'b)) 
-  (define abc: (fn 'a 'b -> ())
+  (def abc: (fn 'a 'b -> ())
     (lambda (x:'a y:'b) ())))
 
 (forall ((CopyCompat (boxed 'a) (boxed 'a)))
-  (define fgh:(fn 'a 'b -> ())
+  (def fgh:(fn 'a 'b -> ())
     (lambda (x:'a y:'b) ())))
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn (vector string) -> int32) 
+(def main.main:(fn (vector string) -> int32) 
   (lambda (argv)  
     (abc (10, 20):(pair int32 (mutable int32))
 	 (10, 20):(pair int32 int32) )

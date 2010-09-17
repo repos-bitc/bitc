@@ -39,13 +39,13 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defunion unin:unboxed C1 (C2 c21:int32 c22:bool) C3) 
+(union unin:unboxed C1 (C2 c21:int32 c22:bool) C3) 
 
-(definstance (Eq unin) 
+(instance (Eq unin) 
   (_==_ = (lambda (x y) true))
   (_!=_ = (lambda (x y) false)))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (let ((n:(mutable int32) 10))
       C1 (C2 10 true)

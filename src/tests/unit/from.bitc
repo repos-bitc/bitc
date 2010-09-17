@@ -41,7 +41,7 @@ bitc version 0.11
 (provide bitc.main main)
 (import bitc.list (map as MAP))
 
-(define main:(fn (vector string) -> int32)
+(def main:(fn (vector string) -> int32)
   (lambda (argvec)
     (MAP (lambda (x) x) (cons true nil))
     0))

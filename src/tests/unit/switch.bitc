@@ -39,21 +39,21 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (id x) x)
-(define i0 (the int32 0))
+(def (id x) x)
+(def i0 (the int32 0))
  
-(defunion (unin 'a 'b) (C1 c1:'a c11:'b) (C2 c2:'a))
+(union (unin 'a 'b) (C1 c1:'a c11:'b) (C2 c2:'a))
  
-(define value (C2 i0)) 
+(def value (C2 i0)) 
 
-(define xin (switch xyz value 
+(def xin (switch xyz value 
 		   (C1 xyz.c1)
 		   (C2 xyz.c2)))
-(define out (switch xyz value 
+(def out (switch xyz value 
 		    (C1 xyz.c1)
 		    (otherwise i0)))
   
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     out
     xin))

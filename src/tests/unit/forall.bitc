@@ -39,37 +39,37 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define i0 (the int32 0))
+(def i0 (the int32 0))
  
-(deftypeclass (TC2 'a 'b)
+(trait (TC2 'a 'b)
  *!*: (fn 'a 'b -> bool)
  )
 
 (forall ((TC2 'a 'b))
-  (defstruct (S2 'a 'b) f1:'a f2:'b))
+  (struct (S2 'a 'b) f1:'a f2:'b))
 (forall ((TC2 'a 'b)) 
-  (defunion (U2 'a 'b)
+  (union (U2 'a 'b)
     u1
     (u2 a:'a b:'b)
     (u3 r:(U2 'a 'b))))
 
 (forall ((TC2 'a 'b)) 
-  (deftypeclass (TC3 'a 'b 'c)
+  (trait (TC3 'a 'b 'c)
     $: (fn 'a 'b -> 'c)
     ))
 
-(definstance (TC2 'a 'a) (*!* = (lambda (x y) true)))
+(instance (TC2 'a 'a) (*!* = (lambda (x y) true)))
 
 (forall ((TC2 'a 'b))
   (proclaim abc:  (fn 'a 'b -> bool)))
 
 (forall ((TC2 'a 'b)) 
-  (define abc:(fn 'a 'b -> bool)
+  (def abc:(fn 'a 'b -> bool)
     (lambda (x y) true)))
 
-(define Q *!*)
+(def Q *!*)
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
   (S2 i0 i0)
   (u2 true false)

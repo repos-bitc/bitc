@@ -38,10 +38,10 @@
 bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
-(define p:(mutable bool) false) 
-(define V1  (vector true p))
-(define V2  (vector p))
-(define main.main:(fn (vector string) -> int32)
+(def p:(mutable bool) false) 
+(def V1  (vector true p))
+(def V2  (vector p))
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     V1[0]
     0))

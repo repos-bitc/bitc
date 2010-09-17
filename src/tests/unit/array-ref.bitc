@@ -39,15 +39,15 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define (g x:(ArrayRef 'a)) 
+(def (g x:(ArrayRef 'a)) 
   x.length)
 
-(define (f x:(ArrayRef 'a)) 
+(def (f x:(ArrayRef 'a)) 
   x[(/ (g x) 2)])
 
-(define arr (array 1 2 3 4 5 6 7 8 9 10))
+(def arr (array 1 2 3 4 5 6 7 8 9 10))
 
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (f arr)
     0:int32))

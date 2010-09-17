@@ -40,6 +40,6 @@ bitc version 0.11
 (provide bitc.main main)
 (import bitc.stdio as stdio)
 
-(define main:(fn (vector string) -> int32)
+(def main:(fn (vector string) -> int32)
   (lambda (argvec)
     0))

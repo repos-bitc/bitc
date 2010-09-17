@@ -285,15 +285,7 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_DEF
 
 // S-expr syntax:
-%token <tok> tk_DEFSTRUCT
-%token <tok> tk_DEFOBJECT
-%token <tok> tk_DEFUNION
-%token <tok> tk_DEFREPR
-%token <tok> tk_DEFEXCEPTION
-%token <tok> tk_DEFTYPECLASS
-%token <tok> tk_DEFINSTANCE
 %token <tok> tk_DEFTHM
-%token <tok> tk_DEFINE
 %token <tok> tk_DECLARE
 %token <tok> tk_PROCLAIM
 %token <tok> tk_EXTERNAL
@@ -975,7 +967,7 @@ blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints trn_optdoc
   $$->child(0)->defForm = $$;
 };
 
-sxp_type_definition: LP tk_DEFSTRUCT sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_fields_and_methods RP {
+sxp_type_definition: LP tk_STRUCT sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_fields_and_methods RP {
   SHOWPARSE("sxp_type_definition -> ( DEFSTRUCT sxp_ptype_name sxp_val "
             "trn_optdocstring sxp_declares sxp_fields_and_methods )");
   $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $4,
@@ -999,7 +991,7 @@ blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints trn_optdocs
   $$->child(0)->defForm = $$;
 }
 
-sxp_type_definition: LP tk_DEFUNION sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_constructors  RP  {
+sxp_type_definition: LP tk_UNION sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_constructors  RP  {
   SHOWPARSE("sxp_type_definition -> ( DEFUNION sxp_ptype_name sxp_val "
             "trn_optdocstring sxp_declares sxp_constructors");
   $$ = AST::make(at_defunion, $2.loc, 
@@ -1013,7 +1005,7 @@ sxp_type_definition: LP tk_DEFUNION sxp_ptype_name sxp_val trn_optdocstring sxp_
 };
 
 /* // REPR TYPES */
-/* type_definition: '(' tk_DEFREPR sxp_defident sxp_val trn_optdocstring sxp_declares reprbody  ')'  { */
+/* type_definition: '(' tk_REPR sxp_defident sxp_val trn_optdocstring sxp_declares reprbody  ')'  { */
 /*   SHOWPARSE("sxp_type_definition -> ( DEFUNION sxp_ptype_name sxp_val " */
 /*             "trn_optdocstring sxp_declares reprbody"); */
 /*   $$ = AST::make(at_defrepr, $2.loc, $3->child(0), $3->child(1), $4, */
@@ -1134,7 +1126,7 @@ blk_repr_repr: blk_ident tk_EQUALS intLit {
   $$ = AST::make(at_reprrepr, $2.loc, $1, $3);
 };
 
-sxp_type_definition: LP tk_DEFREPR sxp_defident sxp_val trn_optdocstring sxp_declares sxp_repr_constructors  RP {
+sxp_type_definition: LP tk_REPR sxp_defident sxp_val trn_optdocstring sxp_declares sxp_repr_constructors  RP {
   SHOWPARSE("sxp_type_definition -> ( DEFREPR sxp_defident sxp_val "
             "trn_optdocstring sxp_declares sxp_repr_constructors");
   $$ = AST::make(at_defrepr, $2.loc, $3, 
@@ -1203,7 +1195,7 @@ blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints trn_optdocstring b
   $$->child(0)->defForm = $$;
 };
 
-sxp_type_definition: LP tk_DEFOBJECT sxp_ptype_name trn_optdocstring sxp_declares sxp_methods_only RP  {
+sxp_type_definition: LP tk_OBJECT sxp_ptype_name trn_optdocstring sxp_declares sxp_methods_only RP  {
   SHOWPARSE("sxp_type_definition -> ( DEFOBJECT sxp_ptype_name "
             "trn_optdocstring sxp_declares sxp_methods_only )");
 
@@ -1235,7 +1227,7 @@ blk_type_decl: blk_val tk_STRUCT blk_ptype_name blk_constraints blk_externals {
   $$->getID()->externalName = $5->externalName;
 };
 
-// sxp_type_decl: LP tk_DEFSTRUCT sxp_ptype_name sxp_val sxp_externals RP {
+// sxp_type_decl: LP tk_STRUCT sxp_ptype_name sxp_val sxp_externals RP {
 //   SHOWPARSE("sxp_type_decl -> ( DEFSTRUCT sxp_ptype_name sxp_val sxp_externals )");
 //   $$ = AST::make(at_declstruct, $2.loc, 
 //                  $3->child(0),  /* ident */
@@ -1266,7 +1258,7 @@ blk_type_decl: blk_val tk_UNION blk_ptype_name blk_constraints blk_externals {
   $$->getID()->externalName = $5->externalName;
 };
 
-// sxp_type_decl: LP tk_DEFUNION sxp_ptype_name sxp_val sxp_externals RP {
+// sxp_type_decl: LP tk_UNION sxp_ptype_name sxp_val sxp_externals RP {
 //   SHOWPARSE("sxp_type_decl -> ( DEFUNION sxp_ptype_name sxp_val sxp_externals )");
 //   $$ = AST::make(at_declunion, $2.loc, 
 //                  $3->child(0), 
@@ -1296,7 +1288,7 @@ blk_type_decl: blk_val tk_REPR blk_defident blk_externals {
   $$->getID()->externalName = $4->externalName;
 };
 
-// sxp_type_decl: LP tk_DEFREPR sxp_defident sxp_val sxp_externals RP {
+// sxp_type_decl: LP tk_REPR sxp_defident sxp_val sxp_externals RP {
 //   SHOWPARSE("sxp_type_decl -> ( DEFREPR sxp_defident sxp_val sxp_externals )");
 //   $$ = AST::make(at_declrepr, $2.loc, $3, 
 //                  AST::make(at_tvlist), /* empty tvlist */
@@ -1392,7 +1384,7 @@ blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring {
   $$->child(0)->defForm = $$;
 };
 
-sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident sxp_val trn_optdocstring RP {
+sxp_type_definition: LP tk_EXCEPTION sxp_ident sxp_val trn_optdocstring RP {
   SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident sxp_val )");
   $3->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $2.loc, 
@@ -1418,7 +1410,7 @@ blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring IsILCB b
   $$->child(0)->defForm = $$;
 };
 
-sxp_type_definition: LP tk_DEFEXCEPTION sxp_ident sxp_val trn_optdocstring sxp_fields RP {
+sxp_type_definition: LP tk_EXCEPTION sxp_ident sxp_val trn_optdocstring sxp_fields RP {
   SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident sxp_val sxp_fields )");
   $3->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $2.loc,
@@ -1441,7 +1433,7 @@ blk_tc_definition: blk_openclosed tk_TRAIT blk_ptype_name blk_constraints trn_op
   $$->child(0)->defForm = $$;
 };
 
-sxp_tc_definition: LP tk_DEFTYPECLASS sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_openclosed sxp_method_decls RP {
+sxp_tc_definition: LP tk_TRAIT sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_openclosed sxp_method_decls RP {
   SHOWPARSE("sxp_tc_definition -> ( DEFTYPECLASS sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_openclosed sxp_method_decls)");
   $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0),
                  $3->child(1), $5, $6, $7);
@@ -1449,7 +1441,7 @@ sxp_tc_definition: LP tk_DEFTYPECLASS sxp_ptype_name trn_optdocstring sxp_tc_dec
   $$->child(0)->defForm = $$;
 };
 
-//tc_definition: '(' tk_DEFTYPECLASS sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_method_decls ')' {
+//tc_definition: '(' tk_TRAIT sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_method_decls ')' {
 //  SHOWPARSE("sxp_tc_definition -> ( DEFTYPECLASS sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_openclosed sxp_method_decls)");
 //  $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0),
 //                 $3->child(1), $5, $6, $3->child(2));
@@ -1550,13 +1542,13 @@ blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring I
   $$ = AST::make(at_definstance, $1.loc, $2, $6, $3);
 };
 
-sxp_ti_definition: LP tk_DEFINSTANCE sxp_constraint trn_optdocstring RP {
+sxp_ti_definition: LP tk_INSTANCE sxp_constraint trn_optdocstring RP {
   SHOWPARSE("sxp_ti_definition -> ( DEFINSTANCE sxp_constraint [docstring])");
   $$ = AST::make(at_definstance, $2.loc, $3,
                  AST::make(at_tcmethods, $5.loc),
                  AST::make(at_constraints, $3->loc));
 };
-sxp_ti_definition: LP tk_DEFINSTANCE sxp_constraint trn_optdocstring sxp_method_bindings RP {
+sxp_ti_definition: LP tk_INSTANCE sxp_constraint trn_optdocstring sxp_method_bindings RP {
   SHOWPARSE("sxp_ti_definition -> ( DEFINSTANCE sxp_constraint [docstring] sxp_method_bindings)");
   $$ = AST::make(at_definstance, $2.loc, $3, $5,
                  AST::make(at_constraints, $3->loc));
@@ -1608,12 +1600,12 @@ blk_value_definition: tk_DEF blk_defpattern blk_constraints trn_optdocstring '='
   SHOWPARSE("blk_value_definition -> DEF blk_defpattern blk_constraints trn_optdocstring = blk_expr");
   $$ = AST::make(at_define, $1.loc, $2, $6, $3);
 };
-sxp_value_definition: LP tk_DEFINE sxp_defpattern sxp_expr RP  {
+sxp_value_definition: LP tk_DEF sxp_defpattern sxp_expr RP  {
   SHOWPARSE("sxp_value_definition -> ( DEFINE  sxp_defpattern sxp_expr )");
   $$ = AST::make(at_define, $2.loc, $3, $4);
   $$->addChild(AST::make(at_constraints));
 };
-sxp_value_definition: LP tk_DEFINE sxp_defpattern trn_docstring sxp_expr RP  {
+sxp_value_definition: LP tk_DEF sxp_defpattern trn_docstring sxp_expr RP  {
   SHOWPARSE("sxp_value_definition -> ( DEFINE  sxp_defpattern trn_docstring sxp_expr )");
   $$ = AST::make(at_define, $2.loc, $3, $5);
   $$->addChild(AST::make(at_constraints));
@@ -1646,7 +1638,7 @@ blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constra
 
 // Define convenience syntax case 1: no arguments
 // No trn_docstring here because of sxp_block
-sxp_value_definition: LP tk_DEFINE '(' sxp_defident ')' sxp_block RP {
+sxp_value_definition: LP tk_DEF '(' sxp_defident ')' sxp_block RP {
   SHOWPARSE("sxp_value_definition -> ( DEFINE  ( sxp_defident ) [docstring] sxp_block )");
   $6 = stripDocString($6);
   shared_ptr<AST> iRetBlock =
@@ -1662,7 +1654,7 @@ sxp_value_definition: LP tk_DEFINE '(' sxp_defident ')' sxp_block RP {
 
 // Define convenience syntax case 3: one or more arguments
 // No trn_docstring here because of sxp_block
-sxp_value_definition: LP tk_DEFINE '(' sxp_defident sxp_lambdapatterns ')'
+sxp_value_definition: LP tk_DEF '(' sxp_defident sxp_lambdapatterns ')'
                   sxp_block RP {
   SHOWPARSE("sxp_value_definition -> ( DEFINE  ( sxp_defident sxp_lambdapatterns ) "
             "[docstring] sxp_block )");

@@ -39,8 +39,8 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define $ (the int32 100))
-(define $@%<> (the int32 25))
-(define main.main:(fn (vector string) -> int32) 
+(def $ (the int32 100))
+(def $@%<> (the int32 25))
+(def main.main:(fn (vector string) -> int32) 
   (lambda (argVec) 
     (+ $ $@%<>) 0))

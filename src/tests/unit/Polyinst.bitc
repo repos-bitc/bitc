@@ -39,10 +39,10 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct st1 a:int32 b:(list bool))
+(struct st1 a:int32 b:(list bool))
 
-(defstruct (st2 'a 'b) a:'a b:'b)
-(define main.main:(fn (vector string) -> int32)
+(struct (st2 'a 'b) a:'a b:'b)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (cons 
      (st2 (st2 true (cons 0:int32 nil)) 

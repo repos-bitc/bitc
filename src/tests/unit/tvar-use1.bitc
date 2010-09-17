@@ -37,7 +37,7 @@
 
 bitc version 0.11
 
-(define  (somefun lst:(list 'a))
+(def  (somefun lst:(list 'a))
   (let ((v:'a true))  // should resolve to the same tvar
     (let ((xyz (lambda (LST) ())))
       true)))
@@ -45,6 +45,6 @@ bitc version 0.11
 
 (import bitc.main as main)
 (provide bitc.main main)
-(define main.main:(fn (vector string) -> int32)
+(def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (somefun nil) 0))

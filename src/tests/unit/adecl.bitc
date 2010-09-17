@@ -40,10 +40,10 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(define a23 (array (array 1:int32 2 3)
+(def a23 (array (array 1:int32 2 3)
 		   (array 4 5 6)))
 
-(define main.main:(fn (vector string) -> int32)  
+(def main.main:(fn (vector string) -> int32)  
   (lambda (argVec)
     (begin a23.length)
     0:int32))
