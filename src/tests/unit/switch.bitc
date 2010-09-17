@@ -46,7 +46,7 @@ bitc version 0.11
  
 (define value (C2 i0)) 
 
-(define in (switch xyz value 
+(define xin (switch xyz value 
 		   (C1 xyz.c1)
 		   (C2 xyz.c2)))
 (define out (switch xyz value 
@@ -56,6 +56,6 @@ bitc version 0.11
 (define main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     out
-    in))
+    xin))
   
 

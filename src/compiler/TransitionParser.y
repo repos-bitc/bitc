@@ -1348,6 +1348,10 @@ sxp_val: ':' tk_VAL {
   SHOWPARSE("sxp_val -> ':' VAL");
   $$ = AST::make(at_valCat, $2);
 };
+sxp_val: ':' tk_UNBOXED {
+  SHOWPARSE("sxp_val -> ':' UNBOXED");
+  $$ = AST::make(at_unboxedCat, $2);
+};
 sxp_val: ':' tk_OPAQUE {
   SHOWPARSE("sxp_val -> ':' OPAQUE");
   $$ = AST::make(at_opaqueCat, $2);
@@ -1357,6 +1361,10 @@ sxp_val: ':' tk_REF {
   SHOWPARSE("sxp_val -> ':' REF");
   $$ = AST::make(at_refCat, $2);
 };
+sxp_val: tk_BOXED {
+  SHOWPARSE("sxp_val -> BOXED");
+  $$ = AST::make(at_boxedCat);
+}
 
 blk_openclosed: {
   SHOWPARSE("blk_closed -> <empty>");
@@ -4130,6 +4138,15 @@ blk_ident: tk_ReservedWord {
   cerr << $1.loc.asString() << ": The token \"" << $1.str
        << "\" is reserved for future use.\n";
   lexer->num_errors++;
+  $$ = AST::make(at_ident, $1);
+};
+
+sxp_ident: tk_EQUALS {
+  SHOWPARSE("sxp_ident -> <Ident " + $1.str + ">");
+  $$ = AST::make(at_ident, $1);
+};
+sxp_ident: '=' {
+  SHOWPARSE("sxp_ident -> <Ident " + $1.str + ">");
   $$ = AST::make(at_ident, $1);
 };
 
