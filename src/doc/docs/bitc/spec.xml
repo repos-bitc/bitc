@@ -3735,7 +3735,7 @@ bitsizeof(<em>T</em>)</literallayout>
             then:
           </p>
           <literallayout>
-<em>e</em>[<em>e<sub>i</sub></em>]
+<em>e</em>[<em>e<sub>i</sub></em>]</literallayout>
           <p indent="no">
             returns the
             <em>e<sub>i</sub></em>'th element of the array, ArrayRef,
