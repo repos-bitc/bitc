@@ -70,18 +70,18 @@ enum ResolverFlagValues {
   /// A name binding is public
   RSLV_BIND_PUBLIC              = 0x0020u,
 
-  /// Only public bindings must be used for name resolution
+  /// Only public bindings must be used for name resolution.
   RSLV_USE_ONLY_PUBLIC          = 0x0040u,
 
-  /// Don't warn about unused proclaimations in source module 
-  /// disabled in the unified UOC past polyinstantiation
+  /// Don't warn about unused proclaimations in source module;
+  /// disabled in the unified UOC past polyinstantiation.
   RSLV_NO_RESOLVE_DECL          = 0x0080u,
 
   /// Currently processing a defunion (used to check that tagtype
   /// declarations onty occur on defunions.
   RSLV_WITHIN_DEFUNION          = 0x0100u,
 
-  /// Dont' import prelude
+  /// Dont' import prelude.
   RSLV_SYM_NO_PRELUDE           = 0x0200u,
 
   /// Used to mark legal contexts (only on the left of a select) where

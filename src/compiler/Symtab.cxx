@@ -102,12 +102,24 @@ warnUnresRef(std::ostream& errStream,
     case at_declstruct:
     case at_proclaim:
       {
+        // Various phases introduce proclaims internally. Don't
+        // complain about those:
         if (ast->flags & PROCLAIM_IS_INTERNAL)
           break;
         
-        shared_ptr<AST> def = env->getBinding(ast->child(0)->s);
-        if (((ast->flags & DEF_IS_EXTERNAL) == 0) && (def == NULL)) {
+        // If the declaration is identified as externally provided,
+        // don't complain about that:
+        if (ast->flags & DEF_IS_EXTERNAL)
+          break;
 
+        // If we saw a declaration first, that will have been bound in
+        // the environment. A subsequent definition replaces that
+        // binding in-place, and following that a further declaration
+        // will not change the environment. So if we look up the
+        // symbol in the environment and get a declaration, we haven't
+        // seen a definition:
+        shared_ptr<AST> binding = env->getBinding(ast->child(0)->s);
+        if (binding->isDecl) {
           errStream << ast->loc << ": WARNING: " 
                     << "Local declaration of " << ast->child(0)->s 
                     << " found here, but no definition found."
@@ -116,19 +128,6 @@ warnUnresRef(std::ostream& errStream,
           if (Options::Wall)
             errorFree = false;
           break;
-        }
-
-        /// @bug Swaroop: This appears to be a check that private
-        /// forward references are eventually resolved. If so, the
-        /// diagnostic is awful. That's easy to fix, but am I
-        /// understanding correctly what this is for?
-        if (def != NULL) {
-          if (def->isDecl) {
-            errStream << ast->loc << ": ERROR: declaration of " << ast->child(0)->s
-                      << " appears to be it's own defintion!"
-                      << std::endl;
-            assert(false);
-          }
         }
       }
     default:
@@ -1006,6 +1005,10 @@ resolve(std::ostream& errStream,
       for (size_t c = 1; c < ast->children.size(); c++)
         RESOLVE(ast->child(c), env, lamLevel, DEF_MODE, identType, 
                 GC_NULL, flags);
+
+      // In an interface unit, we do not check for unresolved
+      // references, because they will (hopefully) be satisfied by
+      // providing modules.
 
       break;
     }
