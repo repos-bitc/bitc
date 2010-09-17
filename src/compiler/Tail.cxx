@@ -94,8 +94,6 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case agt_ow:
   case agt_qtype:
   case agt_fielditem:
-  case at_refCat:
-  case at_valCat:
   case at_boxedCat:
   case at_unboxedCat:
   case at_closed:
@@ -137,12 +135,12 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_typeapp:
   case at_arrayType:
   case at_vectorType:
-  case at_refType:
+  case at_boxedType:
   case at_arrayRefType:
   case at_byRefType:
   case at_exceptionType:
   case at_dummyType:
-  case at_valType:
+  case at_unboxedType:
   case at_primaryType:
   case at_fieldType:
   case at_fnargVec:

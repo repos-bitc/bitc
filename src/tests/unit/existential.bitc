@@ -39,7 +39,7 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct Obj:val
+(defstruct Obj:unboxed
   inc: (fn -> ())
   odd: (fn -> bool)) 
 

@@ -144,8 +144,6 @@ TopInit(std::ostream& errStream,
   bool errFree = true;
 
   switch(ast->astType) {
-  case at_refCat:
-  case at_valCat:
   case at_boxedCat:
   case at_unboxedCat:
   case at_closed:
@@ -236,8 +234,8 @@ TopInit(std::ostream& errStream,
   case at_declare:
   case at_suspend:
   case at_bitfield:
-  case at_refType:
-  case at_valType:
+  case at_boxedType:
+  case at_unboxedType:
   case at_arrayRefType:
   case at_byRefType:
   case at_fn:

@@ -37,15 +37,15 @@
 
 bitc version 0.11
 (forall ((CopyCompat 'a char))
-  (define charEQ:(fn (ref 'a) -> bool)
+  (define charEQ:(fn (boxed 'a) -> bool)
     (lambda (x) true)))
 
 (import bitc.main as main)
 (provide bitc.main main)
 (define main.main:(fn (vector string) -> int32) 
   (lambda (argv)  
-    (let ((const_a:(ref char) (dup 'a'))
-	  (mutable_a:(ref (mutable char)) (dup 'a')))
+    (let ((const_a:(boxed char) (dup 'a'))
+	  (mutable_a:(boxed (mutable char)) (dup 'a')))
       (charEQ const_a)
       (charEQ mutable_a))
     0))

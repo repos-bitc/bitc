@@ -48,14 +48,14 @@ bitc version 0.11
 (define (returnTrue x y) true)
 (define (returnFalse x y) false)
 
-(definstance (Eq (ref (pair bool bool)))
+(definstance (Eq (boxed (pair bool bool)))
   (_==_ = returnTrue) (_!=_ = returnTrue))
 
-(definstance (Eq (ref (pair (mutable bool) (mutable bool))))
+(definstance (Eq (boxed (pair (mutable bool) (mutable bool))))
   (_==_ = returnFalse) (_!=_ = returnFalse))
 
 (define p (dup (true, false)))
-(define mp:(ref (pair (mutable bool) (mutable bool))) 
+(define mp:(boxed (pair (mutable bool) (mutable bool))) 
   (dup (true, false)))
 
 (define main.main:(fn (vector string) -> int32)

@@ -138,8 +138,6 @@ findusedef(std::ostream &errStream,
   case agt_ow:
   case agt_qtype:
   case agt_fielditem:
-  case at_refCat:
-  case at_valCat:
   case at_unboxedCat:
   case at_boxedCat:
   case at_closed:
@@ -406,10 +404,10 @@ findusedef(std::ostream &errStream,
   case at_dummyType:
   case at_arrayType:
   case at_vectorType:
-  case at_refType:
+  case at_boxedType:
   case at_byRefType:
   case at_arrayRefType:
-  case at_valType:
+  case at_unboxedType:
   case at_primaryType:
   case at_fnargVec:
   case at_mutableType:
@@ -812,8 +810,8 @@ cl_convert_ast(shared_ptr<AST> ast,
         // tvList: to be fixed-up later.
         shared_ptr<AST> tvlist = AST::make(at_tvlist, ast->loc);
         defStruct->addChild(tvlist);
-        // env records are ref types
-        defStruct->addChild(AST::make(at_refCat));
+        // env records are boxed types
+        defStruct->addChild(AST::make(at_boxedCat));
         // no declares
         defStruct->addChild(AST::make(at_declares));
         // Parent AST for fields:
@@ -1054,7 +1052,7 @@ cl_heapify(shared_ptr<AST> ast)
         // wrap that in a REF:
         if (bpattern->children.size() == 2)
           bpattern->child(1) =
-            AST::make(at_refType, bpattern->loc, bpattern->child(1));
+            AST::make(at_boxedType, bpattern->loc, bpattern->child(1));
       }
 
       ast->child(1) = expr;

@@ -321,7 +321,7 @@ Type::asAST(const sherpa::LexLoc &loc,
   case ty_ref:
     {
       shared_ptr<AST> typ = t->Base()->asAST(loc, tvP);
-      ast = AST::make(at_refType, loc, typ);
+      ast = AST::make(at_boxedType, loc, typ);
       break;
     }
 

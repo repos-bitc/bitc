@@ -39,7 +39,7 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defrepr theRepr :val
+(defrepr theRepr :unboxed
   (Ct1 i:int32 k:int32 j:bool   (where (== i 10) (== k 10)))
   (Ct2 i:int32 k:int32 (where (== i 1) (== k 10)))
 

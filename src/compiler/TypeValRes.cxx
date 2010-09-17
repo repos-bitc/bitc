@@ -348,8 +348,6 @@ isExpansive(std::ostream& errStream,
       break;
     }
     
-  case at_refCat:
-  case at_valCat:
   case at_unboxedCat:
   case at_boxedCat:
   case at_closed:
@@ -376,10 +374,10 @@ isExpansive(std::ostream& errStream,
   case at_bitfield:
   case at_arrayRefType:
   case at_byRefType:
-  case at_refType:
+  case at_boxedType:
   case at_exceptionType:
   case at_dummyType:
-  case at_valType:
+  case at_unboxedType:
   case at_fn:
   case at_primaryType:
   case at_arrayType:

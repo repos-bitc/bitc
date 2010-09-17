@@ -225,8 +225,6 @@ ssa(std::ostream& errStream,
   switch(ast->astType) {
 
   case at_Null:
-  case at_refCat:
-  case at_valCat:
   case at_boxedCat:
   case at_unboxedCat:
   case at_closed:
@@ -280,8 +278,8 @@ ssa(std::ostream& errStream,
     
   case at_exceptionType:
   case at_dummyType:
-  case at_refType:
-  case at_valType:
+  case at_boxedType:
+  case at_unboxedType:
   case at_byRefType:
   case at_arrayRefType:
   case at_fn:

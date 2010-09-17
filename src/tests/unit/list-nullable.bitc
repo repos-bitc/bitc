@@ -40,7 +40,7 @@ bitc version 0.11
 (provide bitc.main main)
 
 // Check to ensure that (list (nullable bool)) occupies
-// only one word in the list, similar to (list (ref bool))
+// only one word in the list, similar to (list (boxed bool))
 
 (define ln (cons (not_null (dup true)) nil))
 (define main.main:(fn (vector string) -> int32)

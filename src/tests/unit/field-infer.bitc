@@ -39,8 +39,8 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct S1:val i: int32)
-(defstruct S2:ref b:bool i: int32)
+(defstruct S1:unboxed i: int32)
+(defstruct S2:boxed b:bool i: int32)
 
 (define (f x) x.i)
 

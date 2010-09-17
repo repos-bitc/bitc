@@ -454,8 +454,6 @@ resolve(std::ostream& errStream,
   switch(ast->astType) {
 
   case at_Null:
-  case at_refCat:
-  case at_valCat:
   case at_boxedCat:
   case at_unboxedCat:
   case at_opaqueCat:
@@ -1036,7 +1034,7 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
               id_union, ast, 
               (flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK)) | RSLV_BIND_PUBLIC);
-      if (category->astType == at_refCat || category->astType == at_boxedCat)
+      if (category->astType == at_boxedCat)
         tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
 
       // match at_tvlist
@@ -1077,7 +1075,6 @@ resolve(std::ostream& errStream,
       shared_ptr<AST> fields = ast->child(4);
 
       if (ast->astType == at_defexception &&
-          category->astType != at_refCat &&
           category->astType != at_boxedCat) {
         errStream << ast->loc << ": "
                   << "exception " << ast->child(0)->s
@@ -1103,7 +1100,7 @@ resolve(std::ostream& errStream,
       RESOLVE(ast->child(0), tmpEnv, lamLevel, DEF_MODE, 
               identType, ast,
               flags & (~RSLV_NEW_TV_OK) & (~RSLV_INCOMPLETE_OK) | RSLV_BIND_PUBLIC);
-      if (category->astType == at_refCat || category->astType == at_boxedCat)
+      if (category->astType == at_boxedCat)
         tmpEnv->setFlags(ast->child(0)->s, BF_COMPLETE);
       
       // match at_tvlist
@@ -1841,7 +1838,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_refType:
+  case at_boxedType:
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
@@ -1850,7 +1847,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_valType:
+  case at_unboxedType:
     {
       // match agt_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 

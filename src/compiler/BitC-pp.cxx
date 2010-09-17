@@ -302,12 +302,10 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     break;
 
 
-  case at_refCat:
   case at_boxedCat:
     if (!(ast->printVariant & pf_IMPLIED))
       out << "boxed";
     break;
-  case at_valCat:
   case at_unboxedCat:
     out << "unboxed";
     break;
@@ -373,14 +371,12 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     // Things that are implemented in blk_BitcP, but still need to be
     // here in support of something that hasn't moved yet:
     ////////////////////////////////////////////////////////////////////
-  case at_refCat:
   case at_boxedCat:
     if (!(ast->printVariant & pf_IMPLIED))
-      out << ":ref";
+      out << ":boxed";
     break;
-  case at_valCat:
   case at_unboxedCat:
-    out << ":val";
+    out << ":unboxed";
     break;
   case at_opaqueCat:
     out << ":opaque";
@@ -698,8 +694,8 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_arrayType:
   case at_byRefType:
   case at_arrayRefType:
-  case at_refType:
-  case at_valType:
+  case at_boxedType:
+  case at_unboxedType:
   case at_letStar:
   case at_declare:
   case at_cond:

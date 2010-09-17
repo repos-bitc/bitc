@@ -37,8 +37,8 @@
 
 bitc version 0.11
 
-(forall ((RefTypes (ref int32))) 
-  (define abc:(ref int32)
+(forall ((RefTypes (boxed int32))) 
+  (define abc:(boxed int32)
     (dup 10)))
 
 (forall ((RefTypes 'a)) 

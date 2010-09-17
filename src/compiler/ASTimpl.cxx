@@ -276,11 +276,11 @@ AST::atKwd() const
   case at_arrayRefType:
     return "ArrayRef";
 
-  case at_refType:
-    return "ref";
+  case at_boxedType:
+    return "boxed";
 
-  case at_valType:
-    return "val";
+  case at_unboxedType:
+    return "unboxed";
 
   case at_fn:
     return "fn";
@@ -534,15 +534,9 @@ AST::atKwd() const
   case at_tcapp:
     return "<tcapp>";
 
-  case at_refCat:
-    return "ref";
-
   case at_closed:
     return "closed";
     
-  case at_valCat:
-    return "val";
-
   case at_unboxedCat:
     return "unboxed";
 
@@ -905,7 +899,7 @@ AST::precedence() const
     return 2;
 
     /* blk_postfix_type */
-  case at_refType:
+  case at_boxedType:
   case at_arrayType:
   case at_vectorType:
     return 3;

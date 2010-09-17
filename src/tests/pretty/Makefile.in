@@ -127,7 +127,6 @@ quietly:
 
 install: all test
 
-c-source: $(SOURCE:%.bits=%.c)
 objects: $(OBJECTS)
 
 comp:
@@ -147,6 +146,8 @@ TESTOPTS=-v
 BUILD:
 	mkdir -p BUILD
 
+.PRECIOUS: $(SOURCE:%.bits=BUILD/%.bita)
+
 # Always check that these are up to date.
 #.PHONY: $(BITCC) $(LIBBITC_C_RUNTIME) $(LIBBITC_NO_GC)
 
@@ -160,7 +161,7 @@ $(LIBBITC_NO_GC): $(BITCC)
 $(BITCC):
 	make -C $(BITCC_SRC) BUILD/bitcc
 
-BUILD/%.bita: %.bits $(BITCC) $(LIBPRETTYA_SOURCE) | BUILD
+BUILD/%.bita: %.bits $(BITCC) | BUILD
 	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o $(EXPECT_OUTPUT) $(RUN_BITCC) $(INC) -c -o $@ $<
 
 %.test: BUILD/% | BUILD

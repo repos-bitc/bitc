@@ -302,9 +302,7 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_MUTABLE
 %token <tok> tk_SET
 %token <tok> tk_DEREF
-%token <tok> tk_REF
 %token <tok> tk_INNER_REF
-%token <tok> tk_VAL
 %token <tok> tk_UNBOXED
 %token <tok> tk_BOXED
 %left <tok> tk_PTR
@@ -1197,7 +1195,7 @@ blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints trn_optdocstring b
 
   // For the moment, all objects are value types:
   shared_ptr<AST> valCat = 
-    AST::make(at_valCat, LToken(tk_VAL, "val"));
+    AST::make(at_unboxedCat, LToken(tk_UNBOXED, "unboxed"));
 
   $$ = AST::make(at_defobject, $1.loc, $2->child(0), $2->child(1),
                  valCat,
@@ -1211,7 +1209,7 @@ sxp_type_definition: LP tk_DEFOBJECT sxp_ptype_name trn_optdocstring sxp_declare
 
   // For the moment, all objects are value types:
   shared_ptr<AST> valCat = 
-    AST::make(at_valCat, LToken(tk_VAL, "val"));
+    AST::make(at_unboxedCat, LToken(tk_UNBOXED, "unboxed"));
 
   $$ = AST::make(at_defobject, $2.loc, $3->child(0), $3->child(1),
                  valCat,
@@ -1341,14 +1339,10 @@ blk_val: tk_OPAQUE {
 
 sxp_val: {
   SHOWPARSE("sxp_val -> <empty>");
-  $$ = AST::make(at_refCat);
+  $$ = AST::make(at_boxedCat);
   $$->printVariant = pf_IMPLIED;
 };
 
-sxp_val: ':' tk_VAL {
-  SHOWPARSE("sxp_val -> ':' VAL");
-  $$ = AST::make(at_valCat, $2);
-};
 sxp_val: ':' tk_UNBOXED {
   SHOWPARSE("sxp_val -> ':' UNBOXED");
   $$ = AST::make(at_unboxedCat, $2);
@@ -1357,12 +1351,7 @@ sxp_val: ':' tk_OPAQUE {
   SHOWPARSE("sxp_val -> ':' OPAQUE");
   $$ = AST::make(at_opaqueCat, $2);
 };
-sxp_val: ':' tk_REF {
-  /* Same as :ref, since that is the default. */
-  SHOWPARSE("sxp_val -> ':' REF");
-  $$ = AST::make(at_refCat, $2);
-};
-sxp_val: tk_BOXED {
+sxp_val: ':' tk_BOXED {
   SHOWPARSE("sxp_val -> BOXED");
   $$ = AST::make(at_boxedCat);
 }
@@ -2264,7 +2253,7 @@ blk_primary_type: '(' blk_type_cpair ')' {
 // application-style alternate syntax for use in pretty-printing:
 blk_primary_type: tk_PTR '(' blk_type ')' {
   SHOWPARSE("blk_primary_type -> tk_PTR ( blk_type )");
-  $$ = AST::make(at_refType, $1.loc, $3);
+  $$ = AST::make(at_boxedType, $1.loc, $3);
 
 }
 blk_primary_type: tk_ARRAY '(' blk_type ',' natLit ')' {
@@ -2413,26 +2402,26 @@ sxp_type: sxp_primary_type {
 // REF TYPES [3.4.1]             
 blk_postfix_type: blk_postfix_type tk_PTR %prec tk_PTR {
   SHOWPARSE("blk_postfix_type -> blk_postfix_type PTR");
-  $$ = AST::make(at_refType, $2.loc, $1);
+  $$ = AST::make(at_boxedType, $2.loc, $1);
 };
 //blk_prefix_type: tk_BOXED blk_type {
 //  SHOWPARSE("blk_prefix_type -> BOXED blk_type");
-//  $$ = AST::make(at_refType, $1.loc, $2);
+//  $$ = AST::make(at_boxedType, $1.loc, $2);
 //};
 
-sxp_type: '(' tk_REF sxp_type ')' {
-  SHOWPARSE("sxp_type -> ( REF sxp_type )");
-  $$ = AST::make(at_refType, $2.loc, $3);
+sxp_type: '(' tk_BOXED sxp_type ')' {
+  SHOWPARSE("sxp_type -> ( BOXED sxp_type )");
+  $$ = AST::make(at_boxedType, $2.loc, $3);
 };
 
 // VAL TYPES [3.4.2]
 blk_prefix_type: tk_UNBOXED blk_type {
   SHOWPARSE("blk_type -> UNBOXED blk_type");
-  $$ = AST::make(at_valType, $1.loc, $2);
+  $$ = AST::make(at_unboxedType, $1.loc, $2);
 };
-sxp_type: '(' tk_VAL sxp_type ')' {
-  SHOWPARSE("sxp_type -> ( VAL sxp_type )");
-  $$ = AST::make(at_valType, $2.loc, $3);
+sxp_type: '(' tk_UNBOXED sxp_type ')' {
+  SHOWPARSE("sxp_type -> ( UNBOXED sxp_type )");
+  $$ = AST::make(at_unboxedType, $2.loc, $3);
 };
 
 // FUNCTION TYPES [3.4.3]

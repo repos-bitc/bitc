@@ -1907,8 +1907,6 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case agt_expr_or_define:
   case agt_eform:
   case at_Null:
-  case at_refCat:
-  case at_valCat:
   case at_unboxedCat:
   case at_boxedCat:
   case at_closed:
@@ -2210,12 +2208,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->envs.gamma = defGamma;
       
       shared_ptr<AST> category = ast->child(2);
-      bool isRefType = ((category->astType == at_refCat) || 
-                        (category->astType == at_boxedCat));
+      bool isBoxedType = (category->astType == at_boxedCat);
       
       CHKERR(errFree, InferUnion(errStream, ast, defGamma, instEnv,
                                  impTypes, tcc,
-                                 trail, mode, isRefType, 
+                                 trail, mode, isBoxedType, 
                                  true, true, ti_flags));
       
       gamma->mergeBindingsFrom(defGamma);      
@@ -2228,12 +2225,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->envs.gamma = defGamma;
 
       shared_ptr<AST> category = ast->child(2);
-      bool isRefType = ((category->astType == at_refCat) || 
-                        (category->astType == at_boxedCat));
+      bool isBoxedType = (category->astType == at_boxedCat);
 
       CHKERR(errFree, InferStruct(errStream, ast, defGamma, instEnv,
                                   impTypes, tcc,
-                                  trail, mode, isRefType, 
+                                  trail, mode, isBoxedType, 
                                   true, true, ti_flags));
 
       gamma->mergeBindingsFrom(defGamma);      
@@ -2246,12 +2242,11 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       ast->envs.gamma = defGamma;
 
       shared_ptr<AST> category = ast->child(2);
-      bool isRefType = ((category->astType == at_refCat) || 
-                        (category->astType == at_boxedCat));
+      bool isBoxedType = (category->astType == at_boxedCat);
 
       CHKERR(errFree, InferObject(errStream, ast, defGamma, instEnv,
                                   impTypes, tcc,
-                                  trail,  mode, isRefType, 
+                                  trail,  mode, isBoxedType, 
                                   true, true, TI_NO_FLAGS));
 
       gamma->mergeBindingsFrom(defGamma);      
@@ -2273,18 +2268,17 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       shared_ptr<AST> category = ast->child(2);
 
-      bool isRefType = ((category->astType == at_refCat) || 
-                        (category->astType == at_boxedCat));
+      bool isBoxedType = (category->astType == at_boxedCat);
 
       // match at_ident
       // FIX: (shap) Not convinced this is correct for opaque...
       TypeTag decl_ty;      
       switch(ast->astType) {
       case at_declunion:
-        decl_ty = (isRefType ?  ty_unionr : ty_unionv);
+        decl_ty = (isBoxedType ?  ty_unionr : ty_unionv);
         break;
       case at_declstruct:
-        decl_ty = (isRefType ? ty_structr : ty_structv);
+        decl_ty = (isBoxedType ? ty_structr : ty_structv);
         break;
       default:
         die();
@@ -2948,7 +2942,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
-  case at_refType:
+  case at_boxedType:
     {
       // match agt_type
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, tcc,
@@ -2974,7 +2968,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
-  case at_valType:
+  case at_unboxedType:
     {
       ast->symType = Type::make(ty_tvar);
       

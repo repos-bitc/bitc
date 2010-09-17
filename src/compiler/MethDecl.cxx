@@ -117,10 +117,9 @@ insertMethDecls(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
         }
       }
 
-      // If the structure is a :val type, we need to wrap the argument
+      // If the structure is an unboxed type, we need to wrap the argument
       // type in a BY-REF. Check child(4):
-      if ((theTypeDefn->child(4)->astType == at_valCat) ||
-          (theTypeDefn->child(4)->astType == at_unboxedCat))
+      if (theTypeDefn->child(4)->astType == at_unboxedCat)
         structArgType = 
           AST::make(at_byRefType, structArgType->child(4)->loc,
                     structArgType);

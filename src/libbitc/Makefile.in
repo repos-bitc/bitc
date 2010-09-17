@@ -140,8 +140,7 @@ BUILD:
 $(OBJECTS): BUILD/bitc-runtime.h | BUILD
 
 BUILD/bitc-runtime.h: $(BITC_SOURCES) $(BITCC)
-
-	$(BITCC) $(INC) -h -o $@ bitc-runtime.bitc
+	$(BITCC) $(INC) --nostdlib -h -o $@ bitc-runtime.bitc
 
 C_DEP=@$(CC) $(CFLAGS) $(INC) -M -MT $@ -MF $(patsubst %.o,%.m,$@) $<
 C_BUILD=$(CC) $(CFLAGS) $(INC) -c $< -o $@
@@ -187,8 +186,8 @@ uninstall:
 BUILD/libbitc.a: $(RUNTIME_OBJECTS) | BUILD
 	ar -crv $@ $(RUNTIME_OBJECTS)
 
-BUILD/libbitc.bita: $(BITC_SOURCES) | BUILD
-	$(BITCC) $(INC) -c -o $@ $(BITC_SOURCES)
+BUILD/libbitc.bita: $(BITC_SOURCES) $(BITCC) | BUILD
+	$(BITCC) $(INC) --nostdlib -c -o $@ $(BITC_SOURCES)
 
 BUILD/libbitc-no-gc.a: $(NOGC_OBJECTS) | BUILD
 	ar -crv $@ $(NOGC_OBJECTS)

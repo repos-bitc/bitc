@@ -39,17 +39,17 @@ bitc version 0.11
 (import bitc.main as main)
 (provide bitc.main main)
 
-(defstruct (pr1 'a 'b):val
+(defstruct (pr1 'a 'b):unboxed
   (fill (bitfield int32 16))
   a:'a
   b:'b)
 
-(defstruct (pr2 'a 'b):val
+(defstruct (pr2 'a 'b):unboxed
   a:'a
   (reserved (bitfield int32 16) 16)
   b:'b)
 
-(defrepr theRepr:val
+(defrepr theRepr:unboxed
   (Ct1  p:(pr1 bool int32) i:int32 j:bool (where (== i 0)))
   (Ct2  q:(pr2 int32 bool)  i:int32 (where (== i 1))))
  

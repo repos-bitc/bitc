@@ -968,8 +968,6 @@ toc(std::ostream& errStream,
   switch(ast->astType) {
 
   case at_Null:
-  case at_refCat:
-  case at_valCat:
   case at_boxedCat:
   case at_unboxedCat:
   case at_closed:
@@ -1009,12 +1007,12 @@ toc(std::ostream& errStream,
   case at_method_decl:
   case at_usesel:
 
-  case at_refType:
+  case at_boxedType:
   case at_byRefType:
   case at_arrayRefType:
   case at_exceptionType:
   case at_dummyType:
-  case at_valType:
+  case at_unboxedType:
   case at_fn:
   case at_fnargVec:
   case at_primaryType:

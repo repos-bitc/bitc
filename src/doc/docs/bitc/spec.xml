@@ -478,10 +478,9 @@ def fact x =
 	<literallayout indent="no">
 false         true          -&gt;
 and           apply         array         
-array-length  array-nth     array-ref
-array-ref-length  array-ref-nth  begin         
-bitc          as            bitfield      
-bool          block         by-ref        
+ArrayRef      begin         bitc          
+as            bitfield      bool          
+block         boxed         ByRef         
 case          catch         char          
 cond          const         continue      
 declare       defaxiom      defexception  
@@ -490,23 +489,25 @@ defstruct     deftheory     defthm
 defunion      deref         disable       
 do            double        dup           
 enable        exception     extends       
-external      fill          fixint        
-float         if            import        
-impure        int8          int16         
-int32         int64         interface     
+external      false         fill          
+fixint        float         if            
+import        impure        in            
+int8          int16         int32         
+int64         interface     is            
 fn            lambda        let           
-letrec        member        mutable       
-not           opaque        or            
-otherwise     pair          proclaim      
-provide       pure          quad          
-ref           return        return-from   
+letrec        MakeVector    member        
+mutable       not           opaque        
+or            otherwise     pair          
+proclaim      provide       pure          
+quad          return        return-from   
 set!          sizeof        string        
 suspend       switch        tag           
 the           throw         try           
-tyfn          uint8         uint16        
-uint32        uint64        use           
-val           vector        vector-length 
-vector-nth    version       word          </literallayout>
+true          tyfn          uint8         
+uint16        uint32        uint64        
+unboxed       use           vector        
+version       where         until         
+word</literallayout>
 	<p>
 	  The following identifiers are reserved for use as future
 	  keywords:
@@ -519,9 +520,9 @@ deftype       defvariant    do*
 import!       indset        inner-ref     
 int           let*          list          
 location      module        namespace     
-read-only     require       sensory       
-super         tycon         using         
-value-at</literallayout>
+read-only     require       ref           
+sensory       super         tycon         
+using         value-at</literallayout>
 	<p>
           In addition to the reserved words identified above, all
 	  definitions provided in the standard prelude are implicitly
@@ -1357,16 +1358,16 @@ a b c /*
 	    <progident><em>T</em></progident>. 
 	  </p>
 	</sect3>
-        <sect3 id="type:array-ref">
+        <sect3 id="type:ArrayRef">
 	  <title>Array References</title>
           <p>
             An array reference is a sequence type whose elements are
             of type <progident><em>T</em></progident> and whose length
             is dynamic. A parameter or let binding of type
-            <progident>(array-ref&nbsp;<em>T</em>)</progident> will
+            <progident>(ArrayRef&nbsp;<em>T</em>)</progident> will
             accept as its corresponding actual parameter or
             initializer a value of either type
-            <progident>(array-ref&nbsp;<em>T</em>)</progident> or type
+            <progident>(ArrayRef&nbsp;<em>T</em>)</progident> or type
             <progident>(array&nbsp;<em>T</em>&nbsp;<em>len</em>)</progident>
             for <em>any</em> length. There is no value constructor for
             array reference types.
@@ -1374,12 +1375,12 @@ a b c /*
           <p>
             Array references are not permitted to escape. Pending
             definition of a standardized escape analysis for BitC, the
-            <progident>array-ref</progident> type is not permitted as
+            <progident>ArrayRef</progident> type is not permitted as
             the return value of a procedure, a non-value expression, a
             structure field, or a closed-over value. The type:
           </p>
 	  <literallayout>
-(array-ref <em>T</em>)</literallayout>
+(ArrayRef <em>T</em>)</literallayout>
 	  <p>
 	    describes array references of element type
 	    <progident><em>T</em></progident>.
@@ -1461,7 +1462,7 @@ a b c /*
           <literallayout>
 (defstruct ipair a:int32 b:int32)
 
-(defstruct (tree-of 'a):ref
+(defstruct (tree-of 'a):boxed
   left : (optional (tree-of 'a))
   right : (optional (tree-of 'a))
   height : int8
@@ -1534,7 +1535,7 @@ a b c /*
 (defunion contrived
   (asChar c:char) (asInt i:int32))
 
-(defunion (optional 'a) :val
+(defunion (optional 'a) :unboxed
   none
   (some value:'a))</literallayout>
           <p indent="no">
@@ -1547,7 +1548,7 @@ a b c /*
             The declaration:
           </p>
           <literallayout>
-(defunion (list 'a):ref
+(defunion (list 'a):boxed
   nil
   (cons car:'a cdr:(list 'a)))</literallayout>
           <p indent="no">
@@ -1590,7 +1591,7 @@ a b c /*
 	      declaration:
 	    </p>
 	    <literallayout>
-(defunion (list 'a):ref
+(defunion (list 'a):boxed
   (declare (tag-type uint8))
   nil
   (cons car:'a cdr:(list 'a)))</literallayout>
@@ -1863,19 +1864,22 @@ a b c /*
             declaration to make this intention explicit:
           </p>
 	  <literallayout>
-(defstruct <em>nm</em><b>:ref</b> <em>field</em> ...)
-(defstruct (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)<b>:ref</b>
+(defstruct <em>nm</em><b>:boxed</b> <em>field</em> ...)
+(defstruct (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)<b>:boxed</b>
   <em>field</em> ...)
-(defunion <em>nm</em><b>:ref</b> <em>C<sub>1</sub></em> ... <em>C<sub>n</sub></em>)
-(defunion (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)<b>:ref</b>
+(defunion <em>nm</em><b>:boxed</b> <em>C<sub>1</sub></em> ... <em>C<sub>n</sub></em>)
+(defunion (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)<b>:boxed</b>
   <em>C<sub>1</sub></em> ... <em>C<sub>n</sub></em>)
-(defrepr <em>nm</em><b>:ref</b> (<em>body</em>))
-(defrepr (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)<b>:ref</b> (<em>body</em>))</literallayout>
+(defrepr <em>nm</em><b>:boxed</b> (<em>body</em>))
+(defrepr (<em>nm</em> <em>tv<sub>1</sub></em> ... <em>tv<sub>n</sub></em>)<b>:boxed</b> (<em>body</em>))</literallayout>
           <p>
-            The qualifier ``:ref'' indicates that the type declared
+            The qualifier ``:boxed'' indicates that the type declared
             (and consequently the type returned by value constructors)
-            is a reference type. The qualifier ``:val'' indicates that
-            the type declared is a value type. The qualifier
+            is a heap-allocated type, sometimes known as a ``reference
+            type.'' The qualifier ``:unboxed'' indicates that the type
+            declared is a type whose storage is allocated within its
+            containing data structure (which may be the stack). These
+            are sometimes refered to as ``value types.'' The qualifier
             ``:opaque'' indicates that the type declared is a value
             type whose internal structure is not accessable outside of
             the defining interface and the providers of that
@@ -2039,10 +2043,10 @@ unboxed struct int external bitc_int</literallayout>
  	    prelude.
           </p>
           <literallayout>
-(defstruct (pair 'a 'b) :val
+(defstruct (pair 'a 'b) :unboxed
    fst:'a snd:'b)
 
-(defunion (list 'a) :ref
+(defunion (list 'a) :boxed
    nil
    (cons 'a (list 'a)))</literallayout>
           <p indent="no">
@@ -2118,7 +2122,7 @@ unboxed struct int external bitc_int</literallayout>
           is the type of mutable instances of
           <progident><em>T</em></progident>. If the type
           <progident><em>T</em></progident> is a reference type
-          (including <progident>:ref</progident> structure types), then the type
+          (including <progident>:boxed</progident> structure types), then the type
           <progident>(mutable&nbsp;<em>T</em>)</progident> describes a
           mutable reference to a memory location in the heap.
         </p>
@@ -2798,10 +2802,10 @@ nm : <em>function-type</em></literallayout>
         </p>
 <literallayout>
 (forall (<em>constraints</em>)
-  (defstruct (<em>struct-name</em> <em>tvars</em>) [<b>:val</b>])
+  (defstruct (<em>struct-name</em> <em>tvars</em>) [<b>:unboxed</b>])
     <em>nm<sub>1</sub></em>[<b>:</b><em>t<sub>1</sub></em>] ... <em>nm<sub>n</sub></em>[<b>:</b><em>t<sub>n</sub></em>])
 (forall (<em>constraints</em>)
-  (defunion (<em>union-name</em> <em>tvars</em>) [<b>:val</b>])
+  (defunion (<em>union-name</em> <em>tvars</em>) [<b>:unboxed</b>])
     <em>C<sub>1</sub> ... C<sub>n</sub></em>)
 </literallayout>
         <p>
@@ -3442,12 +3446,12 @@ bitsizeof(<em>T</em>)</literallayout>
           </p>
         </sect3>
         <sect3>
-          <title>make-vector</title>
+          <title>MakeVector</title>
           <p>
             The expression:
           </p>
           <literallayout>
-(make-vector <em>e<sub>len</sub></em> <em>e<sub>init</sub></em>)</literallayout>
+(MakeVector <em>e<sub>len</sub></em> <em>e<sub>init</sub></em>)</literallayout>
           <p indent="no">
             creates a new vector whose length is determined by the
             value of the expression
@@ -3475,7 +3479,7 @@ bitsizeof(<em>T</em>)</literallayout>
 <literallayout>
 (import bitc.list as ls)
 (define (list->vector lst)
-  (make-vector
+  (MakeVector
     (length lst)
     (lambda (n)
        (ls.list-nth lst n))))</literallayout>
@@ -3708,54 +3712,51 @@ bitsizeof(<em>T</em>)</literallayout>
       <sect2>
         <title>Array and Vector Expressions</title>
         <sect3>
-          <title>array-length, array-ref-length, vector-length</title>
+          <title>Array, ArrayRef, and Vector lengths</title>
           <p>
             If <progident><em>e</em></progident> is an expression of
-            array (respectively: array-ref, vector) type, then
+            array, ArrayRef, or vector type, then
           </p>
           <literallayout>
-(array-length <em>e</em>)
-(array-ref-length <em>e</em>)
-(vector-length <em>e</em>)</literallayout>
+<em>e</em>.length
+</literallayout>
           <p indent="no">
-            return a <progident>word</progident> whose value is the
-            number of elements in the array, array-ref, or vector.
+            returns a <progident>word</progident> whose value is the
+            number of elements in the array, ArrayRef, or vector.
           </p>
         </sect3>
         <sect3>
-          <title>array-nth, array-ref-nth vector-nth</title>
+          <title>Array, ArrayRef, and Vector indexing</title>
           <p>
             If <progident><em>e</em></progident> is an expression of
-            array (respectively: array-ref, vector) type, and
+            array, ArrayRef, or vector) type, and
             <progident><em>e<sub>i</sub></em></progident> is an
             expression with result type <progident>word</progident>,
             then:
           </p>
           <literallayout>
-(array-nth <em>e<sub>loc</sub></em> <em>e<sub>i</sub></em>)
-(array-ref-nth <em>e<sub>loc</sub></em> <em>e<sub>i</sub></em>)
-(vector-nth <em>e</em> <em>e<sub>i</sub></em>)</literallayout>
+<em>e</em>[<em>e<sub>i</sub></em>]
           <p indent="no">
-            are (respectively) expressions that return the
-            <em>e<sub>i</sub></em>'th element of the array
-            (respectively: array-ref, vector).  If the value
+            returns the
+            <em>e<sub>i</sub></em>'th element of the array, ArrayRef,
+            or vector.  If the value
             <progident><em>e<sub>i</sub></em></progident> is greater
-            than or equal to the length of the array (respectively:
+            than or equal to the length of the array, ArrayRef, or
             vector), then a <progident>IndexBoundsError</progident>
             exception is thrown.
           </p>
           <p>
-            The expression:
+            Note that type inference for these types is currently
+            incomplete. In the absence of declaration, the type
+            <progident>vector</progident> will be inferred for
+            <em>e</em>. Since the type <progident>ArrayRef</progident>
+            can only be declared at parameters and is never inferred,
+            a surprising inference result probably means that
+            something needs to be declared as an array type. Future
+            extensions of BitC are expected to provide generalized
+            accessors, after which this inconvenience will be
+            (backwards compatibly) resolved.
           </p>
-          <literallayout>
-<em>e</em><b>[</b><em>e<sub>i</sub></em><b>]</b>
-</literallayout>
-          <p indent="no">
-            is a convenience shorthand for
-          </p>
-          <literallayout>
-(vector-nth <em>e</em> <em>e<sub>i</sub></em>)
-</literallayout>
         </sect3>
       </sect2>
       <sect2>
@@ -4349,7 +4350,7 @@ bitsizeof(<em>T</em>)</literallayout>
 <!--                   <p>                     -->
 <!--                     <progident><em>s</em></progident> -->
 <!--                     is a reference -->
-<!--                     (<progident>:ref</progident>) structure type -->
+<!--                     (<progident>:boxed</progident>) structure type -->
 <!--                   </p> -->
 <!--                 </li> -->
 <!--                 <li> -->
@@ -4390,7 +4391,7 @@ bitsizeof(<em>T</em>)</literallayout>
 <!--                   <p>                     -->
 <!--                     <progident><em>s</em></progident> -->
 <!--                     is a value -->
-<!--                     (<progident>:val</progident>) structure type -->
+<!--                     (<progident>:unboxed</progident>) structure type -->
 <!--                   </p> -->
 <!--                 </li> -->
 <!--                 <li> -->
@@ -4651,8 +4652,7 @@ bitsizeof(<em>T</em>)</literallayout>
         semantics of BitC does not entirely account for how the
         behavior of <progident>set!</progident> interacts with the
         behavior of accessor expressions such as
-        <progident>array-nth</progident>,
-        <progident>vector-nth</progident>,
+        <progident>a[i]</progident>,
         <progident>member</progident>, <progident>deref</progident>,
         and expressions consisting of a single identifier.  In
         particular, the characterization of
@@ -4678,8 +4678,7 @@ bitsizeof(<em>T</em>)</literallayout>
         </p>
         <literallayout>
 <em>id</em>
-(array-nth <em>loc</em> <em>ndx</em>)
-(vector-nth <em>e</em> <em>ndx</em>)
+<em>loc</em>[<em>ndx</em>]
 (member <em>loc</em> <em>ident</em>)
 (deref <em>e</em>)</literallayout>
         <p indent="no">
@@ -4753,7 +4752,7 @@ bitsizeof(<em>T</em>)</literallayout>
         </p>
 <literallayout>
 (define (4th-elem vec)
-  (vector-nth vec 4))
+  vec[4])
 4th-elem: (fn ((vector 'a word))
               (location 'a))</literallayout>
         <p indent="no">
@@ -4809,10 +4808,10 @@ bitsizeof(<em>T</em>)</literallayout>
         <literallayout>
 interface sample {
   (define x 1) ; constant definition
-  (defunion (list 'a):ref
+  (defunion (list 'a):boxed
     nil
     (cons 'a (list 'a)))
-  (defstruct (tree-of 'a):ref)
+  (defstruct (tree-of 'a):boxed)
   (proclaim y : int32))
   (defstruct S :opaque (int32 i))
 }</literallayout>
@@ -5016,7 +5015,7 @@ bitc version "&BitcVersion;"
 (import sample as ln)
 (provide sample tree-of)
 
-(defstruct (ln.tree-of 'a):ref
+(defstruct (ln.tree-of 'a):boxed
   left : (optional
            (ln.tree-of 'a))
   right : (optional
@@ -5034,7 +5033,7 @@ bitc version "&BitcVersion;"
 (provide sample tree-of)
 (use (ln.tree-of as mumble))
 
-(defstruct (mumble 'a):ref
+(defstruct (mumble 'a):boxed
   left : (optional (mumble 'a))
   right : (optional (mumble 'a))
   height
@@ -5277,20 +5276,20 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
 ;; strings be primitive? Issue is unicode
 ;; character size and long strings.
 ; Strings:
-;;(defunion string:val (vector char))
+;;(defunion string:unboxed (vector char))
 
 ; Pairs:
-(defstruct (pair 'a 'b):val 
+(defstruct (pair 'a 'b):unboxed 
   fst:'a snd:'b)
 
 ; Optional values:
-(defunion (optional 'a):val 
+(defunion (optional 'a):unboxed 
   none (some value:'a))
 
 ; Nullable pointers:
 (forall ((ref-types 'a))
   (defunion
-    (nullable 'a):val 
+    (nullable 'a):unboxed 
      Null (non-null ptr:(ref 'a))))
 
 ; Homogeneous lists:
@@ -5299,7 +5298,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
   (cons car:'a cdr:(list 'a)))
 
 ; Bignums
-(defunion int:val
+(defunion int:unboxed
   (fix f:(bitfield int32 31))
   (big b:(ref (bool, (vector word)))))</literallayout>
     </sect1>
@@ -5486,7 +5485,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
   | (forall (<em>constraint</em><sup>+</sup>) <em>ident</em>)
   | (forall (<em>constraint</em><sup>+</sup>)
                   (<em>ident</em> <em>tvar</em><sup>+</sup>))
-<em>val</em> ::= :val | :ref | :opaque
+<em>val</em> ::= :unboxed | :boxed | :opaque
 <em>typedef</em> ::=
     (defstruct <em>typnm</em> <em>val</em>
                <em>docstring</em><sup>?</sup>
@@ -5577,8 +5576,8 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
   | <em>inttype</em>
   | float | double | quad
   | (bitfield <em>inttype</em> IntLit)
-  | (ref <em>type</em>)
-  | (val <em>type</em>)
+  | (boxed <em>type</em>)
+  | (unboxed <em>type</em>)
   | (mutable <em>type</em>)
   | (fn (<em>type</em><sup>*</sup>) <em>type</em>)
   | <em><u>pairtype</u></em>
@@ -5599,8 +5598,6 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
   | (the <em>type</em> <em>eform</em>).Id
   | (pair <em>expr</em> <em>expr</em>)
   | (member <em>expr</em> Id)
-  | (array-nth <em>expr</em> <em>expr</em>)
-  | (vector-nth <em>expr</em> <em>expr</em>)
   | <em>expr</em> [ <em>expr</em> ]
   | <em>expr</em> ^
   | (deref <em>expr</em>)
@@ -5608,9 +5605,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
   | ({<em>expr</em>,}<sup>+</sup> <em>expr</em>)
   | (array <em>expr</em><sup>+</sup>)
   | (vector <em>expr</em><sup>+</sup>)
-  | (array-length <em>expr</em>)
-  | (vector-length <em>expr</em>)
-  | (make-vector <em>expr</em> <em>expr</em>)
+  | (MakeVector <em>expr</em> <em>expr</em>)
   | (begin <em>expr</em><sup>+</sup>)
   | (lambda (<em>bindingpattern</em><sup>*</sup>) <em>expr</em><sup>+</sup>)
   | (<em>expr</em> <em>expr</em><sup>*</sup>)
@@ -5642,7 +5637,6 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
 <em>switchtags</em> ::= <em>ident</em> | (<em>ident</em><sup>+</sup>)
 <!-- <em>expr</em> ::= Id -->
 <!--   | <em>expr</em>.Id -->
-<!--   | (vector-nth <em>expr</em> <em>expr</em>) -->
 </literallayout>
 
       </sect2>

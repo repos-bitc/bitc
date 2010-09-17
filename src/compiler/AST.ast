@@ -986,12 +986,10 @@ AST reprctr = constructor reprrepr+;
 AST reprrepr = ident intLiteral;
 
 // UNION/STRUCT Categories
-LEAF refCat;
-LEAF valCat;
 LEAF boxedCat;
 LEAF unboxedCat;
 LEAF opaqueCat;
-GROUP category = refCat | valCat | opaqueCat | boxedCat | unboxedCat;
+GROUP category = opaqueCat | boxedCat | unboxedCat;
 
 // Typeclass open/closed mark
 LEAF closed;
@@ -1059,7 +1057,7 @@ AST methdecl = ident type;
 GROUP qtype = qualType | type;
 
 // argVec is not able to appear in a "type" position.
-GROUP type = var | tvar | bitfield | refType | valType
+GROUP type = var | tvar | bitfield | boxedType | unboxedType
            | fn | methType | byRefType | arrayRefType | primaryType | dummyType
            | arrayType | vectorType | typeapp | fieldType
            // | closureType;
@@ -1069,12 +1067,13 @@ GROUP type = var | tvar | bitfield | refType | valType
 AST bitfield = primaryType intLiteral;
 
 // REF TYPES [3.4.1]
-AST refType = type;
 AST byRefType = type;
 AST arrayRefType = type;
 
-// VAL TYPES [3.4.2]
-AST valType = type;
+// BOXED TYPES [3.4.1]
+AST boxedType = type;
+// UNBOXED TYPES [3.4.2]
+AST unboxedType = type;
 // FUNCTION TYPES [3.4.3]
 AST fn = fnargVec type;
 //// METHOD TYPES [3.4.3]
