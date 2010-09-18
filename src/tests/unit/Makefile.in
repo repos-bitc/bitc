@@ -1,37 +1,37 @@
 ##########################################################################
 #
-#  Copyright (C) 2008, Johns Hopkins University.
-#  All rights reserved.
+# Copyright (C) 2010, Jonathan S. Shapiro
+# All rights reserved.
 #
-#  Redistribution and use in source and binary forms, with or
-#  without modification, are permitted provided that the following
-#  conditions are met:
+# Redistribution and use in source and binary forms, with or
+# without modification, are permitted provided that the following
+# conditions are met:
 #
-#    - Redistributions of source code must contain the above 
-#      copyright notice, this list of conditions, and the following
-#      disclaimer. 
+#   - Redistributions of source code must contain the above 
+#     copyright notice, this list of conditions, and the following
+#     disclaimer. 
 #
-#    - Redistributions in binary form must reproduce the above
-#      copyright notice, this list of conditions, and the following
-#      disclaimer in the documentation and/or other materials 
-#      provided with the distribution.
+#   - Redistributions in binary form must reproduce the above
+#     copyright notice, this list of conditions, and the following
+#     disclaimer in the documentation and/or other materials 
+#     provided with the distribution.
 #
-#    - Neither the names of the copyright holders nor the names of any
-#      of any contributors may be used to endorse or promote products
-#      derived from this software without specific prior written
-#      permission. 
+#   - Neither the names of the copyright holders nor the names of any
+#     of any contributors may be used to endorse or promote products
+#     derived from this software without specific prior written
+#     permission. 
 #
-#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-#  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-#  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-#  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
 
@@ -138,10 +138,12 @@ comp:
 
 EXPECT_STATUS=0
 EXPECT_OUTPUT=/dev/null
+EXPECT_ERROUTPUT=/dev/null
 COMPILE_OUTPUT=/dev/null
+COMPILE_ERROUTPUT=/dev/null
 TEST_MODE=exec
 USE_INPUT=/dev/null
-ARGS=""
+ARGS=
 TESTOPTS=-v
 
 BUILD:
@@ -161,59 +163,25 @@ $(BITCC):
 	make -C $(BITCC_SRC) BUILD/bitcc
 
 %.test: BUILD/% | BUILD
-	@../testit.sh -m ${TEST_MODE} ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -i $(USE_INPUT) "./$< $(ARGS)"
+	@../testit.sh -m ${TEST_MODE} ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -e $(EXPECT_ERROUTPUT) -i $(USE_INPUT) "./$< $(ARGS)"
 
-clconv1.test: EXPECT_STATUS=1
-closure.test: EXPECT_STATUS=3
-AppLoc.test: EXPECT_STATUS=3
-newException.test: EXPECT_STATUS=1
-newException.test: EXPECT_OUTPUT=newException.stdout
-VecBoundsError.test: EXPECT_STATUS=1
-VecBoundsError.test: EXPECT_OUTPUT=VecBoundsError.stdout
-UncaughtException.test: EXPECT_STATUS=1
-UncaughtException.test: EXPECT_OUTPUT=UncaughtException.stdout
-wchar.test: EXPECT_OUTPUT=wchar.stdout
-odd_even_letrec.test: EXPECT_STATUS=139
-Echo_Args.test: EXPECT_OUTPUT=Echo_Args.stdout
-echo-char.test: USE_INPUT=echo-char.stdin
-echo-char.test: EXPECT_OUTPUT=echo-char.stdout
-hello.test: EXPECT_OUTPUT=hello.stdout
-Fact-Rec.test: EXPECT_STATUS=120
-Fact-Loop.test: EXPECT_STATUS=120
-Fact-Mut.test: EXPECT_STATUS=120
-intout.test: EXPECT_OUTPUT=intout.stdout
-io-time.test: ARGS=file.input
-io-time.test: EXPECT_OUTPUT=io-time.stdout
-sha1-file.test: ARGS="file.input 128028"
-sha1-file.test: EXPECT_OUTPUT=sha1-file.stdout
-sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout 
-twomodule.test: EXPECT_OUTPUT=twomodule.stdout 
-sizeof.test: EXPECT_STATUS=4
-bitsizeof.test: EXPECT_STATUS=1
-bitset.test: EXPECT_OUTPUT=bitset.stdout
-array-byref.test: EXPECT_STATUS=6
-vec-badly-typed.test: TEST_MODE=compile
-BUILD/vec-badly-typed: TEST_MODE=compile
-BUILD/vec-badly-typed: EXPECT_STATUS=1
-badsyntax.test: TEST_MODE=compile
-BUILD/badsyntax: TEST_MODE=compile
-BUILD/badsyntax: EXPECT_STATUS=1
+include expect.in
 
 BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME)
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} -e ${COMPILE_ERROUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME)
 
 # .PRECIOUS: $(SOURCE:%.bitc=%.c)
 
 LIBBITC_SHA1_SRC=@top_srcdir@/libbitc/crypt/sha1.bits
 
 BUILD/sha1-test: sha1-test.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} -e ${COMPILE_ERROUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
 
 BUILD/sha1-file: sha1-file.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} -e ${COMPILE_ERROUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
 
 BUILD/libbitc-bita: libbitc-bita.bitc  $(BITCC) $(LIBBITC_BITA) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_BITA) $(LIBBITC_C_RUNTIME)
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} -e ${COMPILE_ERROUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_BITA) $(LIBBITC_C_RUNTIME)
 
 #BUILD/%.c: %.bitc  $(BITCC)
 #	$(RUN_BITCC) $(BITCOPT) $(INC) --emit c -o $@ $<

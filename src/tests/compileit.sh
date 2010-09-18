@@ -39,6 +39,7 @@ usage() {
     echo "Recognized options: "
     echo "  -s <int>   # expect non-zero status code <int>"
     echo "  -o <file>  # match output against content of <file>"
+    echo "  -e <file>  # match error output against content of <file>"
     echo "  -m <mode>  # one of \"compile\" or \"exec\""
     echo "  -v         # verbose: show stdout/stderr on miscompare"
     echo "  -q         # quiet: issue output only on bad result"
@@ -48,15 +49,8 @@ usage() {
 quiet=0
 verbose=0
 expect_status=0
-expect_out=""
-
-if [ -n "${expect_out}" ]
-then
-    if [ ! -r $expect_out ]
-    then
-	echo "Cannot open reference output ${expect_out}"
-    fi
-fi
+expect_out=/dev/null
+expect_err=/dev/null
 
 # Cannot use getopt, because options are positionally sensitive.
 while true
@@ -64,6 +58,7 @@ do
 	case $1 in
 	-s)     expect_status=$2; shift; shift;;
 	-o)     expect_out=$2; shift; shift;;
+	-e)     expect_err=$2; shift; shift;;
 	-m)     test_mode=$2; shift; shift;;
 	-q)     quiet=1; shift;;
 	-v)     verbose=1; shift;;
@@ -76,6 +71,22 @@ done
 if [ $# -eq 0 ]
 then
     usage
+fi
+
+if [ -n "${expect_out}" ]
+then
+    if [ ! -r $expect_out ]
+    then
+	echo "Cannot open reference output ${expect_out}"
+    fi
+fi
+
+if [ -n "${expect_err}" ]
+then
+    if [ ! -r $expect_err ]
+    then
+	echo "Cannot open reference error output ${expect_err}"
+    fi
 fi
 
 if [ ${test_mode} = "exec" ]
@@ -103,7 +114,7 @@ then
     good="no"
 fi
 
-if [ \( -n "${expect_out}" \) -a \( ${good} = "yes" \) ]
+if [ ${good} = "yes" ]
 then
     cmp -s /tmp/$$.out ${expect_out}
     if [ $? -ne 0 ]
@@ -113,16 +124,40 @@ then
     fi
 fi
 
+if [ ${good} = "yes" ]
+then
+    # Lines beginning with 'gcc -' are the verbose subcompile reporting.
+    # Try filtering them out and comparing to /dev/null first so that we 
+    # don't need to build an error output check for every single test:
+
+    grep -v '^gcc -' /tmp/$$.err | cmp -s - /dev/null
+    if [ $? -ne 0 ]
+    then
+        # We have some error output. Check whether that matches
+        # expectations. This time, use *all* the lines that went
+        # to stderr, including those that issued the subortinate
+        # compile:
+        cmp -s /tmp/$$.err ${expect_err}
+        if [ $? -ne 0 ]
+        then
+	    echo "Bug: ${cmd} error output does not match expectations."
+            good="no"
+        fi
+    fi
+fi
+
 if [ ${good} = "no" ]
 then
     if [ ${verbose} -eq 1 ]
     then
         echo "=== EXPECTED OUTPUT ==="
-        cat $expect_out
+        cat ${expect_out}
+        echo "=== EXPECTED ERROR OUTPUT ==="
+        cat ${expect_err}
         echo "=== GOT OUTPUT ==="
         cat /tmp/$$.out
         echo "=== GOT ERROR ===="
-        cat /tmp/$$.out
+        cat /tmp/$$.err
         echo "=================="
     fi
 fi
