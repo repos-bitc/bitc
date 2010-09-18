@@ -1,0 +1,7 @@
+alltypes.bits:46:2: WARNING: Local declaration of basic found here, but no definition found.
+alltypes.bits:72:2: WARNING: Local declaration of primaries found here, but no definition found.
+alltypes.bits:81:2: WARNING: Local declaration of shallowperm found here, but no definition found.
+alltypes.bits:84:2: WARNING: Local declaration of postfix found here, but no definition found.
+alltypes.bits:88:2: WARNING: Local declaration of prefix found here, but no definition found.
+alltypes.bits:91:2: WARNING: Local declaration of fntype found here, but no definition found.
+alltypes.bits:95:2: WARNING: Local declaration of RefArgTypes found here, but no definition found.
