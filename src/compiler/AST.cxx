@@ -573,8 +573,8 @@ AST::tagName(const AstType at)
     return "at_sizeof";
   case at_bitsizeof:
     return "at_bitsizeof";
-  case at_makevectorL:
-    return "at_makevectorL";
+  case at_MakeVector:
+    return "at_MakeVector";
   case at_vector:
     return "at_vector";
   case at_array:
@@ -639,8 +639,8 @@ AST::tagName(const AstType at)
     return "at_mkClosure";
   case at_setClosure:
     return "at_setClosure";
-  case at_mkArrayByref:
-    return "at_mkArrayByref";
+  case at_mkArrayRef:
+    return "at_mkArrayRef";
   case at_block:
     return "at_block";
   case at_return_from:
@@ -733,15 +733,9 @@ AST::tagName(const AstType at)
 }
 
 const char *
-AST::astTypeName() const
+AST::nodeName(const AstType at)
 {
-  return tagName(astType);
-}
-
-const char *
-AST::astName() const
-{
-  switch(astType) {
+  switch(at) {
   case at_Null:
     return "Null";
   case at_AnyGroup:
@@ -898,8 +892,8 @@ AST::astName() const
     return "sizeof";
   case at_bitsizeof:
     return "bitsizeof";
-  case at_makevectorL:
-    return "makevectorL";
+  case at_MakeVector:
+    return "MakeVector";
   case at_vector:
     return "vector";
   case at_array:
@@ -964,8 +958,8 @@ AST::astName() const
     return "mkClosure";
   case at_setClosure:
     return "setClosure";
-  case at_mkArrayByref:
-    return "mkArrayByref";
+  case at_mkArrayRef:
+    return "mkArrayRef";
   case at_block:
     return "block";
   case at_return_from:
@@ -1012,6 +1006,325 @@ AST::astName() const
     return "docString";
   case at_letGather:
     return "letGather";
+  case agt_var:
+    return "var";
+  case agt_uselhs:
+    return "uselhs";
+  case agt_literal:
+    return "literal";
+  case agt_tvar:
+    return "tvar";
+  case agt_CompilationUnit:
+    return "CompilationUnit";
+  case agt_definition:
+    return "definition";
+  case agt_type_definition:
+    return "type_definition";
+  case agt_tc_definition:
+    return "tc_definition";
+  case agt_value_definition:
+    return "value_definition";
+  case agt_if_definition:
+    return "if_definition";
+  case agt_category:
+    return "category";
+  case agt_openclosed:
+    return "openclosed";
+  case agt_fielditem:
+    return "fielditem";
+  case agt_qtype:
+    return "qtype";
+  case agt_type:
+    return "type";
+  case agt_expr:
+    return "expr";
+  case agt_expr_or_define:
+    return "expr_or_define";
+  case agt_eform:
+    return "eform";
+  case agt_ucon:
+    return "ucon";
+  case agt_ow:
+    return "ow";
+  default:
+    return "<unknown>";
+  }
+}
+
+const char *
+AST::printName(const AstType at)
+{
+  switch(at) {
+  case at_Null:
+    return "Null";
+  case at_AnyGroup:
+    return "AnyGroup";
+  case at_ident:
+    return "<ident>";
+  case at_ifident:
+    return "<ifident>";
+  case at_usesel:
+    return "<usesel>";
+  case at_boolLiteral:
+    return "<boolLiteral>";
+  case at_charLiteral:
+    return "<charLiteral>";
+  case at_intLiteral:
+    return "<intLiteral>";
+  case at_floatLiteral:
+    return "<floatLiteral>";
+  case at_stringLiteral:
+    return "<stringLiteral>";
+  case at_module:
+    return "module";
+  case at_interface:
+    return "interface";
+  case at_defunion:
+    return "union";
+  case at_declunion:
+    return "union";
+  case at_defstruct:
+    return "struct";
+  case at_declstruct:
+    return "struct";
+  case at_defobject:
+    return "object";
+  case at_defrepr:
+    return "repr";
+  case at_declrepr:
+    return "repr";
+  case at_reprctrs:
+    return "<reprctrs>";
+  case at_reprctr:
+    return "<reprctr>";
+  case at_reprrepr:
+    return "<reprrepr>";
+  case at_boxedCat:
+    return "boxed";
+  case at_unboxedCat:
+    return "unboxed";
+  case at_opaqueCat:
+    return "opaque";
+  case at_closed:
+    return "closed";
+  case at_defexception:
+    return "exception";
+  case at_deftypeclass:
+    return "trait";
+  case at_tcdecls:
+    return "<tcdecls>";
+  case at_tyfn:
+    return "tyfn";
+  case at_tcapp:
+    return "<tcapp>";
+  case at_method_decls:
+    return "<method_decls>";
+  case at_method_decl:
+    return "<method_decl>";
+  case at_qualType:
+    return "<qualType>";
+  case at_constraints:
+    return "<constraints>";
+  case at_definstance:
+    return "instance";
+  case at_tcmethods:
+    return "<tcmethods>";
+  case at_tcmethod_binding:
+    return "<tcmethod_binding>";
+  case at_proclaim:
+    return "def";
+  case at_define:
+    return "def";
+  case at_recdef:
+    return "def";
+  case at_importAs:
+    return "import";
+  case at_provide:
+    return "provide";
+  case at_import:
+    return "import";
+  case at_ifsel:
+    return "<ifsel>";
+  case at_declares:
+    return "<declares>";
+  case at_declare:
+    return "declare";
+  case at_tvlist:
+    return "<tvlist>";
+  case at_constructors:
+    return "<constructors>";
+  case at_constructor:
+    return "<constructor>";
+  case at_fields:
+    return "<fields>";
+  case at_field:
+    return "<field>";
+  case at_fill:
+    return "fill";
+  case at_methdecl:
+    return "<methdecl>";
+  case at_bitfieldType:
+    return "bitfield";
+  case at_byRefType:
+    return "ByRef";
+  case at_arrayRefType:
+    return "ArrayRef";
+  case at_boxedType:
+    return "boxed";
+  case at_unboxedType:
+    return "unboxed";
+  case at_fn:
+    return "fn";
+  case at_methType:
+    return "method";
+  case at_primaryType:
+    return "<primaryType>";
+  case at_fnargVec:
+    return "<fnargVec>";
+  case at_arrayType:
+    return "array";
+  case at_vectorType:
+    return "vector";
+  case at_mutableType:
+    return "mutable";
+  case at_constType:
+    return "const";
+  case at_typeapp:
+    return "<typeapp>";
+  case at_exceptionType:
+    return "exception";
+  case at_fieldType:
+    return "<fieldType>";
+  case at_dummyType:
+    return "<dummyType>";
+  case at_identPattern:
+    return "<identPattern>";
+  case at_tqexpr:
+    return "<tqexpr>";
+  case at_mixExpr:
+    return "<mixExpr>";
+  case at_unit:
+    return "()";
+  case at_suspend:
+    return "<suspend>";
+  case at_sizeof:
+    return "sizeof";
+  case at_bitsizeof:
+    return "bitsizeof";
+  case at_MakeVector:
+    return "MakeVector";
+  case at_vector:
+    return "vector";
+  case at_array:
+    return "array";
+  case at_begin:
+    return "begin";
+  case at_select:
+    return "<select>";
+  case at_fqCtr:
+    return "<fqCtr>";
+  case at_sel_ctr:
+    return "<sel_ctr>";
+  case at_array_nth:
+    return "<array_nth>";
+  case at_array_ref_nth:
+    return "<array_ref_nth>";
+  case at_vector_nth:
+    return "<vector_nth>";
+  case at_nth:
+    return "<nth>";
+  case at_lambda:
+    return "lambda";
+  case at_argVec:
+    return "<argVec>";
+  case at_apply:
+    return "<apply>";
+  case at_struct_apply:
+    return "<struct_apply>";
+  case at_object_apply:
+    return "<object_apply>";
+  case at_ucon_apply:
+    return "<ucon_apply>";
+  case at_if:
+    return "if";
+  case at_when:
+    return "when";
+  case at_and:
+    return "and";
+  case at_or:
+    return "or";
+  case at_cond:
+    return "<cond>";
+  case at_cond_legs:
+    return "<cond_legs>";
+  case at_cond_leg:
+    return "<cond_leg>";
+  case at_condelse:
+    return "<condelse>";
+  case at_setbang:
+    return "set!";
+  case at_deref:
+    return "deref";
+  case at_dup:
+    return "dup";
+  case at_inner_ref:
+    return "<inner_ref>";
+  case at_allocREF:
+    return "<allocREF>";
+  case at_copyREF:
+    return "<copyREF>";
+  case at_mkClosure:
+    return "<mkClosure>";
+  case at_setClosure:
+    return "<setClosure>";
+  case at_mkArrayRef:
+    return "<mkArrayRef>";
+  case at_block:
+    return "block";
+  case at_return_from:
+    return "<return_from>";
+  case at_uswitch:
+    return "switch";
+  case at_usw_legs:
+    return "<usw_legs>";
+  case at_usw_leg:
+    return "<usw_leg>";
+  case at_otherwise:
+    return "otherwise";
+  case at_try:
+    return "try";
+  case at_throw:
+    return "throw";
+  case at_let:
+    return "let";
+  case at_letbindings:
+    return "<letbindings>";
+  case at_letbinding:
+    return "<letbinding>";
+  case at_letrec:
+    return "letrec";
+  case at_loop:
+    return "loop";
+  case at_loopbindings:
+    return "<loopbindings>";
+  case at_loopbinding:
+    return "<loopbinding>";
+  case at_looptest:
+    return "<looptest>";
+  case at_localFrame:
+    return "<localFrame>";
+  case at_frameBindings:
+    return "<frameBindings>";
+  case at_letStar:
+    return "<letStar>";
+  case at_identList:
+    return "<identList>";
+  case at_container:
+    return "<container>";
+  case at_docString:
+    return "<docString>";
+  case at_letGather:
+    return "<letGather>";
   case agt_var:
     return "{var}";
   case agt_uselhs:
@@ -1063,7 +1376,7 @@ void
 astChTypeError(const AST &myAst, const AstType exp_at,
                const AstType act_at, size_t child)
 {
-  ::std::cerr << myAst.loc.asString() << ": " << myAst.astTypeName();
+  ::std::cerr << myAst.loc.asString() << ": " << myAst.tagName();
   ::std::cerr << " has incompatible Child# " << child;
   ::std::cerr << ". Expected " << AST::tagName(exp_at) << ", "; 
   ::std::cerr << "Obtained " << AST::tagName(act_at) << "." << ::std::endl;
@@ -1073,7 +1386,7 @@ void
 astChNumError(const AST &myAst, const size_t exp_ch,
                const size_t act_ch)
 {
-  ::std::cerr << myAst.loc.asString() << ": " << myAst.astTypeName();
+  ::std::cerr << myAst.loc.asString() << ": " << myAst.tagName();
   ::std::cerr << " has wrong number of children. ";
   ::std::cerr << "Expected " << exp_ch << ", ";
   ::std::cerr << "Obtained " << act_ch << "." << ::std::endl;
@@ -1158,7 +1471,7 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_suspend
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_sizeof
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_bitsizeof
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_makevectorL
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_MakeVector
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_vector
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_array
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_begin
@@ -1191,7 +1504,7 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00", // at_copyREF
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00", // at_mkClosure
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00", // at_setClosure
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00", // at_mkArrayByref
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00", // at_mkArrayRef
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00", // at_block
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00", // at_return_from
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00", // at_uswitch
@@ -3423,7 +3736,7 @@ AST::isValid() const
     }
     break;
 
-  case at_makevectorL: // normal AST:
+  case at_MakeVector: // normal AST:
     // match agt_expr
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
@@ -4346,7 +4659,7 @@ AST::isValid() const
     }
     break;
 
-  case at_mkArrayByref: // normal AST:
+  case at_mkArrayRef: // normal AST:
     // match agt_expr
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());

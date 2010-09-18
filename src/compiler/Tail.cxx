@@ -311,10 +311,10 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_vector_nth:
   case at_vector:
   case at_array:
-  case at_makevectorL:    
+  case at_MakeVector:    
   case at_setbang:
   case at_mkClosure:
-  case at_mkArrayByref:
+  case at_mkArrayRef:
     {
       break;
     }

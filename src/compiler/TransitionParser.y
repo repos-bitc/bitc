@@ -2955,7 +2955,7 @@ blk_closed_expr: tk_DEREF '(' blk_expr ')' {
 };
 blk_closed_expr: tk_MAKE_VECTOR '(' blk_expr ',' blk_expr ')' {
   SHOWPARSE("blk_closed_expr -> MAKE-VECTOR ( blk_expr , blk_expr )");
-  $$ = AST::make(at_makevectorL, $1.loc, $3, $5);
+  $$ = AST::make(at_MakeVector, $1.loc, $3, $5);
 };
 blk_closed_expr: tk_VECTOR '(' blk_actual_params ')' {
   SHOWPARSE("blk_closed_expr -> VECTOR (blk_actual_params)");
@@ -3401,7 +3401,7 @@ sxp_unqual_expr: '(' sxp_unqual_expr_cpair ')' {
 
 sxp_unqual_expr: '(' tk_MAKE_VECTOR sxp_expr sxp_expr ')' {
   SHOWPARSE("sxp_unqual_expr -> ( MAKE-VECTOR sxp_expr sxp_expr )");
-  $$ = AST::make(at_makevectorL, $2.loc, $3, $4);
+  $$ = AST::make(at_MakeVector, $2.loc, $3, $4);
 };
 
 // VECTORS [7.4.3]

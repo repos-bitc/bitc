@@ -306,7 +306,7 @@ ssa(std::ostream& errStream,
     {
       errStream << ast->loc << "Internal Compiler Error. " 
                 << "Function SSA, unexpected astType: " 
-                << ast->astTypeName()
+                << ast->tagName()
                 << std::endl;
       
       FEXPR(grandLet) = GC_NULL;
@@ -511,10 +511,10 @@ ssa(std::ostream& errStream,
   case at_dup:
   case at_array:
   case at_vector:
-  case at_makevectorL:
+  case at_MakeVector:
   case at_throw:
   case at_mkClosure:
-  case at_mkArrayByref:
+  case at_mkArrayRef:
     {
       for (c=0; c < ast->children.size(); c++) {
         SSA(errStream, uoc, ast->child(c), grandLet, identList, 

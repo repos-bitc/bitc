@@ -759,9 +759,10 @@ struct EnvSet {
   ///
   /// @issue In most cases, the keyword name is simply the ast name. Later
   /// versions of astmaker actually emit a string translator, and names
-  /// can now be assigned in the .ast file. We should consider using
-  /// that instead of this. That is something for shap to look at.
+  /// can now be assigned in the .ast file. We are in the process of
+  /// switching over to that.
   std::string atKwd() const;
+  std::string old_atKwd() const;
 
   /// @brief Append all ident ASTs from a Binding-pattern to the ids
   /// vector.
@@ -885,6 +886,8 @@ unsigned long long AST::astCount = 0;
   parentLB = GC_NULL;
 }
 
+%astmaker 0.3.6
+
 // AST built for version 0.9
 // Section Numbers indicated within []
 
@@ -927,9 +930,9 @@ GROUP CompilationUnit = module | interface;
 // AST version = stringLiteral;
 
 // MODULES [2.5]
-AST module = definition*;
+AST module ("module") = definition*;
 // INTERFACES [8.1]
-AST interface = ident definition*;
+AST interface ("interface") = ident definition*;
 
 
 // TOP LEVEL DEFINITIONS [2.5.1]
@@ -952,18 +955,18 @@ GROUP if_definition = proclaim | import
 // 9/16/2010: updated declunion to match the shape of defunion in
 // order to regularize processing. Declares and constructors nodes are
 // present on the declaration, but have no children.
-AST defunion = ident tvlist category declares constructors constraints;
-AST declunion = ident tvlist category declares constructors constraints;
+AST defunion ("union") = ident tvlist category declares constructors constraints;
+AST declunion ("union") = ident tvlist category declares constructors constraints;
 
 // STRUCTURE TYPES [3.6.1]
 // 9/16/2010: updated declstruct to match the shape of defunion in
 // order to regularize processing. Declares and constructors nodes are
 // present on the declaration, but have no children.
-AST defstruct = ident tvlist category declares fields constraints;
-AST declstruct = ident tvlist category declares fields constraints;
+AST defstruct ("struct") = ident tvlist category declares fields constraints;
+AST declstruct ("struct") = ident tvlist category declares fields constraints;
 
 // OBJECT TYPES [3.6.1]
-AST defobject = ident tvlist category declares fields constraints;
+AST defobject ("object") = ident tvlist category declares fields constraints;
 
 // REPR TYPES [3.6.1]
 //AST defrepr = ident tvlist category declares reprbody constraints;
@@ -979,20 +982,20 @@ AST defobject = ident tvlist category declares fields constraints;
 // on the declaration, but have no children. Note that constraints are
 // not permitted on a REPR, so the constraints node will always be
 // empty. Similarly, the tvlist nodes will be empty.
-AST defrepr = ident tvlist category declares reprctrs constraints;
-AST declrepr = ident tvlist category declares reprctrs constraints;
+AST defrepr ("repr") = ident tvlist category declares reprctrs constraints;
+AST declrepr ("repr") = ident tvlist category declares reprctrs constraints;
 AST reprctrs = reprctr+;
 AST reprctr = constructor reprrepr+;
 AST reprrepr = ident intLiteral;
 
 // UNION/STRUCT Categories
-LEAF boxedCat;
-LEAF unboxedCat;
-LEAF opaqueCat;
+LEAF boxedCat ("boxed");
+LEAF unboxedCat ("unboxed");
+LEAF opaqueCat ("opaque");
 GROUP category = opaqueCat | boxedCat | unboxedCat;
 
 // Typeclass open/closed mark
-LEAF closed;
+LEAF closed ("closed");
 GROUP openclosed = closed | Null;
 
 // EXCEPTION DEFINITION [3.10]
@@ -1002,15 +1005,15 @@ GROUP openclosed = closed | Null;
 // for defexception is always "boxed". Exceptions are currently not
 // permitted to be polymorphic, so the constraints node will always be
 // empty. Similarly, the tvlist nodes will be empty.
-AST defexception = ident tvlist category declares fields constraints;
+AST defexception ("exception") = ident tvlist category declares fields constraints;
 
 // // TYPE ALIASES (deftype)  [13]
 // AST deftype = ident tvlist type;
 
 // TYPE CLASS DEFINITION [4.1]
-AST deftypeclass = ident tvlist tcdecls openclosed method_decls constraints;
+AST deftypeclass ("trait") = ident tvlist tcdecls openclosed method_decls constraints;
 AST tcdecls = tyfn*;
-AST tyfn = fnargVec tvar;
+AST tyfn ("tyfn") = fnargVec tvar;
 AST tcapp = var type+;
 AST method_decls = method_decl*;
 AST method_decl = ident fn;
@@ -1018,29 +1021,29 @@ AST qualType = constraints type;
 AST constraints = tcapp*;
 
 // TYPE CLASS INSTANTIATIONS [4.2]
-AST definstance = tcapp tcmethods constraints;
+AST definstance ("instance") = tcapp tcmethods constraints;
 AST tcmethods = tcmethod_binding*;
 AST tcmethod_binding = ident expr;
 
 // PROCLAIM DEFINITION -- VALUES [6.2]
-AST proclaim = var qtype constraints;
+AST proclaim ("def") = var qtype constraints;
 
 // DEFINE  [5.1]
-AST define = identPattern expr constraints;
-AST recdef = identPattern expr constraints;
+AST define ("def") = identPattern expr constraints;
+AST recdef ("def") = identPattern expr constraints;
 
 // IMPORT DEFINITIONS [8.2]
-AST importAs = ifident ident;
-AST provide = ifident ident+;
+AST importAs ("import") = ifident ident;
+AST provide ("provide") = ifident ident+;
 
-AST import = ifident ifsel*;
+AST import ("import") = ifident ifsel*;
 AST ifsel = ident ident;
 
 // DECLARES cannot be empty from the input, but we do insert
 // empty DECLARES nodes in the parser for the sake of positional
 // regularity.
 AST declares = declare*;
-AST declare = ident type?;
+AST declare ("declare") = ident type?;
 
 AST tvlist = tvar*;
 
@@ -1050,7 +1053,7 @@ AST constructor = ident fielditem*;
 GROUP fielditem = field | methdecl | fill;
 AST fields = fielditem*;
 AST field = ident type;
-AST fill = type intLiteral?;
+AST fill ("fill") = type intLiteral?;
 AST methdecl = ident type;
 
 // Qualified Type
@@ -1064,36 +1067,36 @@ GROUP type = var | tvar | bitfieldType | boxedType | unboxedType
            | mutableType | constType | exceptionType;
 
 // PRIMARY TYPES [3.2]
-AST bitfieldType = primaryType intLiteral;
+AST bitfieldType ("bitfield") = primaryType intLiteral;
 
 // REF TYPES [3.4.1]
-AST byRefType = type;
-AST arrayRefType = type;
+AST byRefType ("ByRef") = type;
+AST arrayRefType ("ArrayRef") = type;
 
 // BOXED TYPES [3.4.1]
-AST boxedType = type;
+AST boxedType ("boxed") = type;
 // UNBOXED TYPES [3.4.2]
-AST unboxedType = type;
+AST unboxedType ("unboxed") = type;
 // FUNCTION TYPES [3.4.3]
-AST fn = fnargVec type;
+AST fn ("fn") = fnargVec type;
 //// METHOD TYPES [3.4.3]
-AST methType = fnargVec type;
+AST methType ("method") = fnargVec type;
 // PRIMARY TYPES [???]
 LEAF primaryType;
 // vectors of argument type (for FN)
 AST fnargVec = type*;
 // ARRAY TYPE [3.5.1]
-AST arrayType = type intLiteral;
+AST arrayType ("array") = type intLiteral;
 // VECTOR TYPE [3.5.2]
-AST vectorType = type intLiteral?;
+AST vectorType ("vector") = type intLiteral?;
 // MUTABLE TYPE [3.7]
-AST mutableType = type;
+AST mutableType ("mutable") = type;
 // CONST TYPE [3.6]
-AST constType = type;
+AST constType ("const") = type;
 // TYPE CONSTRUCTORS (typapp)
 AST typeapp = var type+;
 // EXCEPTION TYPE
-LEAF exceptionType;
+LEAF exceptionType ("exception");
 // Field type, identifies a literal field-name
 AST fieldType = ident;
 // Dumy types
@@ -1110,7 +1113,7 @@ AST mixExpr = expr+;
 
 // EXPRESSIONS [7]
 GROUP eform = literal | var | unit
-            | array | vector | makevectorL
+            | array | vector | MakeVector
             | begin | select
             | fqCtr | sel_ctr
             | array_nth | array_ref_nth | vector_nth
@@ -1124,7 +1127,7 @@ GROUP eform = literal | var | unit
             | container | loop
             | mkClosure | allocREF | copyREF | setClosure
             | block | return_from
-            | sizeof | bitsizeof | mkArrayByref
+            | sizeof | bitsizeof | mkArrayRef
             // | loop | typecase | casebang
             ;
 // *select* is record selection.
@@ -1141,25 +1144,25 @@ GROUP eform = literal | var | unit
 GROUP ucon = var | select | fqCtr;
 
 // UNIT EXPRESSIONS
-LEAF unit;
+LEAF unit ("()");
 
 // SUSPENDED EXPRESSIONS
 AST suspend = var expr;
 
-AST sizeof = type;
-AST bitsizeof = type;
+AST sizeof ("sizeof") = type;
+AST bitsizeof ("bitsizeof") = type;
 
-// MAKE-VECTOR [7.4.2]
-AST makevectorL = expr expr;
+// MakeVector [7.4.2]
+AST MakeVector ("MakeVector") = expr expr;
 
 // VECTORS [7.4.3]
-AST vector = expr+;
+AST vector ("vector") = expr+;
 
 // ARRAYS [7.4.3]
-AST array = expr+;
+AST array ("array") = expr+;
 
 // BEGIN [7.5]
-AST begin = expr_or_define*;
+AST begin ("begin") = expr_or_define*;
 
 // MEMBER [7.7]
 AST select = expr ident;
@@ -1182,7 +1185,7 @@ AST vector_nth = expr expr;
 AST nth = expr expr;
 
 // LAMBDA [7.9]
-AST lambda = argVec expr;
+AST lambda ("lambda") = argVec expr;
 // vectors of argument bindings (for LAMBDA)
 AST argVec = identPattern*;
 // APPLICATION [7.10]
@@ -1192,13 +1195,13 @@ AST object_apply = var expr;
 AST ucon_apply = ucon expr+;
 
 // IF [7.11.1]
-AST if = expr expr expr;
+AST if ("if") = expr expr expr;
 // IF [7.11.2]
-AST when = expr expr;
+AST when ("when") = expr expr;
 // AND [7.11.3]
-AST and = expr+;
+AST and ("and") = expr+;
 // OR [7.11.4]
-AST or = expr+;
+AST or ("or") = expr+;
 // COND [7.11.6]
 AST cond = cond_legs condelse;
 AST cond_legs = cond_leg*;
@@ -1206,13 +1209,13 @@ AST cond_leg = expr expr;
 AST condelse = expr;
 
 // SET! [7.12.1]
-AST setbang = expr expr;
+AST setbang ("set!") = expr expr;
 
 // READ-ONLY [7.12.2]
 // DEREF [7.13.2]
-AST deref = expr;
+AST deref ("deref") = expr;
 // DUP
-AST dup = expr;
+AST dup ("dup") = expr;
 // INNER-REF
 AST inner_ref = expr expr;
 
@@ -1225,23 +1228,23 @@ AST mkClosure = expr ident;
 AST setClosure = ident expr expr+;
 
 // Build an array-by-ref pair
-AST mkArrayByref = expr;
+AST mkArrayRef = expr;
 
 // BLOCK and RETURN-FROM
-AST block = ident expr;
+AST block ("block") = ident expr;
 AST return_from = ident expr;
 
 // SWITCH
-AST uswitch = ident expr usw_legs ow;
+AST uswitch ("switch") = ident expr usw_legs ow;
 AST usw_legs = usw_leg*;
 AST usw_leg = ident expr ucon+;
-AST otherwise = ident expr;
+AST otherwise ("otherwise") = ident expr;
 GROUP ow = otherwise | Null;
 
 // TRY/CATCH [7.15.1]
-AST try = expr ident usw_legs ow;
+AST try ("try") = expr ident usw_legs ow;
 // THROW  [7.15.2]
-AST throw = expr;
+AST throw ("throw") = expr;
 
 // LET and LETREC require a constraints node because they are
 // generalized. Generalization demands a type scheme, and a type
@@ -1253,14 +1256,14 @@ AST throw = expr;
 // binding patterns using forall in the S-expression syntax.
 
 // LET [7.16.1]
-AST let = letbindings expr constraints;
+AST let ("let") = letbindings expr constraints;
 AST letbindings = letbinding+;
 AST letbinding = identPattern expr;
 // LETREC [7.16.2]
-AST letrec = letbindings expr constraints;
+AST letrec ("letrec") = letbindings expr constraints;
 
 // DO [7.6]
-AST loop = loopbindings looptest expr;
+AST loop ("loop") = loopbindings looptest expr;
 AST loopbindings = loopbinding*;
 AST loopbinding = identPattern expr expr;
 AST looptest = expr expr;

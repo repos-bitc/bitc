@@ -62,7 +62,7 @@ AllocCheck(std::ostream &errStream, shared_ptr<AST> ast)
 
   switch (ast->astType) {
   case at_vector:
-  case at_makevectorL:
+  case at_MakeVector:
     errStream << ast->loc << ": "
               << "Expression requires dynamic allocation. "
               << "Disallowed in NO-GC mode"

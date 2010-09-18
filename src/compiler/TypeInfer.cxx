@@ -1898,7 +1898,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
   DEBUG(TI_AST)
     errStream << "INF: " << ast->loc << ": " 
-              << ast->s << " [" << ast->astTypeName() << "]" 
+              << ast->s << " [" << ast->tagName() << "]" 
               << "   mode = " << mode
               << std::endl;
   
@@ -1951,7 +1951,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
     {
       errStream << ast->loc << ": Internal Compiler Error. Invalid AST type" 
-                << ast->astTypeName() << std::endl;
+                << ast->tagName() << std::endl;
     
       errFree = false;
       break;
@@ -3410,7 +3410,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     }
 
 
-  case at_mkArrayByref:
+  case at_mkArrayRef:
     {
       /*------------------------------------------------
                  A |- e:t  U(t = 'w|(array 'a ?))
@@ -3439,7 +3439,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
-  case at_makevectorL:
+  case at_MakeVector:
     {
       /*------------------------------------------------
                  A |- en:tn  U(tn =  'w|word)
@@ -4170,7 +4170,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
           // array-byref is expected, so need to construct the
           // array-byref pair.
           if(acArg->isArray()) {
-            ast->child(1) = AST::make(at_mkArrayByref, arg->loc, arg);
+            ast->child(1) = AST::make(at_mkArrayRef, arg->loc, arg);
             arg = ast->child(1);
             TYPEINFER(arg, gamma, instEnv, impTypes, tcc,
                       trail,  USE_MODE, TI_EXPRESSION);
@@ -5503,7 +5503,7 @@ UocInfo::DoTypeCheck(std::ostream& errStream, bool init,
 {
   DEBUG(TI_UNITWISE)
     errStream << "Now Processing " << uocName
-              << " ast = " << uocAst->astTypeName()
+              << " ast = " << uocAst->tagName()
               << std::endl;
   
   TypeAstMap impTypes;

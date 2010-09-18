@@ -272,7 +272,7 @@ isExpansive(std::ostream& errStream,
   case at_unit:
     break;
 
-  case at_makevectorL:             
+  case at_MakeVector:             
     {
       /* Make vector takes a lambda as the second argument, but
          implicitely performs application on it possibly 
@@ -284,7 +284,7 @@ isExpansive(std::ostream& errStream,
   case at_letGather:
   case at_vector:
   case at_array:
-  case at_mkArrayByref:
+  case at_mkArrayRef:
 #ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:
   case at_array_ref_length:
@@ -442,7 +442,7 @@ isExpansive(std::ostream& errStream,
     {
       errStream << ast->loc << ": "
                 << "Internal Compiler Error." 
-                << "Unexpected ast-type " << ast->astTypeName()
+                << "Unexpected ast-type " << ast->tagName()
                 << " obtained by isExpansive() routine."
                 << std::endl;
       itsExpansive = true; // be conservative ...

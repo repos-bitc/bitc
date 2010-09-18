@@ -477,8 +477,8 @@ findusedef(std::ostream &errStream,
   case at_vector_nth:
   case at_vector:
   case at_array:
-  case at_makevectorL:
-  case at_mkArrayByref:
+  case at_MakeVector:
+  case at_mkArrayRef:
   case at_apply:
     {
       for (size_t c=0; c<ast->children.size();c++)

@@ -343,8 +343,8 @@ TopInit(std::ostream& errStream,
   case at_block:
   case at_return_from:
   case at_vector:
-  case at_makevectorL:
-  case at_mkArrayByref:
+  case at_MakeVector:
+  case at_mkArrayRef:
   case at_begin:
 #ifdef HAVE_INDEXABLE_LENGTH_OPS
   case at_array_length:

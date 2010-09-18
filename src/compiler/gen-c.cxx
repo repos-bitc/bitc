@@ -1054,7 +1054,7 @@ toc(std::ostream& errStream,
     {
       errStream << ast->loc << "Internal Compiler Error. "
                 << "Function toc, unexpected astType: "
-                << ast->astTypeName()
+                << ast->tagName()
                 << endl;
 
       errorFree = false;
@@ -2123,7 +2123,7 @@ toc(std::ostream& errStream,
       break;
     }
     
-  case at_mkArrayByref:
+  case at_mkArrayRef:
     {
       assert(IDname.size());
       shared_ptr<Type> arrType = ast->child(0)->symType->getType();
@@ -2180,7 +2180,7 @@ toc(std::ostream& errStream,
       break;
     }
 
-  case at_makevectorL:
+  case at_MakeVector:
     {
       assert(IDname.size());
       shared_ptr<Type> t = ast->symType->getBareType();

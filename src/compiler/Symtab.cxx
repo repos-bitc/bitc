@@ -498,7 +498,7 @@ resolve(std::ostream& errStream,
     {
       errStream << ast->loc << ": Internal Compiler Error. " 
                 << "Function resolve, unexpected astType: " 
-                << ast->astTypeName()
+                << ast->tagName()
                 << std::endl;
       
       errorFree = false;
@@ -2072,7 +2072,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_mkArrayByref:
+  case at_mkArrayRef:
     {
       // match at_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
@@ -2091,7 +2091,7 @@ resolve(std::ostream& errStream,
     }
     
 
-  case at_makevectorL:
+  case at_MakeVector:
     {
       // match agt_expr
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 

@@ -162,6 +162,18 @@ AST::makeStringLit(const sherpa::LToken &tok)
 std::string
 AST::atKwd() const
 {
+  std::string s = old_atKwd();
+  if (s != printName()) {
+    std::cerr << s << " != " << printName() << std::endl;
+    assert(old_atKwd() == printName());
+  }
+
+  return printName();
+}
+
+std::string
+AST::old_atKwd() const
+{
   switch(astType) {
   case at_Null:
     return "NULL";
@@ -229,7 +241,7 @@ AST::atKwd() const
     return "def";
 
   case at_declares:
-    return "declares";
+    return "<declares>";
 
   case at_declare:
     return "declare";
@@ -259,7 +271,7 @@ AST::atKwd() const
     return "<field>";
 
   case at_methdecl:
-    return "<method>";
+    return "<methdecl>";
 
   case at_fill:
     return "fill";
@@ -319,36 +331,36 @@ AST::atKwd() const
     return "<identPattern>";
 
   case at_tqexpr:
-    return "the";
+    return "<tqexpr>";
 
   case at_suspend:
     return "suspend";
 
   case at_unit:
-    return "unit";
+    return "()";
 
   case at_letGather:
     return "<letgather>";
 
   case at_allocREF:
-    return "ALLOC-REF";
+    return "<allocREF>";
 
   case at_mkClosure:
-    return "MAKE-CLOSURE";
+    return "<mkClosure>";
 
-  case at_mkArrayByref:
-    return "MAKE-ARRAY-BY-REF";
+  case at_mkArrayRef:
+    return "<mkArrayRef>";
 
   case at_copyREF:
-    return "COPY-REF";
+    return "<copyREF>";
 
   case at_setClosure:
-    return "SET!-REF";
+    return "<setClosure>";
 
   case at_dup:
     return "dup";
 
-  case at_makevectorL:
+  case at_MakeVector:
     return "MakeVector";
 
   case at_vector:
@@ -375,7 +387,7 @@ AST::atKwd() const
     return "block";
 
   case at_return_from:
-    return "return-from";
+    return "<return_from>";
 
   case at_loop:
     return "loop";
@@ -456,7 +468,7 @@ AST::atKwd() const
     return "let";
 
   case at_letStar:
-    return "let*";
+    return "<letStar>";
 
   case at_letbindings:
     return "<letbindings>";
@@ -504,13 +516,13 @@ AST::atKwd() const
     return "def";
 
   case at_array_nth:
-    return "/* array */ nth";
+    return "<array_nth>";
 
   case at_array_ref_nth:
-    return "/* array ref */ nth";
+    return "<array_ref_nth>";
 
   case at_vector_nth:
-    return "/* vector */ nth";
+    return "<vector_nth>";
 
   case at_tcdecls:
     return "<tc_decls>";
@@ -735,7 +747,7 @@ AST::getIds(std::ostream &errStream,
   default:
     errStream << loc << ": Internal Compiler Error,"
               << " getIds routine obtained the wrong "
-              << "AST TYPE " << astTypeName()
+              << "AST TYPE " << tagName()
               << std::endl;
   }
 }

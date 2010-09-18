@@ -637,7 +637,7 @@ enum AstType {
   at_suspend,
   at_sizeof,
   at_bitsizeof,
-  at_makevectorL,
+  at_MakeVector,
   at_vector,
   at_array,
   at_begin,
@@ -670,7 +670,7 @@ enum AstType {
   at_copyREF,
   at_mkClosure,
   at_setClosure,
-  at_mkArrayByref,
+  at_mkArrayRef,
   at_block,
   at_return_from,
   at_uswitch,
@@ -949,9 +949,10 @@ public:
   ///
   /// @issue In most cases, the keyword name is simply the ast name. Later
   /// versions of astmaker actually emit a string translator, and names
-  /// can now be assigned in the .ast file. We should consider using
-  /// that instead of this. That is something for shap to look at.
+  /// can now be assigned in the .ast file. We are in the process of
+  /// switching over to that.
   std::string atKwd() const;
+  std::string old_atKwd() const;
 
   /// @brief Append all ident ASTs from a Binding-pattern to the ids
   /// vector.
@@ -1237,8 +1238,17 @@ public:
   }
 
   static const char *tagName(const AstType at);
-  const char *astTypeName() const;
-  const char *astName() const;
+  static const char *nodeName(const AstType at);
+  static const char *printName(const AstType at);
+
+  inline const char *tagName() const
+  { return tagName(astType); }
+
+  inline const char *nodeName() const
+  { return nodeName(astType); }
+
+  inline const char *printName() const
+  { return printName(astType); }
 
   bool isMemberOfType(AstType) const;
   bool isValid() const;

@@ -473,7 +473,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   default:
     {
       std::cerr << "blk_BitcP() needs support for AST type " 
-                << ast->astTypeName() << std::endl;
+                << ast->tagName() << std::endl;
       assert(false);
     }
   }
@@ -822,7 +822,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_uswitch:
   case at_vector:
   case at_vectorType:
-  case at_makevectorL:
+  case at_MakeVector:
   case at_array:
   case at_arrayType:
   case at_byRefType:
@@ -851,7 +851,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_fill:
   case at_sizeof:
   case at_bitsizeof:
-  case at_mkArrayByref:
+  case at_mkArrayRef:
     //case at_reprbody:
     {
       out << "(" << ast->atKwd();
@@ -943,7 +943,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
   case at_tqexpr:
     // Argument order was swapped.
-    out << "(" << ast->atKwd() << " ";
+    out << "(the ";
     sxp_BitcP(out, ast->child(1), showTypes);
     out << " ";
     sxp_BitcP(out, ast->child(0), showTypes);
@@ -1406,7 +1406,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_AnyGroup:
     {
       cerr << "BAD AST TYPE "
-           << ast->astTypeName()
+           << ast->tagName()
            << "TO BitC-pp.\n";
       break;
     }
@@ -1596,7 +1596,7 @@ doShowTypes(std::ostream& out, shared_ptr<AST> ast,
     cerr << ast->loc.asString() << ": "
          << "Internal Compiler Error."
          << " Unexpected AST type "
-         << ast->astTypeName()
+         << ast->tagName()
          << " obtained by doshowTypes() routine."
          << endl;
     break;
