@@ -213,17 +213,11 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       out << ast->atKwd();
 
-      size_t start = 0;
-
-      if (ast->printVariant != 0) {
-        // explicit module form. Put name on same line:
-        out << " ";
-        blk_BitcP(out, ast->child(0), showTypes);
-        start = 1;
-      }
+      // All modules are anonymous - the module name is just window
+      // dressing, and we do not preserve it.
 
       out.more();
-      doChildren(blk_BitcP, out, ast, start, " is\n", "\n", "", showTypes);
+      doChildren(blk_BitcP, out, ast, 0, " is\n", "\n\n", "", showTypes);
       out.less();
       break;
     }
@@ -237,13 +231,15 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       blk_BitcP(out, ast->child(0), showTypes);
 
       out.more();
-      doChildren(blk_BitcP, out, ast, 1, " is\n", "\n", "", showTypes);
+      doChildren(blk_BitcP, out, ast, 1, " is\n", "\n\n", "", showTypes);
       out.less();
 
       break;
     }
 
+  case at_defrepr:
   case at_defstruct:
+  case at_defunion:
     {
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> tvlist = ast->child(1);
@@ -253,7 +249,13 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> constraints = ast->child(5);
 
       blk_BitcP(out, category, showTypes);
-      out << " " << ast->atKwd() << " ";
+
+      // Careful! Reprs are transformed into unions by the reprSimp
+      // pass, so what we get here might actually be a repr:
+      if (ast->flags & UNION_IS_REPR)
+        out << " repr ";
+      else
+        out << " " << ast->atKwd() << " ";
       blk_BitcP(out, ident, showTypes);
       doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", showTypes);
 
@@ -265,9 +267,73 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << "\nis";
 
       out.more();
-      doChildren(blk_BitcP, out, fc, 0, "\n", "\n", "", showTypes);
+      doChildren(blk_BitcP, out, fc, 0, "\n", 
+                 (ast->astType == at_defstruct) ? "\n" : "\n\n",
+                 "", showTypes);
       out.less();
 
+      break;
+    }
+
+  case at_reprctr:
+    {
+      bool emittedSome = false;
+
+      blk_BitcP(out, ast->child(0), showTypes);
+      out << "\nwhere ";
+      out.indentToHere();
+
+      doChildren(blk_BitcP, out, ast, 1, "", ",\n", "", showTypes);
+      break;
+    }
+  case at_reprrepr:
+    {
+      doChildren(blk_BitcP, out, ast, 0, "", " == ", "", showTypes);
+      break;
+    }
+
+  case at_constructor:
+    {
+      bool isRepr;
+
+      if (ast->children.size() == 1) {
+        blk_BitcP(out, ast->child(0), showTypes);
+      }
+      else {
+        blk_BitcP(out, ast->child(0), showTypes);
+        out << " is";
+        out.more();
+        doChildren(blk_BitcP, out, ast, 1, "\n", "\n", "", showTypes);
+        out.less();
+
+        for(size_t c = 1; c < ast->children.size(); c++) {
+          shared_ptr<AST> fld = ast->child(c);
+          if (fld->flags & FLD_IS_DISCM) {
+            isRepr = true;
+            break;
+          }
+        }
+
+        if (isRepr) {
+          bool emittedSome = false;
+
+          out << "\nwhere ";
+          out.indentToHere();
+          for(size_t c = 1; c < ast->children.size(); c++) {
+            shared_ptr<AST> fld = ast->child(c);
+            if (fld->flags & FLD_IS_DISCM) {
+              if (emittedSome)
+                out << ",\n";
+
+              blk_BitcP(out, fld->child(0), showTypes); // field name
+              out << " == "
+                  << fld->unin_discm;
+              emittedSome = true;
+            }
+          }
+        }
+      }
+      
       break;
     }
 
@@ -281,7 +347,10 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> constraints = ast->child(5);
 
       blk_BitcP(out, category, showTypes);
-      out << " " << ast->atKwd() << " ";
+      if (ast->flags & UNION_IS_REPR)
+        out << " repr ";
+      else
+        out << " " << ast->atKwd() << " ";
       blk_BitcP(out, ident, showTypes);
       doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", showTypes);
 
@@ -465,8 +534,6 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_deftypeclass:
   case at_definstance:
   case at_defexception:
-  case at_defrepr:
-  case at_defunion:
     sxp_BitcP(out, ast, showTypes);
     break;
 
@@ -496,6 +563,9 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_declrepr:
   case at_declunion:
   case at_declstruct:
+  case at_defstruct:
+  case at_defunion:
+  case at_defrepr:
     {
       blk_BitcP(out, ast, showTypes);
       break;
@@ -1132,63 +1202,33 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
+#if 0
   case at_defrepr:
     {
       shared_ptr<AST> ident = ast->child(0);
-      // child(1) is empty tvlist
+      shared_ptr<AST> tvlist = ast->child(1); // empty
       shared_ptr<AST> category = ast->child(2);
       shared_ptr<AST> declares = ast->child(3);
-      shared_ptr<AST> body = ast->child(4);
+      shared_ptr<AST> fc = ast->child(4);
+      shared_ptr<AST> constraints = ast->child(5); // empty
 
       out << "(" << ast->atKwd() << " ";
-      sxp_BitcP(out, ident, showTypes);
+      out.indentToHere();
+      sxp_show_qual_name(out, ident, tvlist, showTypes);
       sxp_BitcP(out, category, showTypes);
-      out << " ";
+      out << endl;
       sxp_BitcP(out, declares, showTypes);
-      out << "(";
-      sxp_doChildren(out, body, 0, false, showTypes);
-      out << "))";
+      if (declares->children.size())
+        out << endl;
+
+      sxp_BitcP(out, fc, showTypes);
+      out << ")";
       break;
     }
-
-
-    //case at_reprcase:
-    //     {
-    //       out << "(case ";
-    //       sxp_doChildren(out, ast, 0, false, showTypes);
-    //       out << ")";
-    //       break;
-    //     }
-
-    //case at_reprcaselegR:
-    //     {
-    //       shared_ptr<AST> body = ast->child(0);
-    //       out << "(";
-    //       if (ast->children.size() > 2)
-    //         out << "(";
-    //       sxp_doChildren(out, ast, 1, false, showTypes);
-    //       if (ast->children.size() > 2)
-    //         out << ")";
-    //       out << " (";
-    //       sxp_doChildren(out, body, 0, false, showTypes);
-    //       out << "))";
-    //       break;
-    //     }
-
-    // case at_reprtag:
-    //     {
-    //       out << "(tag ";
-    //       sxp_doChildren(out, ast, 0, false, showTypes);
-    //       out << ")";
-    //       break;
-    //     }
-
-#if 1
-  case at_defstruct:
-    blk_BitcP(out, ast, showTypes);
-#else
-  case at_defstruct:
 #endif
+
+#if 0
+  case at_defstruct:
   case at_defunion:
     {
       shared_ptr<AST> ident = ast->child(0);
@@ -1215,6 +1255,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       break;
     }
+#endif
 
 #if 0
   case at_declunion:

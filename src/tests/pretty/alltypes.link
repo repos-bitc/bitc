@@ -1,9 +1,9 @@
-BUILD/alltypes.bita:5:3: WARNING: Local declaration of basic found here, but no definition found.
-BUILD/alltypes.bita:15:3: WARNING: Local declaration of primaries found here, but no definition found.
-BUILD/alltypes.bita:16:3: WARNING: Local declaration of shallowperm found here, but no definition found.
-BUILD/alltypes.bita:17:3: WARNING: Local declaration of postfix found here, but no definition found.
-BUILD/alltypes.bita:18:3: WARNING: Local declaration of prefix found here, but no definition found.
-BUILD/alltypes.bita:19:3: WARNING: Local declaration of fntype found here, but no definition found.
-BUILD/alltypes.bita:20:3: WARNING: Local declaration of RefArgTypes found here, but no definition found.
+BUILD/alltypes.bita:6:3: WARNING: Local declaration of basic found here, but no definition found.
+BUILD/alltypes.bita:19:3: WARNING: Local declaration of primaries found here, but no definition found.
+BUILD/alltypes.bita:21:3: WARNING: Local declaration of shallowperm found here, but no definition found.
+BUILD/alltypes.bita:23:3: WARNING: Local declaration of postfix found here, but no definition found.
+BUILD/alltypes.bita:25:3: WARNING: Local declaration of prefix found here, but no definition found.
+BUILD/alltypes.bita:27:3: WARNING: Local declaration of fntype found here, but no definition found.
+BUILD/alltypes.bita:29:3: WARNING: Local declaration of RefArgTypes found here, but no definition found.
 CYCLIC SUBSTITUTION (array int32 5) |-> (mutable (array int32 5))
 bitcc: Trail.cxx:61: void Trail::link(boost::shared_ptr<Type>, boost::shared_ptr<Type>): Assertion `false' failed.
