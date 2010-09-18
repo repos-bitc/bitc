@@ -2243,8 +2243,8 @@ blk_primary_type: '(' blk_type_cpair ')' {
 
 // Temporary expedient: for each of the postfix types, introduce an
 // application-style alternate syntax for use in pretty-printing:
-blk_primary_type: tk_PTR '(' blk_type ')' {
-  SHOWPARSE("blk_primary_type -> tk_PTR ( blk_type )");
+blk_primary_type: tk_BOXED '(' blk_type ')' {
+  SHOWPARSE("blk_primary_type -> tk_BOXED ( blk_type )");
   $$ = AST::make(at_boxedType, $1.loc, $3);
 
 }
@@ -2641,20 +2641,20 @@ sxp_type: '(' tk_CONST sxp_type ')' {
 // BITFIELD TYPE
 blk_bitfieldtype: any_int_type '(' natLit ')' {
   SHOWPARSE("blk_bitfieldtype -> any_int_type ( natLit )");
-  $$ = AST::make(at_bitfield, $1->loc, $1, $3);
+  $$ = AST::make(at_bitfieldType, $1->loc, $1, $3);
 };
 blk_bitfieldtype: bool_type '(' natLit ')' {
   SHOWPARSE("blk_bitfieldtype -> bool_type ( natLit )");
-  $$ = AST::make(at_bitfield, $1->loc, $1, $3);
+  $$ = AST::make(at_bitfieldType, $1->loc, $1, $3);
 };
 
 sxp_bitfieldtype: '(' tk_BITFIELD any_int_type natLit ')' {
   SHOWPARSE("sxp_bitfieldtype -> ( BITFIELD any_int_type natLit )");
-  $$ = AST::make(at_bitfield, $2.loc, $3, $4);
+  $$ = AST::make(at_bitfieldType, $2.loc, $3, $4);
 };
 sxp_bitfieldtype: '(' tk_BITFIELD bool_type natLit ')' {
   SHOWPARSE("sxp_bitfieldtype -> ( BITFIELD bool_type natLit )");
-  $$ = AST::make(at_bitfield, $2.loc, $3, $4);
+  $$ = AST::make(at_bitfieldType, $2.loc, $3, $4);
 };
 
 // Any non-by-ref type, including bitfield type

@@ -117,7 +117,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
   case at_intLiteral:
   case at_floatLiteral:
   case at_stringLiteral:
-  case at_bitfield:
+  case at_bitfieldType:
   case at_deftypeclass:
   case at_definstance:
   case at_tcmethods:

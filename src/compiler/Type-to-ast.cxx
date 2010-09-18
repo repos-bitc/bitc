@@ -214,7 +214,7 @@ Type::asAST(const sherpa::LexLoc &loc,
       shared_ptr<AST> intLit = AST::make(at_intLiteral, loc);
       mpz_init_set_ui(intLit->litValue.i, t->Isize);
       intLit->litBase = 10;
-      ast = AST::make(at_bitfield, loc, typ, intLit);
+      ast = AST::make(at_bitfieldType, loc, typ, intLit);
       break;
     }
 #endif

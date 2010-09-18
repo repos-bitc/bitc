@@ -2870,7 +2870,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
-  case at_bitfield:
+  case at_bitfieldType:
     {
       // match agt_type
       TYPEINFER(ast->child(0), gamma, instEnv, impTypes, tcc,

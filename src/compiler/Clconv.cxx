@@ -162,7 +162,7 @@ findusedef(std::ostream &errStream,
   case at_intLiteral:
   case at_floatLiteral:
   case at_stringLiteral:
-  case at_bitfield:
+  case at_bitfieldType:
   case at_declunion:
   case at_declstruct:
   case at_declrepr:

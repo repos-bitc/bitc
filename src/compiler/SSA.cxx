@@ -290,7 +290,7 @@ ssa(std::ostream& errStream,
   case at_mutableType:
   case at_constType:
   case at_typeapp:
-  case at_bitfield:
+  case at_bitfieldType:
   case at_qualType:    
   case at_constraints:
   case at_fieldType:

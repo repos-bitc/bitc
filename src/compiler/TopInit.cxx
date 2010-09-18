@@ -233,7 +233,7 @@ TopInit(std::ostream& errStream,
   case at_declares:
   case at_declare:
   case at_suspend:
-  case at_bitfield:
+  case at_bitfieldType:
   case at_boxedType:
   case at_unboxedType:
   case at_arrayRefType:

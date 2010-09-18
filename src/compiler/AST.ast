@@ -1057,14 +1057,14 @@ AST methdecl = ident type;
 GROUP qtype = qualType | type;
 
 // argVec is not able to appear in a "type" position.
-GROUP type = var | tvar | bitfield | boxedType | unboxedType
+GROUP type = var | tvar | bitfieldType | boxedType | unboxedType
            | fn | methType | byRefType | arrayRefType | primaryType | dummyType
            | arrayType | vectorType | typeapp | fieldType
            // | closureType;
            | mutableType | constType | exceptionType;
 
 // PRIMARY TYPES [3.2]
-AST bitfield = primaryType intLiteral;
+AST bitfieldType = primaryType intLiteral;
 
 // REF TYPES [3.4.1]
 AST byRefType = type;

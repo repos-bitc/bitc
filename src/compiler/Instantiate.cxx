@@ -1216,7 +1216,7 @@ UocInfo::recInstantiate(ostream &errStream,
       break;
     }
 
-  case at_bitfield:
+  case at_bitfieldType:
   case at_fill:
     {
       break;

@@ -264,7 +264,7 @@ AST::atKwd() const
   case at_fill:
     return "fill";
 
-  case at_bitfield:
+  case at_bitfieldType:
     return "bitfield";
 
   case at_byRefType:
@@ -295,8 +295,10 @@ AST::atKwd() const
     return "<primaryType>";
 
   case at_argVec:
+    return "<argVec>";
+
   case at_fnargVec:
-    return "";
+    return "<fnargVec>";
 
   case at_arrayType:
     return "array";
@@ -305,7 +307,7 @@ AST::atKwd() const
     return "vector";
 
   case at_typeapp:
-    return "";
+    return "<typeapp>";
 
   case at_mutableType:
     return "mutable";
@@ -499,7 +501,7 @@ AST::atKwd() const
     return "<ifsel>";
 
   case at_proclaim:
-    return "proclaim";
+    return "def";
 
   case at_array_nth:
     return "/* array */ nth";
@@ -603,6 +605,7 @@ AST::atKwd() const
 
   // Impossible to reach here.
   assert(false);
+
   // Satisfy the compiler
   return "<IMPOSSIBLE>";
 }

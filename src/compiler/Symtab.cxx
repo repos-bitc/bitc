@@ -1818,7 +1818,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_bitfield:
+  case at_bitfieldType:
     {
       // match at_type
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 

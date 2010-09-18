@@ -371,7 +371,7 @@ isExpansive(std::ostream& errStream,
   case at_field:
   case at_fieldType:
   case at_methdecl:
-  case at_bitfield:
+  case at_bitfieldType:
   case at_arrayRefType:
   case at_byRefType:
   case at_boxedType:

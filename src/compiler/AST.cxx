@@ -525,8 +525,8 @@ AST::tagName(const AstType at)
     return "at_fill";
   case at_methdecl:
     return "at_methdecl";
-  case at_bitfield:
-    return "at_bitfield";
+  case at_bitfieldType:
+    return "at_bitfieldType";
   case at_byRefType:
     return "at_byRefType";
   case at_arrayRefType:
@@ -850,8 +850,8 @@ AST::astName() const
     return "fill";
   case at_methdecl:
     return "methdecl";
-  case at_bitfield:
-    return "bitfield";
+  case at_bitfieldType:
+    return "bitfieldType";
   case at_byRefType:
     return "byRefType";
   case at_arrayRefType:
@@ -1134,7 +1134,7 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_field
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_fill
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_methdecl
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_bitfield
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_bitfieldType
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_byRefType
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_arrayRefType
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_boxedType
@@ -2920,7 +2920,7 @@ AST::isValid() const
     }
     break;
 
-  case at_bitfield: // normal AST:
+  case at_bitfieldType: // normal AST:
     // match at_primaryType
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());

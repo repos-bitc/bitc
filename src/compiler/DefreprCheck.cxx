@@ -125,7 +125,7 @@ bitOffset(shared_ptr<AST> leg, size_t n)
   for (size_t c=1; c < n; c++) {
     shared_ptr<AST> fld = leg->child(c);
     shared_ptr<AST> fldType = getTypeAst(fld);
-    if (fldType->astType == at_bitfield)
+    if (fldType->astType == at_bitfieldType)
       off += fldType->field_bits;
     else
       off += fldType->symType->size();

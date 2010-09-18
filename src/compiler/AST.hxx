@@ -613,7 +613,7 @@ enum AstType {
   at_field,
   at_fill,
   at_methdecl,
-  at_bitfield,
+  at_bitfieldType,
   at_byRefType,
   at_arrayRefType,
   at_boxedType,
