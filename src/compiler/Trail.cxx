@@ -46,6 +46,18 @@
 using namespace boost;
 using namespace sherpa;
 
+/// @brief Link @p from to @p to without regard to whether @p from is
+/// actually a type variable.
+///
+/// This is an obscure case. It arises in structure types when
+/// maximizing mutability. The problem here is that we have an 'a that
+/// has already been concretized, and we now want to maximize the
+/// mutability of the alpha parameter. The way we accomplish that is
+/// by setting the link pointer on the original, concrete type so as
+/// to point to the new, more mutable type. It's a re-substitution, so
+/// it is as if we are re-writing the original concretization with a
+/// new alpha variable in-place, and then resolving that alpha
+/// variable to the new result.
 void
 Trail::link(shared_ptr<Type> from, shared_ptr<Type> to)
 {  
