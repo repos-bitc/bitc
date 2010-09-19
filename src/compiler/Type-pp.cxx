@@ -75,7 +75,7 @@ printName(shared_ptr<AST> ast)
 }
 
 string
-Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options) 
+Type::asSexprString(shared_ptr<TvPrinter> tvP, PrintOptions options)
 { 
   stringstream ss;
   
@@ -392,6 +392,13 @@ Type::asString(shared_ptr<TvPrinter> tvP, PrintOptions options)
   return /*asBlockString(tvP, options) + " OR " + */asSexprString(tvP, options);
 }
 
+void
+Type::PrettyPrint()
+{
+  std::cerr << asString();
+  std::cerr << std::endl;
+}
+
 // Return the precedence (in the grammar's view) of the production
 // that produces a given type.
 static int typePrecedence(TypeTag ttag)
@@ -424,7 +431,7 @@ static bool shouldParenWrap(TypeTag parent, TypeTag child)
 
 string
 Type::asBlockStringProducer(shared_ptr<TvPrinter> tvP, PrintOptions options, 
-                       bool parenWrap) 
+                       bool parenWrap)
 { 
   stringstream ss;
   
