@@ -172,6 +172,8 @@ bindIdentDef(shared_ptr<AST> ast,
     gamma->addBinding(ast->s, sigma);      
   }
   
+  /// @bug In some cases, shap thinks this is binding flags in the
+  /// wrong gamma.
   gamma->setFlags(ast->s, bindFlags);    
   return sigma;
 }
@@ -636,7 +638,8 @@ matchDefDecl(std::ostream& errStream,
     shared_ptr<Type> declT = declTS->tau->getType();
     shared_ptr<Type> defT  = defTS->tau->getType();
     
-    CHKERR(errorFree, declT->strictlyEquals(defT, verbose));
+    CHKERR(errorFree, declT->defEqualsDecl(defT, verbose));
+
     if (errorFree)
       CHKERR(errorFree, checkConstraints(errStream, defTS, declTS, decl));
     
@@ -916,6 +919,9 @@ InferStruct(std::ostream& errStream, shared_ptr<AST> ast,
   // type arguments that are candidiates for copy-compatibility.
   markCCC(st);
   
+  /// @bug Shap thinks this happens too early, because errors are
+  // still possible.
+
   // Set the main AST's type.
   ast->symType = sIdent->symType;
    
@@ -2105,7 +2111,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
             //   (define a:'a 10)
             //
             // there will be no prior definition of it ('a).  So, it
-            // should now be defined.  In-correct usages should be
+            // should now be defined.  Incorrect usages should be
             // taken care of by the symbol resolver.  So, it is safe
             // to add this type to Gamma now.
 
@@ -2304,8 +2310,15 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
 
       // Type all constraints
       shared_ptr<AST> constraints = ast->child(5);
-      TYPEINFER(constraints, gamma, instEnv, impTypes, 
+      TYPEINFER(constraints, defGamma, instEnv, impTypes, 
                 sigma->tcc, trail, mode, TI_CONSTRAINT);
+
+      // Add Ftvs so that they get generalized in future uses
+      addTvsToSigma(errStream, tvList, sigma, trail); 
+
+      // In case of value type definitions, mark all those  
+      // type arguments that are candidiates for copy-compatibility.
+      markCCC(ident->symType);
 
       // Solve current Predicates.
       CHKERR(errFree, sigma->solvePredicates(errStream, ident->loc,

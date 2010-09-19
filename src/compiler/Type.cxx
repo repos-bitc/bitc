@@ -1318,6 +1318,13 @@ Type::eql(shared_ptr<Type> t, bool verbose, std::ostream &errStream,
 }
 
 bool
+Type::defEqualsDecl(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
+{
+  return eql(t, verbose, errStream, 
+             UFLG_UNIFY_STRICT|UFLG_UN_IGN_RIGIDITY, false);
+}
+
+bool
 Type::equals(shared_ptr<Type> t, bool verbose, std::ostream &errStream)
 {
   return eql(t, verbose, errStream, UFLG_NO_FLAGS, false);

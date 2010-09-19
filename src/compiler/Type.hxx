@@ -309,7 +309,7 @@ public:
   TypeTag typeTag;
   
   /// @brief Pointer to next element of a chain constrained by
-  /// equality.
+  /// unification.
   ///
   /// This is set by the unifier.
   boost::shared_ptr<Type> link;
@@ -609,6 +609,8 @@ public:
   // restrictions. 
   bool equals(boost::shared_ptr<Type> t, bool verbose=false,
               std::ostream &errStream=std::cerr);
+  bool defEqualsDecl(boost::shared_ptr<Type> t, bool verbose=false,
+                     std::ostream &errStream=std::cerr);
   bool strictlyEquals(boost::shared_ptr<Type> t, bool verbose=false,
                       bool noAlphaRename=false,
                       std::ostream &errStream=std::cerr);  
@@ -764,6 +766,9 @@ public:
   std::string
   asString(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make(), 
            PrintOptions options = PO_NO_FLAGS);
+
+  // For use in GDB:
+  void PrettyPrint();
 
   //  std::string 
   //  asString(boost::shared_ptr<TvPrinter> tvP = TvPrinter::make(), 
