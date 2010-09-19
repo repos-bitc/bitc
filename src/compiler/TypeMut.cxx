@@ -292,9 +292,9 @@ Type::maximizeMutability(shared_ptr<Trail> trail)
     
   case ty_array:
     {
-      rt = Type::make(t);
+      rt = t->getDCopy();
       rt->Base() = t->Base()->maximizeMutability(trail);
-      rt = Mutable(t);      
+      rt = Mutable(rt);
       break;
     }
 
