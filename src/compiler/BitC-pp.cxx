@@ -240,6 +240,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_defrepr:
   case at_defstruct:
   case at_defunion:
+  case at_defexception:
     {
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> tvlist = ast->child(1);
@@ -253,9 +254,9 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       // Careful! Reprs are transformed into unions by the reprSimp
       // pass, so what we get here might actually be a repr:
       if (ast->flags & UNION_IS_REPR)
-        out << " repr ";
+        out << "repr ";
       else
-        out << " " << ast->atKwd() << " ";
+        out << ast->atKwd() << " ";
       blk_BitcP(out, ident, showTypes);
       doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", showTypes);
 
@@ -264,13 +265,18 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       doChildren(blk_BitcP, out, declares, 0, "\n", "\n", "", showTypes);
       out.less();
 
-      out << "\nis";
+      if (fc->children.size()) {
+        out << "\nis ";
 
-      out.more();
-      doChildren(blk_BitcP, out, fc, 0, "\n", 
-                 (ast->astType == at_defstruct) ? "\n" : "\n\n",
-                 "", showTypes);
-      out.less();
+        out.indentToHere();
+        doChildren(blk_BitcP, out, fc, 0, "", 
+#if 0
+                   (ast->astType == at_defstruct) ? "\n" : "\n\n",
+#else
+                   "\n",
+#endif
+                   "", showTypes);
+      }
 
       break;
     }
@@ -301,10 +307,13 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       }
       else {
         blk_BitcP(out, ast->child(0), showTypes);
-        out << " is";
-        out.more();
-        doChildren(blk_BitcP, out, ast, 1, "\n", "\n", "", showTypes);
-        out.less();
+        out << " ";
+        (void) out.indentToHere(); // record the "is" depth
+
+        out << "is ";
+        size_t isDepth = out.indentToHere();
+        doChildren(blk_BitcP, out, ast, 1, "", "\n", "", showTypes);
+        out.setIndent(isDepth);
 
         for(size_t c = 1; c < ast->children.size(); c++) {
           shared_ptr<AST> fld = ast->child(c);
@@ -313,6 +322,8 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
             break;
           }
         }
+
+        //        out.setIndent(isDepth);
 
         if (isRepr) {
           bool emittedSome = false;
@@ -348,9 +359,9 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       blk_BitcP(out, category, showTypes);
       if (ast->flags & UNION_IS_REPR)
-        out << " repr ";
+        out << "repr ";
       else
-        out << " " << ast->atKwd() << " ";
+        out << ast->atKwd() << " ";
       blk_BitcP(out, ident, showTypes);
       doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", showTypes);
 
@@ -490,13 +501,13 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
   case at_boxedCat:
     if (!(ast->printVariant & pf_IMPLIED))
-      out << "boxed";
+      out << "boxed ";
     break;
   case at_unboxedCat:
-    out << "unboxed";
+    out << "unboxed ";
     break;
   case at_opaqueCat:
-    out << "opaque";
+    out << "opaque ";
     break;
 
   case at_closed:
@@ -533,7 +544,6 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
   case at_deftypeclass:
   case at_definstance:
-  case at_defexception:
     sxp_BitcP(out, ast, showTypes);
     break;
 
@@ -566,6 +576,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_defstruct:
   case at_defunion:
   case at_defrepr:
+  case at_defexception:
     {
       blk_BitcP(out, ast, showTypes);
       break;
@@ -1068,14 +1079,16 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_provide:
+#if 0
   case at_defexception:
     out << "(" << ast->atKwd();
     sxp_doChildren(out, ast, 0, true, showTypes);
     out << ")";
     break;
+#endif
 
   case at_import:
+  case at_provide:
     out << "(" << ast->atKwd();
     sxp_doChildren(out, ast, 0, true, showTypes);
     out << ")";

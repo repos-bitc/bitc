@@ -1000,7 +1000,7 @@ GROUP openclosed = closed | Null;
 
 // EXCEPTION DEFINITION [3.10]
 // 9/16/2010: updated defexception to match the shape of other
-// type-defining ASTa in order to regularize processing. Declares
+// type-defining ASTs in order to regularize processing. Declares
 // field is present on the definition, but has no children. Category
 // for defexception is always "boxed". Exceptions are currently not
 // permitted to be polymorphic, so the constraints node will always be
