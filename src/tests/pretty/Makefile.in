@@ -161,7 +161,7 @@ $(LIBBITC_NO_GC): $(BITCC)
 $(BITCC):
 	make -C $(BITCC_SRC) BUILD/bitcc
 
-include expect.in
+include expect.mk
 
 BUILD/%.bita: %.bits $(BITCC) | BUILD
 	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o $(EXPECT_OUTPUT) -e $(EXPECT_ERROUTPUT) $(RUN_BITCC) $(INC) -c -o $@ $<

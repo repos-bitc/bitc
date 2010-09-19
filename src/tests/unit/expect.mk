@@ -35,7 +35,44 @@
 #
 ##########################################################################
 
-BUILD/alltypes: EXPECT_STATUS=134
-BUILD/alltypes: EXPECT_ERROUTPUT=alltypes.link
-BUILD/alltypes.bita: EXPECT_STATUS=0
-BUILD/alltypes.bita: EXPECT_ERROUTPUT=alltypes.compile
+clconv1.test: EXPECT_STATUS=1
+closure.test: EXPECT_STATUS=3
+AppLoc.test: EXPECT_STATUS=3
+newException.test: EXPECT_STATUS=1
+newException.test: EXPECT_OUTPUT=newException.stdout
+VecBoundsError.test: EXPECT_STATUS=1
+VecBoundsError.test: EXPECT_OUTPUT=VecBoundsError.stdout
+UncaughtException.test: EXPECT_STATUS=1
+UncaughtException.test: EXPECT_OUTPUT=UncaughtException.stdout
+wchar.test: EXPECT_OUTPUT=wchar.stdout
+odd_even_letrec.test: EXPECT_STATUS=139
+Echo_Args.test: EXPECT_OUTPUT=Echo_Args.stdout
+echo-char.test: USE_INPUT=echo-char.stdin
+echo-char.test: EXPECT_OUTPUT=echo-char.stdout
+hello.test: EXPECT_OUTPUT=hello.stdout
+Fact-Rec.test: EXPECT_STATUS=120
+Fact-Loop.test: EXPECT_STATUS=120
+Fact-Mut.test: EXPECT_STATUS=120
+intout.test: EXPECT_OUTPUT=intout.stdout
+io-time.test: ARGS=file.input
+io-time.test: EXPECT_OUTPUT=io-time.stdout
+sha1-file.test: ARGS="file.input 128028"
+sha1-file.test: EXPECT_OUTPUT=sha1-file.stdout
+sha1-test.test: EXPECT_OUTPUT=sha1-test.stdout 
+twomodule.test: EXPECT_OUTPUT=twomodule.stdout 
+sizeof.test: EXPECT_STATUS=4
+bitsizeof.test: EXPECT_STATUS=1
+bitset.test: EXPECT_OUTPUT=bitset.stdout
+array-byref.test: EXPECT_STATUS=6
+vec-badly-typed.test: TEST_MODE=compile
+BUILD/vec-badly-typed: TEST_MODE=compile
+BUILD/vec-badly-typed: COMPILE_ERROUTPUT=vec-badly-typed.errout
+BUILD/vec-badly-typed: EXPECT_STATUS=1
+
+badsyntax.test: TEST_MODE=compile
+BUILD/badsyntax: TEST_MODE=compile
+BUILD/badsyntax: COMPILE_ERROUTPUT=badsyntax.errout
+BUILD/badsyntax: EXPECT_STATUS=1
+BUILD/cyclic: COMPILE_ERROUTPUT=cyclic.errout
+
+cyclic.test: TEST_MODE=compile

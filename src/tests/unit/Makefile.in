@@ -165,7 +165,7 @@ $(BITCC):
 %.test: BUILD/% | BUILD
 	@../testit.sh -m ${TEST_MODE} ${TESTOPTS} -s $(EXPECT_STATUS) -o $(EXPECT_OUTPUT) -e $(EXPECT_ERROUTPUT) -i $(USE_INPUT) "./$< $(ARGS)"
 
-include expect.in
+include expect.mk
 
 BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | BUILD
 	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} -e ${COMPILE_ERROUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME)

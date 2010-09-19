@@ -41,13 +41,13 @@ module cyclic is
   import bitc.main as main
   provide bitc.main main
 
-  (proclaim lispbasearray : (array int32 5))
+  //(proclaim lispbasearray : (array int32 5))
 
-  def basearray : int32[5]
+  //def basearray : int32[5]
 
-  def wrapped_array : int32[5]
+  //def wrapped_array : int32[5]
 
-  def array_on_field : (int32, int32[5])
+  def array_on_field : (char, int32[5])
 
   def main.main(argv: string[]) = {
     0:int32
