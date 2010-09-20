@@ -2002,10 +2002,10 @@ unboxed struct int external bitc_int</literallayout>
             <literallayout>
 (proclaim S.m: (fn S int32 -&gt; bool))
 (proclaim T.m:
-   (fn (by-ref T) int32 -&gt; bool))</literallayout>
+   (fn (ByRef T) int32 -&gt; bool))</literallayout>
             <p indent="no">
               where the parameter corresponding to the argument of
-              structure type is <progident>by-ref</progident> exactly if
+              structure type is <progident>ByRef</progident> exactly if
               the corresponding structure type is a value type.
               Implementations of these procedures must be provided
               elsewhere by the developer.
@@ -3830,10 +3830,10 @@ import bitc.list as ls
             by-reference parameters as in:            
           </p>
           <literallayout>
-(lambda (x:(by-ref &tau;) ...) ...)         // or
-(def (f x:(by-ref &tau;) ...) ...)</literallayout>
+(lambda (x:(ByRef &tau;) ...) ...)         // or
+(def (f x:(ByRef &tau;) ...) ...)</literallayout>
           <p>
-            A <progident>by-ref</progident> declaration can only
+            A <progident>ByRef</progident> declaration can only
             appear as a qualifier for the type of a  parameter. This
             is a syntactic restriction.
           </p>
@@ -3851,7 +3851,7 @@ import bitc.list as ls
 <!--           </p> -->
           <p>
             A function with a formal parameter declared as 
-            <progident>(by-ref &tau;)</progident>
+            <progident>(ByRef &tau;)</progident>
             can only be apllied to an actual argument of type 
             <progident>&tau;</progident>. That is, unlike 
             normal parameters, an actual argument of type 
