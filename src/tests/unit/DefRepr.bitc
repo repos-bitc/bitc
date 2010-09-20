@@ -36,8 +36,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 
 (repr theRepr :unboxed
   (Ct1 i:int32 j:bool  (where (== i 0)))

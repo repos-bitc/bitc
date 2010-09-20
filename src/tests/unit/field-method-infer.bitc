@@ -36,8 +36,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 
 (struct S1 f: (fn -> int32))
 (struct S2 i:int32 f: (method -> int32))

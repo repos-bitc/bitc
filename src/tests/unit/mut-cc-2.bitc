@@ -54,7 +54,7 @@ bitc version 0.11
 
 (def q5:(St  bool (mutable bool)) (St (vector true) false))
  
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 0))

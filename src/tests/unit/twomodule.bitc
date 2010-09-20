@@ -37,9 +37,9 @@
 
 bitc version 0.11
 module MainModule is
-  (import bitc.main as main)
-  (provide bitc.main main)
-  (import bitc.stdio as stdio)
+  import bitc.main as main
+  provide bitc.main main
+  import bitc.stdio as stdio
 
   (def main.main:(fn (vector string) -> int32)
     (lambda (argvec)

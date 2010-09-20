@@ -41,7 +41,7 @@ bitc version 0.11
 // dump the types of these expressions and see if they are as expected
 // as the type inference of mutability is changes or readjusted.
 
-(import bitc.list as ls)
+import bitc.list as ls
 
 (def (id x) x)
 
@@ -74,8 +74,8 @@ bitc version 0.11
 (def (lvmq lst:(list (mutable char)))
   (l2vq lst))
 
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 0))
 

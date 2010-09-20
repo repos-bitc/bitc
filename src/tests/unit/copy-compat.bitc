@@ -41,8 +41,8 @@ bitc version 0.11
   (def dupize2:(fn 'a -> (boxed 'b))
     (lambda (x) (dup x))))
 
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 (def main.main:(fn (vector string) -> int32) 
   (lambda (argv)  
     ((dupize1 true), (dupize2 false))

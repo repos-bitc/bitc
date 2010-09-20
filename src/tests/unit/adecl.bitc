@@ -37,8 +37,8 @@
 
 bitc version 0.11
 
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 
 (def a23 (array (array 1:int32 2 3)
 		   (array 4 5 6)))

@@ -36,8 +36,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 
 (def i0 0:int32)
 
@@ -62,7 +62,7 @@ bitc version 0.11
 //(def p6 (let ((m:'a (let ((n:'a (lambda (x) x))) n)))
 //	     (m true) (m i0) ))
 
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec)  0))

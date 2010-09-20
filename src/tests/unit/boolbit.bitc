@@ -36,8 +36,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 (struct bst f1:(bitfield bool 1) (fill (bitfield uint32 31)))
 
 (def bstv (bst true))

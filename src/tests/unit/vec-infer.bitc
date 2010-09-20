@@ -37,8 +37,8 @@
 
 bitc version 0.11
 
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 
 (def (choose_array_nth e:(array 'a 5)) e[4])
 

@@ -36,8 +36,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 (def p:(mutable bool) false) 
 (def V1  (vector true p))
 (def V2  (vector p))

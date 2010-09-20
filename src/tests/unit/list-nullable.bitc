@@ -36,8 +36,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 
 // Check to ensure that (list (nullable bool)) occupies
 // only one word in the list, similar to (list (boxed bool))

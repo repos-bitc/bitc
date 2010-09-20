@@ -36,9 +36,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(import bitc.list as lst)
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.list as lst
+import bitc.main as main
+provide bitc.main main
 
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

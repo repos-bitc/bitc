@@ -37,9 +37,9 @@
 
 bitc version 0.11
 
-(import bitc.main main)
-(provide bitc.main main)
-(import bitc.list (map as MAP))
+import bitc.main main
+provide bitc.main main
+import bitc.list MAP=map
 
 (def main:(fn (vector string) -> int32)
   (lambda (argvec)

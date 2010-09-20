@@ -2139,14 +2139,14 @@ unboxed struct int external bitc_int</literallayout>
           <literallayout indent="no">
 (def p (pair (mutable #\c) 3:int32))
 ...
-;; legal, field is mutable:
+// legal, field is mutable:
 (set! p.first #\d)
-;; illegal
+// illegal
 (set! p.second 5)
 
 (def mp (pair (mutable #\c)
            3:(mutable int32)))
-;; legal, all fields mutable:
+// legal, all fields mutable:
 (set! mp (pair #\d 4))</literallayout>
           <p indent="no">
             The test of constituent mutability does not extend across
@@ -2895,12 +2895,12 @@ id : T
           is legal for a source unit of compilation to contain:
         </p>
 	<literallayout>
-;; State that we are a provider
-;; of my.interface:
-(provide if my.interface)
-;;...
-;; Define some variable declared
-;; in the interface:
+// State that we are a provider
+// of my.interface:
+provide if my.interface
+//...
+// Define some variable declared
+// in the interface:
 (def (if.varname x)
   (+ x 1))</literallayout>
       </sect2>
@@ -3477,7 +3477,7 @@ bitsizeof(<em>T</em>)</literallayout>
             <progident>list-&gt;vector</progident> may be written as:
           </p>
 <literallayout>
-(import bitc.list as ls)
+import bitc.list as ls
 (def (list->vector lst)
   (MakeVector
     (length lst)
@@ -3830,7 +3830,7 @@ bitsizeof(<em>T</em>)</literallayout>
             by-reference parameters as in:            
           </p>
           <literallayout>
-(lambda (x:(by-ref &tau;) ...) ...)         ;; or
+(lambda (x:(by-ref &tau;) ...) ...)         // or
 (def (f x:(by-ref &tau;) ...) ...)</literallayout>
           <p>
             A <progident>by-ref</progident> declaration can only
@@ -4863,7 +4863,7 @@ interface sample {
             The syntax of the hygienic import form is:
           </p>
           <literallayout>
-(import <em>if-name</em> as <em>local-name</em>)</literallayout>
+import <em>if-name</em> as <em>local-name</em></literallayout>
           <p indent="no">
             where <progident><em>if-name</em></progident> is an
             interface name and
@@ -4873,7 +4873,7 @@ interface sample {
             <progident>TheInterface</progident>, then after executing
           </p>
           <literallayout>
-(import TheInterface as myName)</literallayout>
+import TheInterface as myName</literallayout>
           <p indent="no">
             it is legal to write
             <progident>myName.<em>pubName</em></progident> at any
@@ -4905,13 +4905,13 @@ interface sample {
             unit of compilation. The syntax of this form is:
           </p>
           <literallayout>
-(import <em>if-name</em> <em>ident-or-remap</em><sup>+</sup>)</literallayout>
+import <em>if-name</em> <em>ident-or-remap</em><sup>+</sup></literallayout>
           <p>
             where <em>ident-of-remap</em> is either some identifier
             published by the imported interface or it is:
           </p>
           <literallayout>
-(<em>pubName</em> as <em>localName</em>)</literallayout>
+<em>localName</em> = <em>pubName</em></literallayout>
           <p indent="no">
             If a single identifier is given, the local alias is bound
             using the public name. If the ``as'' variant is given, the
@@ -4934,7 +4934,7 @@ interface sample {
             The syntax of this form is:
           </p>
           <literallayout>
-(import <em>if-name</em>)</literallayout>
+import <em>if-name</em></literallayout>
           <p indent="no">
             This form does not support identifier re-naming on import.
             Name collisions resulting from import can, if necessary,
@@ -4996,7 +4996,7 @@ interface sample {
           syntax of provide is:
         </p>
         <literallayout>
-(provide <em>interface-name</em> <em>ident</em><sup>+</sup>)</literallayout>
+provide <em>interface-name</em> <em>ident</em><sup>+</sup></literallayout>
         <p indent="no">
           Where each <progident><em>ident</em></progident> is an
           identifier proclaimed by the named interface. That is: the
@@ -5012,14 +5012,14 @@ For example:
         </p>
         <literallayout>
 bitc version "&BitcVersion;"
-(import sample as ln)
-(provide sample tree-of)
+import sample as ln
+provide sample TreeOf
 
-(struct (ln.tree-of 'a):boxed
+(struct (ln.TreeOf 'a):boxed
   left : (optional
-           (ln.tree-of 'a))
+           (ln.TreeOf 'a))
   right : (optional
-            (ln.tree-of 'a))
+            (ln.TreeOf 'a))
   height
   value : 'a)</literallayout>
         <p indent="no">
@@ -5029,9 +5029,9 @@ bitc version "&BitcVersion;"
           </p>
         <literallayout>
 bitc version "&BitcVersion;"
-(import sample as ln)
-(provide sample tree-of)
-(use (ln.tree-of as mumble))
+import sample as ln
+provide sample TreeOf
+(use (ln.TreeOf as mumble))
 
 (struct (mumble 'a):boxed
   left : (optional (mumble 'a))
@@ -5272,32 +5272,32 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
         conspire to hide the fact that these types are union types.
       </p>
       <literallayout>
-;; There is an open issue here: should
-;; strings be primitive? Issue is unicode
-;; character size and long strings.
-; Strings:
-;;(union string:unboxed (vector char))
+// There is an open issue here: should
+// strings be primitive? Issue is unicode
+// character size and long strings.
+// Strings:
+//(union string:unboxed (vector char))
 
-; Pairs:
+// Pairs:
 (struct (pair 'a 'b):unboxed 
   fst:'a snd:'b)
 
-; Optional values:
+// Optional values:
 (union (optional 'a):unboxed 
   none (some value:'a))
 
-; Nullable pointers:
+// Nullable pointers:
 (forall ((ref-types 'a))
   (union
     (nullable 'a):unboxed 
      Null (non-null ptr:(ref 'a))))
 
-; Homogeneous lists:
+// Homogeneous lists:
 (union (list 'a) 
   nil
   (cons car:'a cdr:(list 'a)))
 
-; Bignums
+// Bignums
 (union int:unboxed
   (fix f:(bitfield int32 31))
   (big b:(ref (bool, (vector word)))))</literallayout>
@@ -5309,28 +5309,28 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
         classes:
       </p>
       <literallayout>
-; Equality comparison by identity:
+// Equality comparison by identity:
 (trait (EqComparison 'a)
   eq : (fn ('a 'a) bool))
 
-; Equality comparison by identity,
-; with exceptional handling for
-; numerics:
+// Equality comparison by identity,
+// with exceptional handling for
+// numerics:
 (trait (EqlComparison 'a)
   eql : (fn ('a 'a) bool))
 
-; Generalized equality:
+// Generalized equality:
 (trait (EqualityComparison 'a)
   == : (fn ('a 'a) bool)
   != : (fn ('a 'a) bool))
 
-; Magnitude comparison
+// Magnitude comparison
 (forall ((EqualityComparison 'a))
   (trait (Ord 'a)
   &lt;  : (fn ('a 'a) bool)
   &lt;= : (fn ('a 'a) bool)))
 
-; Checked arithmetic
+// Checked arithmetic
 (forall ((Ord 'a))
   (trait (Arith 'a)
     +: (fn ('a 'a) 'a)
@@ -5340,7 +5340,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
     &lt;&lt;:(fn ('a word) 'a)
     &gt;&gt;:(fn ('a word) 'a)))
 
-; Ring arithmetic
+// Ring arithmetic
 (forall ((Ord 'a))
   (trait (Ring 'a)
     R+: (fn ('a 'a) 'a)
@@ -5350,7 +5350,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
     R&lt;&lt;:(fn ('a word) 'a)
     R&gt;&gt;:(fn ('a word) 'a)))
 
-; Sign transformations
+// Sign transformations
 (forall ((Ord 'a))
   (trait (Signed 'a)
     negate: (fn ('a) 'a)
@@ -5444,8 +5444,8 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
   module <em>ifname</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod_def</em><sup>+</sup> }
 <em>mod_def</em> ::= <em>def</em> | <em>provide</em>
 <em>implicit_module</em> ::= <em>mod_def</em><sup>+</sup>
-<em>import</em> ::= (import <em>ifname</em> as Id)
-<em>provide</em> ::= (provide Id <em>ifname</em> Id<sup>+</sup>)
+<em>import</em> ::= import <em>ifname</em> as Id
+<em>provide</em> ::= provide Id <em>ifname</em> Id<sup>+</sup>
 <em>usedecl</em> ::=
     (use {Id.Id | (Id.Id as Id)}<sup>+</sup>)
 <em>def</em> ::= <em>import</em>
@@ -5591,7 +5591,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
 <em>ident</em> ::= Id | Id.Id
 <em>expr</em> ::= <em>eform</em>
   | (the <em>type</em> <em>eform</em>)
-;; <em>eform permits</em> ident <em>via expr.id</em>
+// <em>eform permits</em> ident <em>via expr.id</em>
 <em>eform</em> ::= Id
   | ()
   | <em>eform</em>.Id
@@ -5616,7 +5616,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
   | (dup <em>expr</em>)
   | (cond ( {(<em>expr</em> <em>expr</em>)}<sup>*</sup>)
             (otherwise <em>expr</em>))
-  <em>;; MAY NEED CASE</em>
+  <em>// MAY NEED CASE</em>
   | (switch Id <em>expr</em>
             ( {(<em>switchtags</em> <em>expr_seq</em>)}<sup>*</sup>
               (otherwise <em>expr_seq</em>)))

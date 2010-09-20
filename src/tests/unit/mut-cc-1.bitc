@@ -49,7 +49,7 @@ bitc version 0.11
 //(def p3:(St (mutable bool) bool) (St true false))
 (def p4:(St  bool (mutable bool)) (St true false))
 
-(import bitc.main as main)
-(provide bitc.main main)
+import bitc.main as main
+provide bitc.main main
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 0))

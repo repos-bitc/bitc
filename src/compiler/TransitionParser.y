@@ -333,7 +333,8 @@ static unsigned VersionMinor(const std::string s)
 
 //%token <tok> tk_SUPER
 %token <tok> tk_SUSPEND
-%type <tok>  sxp_ifident blk_ifident
+// %type <tok>  sxp_ifident
+%type <tok>  blk_ifident
 
 //%token <tok> tk_EXPORT
  
@@ -358,15 +359,16 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_type_decl
 // %type <ast> sxp_type_decl
 %type <ast> sxp_externals blk_externals
-%type <ast> sxp_alias blk_alias
-%type <ast> sxp_importList sxp_provideList
+// %type <ast> sxp_importList sxp_provideList
+// %type <ast> sxp_alias
 %type <ast> blk_importList blk_provideList
+%type <ast> blk_alias
 %type <ast> sxp_type_cpair sxp_unqual_expr_cpair
 %type <ast> blk_type_cpair
 %type <ast> sxp_value_definition blk_value_definition 
 %type <ast> sxp_tc_definition sxp_ti_definition
 %type <ast> blk_tc_definition blk_ti_definition
-%type <ast> sxp_import_definition sxp_provide_definition
+// %type <ast> sxp_import_definition sxp_provide_definition
 %type <ast> blk_import_definition blk_provide_definition
 %type <ast> sxp_tc_decls // sxp_tc_decl
 %type <ast> blk_tc_decls // blk_tc_decl
@@ -585,18 +587,18 @@ blk_ifident: blk_ifident '.' {
   $$ = LToken(tk_BlkIdent, $1.loc, $4.endLoc, $1.str + "." + $4.str);
 };
 
-sxp_ifident: {
-    lexer->setIfIdentMode(true);
-  } sxp_ident {
-  lexer->setIfIdentMode(false);
-  $$ = LToken(tk_SxpIdent, $2->loc, $2->endLoc(), $2->s);
-};
-sxp_ifident: sxp_ifident '.' {
-    lexer->setIfIdentMode(true);
-  } tk_SxpIdent {
-  lexer->setIfIdentMode(false);
-  $$ = LToken(tk_SxpIdent, $1.loc, $4.endLoc, $1.str + "." + $4.str);
-};
+// sxp_ifident: {
+//     lexer->setIfIdentMode(true);
+//   } sxp_ident {
+//   lexer->setIfIdentMode(false);
+//   $$ = LToken(tk_SxpIdent, $2->loc, $2->endLoc(), $2->s);
+// };
+// sxp_ifident: sxp_ifident '.' {
+//     lexer->setIfIdentMode(true);
+//   } tk_SxpIdent {
+//   lexer->setIfIdentMode(false);
+//   $$ = LToken(tk_SxpIdent, $1.loc, $4.endLoc, $1.str + "." + $4.str);
+// };
 
 // MODULES [2.5]
 trn_module_seq: trn_module {
@@ -727,10 +729,10 @@ blk_mod_definition: blk_provide_definition {
   $$ = $1;
 };
 
-sxp_mod_definition: sxp_provide_definition {
-  SHOWPARSE("sxp_mod_definition -> sxp_provide_definition");
-  $$ = $1;
-};
+// sxp_mod_definition: sxp_provide_definition {
+//   SHOWPARSE("sxp_mod_definition -> sxp_provide_definition");
+//   $$ = $1;
+// };
 
 blk_mod_definition: blk_common_definition {
   SHOWPARSE("blk_mod_definition -> blk_common_definition");
@@ -747,10 +749,10 @@ blk_common_definition: blk_import_definition {
   $$ = $1;
 }
 
-sxp_common_definition: sxp_import_definition {
-  SHOWPARSE("sxp_common_definition -> sxp_import_definition");
-  $$ = $1;
-};
+// sxp_common_definition: sxp_import_definition {
+//   SHOWPARSE("sxp_common_definition -> sxp_import_definition");
+//   $$ = $1;
+// };
 
 blk_common_definition: blk_type_val_definition {
   SHOWPARSE("blk_common_definition -> blk_type_val_definition");
@@ -1719,15 +1721,15 @@ blk_import_definition: tk_IMPORT blk_ifident tk_AS blk_ident {
   $$ = AST::make(at_importAs, $1.loc, ifIdent, $4);
 }
 
-sxp_import_definition: LP tk_IMPORT sxp_ifident tk_AS sxp_ident RP {
-  SHOWPARSE("sxp_import_definition -> ( IMPORT sxp_ifident AS sxp_ident )");
-  shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-  if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
-    std::string err = "Unable to import " + $3.str;
-    lexer->ReportParseError($2.loc, err);
-  }
-  $$ = AST::make(at_importAs, $2.loc, ifIdent, $5);
-};
+// sxp_import_definition: LP tk_IMPORT sxp_ifident tk_AS sxp_ident RP {
+//   SHOWPARSE("sxp_import_definition -> ( IMPORT sxp_ifident AS sxp_ident )");
+//   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
+//   if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
+//     std::string err = "Unable to import " + $3.str;
+//     lexer->ReportParseError($2.loc, err);
+//   }
+//   $$ = AST::make(at_importAs, $2.loc, ifIdent, $5);
+// };
 
 blk_import_definition: tk_IMPORT blk_ifident {
   SHOWPARSE("blk_import_definition -> IMPORT blk_ifident;");
@@ -1739,15 +1741,15 @@ blk_import_definition: tk_IMPORT blk_ifident {
   $$ = AST::make(at_import, $1.loc, ifIdent);
 };
 
-sxp_import_definition: LP tk_IMPORT sxp_ifident RP {
-  SHOWPARSE("sxp_import_definition -> (IMPORT sxp_ifident)");
-  shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-  if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
-    std::string err = "Unable to import " + $3.str;
-    lexer->ReportParseError($2.loc, err);
-  }
-  $$ = AST::make(at_import, $2.loc, ifIdent);
-};
+// sxp_import_definition: LP tk_IMPORT sxp_ifident RP {
+//   SHOWPARSE("sxp_import_definition -> (IMPORT sxp_ifident)");
+//   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
+//   if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
+//     std::string err = "Unable to import " + $3.str;
+//     lexer->ReportParseError($2.loc, err);
+//   }
+//   $$ = AST::make(at_import, $2.loc, ifIdent);
+// };
 
 blk_import_definition: tk_IMPORT blk_ifident blk_importList {
   SHOWPARSE("blk_import_definition -> IMPORT blk_ifident blk_importList;");
@@ -1760,16 +1762,16 @@ blk_import_definition: tk_IMPORT blk_ifident blk_importList {
   $$->addChildrenFrom($3);
 };
 
-sxp_import_definition: LP tk_IMPORT sxp_ifident sxp_importList RP {
-  SHOWPARSE("sxp_import_definition -> (IMPORT sxp_ifident sxp_importList)");
-  shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-  if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
-    std::string err = "Unable to import " + $3.str;
-    lexer->ReportParseError($2.loc, err);
-  }
-  $$ = AST::make(at_import, $2.loc, ifIdent);
-  $$->addChildrenFrom($4);
-};
+// sxp_import_definition: LP tk_IMPORT sxp_ifident sxp_importList RP {
+//   SHOWPARSE("sxp_import_definition -> (IMPORT sxp_ifident sxp_importList)");
+//   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
+//   if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
+//     std::string err = "Unable to import " + $3.str;
+//     lexer->ReportParseError($2.loc, err);
+//   }
+//   $$ = AST::make(at_import, $2.loc, ifIdent);
+//   $$->addChildrenFrom($4);
+// };
 
 blk_importList: blk_alias {
   SHOWPARSE("blk_importList -> blk_alias");
@@ -1793,27 +1795,27 @@ blk_alias: blk_ident '=' blk_ident {
   $$ = AST::make(at_ifsel, $1->loc, $1, $3);
 };
 
-sxp_importList: sxp_alias {
-  SHOWPARSE("sxp_importList -> sxp_alias");
-  $$ = AST::make(at_Null, $1->loc, $1);
-};
-sxp_importList: sxp_importList sxp_alias {
-  SHOWPARSE("sxp_importList -> sxp_importList sxp_alias");
-  $$ = $1;
-  $$->addChild($2);
-};
-
-sxp_alias: sxp_ident {
-  SHOWPARSE("sxp_alias -> sxp_ident");
-  // The two identifiers in this case are textually the same, but the
-  // need to end up with distinct AST nodes, thus getDCopy().
-  $$ = AST::make(at_ifsel, $1->loc, $1, $1->getDeepCopy());
-};
-sxp_alias: '(' sxp_ident tk_AS sxp_ident ')' {
-  SHOWPARSE("sxp_alias -> ( sxp_ident AS sxp_ident )");
-
-  $$ = AST::make(at_ifsel, $2->loc, $4, $2);
-};
+// sxp_importList: sxp_alias {
+//   SHOWPARSE("sxp_importList -> sxp_alias");
+//   $$ = AST::make(at_Null, $1->loc, $1);
+// };
+// sxp_importList: sxp_importList sxp_alias {
+//   SHOWPARSE("sxp_importList -> sxp_importList sxp_alias");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
+// 
+// sxp_alias: sxp_ident {
+//   SHOWPARSE("sxp_alias -> sxp_ident");
+//   // The two identifiers in this case are textually the same, but the
+//   // need to end up with distinct AST nodes, thus getDCopy().
+//   $$ = AST::make(at_ifsel, $1->loc, $1, $1->getDeepCopy());
+// };
+// sxp_alias: '(' sxp_ident tk_AS sxp_ident ')' {
+//   SHOWPARSE("sxp_alias -> ( sxp_ident AS sxp_ident )");
+// 
+//   $$ = AST::make(at_ifsel, $2->loc, $4, $2);
+// };
 
 
 // PROVIDE DEFINITION [8.3]
@@ -1836,24 +1838,24 @@ blk_provideList: blk_provideList ',' blk_ident {
   $$->addChild($3);
 };
 
-sxp_provide_definition: LP tk_PROVIDE sxp_ifident sxp_provideList RP {
-  SHOWPARSE("sxp_provide_definition -> (PROVIDE sxp_ifident sxp_provideList)");
-  shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-  UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
-  $$ = AST::make(at_provide, $2.loc, ifIdent);
-  $$->addChildrenFrom($4);
-};
-
-sxp_provideList: sxp_ident {
-  SHOWPARSE("sxp_provideList -> sxp_ident");
-  $$ = AST::make(at_Null, $1->loc, $1);
-};
-
-sxp_provideList: sxp_provideList sxp_ident {
-  SHOWPARSE("sxp_provideList -> sxp_provideList sxp_ident");
-  $$ = $1;
-  $$->addChild($2);
-};
+// sxp_provide_definition: LP tk_PROVIDE sxp_ifident sxp_provideList RP {
+//   SHOWPARSE("sxp_provide_definition -> (PROVIDE sxp_ifident sxp_provideList)");
+//   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
+//   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
+//   $$ = AST::make(at_provide, $2.loc, ifIdent);
+//   $$->addChildrenFrom($4);
+// };
+// 
+// sxp_provideList: sxp_ident {
+//   SHOWPARSE("sxp_provideList -> sxp_ident");
+//   $$ = AST::make(at_Null, $1->loc, $1);
+// };
+// 
+// sxp_provideList: sxp_provideList sxp_ident {
+//   SHOWPARSE("sxp_provideList -> sxp_provideList sxp_ident");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
 
 // definition: '(' tk_DEFTHM sxp_ident sxp_expr ')'  {
 //    SHOWPARSE("definition -> ( DEFTHM sxp_ident sxp_expr )");
