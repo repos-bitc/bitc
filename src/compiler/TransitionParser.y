@@ -407,7 +407,6 @@ static unsigned VersionMinor(const std::string s)
 
 // in order of precedence, *lowest* first:
 %type <ast> blk_type
-%type <ast> blk_prefix_type
 %type <ast> blk_postfix_type
 %type <ast> blk_shallowperm_type
 %type <ast> primary_type
@@ -2226,12 +2225,8 @@ blk_postfix_type: blk_shallowperm_type {
   $$ = $1;
 }
 
-blk_prefix_type: blk_postfix_type %prec prec_PreferShift {
-  SHOWPARSE("blk_prefix_type -> blk_postfix_type");
-  $$ = $1;
-}
-blk_type: blk_prefix_type {
-  SHOWPARSE("blk_type -> blk_prefix_type");
+blk_type: blk_postfix_type %prec prec_PreferShift {
+  SHOWPARSE("blk_type -> blk_postfix_type");
   $$ = $1;
 }
 
@@ -2257,6 +2252,10 @@ blk_primary_type: tk_BOXED '(' blk_type ')' {
   $$ = AST::make(at_boxedType, $1.loc, $3);
 
 }
+blk_primary_type: tk_UNBOXED '(' blk_type ')' {
+  SHOWPARSE("blk_type -> UNBOXED ( blk_type )");
+  $$ = AST::make(at_unboxedType, $1.loc, $3);
+};
 blk_primary_type: tk_ARRAY '(' blk_type ',' natLit ')' {
   SHOWPARSE("blk_primary_type -> tk_ARRAY ( blk_type, natLit )");
   $$ = AST::make(at_arrayType, $1.loc, $3, $5);
@@ -2405,10 +2404,6 @@ blk_postfix_type: blk_postfix_type tk_PTR %prec tk_PTR {
   SHOWPARSE("blk_postfix_type -> blk_postfix_type PTR");
   $$ = AST::make(at_boxedType, $2.loc, $1);
 };
-//blk_prefix_type: tk_BOXED blk_type {
-//  SHOWPARSE("blk_prefix_type -> BOXED blk_type");
-//  $$ = AST::make(at_boxedType, $1.loc, $2);
-//};
 
 sxp_type: '(' tk_BOXED sxp_type ')' {
   SHOWPARSE("sxp_type -> ( BOXED sxp_type )");
@@ -2416,10 +2411,6 @@ sxp_type: '(' tk_BOXED sxp_type ')' {
 };
 
 // VAL TYPES [3.4.2]
-blk_prefix_type: tk_UNBOXED blk_type {
-  SHOWPARSE("blk_type -> UNBOXED blk_type");
-  $$ = AST::make(at_unboxedType, $1.loc, $2);
-};
 sxp_type: '(' tk_UNBOXED sxp_type ')' {
   SHOWPARSE("sxp_type -> ( UNBOXED sxp_type )");
   $$ = AST::make(at_unboxedType, $2.loc, $3);
