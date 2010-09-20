@@ -2062,6 +2062,13 @@ blk_field: tk_FILL ':' blk_bitfieldtype {
   $$ = AST::make(at_fill, $1.loc, $3);
 };
 
+// Some low level data structures have reserved bit positions that are
+// required to hold designated values.
+blk_field: tk_RESERVED ':' blk_bitfieldtype '=' natLit  {
+  SHOWPARSE("blk_field -> RESERVED ':' blk_bitfieldtype = natLit");
+  $$ = AST::make(at_fill, $1.loc, $3, $5);
+};
+
 sxp_field: sxp_ident ':' sxp_field_type  {
   SHOWPARSE("sxp_field -> sxp_ident : sxp_field_type");
   $$ = AST::make(at_field, $1->loc, $1, $3);
