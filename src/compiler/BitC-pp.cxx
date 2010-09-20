@@ -300,7 +300,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
   case at_constructor:
     {
-      bool isRepr;
+      bool isRepr = false;
 
       if (ast->children.size() == 1) {
         blk_BitcP(out, ast->child(0), showTypes);
