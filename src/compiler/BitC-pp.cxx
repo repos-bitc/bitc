@@ -237,6 +237,26 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
+  case at_import:
+    {
+      out << ast->atKwd();
+      out << " ";
+      blk_BitcP(out, ast->child(0), showTypes);
+      doChildren(blk_BitcP, out, ast, 1, " ", ", ", "", showTypes);
+      break;
+    }
+
+  case at_ifsel:
+    {
+      // Note: arguments are somewhat inverted. Local ident is child(1).
+      out << ast->child(0)->s;
+      if (ast->child(0)->s != ast->child(1)->s) {
+        out << " = "
+            << ast->child(1)->s;
+      }
+      break;
+    }
+
   case at_importAs:
     { 
       out << ast->atKwd();
@@ -286,6 +306,34 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       else
         out << " {}";
 
+      break;
+    }
+
+  case at_definstance:
+    {
+      shared_ptr<AST> tapp = ast->child(0);
+      shared_ptr<AST> methods = ast->child(1);
+      shared_ptr<AST> constraints = ast->child(2);
+
+      out << ast->atKwd() << " ";
+      blk_BitcP(out, tapp, showTypes);
+
+      out.more();
+      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ", ", "", showTypes);
+      out.less();
+
+      if (methods->children.size()) {
+        out << "\nis ";
+
+        out.indentToHere();
+        doChildren(blk_BitcP, out, methods, 0, "", "\n", "", showTypes);
+      }
+
+      break;
+    }
+  case at_tcmethod_binding:
+    {
+      doChildren(blk_BitcP, out, ast, 0, "", " = ", "", showTypes);
       break;
     }
 
@@ -591,12 +639,9 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
 
     // Things that (for the moment) we pass back to the s-expression printer:
-  case at_import:
-
   case at_define:
   case at_recdef:
 
-  case at_definstance:
     sxp_BitcP(out, ast, showTypes);
     break;
 
@@ -1149,11 +1194,11 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 #endif
 
   case at_provide:
+  case at_import:
 #if 1
     blk_BitcP(out, ast, showTypes);
     break;
-#endif
-  case at_import:
+#else
     out << "(" << ast->atKwd();
     sxp_doChildren(out, ast, 0, true, showTypes);
     out << ")";
@@ -1168,6 +1213,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
           << ast->child(0)->s
           << ")";
     break;
+#endif
 
 #if 1
   case at_proclaim:
@@ -1230,6 +1276,10 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     }
 #endif
 
+#if 1
+  case at_definstance:
+    blk_BitcP(out, ast, showTypes);
+#else
   case at_definstance:
     {
       shared_ptr<AST> tapp = ast->child(0);
@@ -1261,6 +1311,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
           << ")";
       break;
     }
+#endif
  
   case at_tyfn:
     out << "(" << ast->atKwd();

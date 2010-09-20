@@ -1790,7 +1790,7 @@ blk_alias: blk_ident {
 blk_alias: blk_ident '=' blk_ident {
   SHOWPARSE("blk_alias -> blk_ident '=' blk_ident");
 
-  $$ = AST::make(at_ifsel, $1->loc, $3, $1);
+  $$ = AST::make(at_ifsel, $1->loc, $1, $3);
 };
 
 sxp_importList: sxp_alias {
