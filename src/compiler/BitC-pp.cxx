@@ -508,6 +508,11 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_fill:
     out << ast->atKwd() << " : ";
     blk_BitcP(out, ast->child(0), showTypes);
+    if (ast->children.size() > 0) { // if RESERVED
+      out << " = ";
+      blk_BitcP(out, ast->child(0), showTypes);
+    }
+      
     break;
 
   case at_field:
