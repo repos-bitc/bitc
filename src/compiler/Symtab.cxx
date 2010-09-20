@@ -487,7 +487,8 @@ resolve(std::ostream& errStream,
     //case at_reprcase:
     //case at_reprcaselegR:
     //case at_reprtag:
-  case at_closed:
+  case at_oc_closed:
+  case at_oc_open:
   case agt_openclosed:
   case at_reprctrs:
   case at_reprctr:
@@ -1366,7 +1367,7 @@ resolve(std::ostream& errStream,
         shared_ptr<AST> tcName = ast->child(0)->child(0);
         shared_ptr<AST> tcSym = tcName->symbolDef;
         shared_ptr<AST> tcDef = tcSym->defForm;
-        bool isClosed = (tcDef->child(3)->astType == at_closed);
+        bool isClosed = (tcDef->child(3)->astType == at_oc_closed);
 
         if (isClosed && tcSym->fqn.iface != env->uocName) {
           errStream << ast->loc

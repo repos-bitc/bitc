@@ -140,7 +140,8 @@ findusedef(std::ostream &errStream,
   case agt_fielditem:
   case at_unboxedCat:
   case at_boxedCat:
-  case at_closed:
+  case at_oc_closed:
+  case at_oc_open:
   case at_opaqueCat:
   case at_tcdecls:
   case at_tyfn:

@@ -237,6 +237,58 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
+  case at_importAs:
+    { 
+      out << ast->atKwd();
+
+      doChildren(blk_BitcP, out, ast, 0, " ", " as ", "", showTypes);
+
+      break;
+    }
+  case at_provide:
+    {
+      out << ast->atKwd();
+
+      out << " ";
+      blk_BitcP(out, ast->child(0), showTypes);
+
+      doChildren(blk_BitcP, out, ast, 1, " ", ", ", "", showTypes);
+
+      break;
+    }
+
+  case at_deftypeclass:
+    {
+      shared_ptr<AST> ident = ast->child(0);
+      shared_ptr<AST> tvlist = ast->child(1);
+      shared_ptr<AST> tcdecls = ast->child(2);
+      shared_ptr<AST> openclosed = ast->child(3);
+      shared_ptr<AST> methods = ast->child(4);
+      shared_ptr<AST> constraints = ast->child(5);
+
+      blk_BitcP(out, openclosed, showTypes);
+      out << ast->atKwd() << " ";
+      blk_BitcP(out, ident, showTypes);
+      doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", showTypes);
+      out.more();
+      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ", ", "", showTypes);
+      //      blk_BitcP(out, tcdecls, showTypes);
+      out.less();
+
+      if (methods->children.size()) {
+        out << "\nis ";
+
+        out.indentToHere();
+        doChildren(blk_BitcP, out, methods, 0, "", 
+                   "\n",
+                   "", showTypes);
+      }
+      else
+        out << " {}";
+
+      break;
+    }
+
   case at_defrepr:
   case at_defstruct:
   case at_defunion:
@@ -412,6 +464,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
   case at_field:
   case at_methdecl:
+  case at_method_decl:          // TC method
     doChildren(blk_BitcP, out, ast, 0, "", " : ", "", showTypes);
     break;
 
@@ -510,8 +563,11 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     out << "opaque ";
     break;
 
-  case at_closed:
-    out << "closed";
+  case at_oc_closed:
+    out << "closed ";
+    break;
+  case at_oc_open:
+    // does not print!
     break;
 
     ////////////////////////////////////////////////////////////////////
@@ -536,13 +592,10 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
     // Things that (for the moment) we pass back to the s-expression printer:
   case at_import:
-  case at_importAs:
-  case at_provide:
 
   case at_define:
   case at_recdef:
 
-  case at_deftypeclass:
   case at_definstance:
     sxp_BitcP(out, ast, showTypes);
     break;
@@ -597,8 +650,11 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     out << ":opaque";
     break;
 
-  case at_closed:
+  case at_oc_closed:
     out << ":closed";
+    break;
+
+  case at_oc_open:
     break;
 
     //////////////////////////////////////////////
@@ -1067,6 +1123,10 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     }
 
   case at_importAs:
+#if 1
+    blk_BitcP(out, ast, showTypes);
+    break;
+#else
     {
       shared_ptr<AST> ifAst = ast->child(0);
       shared_ptr<AST> idAst = ast->child(1);
@@ -1078,6 +1138,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << ")";
       break;
     }
+#endif
 
 #if 0
   case at_defexception:
@@ -1087,8 +1148,12 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     break;
 #endif
 
-  case at_import:
   case at_provide:
+#if 1
+    blk_BitcP(out, ast, showTypes);
+    break;
+#endif
+  case at_import:
     out << "(" << ast->atKwd();
     sxp_doChildren(out, ast, 0, true, showTypes);
     out << ")";
@@ -1131,6 +1196,11 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     break;
 #endif
 
+#if 1
+  case at_deftypeclass:
+    blk_BitcP(out, ast, showTypes);
+    break;
+#else
   case at_deftypeclass:
     {
       shared_ptr<AST> ident = ast->child(0);
@@ -1158,6 +1228,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       break;
     }
+#endif
 
   case at_definstance:
     {
@@ -1200,6 +1271,9 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     out << ")";
     break;
 
+    /// @bug Should this have been merged with at_methdecl? I'm not
+    /// clear if we needed a distinct AST type for this. Check the
+    /// handling in the resolver and the type inference pass.
   case at_method_decl:
     sxp_BitcP(out, ast->child(0), showTypes);
     out << " : ";
@@ -1412,6 +1486,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_methdecl:
     {
       sxp_BitcP(out, ast->child(0), showTypes);
+      assert(ast->children.size() > 1);
       if (ast->children.size() > 1) {
         out << ":";
         sxp_BitcP(out, ast->child(1), showTypes);

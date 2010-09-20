@@ -1350,24 +1350,24 @@ sxp_val: ':' tk_BOXED {
 
 blk_openclosed: {
   SHOWPARSE("blk_closed -> <empty>");
-  $$ = AST::make(at_Null);
+  $$ = AST::make(at_oc_open);
   $$->printVariant = pf_IMPLIED;
 };
 
 blk_openclosed: tk_CLOSED {
   SHOWPARSE("blk_closed -> CLOSED");
-  $$ = AST::make(at_closed, $1);
+  $$ = AST::make(at_oc_closed, $1);
 };
 
 sxp_openclosed: {
   SHOWPARSE("sxp_closed -> <empty>");
-  $$ = AST::make(at_Null);
+  $$ = AST::make(at_oc_open);
   $$->printVariant = pf_IMPLIED;
 };
 
 sxp_openclosed: ':' tk_CLOSED {
   SHOWPARSE("sxp_closed -> ':' CLOSED");
-  $$ = AST::make(at_closed, $2);
+  $$ = AST::make(at_oc_closed, $2);
 };
 
 // EXCEPTION DEFINITION [3.10]
@@ -1449,7 +1449,7 @@ sxp_tc_definition: LP tk_TRAIT sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_
 //};
 
 blk_tc_decls: {
-  SHOWPARSE("blk_tcdecls -> <empty>");
+  SHOWPARSE("blk_tc_decls -> <empty>");
   $$ = AST::make(at_tcdecls);
 };
 

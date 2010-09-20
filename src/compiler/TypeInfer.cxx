@@ -1915,7 +1915,8 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
   case at_Null:
   case at_unboxedCat:
   case at_boxedCat:
-  case at_closed:
+  case at_oc_closed:
+  case at_oc_open:
   case at_opaqueCat:
   case at_tcmethods:
   case at_tcmethod_binding:

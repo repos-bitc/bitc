@@ -545,8 +545,11 @@ AST::old_atKwd() const
   case at_tcapp:
     return "<tcapp>";
 
-  case at_closed:
+  case at_oc_closed:
     return "closed";
+    
+  case at_oc_open:
+    return "open";
     
   case at_unboxedCat:
     return "unboxed";

@@ -995,8 +995,9 @@ LEAF opaqueCat ("opaque");
 GROUP category = opaqueCat | boxedCat | unboxedCat;
 
 // Typeclass open/closed mark
-LEAF closed ("closed");
-GROUP openclosed = closed | Null;
+LEAF oc_closed ("closed");
+LEAF oc_open ("open");
+GROUP openclosed = oc_closed | oc_open;
 
 // EXCEPTION DEFINITION [3.10]
 // 9/16/2010: updated defexception to match the shape of other
