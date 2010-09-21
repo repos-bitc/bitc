@@ -43,7 +43,7 @@ provide bitc.main main
 
 (def X (let ((myID id))
             (myID true)
-	    (myID (the int32 10))))
+	    (myID 10:int32)))
  
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

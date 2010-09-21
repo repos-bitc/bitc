@@ -62,14 +62,14 @@ is <<== = <=
 (def P ===)
 (def (T a b) (and (<<== a b) (=== a b)))
 (def (U a) (<<== a a))
-//(def R (P (the int32 123) 456))
+//(def R (P 123:int32 456))
 
 // Should not work
-//(def RR (P (the int64 123) 456))
+//(def RR (P 123:int64 456))
 
 // Should not work
 //(instance (ORD int64) <=)
-//(def RPQ (<<== (the int64 123) 456)) 
+//(def RPQ (<<== 123:int64 456)) 
 
 instance Eq(list('a))
 is _==_ = lambda (x, y) true
@@ -82,7 +82,7 @@ is === = ==
 
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (=== (the int32 10) 20)
+    (=== 10:int32 20)
     (=== true false)
     (=== nil nil)
     (P true false) 0))

@@ -45,13 +45,13 @@ provide bitc.main main
 
 (def XYZ
   (begin
-    (addone (the int32 10))
-    (addone (the int64 20))))
+    (addone 10:int32)
+    (addone 20:int64)))
 
 (def ABC
   (begin
-    (addone (the int32 10))
-    (addone (the int64 20))))
+    (addone 10:int32)
+    (addone 20:int64)))
 
 // should not work
 // XXYYZZ will be given dummy types

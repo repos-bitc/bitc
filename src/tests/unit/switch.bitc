@@ -40,7 +40,7 @@ import bitc.main as main
 provide bitc.main main
 
 (def (id x) x)
-(def i0 (the int32 0))
+(def i0 0:int32)
  
 boxed union unin('a, 'b)
 is C1 is c1:'a

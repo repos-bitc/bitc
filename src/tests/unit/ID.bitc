@@ -39,9 +39,9 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def i0 (the int32 0))
-(def i1 (the int32 1))
-(def i2 (the int32 2))
+(def i0 0:int32)
+(def i1 1:int32)
+(def i2 2:int32)
  
 (def (id x) x)
 

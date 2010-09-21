@@ -39,30 +39,30 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def i0 (the int16 0))
-(def i1 (the int16 1))
-(def i2 (the int16 2))
+(def i0 0:int16)
+(def i1 1:int16)
+(def i2 2:int16)
 
 (def (fact x) (if (== x i0) i1 (* x (fact (- x 1)))))
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (begin 
-      (and (== (the int8 0)
-	       (the int8 0))
-	   (== (the int16 0)
-	       (the int16 0))
-	   (== (the int32 0)
-	       (the int32 0))
-	   (== (the int64 0)
-	       (the int64 0))
-	   (== (the uint8 0)
-	       (the uint8 0))
-	   (== (the uint16 0)
-	       (the uint16 0))
-	   (== (the uint32 0)
-	       (the uint32 0))
-	   (== (the uint64 0)
-	       (the uint64 0))
+      (and (== 0:int8
+	       0:int8)
+	   (== 0:int16
+	       0:int16)
+	   (== 0:int32
+	       0:int32)
+	   (== 0:int64
+	       0:int64)
+	   (== 0:uint8
+	       0:uint8)
+	   (== 0:uint16
+	       0:uint16)
+	   (== 0:uint32
+	       0:uint32)
+	   (== 0:uint64
+	       0:uint64)
 	   (== 'a' 'a')
 	   (== true true)
 	   (== "abc" "abc")
@@ -71,9 +71,9 @@ provide bitc.main main
 	   (>= "abc" "abc")
 	   (<= "abc" "abc")
 
-	   (> (the int32 0) (the int32 0))
-	   (< (the int32 0) (the int32 0))
-	   (>= (the int32 0) (the int32 0))
-	   (<= (the int32 0) (the int32 0))
+	   (> 0:int32 0:int32)
+	   (< 0:int32 0:int32)
+	   (>= 0:int32 0:int32)
+	   (<= 0:int32 0:int32)
 	   )
       0)))

@@ -626,6 +626,12 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     ////////////////////////////////////////////////////////////////////
     // EXPRESSIONS
     ////////////////////////////////////////////////////////////////////
+  case at_tqexpr:
+    // Argument order was swapped.
+    doChildren(blk_BitcP, out, ast, 0, "", " : ", "", false);
+    if (showTypes) print_type(out, ast);
+    break;
+
   case at_boolLiteral:
   case at_charLiteral:
   case at_intLiteral:
@@ -643,7 +649,9 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     break;
 
 
+    ////////////////////////////////////////////////////////////////////
     // Things that (for the moment) we pass back to the s-expression printer:
+    ////////////////////////////////////////////////////////////////////
   case at_define:
   case at_recdef:
 
@@ -1130,11 +1138,16 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
   case at_tqexpr:
     // Argument order was swapped.
+    sxp_BitcP(out, ast->child(0), showTypes);
+    out << " : ";
+    sxp_BitcP(out, ast->child(1), showTypes);
+#if 0
     out << "(the ";
     sxp_BitcP(out, ast->child(1), showTypes);
     out << " ";
     sxp_BitcP(out, ast->child(0), showTypes);
     out << ")";
+#endif
 
     if (showTypes) print_type(out, ast);
 

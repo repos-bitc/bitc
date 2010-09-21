@@ -246,7 +246,7 @@ static unsigned VersionMinor(const std::string s)
 %nonassoc <tok> tk_THEN
 %nonassoc <tok> tk_ELSE
 
-%token <tok> tk_THE
+// %token <tok> tk_THE
 
 %token <tok> tk_WHEN
 %token <tok> tk_COND
@@ -389,7 +389,8 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_block sxp_block_exprs
 %type <ast> blk_iblock blk_ieblock
 %type <ast> blk_expr_seq
-%type <ast> sxp_expr sxp_the_expr sxp_unqual_expr
+// %type <ast> sxp_the_expr
+%type <ast> sxp_expr sxp_unqual_expr
 // Primary exprs are the truly primitive things.
 // Closed exprs are things like LET, DO, WHILE that are bracketed on
 // all sides.
@@ -2076,10 +2077,10 @@ sxp_field: sxp_ident ':' sxp_field_type  {
   $$ = AST::make(at_field, $1->loc, $1, $3);
 };
 
-sxp_field: '(' tk_THE sxp_field_type sxp_ident ')'  {
-  SHOWPARSE("sxp_field -> '(' THE sxp_field_type sxp_ident ')'");
-  $$ = AST::make(at_field, $1.loc, $4, $3);
-};
+// sxp_field: '(' tk_THE sxp_field_type sxp_ident ')'  {
+//   SHOWPARSE("sxp_field -> '(' THE sxp_field_type sxp_ident ')'");
+//   $$ = AST::make(at_field, $1.loc, $4, $3);
+// };
 
 sxp_field: '(' tk_FILL sxp_bitfieldtype ')'  {
   SHOWPARSE("sxp_field -> '(' FILL sxp_bitfieldtype ')'");
@@ -2755,10 +2756,10 @@ sxp_bindingpattern: sxp_ident ':' sxp_type {
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
 };
 
-sxp_bindingpattern: '(' tk_THE sxp_type sxp_ident ')' {
-  SHOWPARSE("sxp_bindingpattern -> sxp_ident : sxp_type");
-  $$ = AST::make(at_identPattern, $1.loc, $4, $3);
-};
+// sxp_bindingpattern: '(' tk_THE sxp_type sxp_ident ')' {
+//   SHOWPARSE("sxp_bindingpattern -> sxp_ident : sxp_type");
+//   $$ = AST::make(at_identPattern, $1.loc, $4, $3);
+// };
 
 // There are no sxp_defpattern sequences, because there is no top-level
 // pattern application
@@ -2779,10 +2780,10 @@ sxp_defpattern: sxp_defident ':' sxp_type {
   SHOWPARSE("sxp_defpattern -> sxp_defident : sxp_qual_type");
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
 };
-sxp_defpattern: '(' tk_THE sxp_type sxp_defident ')' {
-  SHOWPARSE("sxp_defpattern -> (THE sxp_qual_type sxp_defident)");
-  $$ = AST::make(at_identPattern, $1.loc, $4, $3);
-};
+// sxp_defpattern: '(' tk_THE sxp_type sxp_defident ')' {
+//   SHOWPARSE("sxp_defpattern -> (THE sxp_qual_type sxp_defident)");
+//   $$ = AST::make(at_identPattern, $1.loc, $4, $3);
+// };
 
 
 /* Lambda Patterns -- with an additional by-ref annotation */
@@ -2829,21 +2830,21 @@ sxp_lambdapattern: sxp_ident ':' sxp_type_pl_byref {
     $1->flags |= ARG_BYREF;
 };
 
-sxp_lambdapattern: '(' tk_THE sxp_type sxp_ident ')' {
-  SHOWPARSE("sxp_lambdapattern -> ( THE sxp_type sxp_ident ) ");
-  $$ = AST::make(at_identPattern, $1.loc, $4, $3);
-};
+// sxp_lambdapattern: '(' tk_THE sxp_type sxp_ident ')' {
+//   SHOWPARSE("sxp_lambdapattern -> ( THE sxp_type sxp_ident ) ");
+//   $$ = AST::make(at_identPattern, $1.loc, $4, $3);
+// };
 
-sxp_lambdapattern: '(' tk_THE '(' tk_BY_REF sxp_type ')' sxp_ident ')' {
-  SHOWPARSE("sxp_lambdapattern -> ( THE ( BY-REF sxp_type ) sxp_ident )");
-  $$ = AST::make(at_identPattern, $1.loc, $7, $5);
-  $5->flags |= ARG_BYREF;
-};
+// sxp_lambdapattern: '(' tk_THE '(' tk_BY_REF sxp_type ')' sxp_ident ')' {
+//   SHOWPARSE("sxp_lambdapattern -> ( THE ( BY-REF sxp_type ) sxp_ident )");
+//   $$ = AST::make(at_identPattern, $1.loc, $7, $5);
+//   $5->flags |= ARG_BYREF;
+// };
 
-sxp_lambdapattern: '(' tk_THE '(' tk_ARRAY_REF sxp_type ')' sxp_ident ')' {
-  SHOWPARSE("sxp_lambdapattern -> ( THE ( ARRAY-REF sxp_type ) sxp_ident )");
-  $$ = AST::make(at_identPattern, $1.loc, $7, $5);
-};
+// sxp_lambdapattern: '(' tk_THE '(' tk_ARRAY_REF sxp_type ')' sxp_ident ')' {
+//   SHOWPARSE("sxp_lambdapattern -> ( THE ( ARRAY-REF sxp_type ) sxp_ident )");
+//   $$ = AST::make(at_identPattern, $1.loc, $7, $5);
+// };
 
 // EXPRESSIONS [7]
 //
@@ -3208,16 +3209,16 @@ sxp_expr: sxp_expr ':' sxp_type {
   SHOWPARSE("sxp_expr -> sxp_expr : sxp_type");
   $$ = AST::make(at_tqexpr, $1->loc, $1, $3);
 };
-sxp_expr: sxp_the_expr {
-  SHOWPARSE("sxp_expr -> sxp_the_expr");
-  $$ = $1;
-};
+// sxp_expr: sxp_the_expr {
+//   SHOWPARSE("sxp_expr -> sxp_the_expr");
+//   $$ = $1;
+// };
 
-sxp_the_expr: '(' tk_THE sxp_type sxp_unqual_expr ')' {
-  SHOWPARSE("sxp_the_expr -> ( THE sxp_type sxp_unqual_expr )");
-  // Note: argument order swapped for historical reasons.
-  $$ = AST::make(at_tqexpr, $2.loc, $4, $3);
-};
+// sxp_the_expr: '(' tk_THE sxp_type sxp_unqual_expr ')' {
+//   SHOWPARSE("sxp_the_expr -> ( THE sxp_type sxp_unqual_expr )");
+//   // Note: argument order swapped for historical reasons.
+//   $$ = AST::make(at_tqexpr, $2.loc, $4, $3);
+// };
 
 
 // SUSPENDED EXPRESSIONS
@@ -3312,10 +3313,10 @@ sxp_unqual_expr: sxp_unqual_expr '.' sxp_ident {
 };
 
 // No blk variant
-sxp_unqual_expr: sxp_the_expr '.' sxp_ident {
-  SHOWPARSE("sxp_unqual_expr -> sxp_the_expr . sxp_ident");
-  $$ = AST::make(at_select, $1->loc, $1, $3);
-};
+// sxp_unqual_expr: sxp_the_expr '.' sxp_ident {
+//   SHOWPARSE("sxp_unqual_expr -> sxp_the_expr . sxp_ident");
+//   $$ = AST::make(at_select, $1->loc, $1, $3);
+// };
 
 // No blk variant
 sxp_unqual_expr: '(' tk_MEMBER sxp_expr sxp_ident ')' {

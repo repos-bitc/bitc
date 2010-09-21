@@ -39,8 +39,8 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def $ (the int32 100))
-(def $@%<> (the int32 25))
+(def $ 100:int32)
+(def $@%<> 25:int32)
 (def main.main:(fn (vector string) -> int32) 
   (lambda (argVec) 
     (+ $ $@%<>) 0))

@@ -295,7 +295,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "suspend",          lf_transition,        tk_SUSPEND ),  
   TransitionLexer::KeyWord( "switch",           lf_transition,        tk_SWITCH ),
   TransitionLexer::KeyWord( "tag",              lf_transition,        tk_TAG ),
-  TransitionLexer::KeyWord( "the",              lf_transition,        tk_THE ),
+//  TransitionLexer::KeyWord( "the",              lf_transition,        tk_THE ),
   TransitionLexer::KeyWord( "then",             lf_transition,        tk_THEN ),
   TransitionLexer::KeyWord( "throw",            lf_transition,        tk_THROW ),
   TransitionLexer::KeyWord( "trait",            lf_transition,        tk_TRAIT ),

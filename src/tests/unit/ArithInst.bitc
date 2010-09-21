@@ -41,4 +41,4 @@ provide bitc.main main
 
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
-    (if (== (the int32 1) 1) 0 1)))
+    (if (== 1:int32 1) 0 1)))

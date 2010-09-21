@@ -46,7 +46,7 @@ provide bitc.main main
 
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
-    (let ((p (the int32 (len (cons 0:int32 nil)))))
+    (let ((p (len (cons 0:int32 nil)):int32))
       (set! p 0)
       p)))
   
