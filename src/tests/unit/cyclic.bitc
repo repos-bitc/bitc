@@ -41,8 +41,6 @@ module cyclic is
   import bitc.main as main
   provide bitc.main main
 
-  //(proclaim lispbasearray : (array int32 5))
-
   //def basearray : int32[5]
 
   //def wrapped_array : int32[5]

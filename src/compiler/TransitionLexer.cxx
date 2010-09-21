@@ -275,7 +275,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "opaque",           lf_transition,        tk_OPAQUE ),
   TransitionLexer::KeyWord( "or",               lf_transition,        tk_OR ),
   TransitionLexer::KeyWord( "otherwise",        lf_transition,        tk_OTHERWISE ),
-  TransitionLexer::KeyWord( "proclaim",         lf_transition,        tk_PROCLAIM ),
+//   TransitionLexer::KeyWord( "proclaim",         lf_transition,        tk_PROCLAIM ),
   TransitionLexer::KeyWord( "provide",          lf_transition,        tk_PROVIDE ),
   TransitionLexer::KeyWord( "provide!",         lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "pure",             lf_transition,        tk_PURE ),

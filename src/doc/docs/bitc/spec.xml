@@ -200,19 +200,20 @@
       </p>
       <p>
 	When a sequence of similar elements is permitted, this is
-	shown using "...".  Such a sequence must have at least one
-	element. For example:
+	shown using ",..." or ";...", according to whether the
+	elements are separated by commas or semicolons.  Such a
+	sequence must have at least one element. For example:
       </p>
       <literallayout>
-(begin <em>e</em> ... <em>e</em>)</literallayout>
+{<em>e</em>; ... <em>e</em>}</literallayout>
       <p indent="no">
-	indicates that the <progident>begin</progident> form takes a
-	(non-empty) sequence of expressions. When it is intended that
-	zero elements should be permitted in a sequence, the example
-	will be written:
+	indicates that a block consists of a (non-empty) sequence of
+	expressions separated by ``;''. When it is intended that zero
+	elements should be permitted in a sequence, the example will
+	be written:
       </p>
       <literallayout>
-(begin [<em>e</em> ... <em>e</em>])</literallayout>
+{[<em>e</em>; ... <em>e</em>]}</literallayout>
       <p indent="no">
 	Note that the square braces <b>[</b> and <b>]</b> have no
 	syntactic significance in the BitC core language after
@@ -801,18 +802,69 @@ float double quad</literallayout>
             The top level forms that introduce programmatic
             definitions and declarations are:
           </p>
-          <literallayout>
-def       instance  repr
-struct    trait     union  
-proclaim
-use</literallayout>
+          <deflist>
+            <defli>
+              <label><progident>def</progident></label>
+              <li>
+                <p>
+                  Introduces value declarations and definitions,
+                  including functions.
+                </p>
+              </li>
+            </defli>
+            <defli>
+              <label><progident>struct</progident></label>
+              <li>
+                <p>
+                  Introduces structure declarations and definitions.
+                </p>
+              </li>
+            </defli>
+            <defli>
+              <label><progident>union</progident></label>
+              <li>
+                <p>
+                  Introduces union declarations and definitions.
+                </p>
+              </li>
+            </defli>
+            <defli>
+              <label><progident>repr</progident></label>
+              <li>
+                <p>
+                  Introduces repr definitions and declarations. Reprs
+                  are a special kind of union with fine-grain layout
+                  and tag control.
+                </p>
+              </li>
+            </defli>
+            <defli>
+              <label><progident>trait</progident></label>
+              <li>
+                <p>
+                  Introduces traits definitions, which restrict how
+                  type variables can be instantiated and provide
+                  overloading.
+                </p>
+              </li>
+            </defli>
+            <defli>
+              <label><progident>instance</progident></label>
+              <li>
+                <p>
+                  Introduces trait instance definitions, which
+                  identify the types for which a trait is defined.
+                </p>
+              </li>
+            </defli>
+          </deflist>
           <p>
             The <progident>def</progident>,
             <progident>union</progident>,
-            <progident>repr</progident>, and
-            <progident>struct</progident> forms support simple
+            <progident>struct</progident>, and
+            <progident>repr</progident>, forms support simple
             recursion. That is, the identifier(s) being defined may be
-            used in their definition. However, the identifier(s) being
+            used in their definition. However, identifier(s) being
             defined are deemed incomplete until the end of the
             enclosing defining form. Restrictions on the use of
             incomplete identifiers are described in the sections on
@@ -830,14 +882,14 @@ use</literallayout>
             but may not be used as part of a top-level initializer
             (see <progident>def</progident>, Section&nbsp;<xref ref="def"/>).
           </p>
+          <!-- <p> -->
+          <!--   The <progident>use</progident> form is used to provide -->
+          <!--   an alternative identifier that is equivalent in all -->
+          <!--   respects to some existing top-level identifier. -->
+          <!-- </p> -->
           <p>
-            The <progident>use</progident> form is used to provide
-            an alternative identifier that is equivalent in all
-            respects to some existing top-level identifier.
-          </p>
-          <p>
-            All definition forms are expressions that return a
-            value of type <b>unit</b>.
+            All defining forms are expressions that return a value of
+            type <b>unit</b>.
           </p>
         </sect3>
       </sect2>
@@ -1071,48 +1123,200 @@ a b c /*
     </sect1>
     <sect1>
       <title>Types</title>
-      <p>
-	BitC provides explicit control over data structure
-	representation while preserving a memory-safe and type-safe
-	language design.
-      </p>
-      <sect2>
-        <title>Categories of Types</title>
+      <sect2 id="types-overview">
+        <title>Overview</title>
         <p>
-          BitC has two categories of types: value types and reference
-          types.
+          To mitigate mitigate the effects of forward reference in the
+          specification, we begin with a high-level overview of the
+          BitC type system. This overview is non-normative.
         </p>
         <p>
-          A value type is one whose value representation is
-          ``embedded'' in the representation of its containing
-          composite type or stack frame. The lifetime of an instance
-          of value type is determined by the lifetime of its
-          container, and it is the responsibility of the container
-          to allocate storage for its contained value types.
+          BitC provides explicit control over data structure
+          representation while preserving a memory-safe and type-safe
+          language design. Where types are specified explicitly by the
+          developer, both the layout and size of the underlying data
+          structures for a given compilation target platform are fully
+          specified. Different target platforms may yield different
+          layouts and sizes due to (e.g.) differences in underlying
+          pointer types. In consequence, the use of constructs such as
+          <progident>sizeof</progident> and
+          <progident>bitsizeof</progident>, or of the machine-dependent
+          type <progident>word</progident>, can render a program
+          target-dependent.
         </p>
         <p>
-          A reference type is a type whose value representation
-          resides in the heap. Every instance of a reference type has
-          at least one reference value that denotes it. The
-          <em>reference</em> is a value type; the value
-          <em>denoted</em> by the reference is a reference type.
+          BitC provides a powerful type inference mechanism.  In the
+          absence of concrete declaration or specification through type
+          parameters, the type of a binding is <em>inferred</em> by type
+          inference based on its initializing expression and their
+          context(s) of use.
         </p>
-        <p>
-          If <progident><em>T</em></progident> is a value type, then
-          <progident>(ref&nbsp;<em>T</em>)</progident> is the type of
-          a reference denoting a heap-allocated instance of
-          <progident><em>T</em></progident>. Similarly, if
-          <progident><em>T</em></progident> is a reference type, then
-          <progident>(val&nbsp;<em>T</em>)</progident> is the
-          corresponding value type. The <progident>val</progident>
-          type constructor can only be applied to reference types
-          whose target is of statically known size. Storage for a
-          value of value type is allocated from its containing type.
-        </p>
-        <p>
-          BitC does not provide automatic assignment conversion
-          between value types and reference types.
-        </p>
+        <sect3>
+          <title>Terms vs. Locations</title>
+          <p>
+            <leadin>Term Bindings</leadin> If the initializing
+            expression is pure, and the bound value is never mutated,
+            that it is a <em>term binding</em>, and is given
+            polymorphic type. For example, the type reported for the
+            following definition:
+          </p>
+          <literallayout>
+def i = 1 + 3;
+<em>i: 'a where IntLit('a)</em></literallayout>
+          <p>
+            indicates that <progident>i</progident> is a term binding. It
+            inhabits any type that satisfies the
+            <progident>IntLit('a)</progident> constraint, which is to say:
+            any type that admits both <progident>1</progident> and
+            <progident>3</progident> and as valid literals.<footnote>
+              <p>
+                This particular typing is expected to change when we
+                introduce the <progident>Nat</progident> kind.
+              </p>
+            </footnote>
+            The intuition is that a term binding's semantics is defined by
+            substitution at the point of use. The final type of the
+            binding is determined by inference following substitution.
+            The implementation is free to actually perform such
+            substitution or to instantiate a concrete binding for each
+            concrete type of <progident>i</progident> that is actually
+            seen.
+          </p>
+          <p>
+            With two exceptions, the BitC inference mechanism produces
+            typings that are complete; the derived type will be the
+            <em>least constraining</em> type that is permissible given the
+            initializing expression and the context(s) of use. The
+            exceptions are:
+          </p>
+          <ul>
+            <li>
+              <p>
+                The current inference algorithm does not infer array,
+                ArrayRef, or ByRef types.
+              </p>
+            </li>
+            <li>
+              <p>
+                BitC does not (yet) provide polymorphic recursion.
+              </p>
+            </li>
+          </ul>
+          <p indent="no">
+            It is expected that both of these limitations will be lifted
+            in upcoming enhancements to the language.
+          </p>
+          <p>
+            <leadin>Location bindings</leadin> If the binding's
+            initializer has side effects, or if the bound variable is
+            mutated (in whole or in part), then the binding is a
+            <em>location binding</em>. Location bindings are given
+            monomorphic type and the value occupies some concrete
+            location. Because their values are subject to change,
+            location bindings are not equivalent under term
+            substitution.
+          </p>
+          <p>
+            The concrete type of a monomorphic binding must be fully known
+            by the close of its defining form. When the binding occurs at
+            top-level, this means that use-occurrences cannot be
+            considered by the inference engine to determine whether the
+            binding is a location binding or a term binding. In the
+            absence of specification, a term binding is inferred:
+          </p>
+          <literallayout>
+def i = 1 + 3;
+<em>i: 'a where IntLit('a)</em>
+def mi : mutable('a) = 1 + 3 : int32;
+<em>mi: mutable(int32)</em>
+def bad_mi : mutable('a) = 1 + 3
+<em>error: 'a monomorphic, not fully determined</em></literallayout>
+          <p>
+            Because it is able to consider the contexts of use, the BitC
+            inference algorithm will infer a location for local location
+            bindings.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Boxed and Unboxed Types</title>
+          <p>
+            Most languages having advanced type systems have a
+            heap-based value semantics. Conceptually, all values live
+            in the heap and are manipulated through references.  BitC
+            has two categories of types &mdash; boxed and unboxed
+            &mdash; each with associated values.
+          </p>
+          <p>
+            An unboxed type is one whose values are ``contained''
+            within some composite value (which may be a stack frame).
+            The lifetime of an instance of unboxed type is determined
+            by the lifetime of its container, and it is the
+            responsibility of the container to reserve storage for its
+            contained value types. Such types are said to be
+            ``unboxed.'' All of BitC's primary types are unboxed
+            types.
+          </p>
+          <p>
+            A boxed type is one whose values live in the heap.  Every
+            instance of a boxed type has at least one reference that
+            denotes it. The reference is an unboxed value; the value
+            it denotes is boxed.
+          </p>
+          <p>
+            If <progident><em>T</em></progident> is an unboxed type,
+            then <progident>boxed(<em>T</em>)</progident> is the type
+            of a reference denoting a heap-allocated instance of
+            <progident><em>T</em></progident>. Unboxed values can be
+            copied to the heap using <progident>dup()</progident>.
+          </p>
+          <p>
+            Similarly, if <progident><em>T</em></progident> is a boxed
+            type whose target is of statically known size, and whose
+            type unifies with <progident>(boxed&nbsp;'a)</progident>,
+            then <progident>unboxed(<em>T</em>)</progident> is the
+            corresponding value type. <font color="red"><em>Need to
+            explain why the qualification is needed. Issue is unboxing
+            of boxed unions, but I can't remember the details at the
+            moment.</em></font> Unboxed copies of boxed values can be
+            obtained using <progident>deref()</progident>.
+          </p>
+          <p>
+            At the moment, BitC requires that all structure and union
+            declarations explicitly state whether the type defined is
+            boxed or unboxed. We will eventually relax this
+            requirement, making <progident>boxed</progident> the
+            default for union types and <progident>unboxed</progident>
+            the default for struct types. Exception types are boxed by
+            definition; specification that an exception type is boxed
+            is permitted, but not required.
+          </p>
+          <p>
+            BitC does not provide automatic assignment conversion
+            between value types and reference types.
+          </p>
+        </sect3>
+        <sect3>
+          <title>Type Variables</title>
+          <p>
+            BitC permits types to be parameterized by means of <link
+            href="#type-variables">type variables</link>. Type
+            variables provide a means of specifying that the type of
+            some element will be provided at a later point of
+            specialization. Permitted instantiations may be
+            constrained by <em>type classes</em>. For example, the type:
+          </p>
+          <literallayout>
+def isLessThan(a,b) = a &lt; b;
+<em>fn('a, 'a) -&gt; bool
+  where Ord('a)</em></literallayout>
+          <p indent="no">
+            indicates that <progident>isLessThan()</progident> is
+            defined over any specialization of
+            <progident>'a</progident> for which a definition of
+            ordering methods has been provided by an instantiation of
+            the <progident>Ord('a)</progident> trait.
+          </p>
+        </sect3>
       </sect2>
       <sect2>
 	<title>Primary Types</title>
@@ -1167,52 +1371,20 @@ a b c /*
                </p>
  	    </li>
  	  </defli>
-<!-- 	  <defli> -->
-<!-- 	    <label><term>fixint</term></label> -->
-<!-- 	    <li> -->
-<!-- 	      <p> -->
-<!-- 		The <progident>fixint</progident> form describes a -->
-<!-- 		fixed-precision integer field: -->
-<!-- 	      </p> -->
-<!-- 	      <literallayout> -->
-<!-- (fixint <em>size</em> <em>align</em> <em>signed</em>) -->
-<!-- </literallayout> -->
-<!-- 	      <p indent="no"> -->
-<!--                 Legal values for <em>align</em> are 8, 16, 32, and -->
-<!--                 64. The value of <em>size</em> must be less than or -->
-<!--                 equal to the value of <em>align</em>. The value of -->
-<!--                 <em>signed</em> must be either false or true. The arguments -->
-<!--                 to the <progident>fixint</progident> form must be -->
-<!--                 literals. Type equivalence for -->
-<!--                 <progident>fixint</progident> types is determined -->
-<!--                 structurally: two appearances of a -->
-<!--                 <progident>fixint</progident> form having the same -->
-<!--                 values for <em>size</em>, <em>align</em>, and -->
-<!--                 <em>signed</em> denote the same type. -->
-<!-- 	      </p> -->
-<!-- 	      <p>The form</p> -->
-<!-- 	      <literallayout> -->
-<!-- (fixint 4 32 true) -->
-<!-- </literallayout> -->
-<!-- 	      <p indent="no"> -->
-<!-- 		describes a two's complement four bit field placed -->
-<!-- 		within a 32-bit alignment frame. The type -->
-<!-- 		<progident>int32</progident> is internally defined as -->
-<!-- 	      </p> -->
-<!-- 	      <literallayout> -->
-<!-- (fixint 32 32 true) -->
-<!-- </literallayout> -->
-<!-- 	    </li> -->
-<!-- 	  </defli> -->
 	  <defli>
 	    <label><term>bitfield</term></label>
 	    <li>
+              <p>
+                <font color="red"><em>This is not a primary type, and it's
+                description needs to move into the section dealing
+                with aggregate types.</em></font>
+              </p>
 	      <p>
 		The <progident>bitfield</progident> form describes a
 		fixed-precision integer field:
 	      </p>
 	      <literallayout>
-(bitfield <em>basetype</em> <em>size</em>)</literallayout>
+<em>basetype</em>(<em>size</em>)</literallayout>
 	      <p indent="no">
                 Where <progident><em>basetype</em></progident> is one
                 of the primary fixed-precision integral types and
@@ -1223,7 +1395,7 @@ a b c /*
                 The form
               </p>
 	      <literallayout>
-(bitfield int32 4)</literallayout>
+int32(4)</literallayout>
 	      <p indent="no">
 		describes a two's complement four bit field placed
 		within a 32-bit alignment frame.
@@ -1256,6 +1428,45 @@ a b c /*
 	  </defli>
 	</deflist>
       </sect2>
+      <sect2 id="type-vars">
+	<title>Type Variables</title>
+        <p>
+          A type variable is an alphanumeric identifier fragment
+          preceded by a single quote, as in <progident>'a</progident>.
+          A type variable, may appear in any position where a type can
+          appear. This indicates a type parameter whose actual
+          (concrete) type is to be specified later. A type containing
+          type variables within its description must be
+          ``specialized'' by supplying the type corresponding to each
+          parameter. In the case of parameterized structure and union
+          types, each type variable is specialized by supplying it at
+          the point of use: <progident>list(char)</progident> is an
+          instantiation of <progident>list('a)</progident>. In the
+          case of function types and let/letrec bindings, type
+          variables are specialized automatically during compilation
+          by inferring the required type of each type variable at each
+          point of application.
+        </p>
+        <p>
+          The scope of a type variable is generally its outermost
+          defining form. In some cases, a
+          <progident>letrec</progident>, <progident>let</progident>,
+          or local definition can introduce a new type variable scope.
+          Because a type variable's scope covers an entire definition,
+          type variables can be used used to annotate that two
+          expressions must have the same type. The expression:
+        </p>
+        <literallayout>
+myfun(x, y:'a):'a</literallayout>
+        <p indent="no">
+          says that the type of <progident>x</progident> is
+          unspecified by the program author (and should therefore be
+          inferred), the return type is also unspecified (and should
+          be inferred), but the return type and the last argument type
+          are the same. This type of annotation is sometimes useful to
+          assist the inference engine.
+        </p>
+      </sect2>
       <sect2>
 	<title>Simple Constructed Types</title>
 	<p>
@@ -1269,7 +1480,7 @@ a b c /*
             If <progident><em>T</em></progident> is a value type, then
           </p>
           <literallayout>
-(ref <em>T</em>)</literallayout>
+boxed(<em>T</em>)</literallayout>
           <p indent="no">
             is the type of a reference denoting a heap-allocated
             instance of <progident><em>T</em></progident>.
@@ -1290,7 +1501,7 @@ a b c /*
 	    types (including type variables), then:
 	  </p>
 	  <literallayout>
-(fn <em>t<sub>arg_1</sub></em>...<em>t<sub>arg_n</sub></em> -&gt; <em>t<sub>result</sub></em>)</literallayout>
+fn (<em>t<sub>arg_1</sub></em>, ...<em>t<sub>arg_n</sub></em>) -&gt; <em>t<sub>result</sub></em>)</literallayout>
 	  <p indent="no">
 	    is the type of a function taking <em>n</em> arguments of
 	    types <em>t<sub>arg1</sub></em> through
@@ -1301,12 +1512,13 @@ a b c /*
 	    function taking zero arguments is written as:
           </p>
 	  <literallayout>
-(fn -&gt; <em>t<sub>result</sub></em>)</literallayout>
-          <p>
-            Function types are considered reference types that denote
-            an object of statically undefined size. The size and
-            alignment of a value of function type is determined by the
-            underlying processor architecture.
+fn () -&gt; <em>t<sub>result</sub></em>)</literallayout>
+	  <p>
+	    <leadin>Storage Layout</leadin> Function types are
+            considered reference types that denote an object of
+            statically undefined size. The size and alignment of a
+            value of function type is the size and alignment of the
+            underlying architecture's pointer size.
           </p>
 	</sect3>
       </sect2>
@@ -1607,7 +1819,7 @@ a b c /*
             <title>Tag Representation</title>
             <p>
               The prelude type
-              <progident>(nullable&nbsp;'a)</progident> must be
+              <progident>nullable('a)</progident> must be
               implemented in a single pointer-sized machine word, with
               the <progident>Null</progident> case being tagged by a
               word value of zero and the <progident>ptr</progident>
@@ -1623,11 +1835,12 @@ a b c /*
             <p>
               In the absence of an explicit declaration of the type
               tag representation, a union type having exactly one
-              union leg whose first element is of type
-              <progident>(ref&nbsp;'a)</progident> or
-              <progident>(nullable&nbsp;'a)</progident>, and all of
-              whose other legs have no fields shall be represented in
-              such a way that the tag word reuses the storage of the
+              union leg whose first element's type
+              <progident>'a</progident> unifies with
+              <progident>RefType('a)</progident> or
+              <progident>nullable('a)</progident>, and all of whose
+              other legs have no fields shall be represented in such a
+              way that the tag word reuses the storage of the
               ref/nullable field. The ref/nullable leg shall be
               denoted by a tag field whose least significant bit is
               zero. The n'th enumeration leg's tag value (in order of
@@ -1645,9 +1858,10 @@ a b c /*
               <progident>align&gt;=2<sup>b</sup></progident>, the
               total number of distinct legs of the union does not
               exceed <progident>2<sup>b</sup></progident>, and there
-              is exactly one union leg whose first element is of type
-              <progident>(ref&nbsp;'a)</progident> or
-              <progident>(nullable&nbsp;'a)</progident>, then the tag
+              is exactly one union leg whose first element's
+              <progident>'a</progident> type unifies with
+              <progident>RefType('a)</progident> or
+              <progident>nullable('a)</progident>, then the tag
               field shall overlay the least significant bits of the
               ref/nullable field, the tag value zero shall denote the
               ref/nullable leg, and all other tag values shall be
@@ -2000,9 +2214,9 @@ unboxed struct int external bitc_int</literallayout>
               implicitly proclaim (respectively) the procedures:
             </p>
             <literallayout>
-(proclaim S.m: (fn S int32 -&gt; bool))
+(proclaim S.m: fn (S, int32) -&gt; bool)
 (proclaim T.m:
-   (fn (ByRef T) int32 -&gt; bool))</literallayout>
+   fn (ByRef T, int32) -&gt; bool)</literallayout>
             <p indent="no">
               where the parameter corresponding to the argument of
               structure type is <progident>ByRef</progident> exactly if
@@ -2095,7 +2309,7 @@ unboxed struct int external bitc_int</literallayout>
           The <progident>const</progident> keyword is a type
           <em>metaconstructor</em>. If
           <progident><em>T</em></progident> is a type, then the type
-          <progident>(const&nbsp;<em>T</em>)</progident> is a type
+          <progident>const(<em>T</em>)</progident> is a type
           that is copy-compatible (<xref ref="type:copy-compatible"/>)
           with <progident><em>T</em></progident>, but has had all
           mutability stripped (recursively) at all shallow constituent
@@ -2106,7 +2320,7 @@ unboxed struct int external bitc_int</literallayout>
           The <progident>const</progident> construct is considered a
           meta-constructor because of its ``sticky'' behavior under
           unification. The type
-          <progident>(const&nbsp;<em>'a</em>)</progident> does not
+          <progident>const(<em>'a</em>)</progident> does not
           unify with any type (shallowly) containing a mutable
           constituent field.
         </p>
@@ -2118,12 +2332,12 @@ unboxed struct int external bitc_int</literallayout>
           keyword, the preceding types yield immutable
           instantiations.  If <progident><em>T</em></progident> is a
           type, then the type
-          <progident>(mutable&nbsp;<em>T</em>)</progident>
+          <progident>mutable(<em>T</em>)</progident>
           is the type of mutable instances of
           <progident><em>T</em></progident>. If the type
           <progident><em>T</em></progident> is a reference type
           (including <progident>:boxed</progident> structure types), then the type
-          <progident>(mutable&nbsp;<em>T</em>)</progident> describes a
+          <progident>mutable(<em>T</em>)</progident> describes a
           mutable reference to a memory location in the heap.
         </p>
         <sect3>
@@ -2137,15 +2351,15 @@ unboxed struct int external bitc_int</literallayout>
             constituent fields are mutable:
           </p>
           <literallayout indent="no">
-(def p (pair (mutable #\c) 3:int32))
+(def p (pair mutable(#\c) 3:int32))
 ...
 // legal, field is mutable:
 (set! p.first #\d)
 // illegal
 (set! p.second 5)
 
-(def mp (pair (mutable #\c)
-           3:(mutable int32)))
+(def mp (pair mutable(#\c)
+           3:mutable(int32)))
 // legal, all fields mutable:
 (set! mp (pair #\d 4))</literallayout>
           <p indent="no">
@@ -2154,7 +2368,7 @@ unboxed struct int external bitc_int</literallayout>
           </p>
           <p>
             If <progident><em>T</em></progident> is an aggregate type,
-            then <progident>(mutable&nbsp;<em>T</em>)</progident> is a
+            then <progident>mutable(<em>T</em>)</progident> is a
             valid type exactly if <em>T</em> is mutable at all
             constituents.
           </p>
@@ -2175,7 +2389,7 @@ unboxed struct int external bitc_int</literallayout>
           </p>
           <p>
             The type
-            <progident>(ref&nbsp;(mutable&nbsp;'a))</progident> is
+            <progident>boxed(mutable('a))</progident> is
             shallow immutable but deep mutable.
           </p>
         </sect3>
@@ -2187,7 +2401,7 @@ unboxed struct int external bitc_int</literallayout>
 <!--         </p> -->
 <!--         <literallayout> -->
 <!-- (method (<em>TC</em> 'a ... 'z)  -->
-<!--         (fn <em>T<sub>arg</sub></em> <em>T<sub>out</sub></em>))</literallayout> -->
+<!--         fn (<em>T<sub>arg</sub></em>, <em>T<sub>out</sub></em>)</literallayout> -->
 <!--         <p indent="no"> -->
 <!--           describes the type of <em>methods</em> (see type classes, -->
 <!--           below) that are members of some type class -->
@@ -2224,33 +2438,6 @@ unboxed struct int external bitc_int</literallayout>
           associated with the exception.
         </p>
       </sect2>
-      <sect2>
-	<title>Type Variables</title>
-        <p>
-          A type variable is a type variable identifier preceded by a
-          single quote, as in <progident>'a</progident>. Type
-          variables may appear in any position where a type can
-          appear. Type variables are most commonly used as type
-          constructor arguments for named constructed types (see
-          below). They can also be used to annotate expressions, for
-          example to require that two expressions must have the same
-          type. The expression:
-        </p>
-        <literallayout>
-(myfun x y:'a):'a</literallayout>
-        <p indent="no">
-          says that the type of <progident>x</progident> is
-          unspecified by the program author (and should therefore be
-          inferred), the return type is also unspecified (and should
-          be inferred), but the program author is stating that the
-          return type and the last argument type are the same. This
-          type of annotation is sometimes useful to assist the
-          inference engine.
-        </p>
-        <p>
-          The scope of a type variable is its outermost defining form.
-        </p>
-      </sect2>
       <sect2 id="type:copy-compatible">
         <title>Copy Compatibility</title>
         <p>
@@ -2268,10 +2455,10 @@ unboxed struct int external bitc_int</literallayout>
           <title>Trivial Copy Compatibility</title>
           <p>
             The types <progident><em>T</em></progident> and
-            <progident>(mutable&nbsp;<em>T</em>)</progident> are
+            <progident>mutable(<em>T</em>)</progident> are
             trivially copy compatible, because they differ only in
             top-level mutability. A location of type
-            <progident>(mutable&nbsp;<em>T</em>)</progident> may be
+            <progident>mutable(<em>T</em>)</progident> may be
             assigned a value of either type, and a parameter of type
             <progident><em>T</em></progident> may be passed a value of
             either type.
@@ -2323,21 +2510,21 @@ unboxed struct int external bitc_int</literallayout>
             functions have two types. Consider the function:
           </p>
           <literallayout>
-(def (inc x:(mutable int32))
+(def (inc x:mutable(int32))
   (set! x (+ x 1))
   x)</literallayout>
           <p indent="no">
             From the perspective of the function's implementation,
             <progident>x</progident> is a mutable location having type
-            <progident>(mutable&nbsp;int32)</progident>, and since
+            <progident>mutable(int32)</progident>, and since
             <progident>x</progident> is returned, the return type of
             this function is also
-            <progident>(mutable&nbsp;int32)</progident>. From this, we
+            <progident>mutable(int32)</progident>. From this, we
             would conclude that the type of <progident>inc</progident>
             should be:
           </p>
 <literallayout indent="no">
-inc: (fn ((mutable int32)) (mutable int32))</literallayout>
+inc: fn (mutable(int32) -&gt; mutable(int32)</literallayout>
           <p indent="no">
             Given the copy compatibility rules, however, the fact that
             <progident>inc</progident> internally mutates its argument
@@ -2347,7 +2534,7 @@ inc: (fn ((mutable int32)) (mutable int32))</literallayout>
             therefore strips shallow mutability, giving:
           </p>
 <literallayout>
-inc: (fn (int32) int32)</literallayout>
+inc: fn (int32) -&gt; int32</literallayout>
           <p>
             In addition to preserving abstraction, reducing type
             incompatibilities at function reference types, and
@@ -2409,19 +2596,19 @@ inc: (fn (int32) int32)</literallayout>
         which is typed as:
       </p>
 <literallayout>
-(forall ((Ord 'a))
-        (fn ((list 'a)) 'a))</literallayout>
+fn (list('a)) -&gt; 'a
+  where Ord('a)</literallayout>
       <p>
         This type should be read informally as
         ``<progident>list-max</progident> is a procedure accepting
         lists of type <progident>'a</progident> and returning a value
         of type <progident>'a</progident>. It is defined over all
         types <progident>'a</progident> such that there is an
-        instantiation of the <progident>(Ord&nbsp;'a)</progident> type
+        instantiation of the <progident>Ord('a)</progident> type
         class.''
       </p>
       <p>
-        In this example, <progident>(Ord&nbsp;'a)</progident> is the
+        In this example, <progident>Ord('a)</progident> is the
         type class that describes types having a total order. That is:
         types over which the procedure <progident>&gt;=</progident> is
         defined. Obviously, it not semantically sensible to request
@@ -2445,8 +2632,8 @@ inc: (fn (int32) int32)</literallayout>
         which is typed as:
       </p>
 <literallayout>
-(fn ((fn ('a 'a) bool)
-     (list 'a)) 'a))</literallayout>
+fn (fn ('a, 'a) -&gt; bool,
+    list('a)) -&gt; 'a</literallayout>
       <p indent="no">
         In this second example, the comparison operator is provided as
         an argument, and there is no requirement for additional type
@@ -2524,9 +2711,9 @@ nm : <em>function-type</em></literallayout>
             The definition of this type class is written:
           </p>
           <literallayout>
-(trait (Eql 'a)
-  == : (fn ('a 'a) bool))
-  != : (fn ('a 'a) bool))</literallayout>
+(trait Eql('a)
+  == : fn ('a, 'a) bool)
+  != : fn ('a, 'a) bool)</literallayout>
           <p indent="no">
             which states that <progident>Eq.</progident> is the
             single element type relation over all types
@@ -2557,9 +2744,9 @@ nm : <em>function-type</em></literallayout>
             type class:
           </p>
           <literallayout>
-(forall ((Eql 'a))
-  (trait (Ord 'a)
-    &lt; : (fn ('a 'a) 'a)))</literallayout>
+trait Ord('a)
+  where Eql('a)
+is &lt; : fn ('a, 'a) 'a</literallayout>
           <p indent="no">
             This type class states that <progident>Ord</progident> is
             the single element type relation over all types
@@ -2587,7 +2774,8 @@ nm : <em>function-type</em></literallayout>
             all of which will be inferred to have the type:
           </p>
           <literallayout>
-(forall ((Ord 'a)) (fn ('a 'a) bool))</literallayout>
+fn('a, 'a) -&gt; bool
+  where Ord('a)</literallayout>
           <p>
             This may seem like a very long-winded way of saying that
             an orderable type is any type that can be passed to the
@@ -2597,13 +2785,14 @@ nm : <em>function-type</em></literallayout>
             become clearer with the following example.
           </p>
           <p>
-            Note that because <progident>(Ord&nbsp;'a)</progident> has
-            <progident>(Eql&nbsp;'a)</progident>, the types: 
+            Note that because <progident>Ord('a)</progident> has
+            <progident>Eql('a)</progident>, the types: 
           </p>
           <literallayout>
-(forall ((Ord 'a) (Eql 'a))
-        (fn ('a 'a) bool))
-(forall ((Ord 'a)) (fn ('a 'a) bool))</literallayout>
+fn('a, 'a) -&gt; bool
+  where Ord('a), Eql('a)
+fn('a, 'a) -&gt; bool
+  where Ord('a)</literallayout>
           <p indent="no">
             are equivalent. The second is stylistically preferred for
             reasons of brevity. It is also more robust: in the (in
@@ -2694,7 +2883,7 @@ nm : <em>function-type</em></literallayout>
           For example, the definition:
         </p>
         <literallayout>
-(instance (Ord int32)
+(instance Ord(int32)
   int32-ops.&lt;)</literallayout>
         <p indent="no">
           states that <progident>int32</progident> is member of the
@@ -2717,7 +2906,7 @@ nm : <em>function-type</em></literallayout>
 (instance (Eq int32)
   int32-ops.==
   int32-ops.!=)
-(instance (Ord int32)
+(instance Ord(int32)
   int32-ops.&lt;)</literallayout>
         <p>
           A type class instantiation is deemed to be in scope for
@@ -2781,7 +2970,7 @@ nm : <em>function-type</em></literallayout>
         </p>
         <literallayout>
 (def
-  (v1:(forall ((Eql 'a)) 'a), v2:'b)
+  (v1:(forall (Eql('a)) 'a), v2:'b)
   : (forall ((Num 'c))
       ((fn ('c) bool), 'b)) ...)</literallayout>
         <p indent="no">
@@ -2789,7 +2978,7 @@ nm : <em>function-type</em></literallayout>
           qualified type:
         </p>
 <literallayout>
-(forall ((Eql (fn ('c) bool))
+(forall (Eql((fn ('c) bool))
          (Num 'c))
         (fn ('c) bool))</literallayout>
         <p indent="no">
@@ -2826,14 +3015,14 @@ nm : <em>function-type</em></literallayout>
         <sect3>
           <title><progident>ref-types</progident></title>
           <p>
-            <progident>(ref-types&nbsp;'a)</progident> is the type
+            <progident>RefTypes('a)</progident> is the type
             class consisting of all heap-allocated types:
-            <progident>(ref&nbsp;'a)</progident>,
+            <progident>boxed('a)</progident>,
             <progident>(vector&nbsp;'a)</progident>, and
             <progident>string</progident>. Use of this type class is
             appropriate when a structure or union should not be
             instantiated over value types. The
-            <progident>(nullable&nbsp;'a)</progident> type is an
+            <progident>nullable('a)</progident> type is an
             example of this.
           </p>
         </sect3>
@@ -2846,7 +3035,7 @@ nm : <em>function-type</em></literallayout>
             that are ``copy compatible''. That is: all types for which
             a value of type <progident>'b</progident> may be assigned
             to a location of type
-            <progident>(mutable&nbsp;'a)</progident>, and all types
+            <progident>mutable('a)</progident>, and all types
             for which a formal parameter of type
             <progident>'a</progident> may be passed an actual
             parameter of type <progident>'b</progident>.
@@ -2860,8 +3049,8 @@ nm : <em>function-type</em></literallayout>
             is an equivalence relation containing all pairs of types
             <progident>'a</progident>, <progident>'b</progident> such
             that <progident>'a=='b</progident>,
-            <progident>(mutable&nbsp;'a)=='b</progident>, or
-            <progident>'a==(mutable&nbsp;'b)</progident>. That is: types
+            <progident>mutable('a)=='b</progident>, or
+            <progident>'a==mutable('b)</progident>. That is: types
             that are the same ignoring top-level mutability.
           </p>
         </sect3>
@@ -3855,12 +4044,12 @@ import bitc.list as ls
             can only be apllied to an actual argument of type 
             <progident>&tau;</progident>. That is, unlike 
             normal parameters, an actual argument of type 
-            <progident>(mutable &tau;)</progident>
+            <progident>mutable(&tau;)</progident>
             where the formal parameter is of type 
             &tau; 
             or <foreignphrase>vice versa</foreignphrase> is not
             permitted
-            [Here, &tau; &ne; (mutable &tau;<sup>&prime;</sup>)].
+            [Here, &tau; &ne; mutable(&tau;<sup>&prime;</sup>)].
           </p>
         </sect3>
       </sect2>
@@ -4215,7 +4404,7 @@ import bitc.list as ls
         <p indent="no">
           is used to set the value of a mutable entity. The
           expression <em>e<sub>loc</sub></em> should evaluate to a
-          location of mutable type <progident>(mutable&nbsp;<em>T</em>)</progident>. The expression
+          location of mutable type <progident>mutable(<em>T</em>)</progident>. The expression
           <em>e<sub>val</sub></em> should evaluate to an
           assignment-compatible type
           <progident><em>T</em></progident>.
@@ -4230,20 +4419,20 @@ import bitc.list as ls
 <!--             to an expression: -->
 <!--           </p> -->
 <!--           <literallayout> -->
-<!-- (mutable <em>e</em>) -->
+<!-- mutable(<em>e</em>) -->
 <!-- </literallayout> -->
 <!--           <p indent="no"> -->
 <!--             the <progident>mutable</progident> operator induces a -->
 <!--             requirement on the type checker and the type inference -->
 <!--             engine that the type of its argument must unify with the -->
-<!--             type <progident>(mutable&nbsp;'a)</progident>. That is, -->
+<!--             type <progident>mutable('a)</progident>. That is, -->
 <!--             the effect of <progident>mutable</progident> is a -->
 <!--             constraint on the type of its argument.<footnote><p>Note -->
-<!--             that the <progident>(mutable&nbsp;<em>e</em>)</progident> -->
+<!--             that the <progident>mutable(<em>e</em>)</progident> -->
 <!--             expression form is a redundant convenience syntax. An -->
 <!--             equivalent effect can be obtained by writing the type -->
 <!--             qualifier -->
-<!--             <progident><em>e</em>:(mutable&nbsp;'a)</progident>.</p> -->
+<!--             <progident><em>e</em>:mutable('a)</progident>.</p> -->
 <!--             </footnote> The <progident>mutable</progident> value -->
 <!--             constructor does not copy its argument; the return value -->
 <!--             is identically the same as its argument value. -->
@@ -4273,7 +4462,7 @@ import bitc.list as ls
 <!--             argument value, with any top-level mutability stripped -->
 <!--             from its type. That is, if the type of -->
 <!--             <progident><em>e</em></progident> would unify with -->
-<!--             <progident>(mutable&nbsp;'a)</progident>, the type of the -->
+<!--             <progident>mutable('a)</progident>, the type of the -->
 <!--             return value is <progident>'a</progident>, otherwise, the -->
 <!--             type of the return value is the same as the type of the -->
 <!--             input value. -->
@@ -4300,7 +4489,7 @@ import bitc.list as ls
           <title>deref</title>
           <p>If
           <progident><em>e</em></progident> is an expression of reference
-            type <progident>(ref &tau;)</progident>, then:
+            type <progident>boxed(&tau;)</progident>, then:
           </p>
           <literallayout>
 (deref <em>e</em>)</literallayout>
@@ -4371,7 +4560,7 @@ import bitc.list as ls
 <!--                 then, the expression  -->
 <!--                 <progident>(inner-ref <em>e</em> <em>l</em>)</progident> -->
 <!--                 returns a reference to the inner field with type  -->
-<!--                 <progident>(ref &tau;)</progident> -->
+<!--                 <progident>boxed(&tau;)</progident> -->
 <!--               </p> -->
 <!--             </li> -->
 <!--             <li> -->
@@ -4383,7 +4572,7 @@ import bitc.list as ls
 <!--                   <p>                     -->
 <!--                     <progident><em>e</em></progident> -->
 <!--                     is an expression with type -->
-<!--                     <progident>(ref (<em>s</em> &tau;<sub>1</sub> -->
+<!--                     <progident>boxed((<em>s</em> &tau;<sub>1</sub> -->
 <!--                       ... &tau;<sub>n</sub>))</progident> -->
 <!--                     </p> -->
 <!--                 </li> -->
@@ -4413,7 +4602,7 @@ import bitc.list as ls
 <!--                 the expression  -->
 <!--                 <progident>(inner-ref <em>e</em> <em>l</em>)</progident> -->
 <!--                 returns a reference to the inner field with type  -->
-<!--                 <progident>(ref &tau;)</progident>. -->
+<!--                 <progident>boxed(&tau;)</progident>. -->
 <!--               </p> -->
 <!--             </li> -->
 <!--             <li> -->
@@ -4440,7 +4629,7 @@ import bitc.list as ls
 <!--                 then, the expression  -->
 <!--                 <progident>(inner-ref <em>e</em> <em>e<sub>n</sub></em>)</progident> -->
 <!--                 returns a reference to the inner element with type  -->
-<!--                 <progident>(ref &tau;)</progident> -->
+<!--                 <progident>boxed(&tau;)</progident> -->
 <!--               </p> -->
 <!--             </li> -->
 <!--             <li> -->
@@ -4452,7 +4641,7 @@ import bitc.list as ls
 <!--                   <p>                     -->
 <!--                     <progident><em>e</em></progident> -->
 <!--                     is an expression with type -->
-<!--                     <progident>(ref (array &tau;))</progident> -->
+<!--                     <progident>boxed((array &tau;))</progident> -->
 <!--                   </p> -->
 <!--                 </li> -->
 <!--                 <li> -->
@@ -4467,7 +4656,7 @@ import bitc.list as ls
 <!--                 then, the expression  -->
 <!--                 <progident>(inner-ref <em>e</em> <em>e<sub>n</sub></em>)</progident> -->
 <!--                 returns a reference to the inner element with type  -->
-<!--                 <progident>(ref &tau;)</progident> -->
+<!--                 <progident>boxed(&tau;)</progident> -->
 <!--               </p> -->
 <!--             </li> -->
 <!--           </ol>           -->
@@ -4840,7 +5029,7 @@ interface sample {
           type. Clients may declare arguments of type
         </p>
         <literallayout>
-(ref sample.value-type)</literallayout>
+boxed(sample.value-type)</literallayout>
         <p indent="no">
           but not of type <progident>value-type</progident>, because
           the size of <progident>value-type</progident> is not
@@ -5160,7 +5349,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
               <progident>id</progident>, thereby converting it into a
               deep mutable value that is shallow immutable. The
               resulting reference
-              <progident>id:(ref&nbsp;T)</progident> is then closure
+              <progident>id:boxed(T)</progident> is then closure
               converted as a shallow immutable identifier.
             </p>
           </li>
@@ -5287,10 +5476,10 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
   none (some value:'a))
 
 // Nullable pointers:
-(forall ((ref-types 'a))
-  (union
-    (nullable 'a):unboxed 
-     Null (non-null ptr:(ref 'a))))
+unboxed union nullable('a)
+  where RefTypes('a)
+is Null
+   non-null is ptr : boxed('a)
 
 // Homogeneous lists:
 (union (list 'a) 
@@ -5300,7 +5489,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
 // Bignums
 (union int:unboxed
   (fix f:(bitfield int32 31))
-  (big b:(ref (bool, (vector word)))))</literallayout>
+  (big b: boxed((bool, (vector word)))))</literallayout>
     </sect1>
     <sect1>
       <title>Foundational Type Classes</title>
@@ -5326,12 +5515,12 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
 
 // Magnitude comparison
 (forall ((EqualityComparison 'a))
-  (trait (Ord 'a)
+  (trait Ord('a)
   &lt;  : (fn ('a 'a) bool)
   &lt;= : (fn ('a 'a) bool)))
 
 // Checked arithmetic
-(forall ((Ord 'a))
+(forall (Ord('a))
   (trait (Arith 'a)
     +: (fn ('a 'a) 'a)
     -: (fn ('a 'a) 'a)
@@ -5341,7 +5530,7 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
     &gt;&gt;:(fn ('a word) 'a)))
 
 // Ring arithmetic
-(forall ((Ord 'a))
+(forall (Ord('a))
   (trait (Ring 'a)
     R+: (fn ('a 'a) 'a)
     R-: (fn ('a 'a) 'a)
@@ -5351,8 +5540,8 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
     R&gt;&gt;:(fn ('a word) 'a)))
 
 // Sign transformations
-(forall ((Ord 'a))
-  (trait (Signed 'a)
+(forall (Ord('a))
+  (trait Signed('a)
     negate: (fn ('a) 'a)
     abs:    (fn ('a) 'a))</literallayout>
     </sect1>
@@ -5575,10 +5764,13 @@ module <em>module-name</em><sup>?</sup> <em>docstring</em><sup>?</sup> { <em>mod
   | () | bool | char | string | exception
   | <em>inttype</em>
   | float | double | quad
-  | (bitfield <em>inttype</em> IntLit)
+    // integer bitfield:
+  | <em>inttype</em>(IntLit)
+    // boolean bitfield:
+  | bool(1)
   | (boxed <em>type</em>)
-  | (unboxed <em>type</em>)
-  | (mutable <em>type</em>)
+  | unboxed( <em>type</em>)
+  | mutable(<em>type</em>)
   | (fn (<em>type</em><sup>*</sup>) <em>type</em>)
   | <em><u>pairtype</u></em>
   | (array <em>type</em> IntLit)

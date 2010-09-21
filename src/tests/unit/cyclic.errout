@@ -1,3 +1,3 @@
-cyclic.bitc:50:2: WARNING: Local declaration of array_on_field found here, but no definition found.
+cyclic.bitc:48:2: WARNING: Local declaration of array_on_field found here, but no definition found.
 gcc -std=gnu99 -c  -O -I ../../libbitc -o bitc.out.o bitc.out.c
 gcc -O -I ../../libbitc --nostdlib -o BUILD/cyclic bitc.out.o ../../libbitc/BUILD/libbitc.a -lgc

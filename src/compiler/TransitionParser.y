@@ -287,7 +287,7 @@ static unsigned VersionMinor(const std::string s)
 // S-expr syntax:
 %token <tok> tk_DEFTHM
 %token <tok> tk_DECLARE
-%token <tok> tk_PROCLAIM
+// %token <tok> tk_PROCLAIM
 %token <tok> tk_EXTERNAL
 %token <tok> tk_TAG
 
@@ -348,7 +348,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> trn_if_definitions trn_if_definition
 %type <ast> sxp_common_definition
 %type <ast> blk_common_definition
-%type <ast> sxp_value_declaration
+// %type <ast> sxp_value_declaration
 %type <ast> blk_value_declaration
 // %type <ast> sxp_ptype_name
 %type <ast> sxp_val blk_val blk_optval
@@ -359,7 +359,8 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_typeapp blk_typeapp
 %type <ast> blk_type_decl
 // %type <ast> sxp_type_decl
-%type <ast> sxp_externals blk_externals
+%type <ast> blk_externals
+// %type <ast> sxp_externals
 // %type <ast> sxp_importList sxp_provideList
 // %type <ast> sxp_alias
 %type <ast> blk_importList blk_provideList
@@ -428,7 +429,8 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_switch_matches sxp_switch_match
  // %type <ast> blk_switch_matches blk_switch_match
 %type <ast> blk_switch_match
-%type <ast> sxp_exident blk_exident
+%type <ast> blk_exident
+// %type <ast> sxp_exident
 %type <ast> trn_docstring trn_optdocstring
 %type <ast> sxp_condcases sxp_condcase
 %type <ast> sxp_fntype // sxp_method_type
@@ -813,10 +815,10 @@ blk_type_val_definition: blk_value_declaration {
   $$ = $1;
 };
 
-sxp_type_val_definition: sxp_value_declaration {
-  SHOWPARSE("sxp_type_val_definition -> sxp_value_declaration");
-  $$ = $1;
-};
+// sxp_type_val_definition: sxp_value_declaration {
+//   SHOWPARSE("sxp_type_val_definition -> sxp_value_declaration");
+//   $$ = $1;
+// };
 
 blk_type_val_definition: blk_tc_definition {
   SHOWPARSE("blk_type_val_definition -> blk_tc_definition");
@@ -1162,24 +1164,24 @@ blk_externals: tk_EXTERNAL blk_exident {
   $$->externalName = $2->s;
 };
 
-sxp_externals: /* nothing */ {
-  SHOWPARSE("sxp_externals -> ");
-  $$ = AST::make(at_Null);
-  $$->flags = NO_FLAGS;
-};
+// sxp_externals: /* nothing */ {
+//   SHOWPARSE("sxp_externals -> ");
+//   $$ = AST::make(at_Null);
+//   $$->flags = NO_FLAGS;
+// };
 
-sxp_externals: tk_EXTERNAL {
-  SHOWPARSE("sxp_externals -> EXTERNAL");
-  $$ = AST::make(at_Null, $1.loc);
-  $$->flags = DEF_IS_EXTERNAL;
-};
+// sxp_externals: tk_EXTERNAL {
+//   SHOWPARSE("sxp_externals -> EXTERNAL");
+//   $$ = AST::make(at_Null, $1.loc);
+//   $$->flags = DEF_IS_EXTERNAL;
+// };
 
-sxp_externals: tk_EXTERNAL sxp_exident {
-  SHOWPARSE("sxp_externals -> EXTERNAL sxp_exident");
-  $$ = AST::make(at_Null, $1.loc);
-  $$->flags = DEF_IS_EXTERNAL;
-  $$->externalName = $2->s;
-};
+// sxp_externals: tk_EXTERNAL sxp_exident {
+//   SHOWPARSE("sxp_externals -> EXTERNAL sxp_exident");
+//   $$ = AST::make(at_Null, $1.loc);
+//   $$->flags = DEF_IS_EXTERNAL;
+//   $$->externalName = $2->s;
+// };
 
 
 // OBJECT TYPES [3.6.1]         
@@ -1689,14 +1691,14 @@ blk_value_declaration: tk_DEF blk_defpattern blk_constraints trn_optdocstring bl
   $$->getID()->externalName = $5->externalName;
 };
 
-sxp_value_declaration: LP tk_PROCLAIM sxp_defident ':' sxp_type trn_optdocstring sxp_externals RP {
-  SHOWPARSE("sxp_if_definition -> ( PROCLAIM sxp_defident : sxp_type trn_optdocstring sxp_externals )");
-  $$ = AST::make(at_proclaim, $2.loc, $3, $5);
-  $$->flags |= $7->flags;
-  $$->getID()->flags |= $7->flags;
-  $$->getID()->externalName = $7->externalName;
-  $$->addChild(AST::make(at_constraints));
-};
+// sxp_value_declaration: LP tk_PROCLAIM sxp_defident ':' sxp_type trn_optdocstring sxp_externals RP {
+//   SHOWPARSE("sxp_if_definition -> ( PROCLAIM sxp_defident : sxp_type trn_optdocstring sxp_externals )");
+//   $$ = AST::make(at_proclaim, $2.loc, $3, $5);
+//   $$->flags |= $7->flags;
+//   $$->getID()->flags |= $7->flags;
+//   $$->getID()->externalName = $7->externalName;
+//   $$->addChild(AST::make(at_constraints));
+// };
 
 // TODO: The second ident in import rule, and the ident in the provide rule
 //  should be restricted to
@@ -4088,15 +4090,15 @@ blk_exident: tk_ReservedWord {
   $$ = AST::make(at_ident, $1);
 };
 
-sxp_exident: tk_SxpIdent {
-  SHOWPARSE("sxp_exident -> <Ident " + $1.str + ">");
-  $$ = AST::make(at_ident, $1);
-};
+// sxp_exident: tk_SxpIdent {
+//   SHOWPARSE("sxp_exident -> <Ident " + $1.str + ">");
+//   $$ = AST::make(at_ident, $1);
+// };
 
-sxp_exident: tk_SxpReservedWord {
-  SHOWPARSE("sxp_exident -> <Reserved " + $1.str + ">");
-  $$ = AST::make(at_ident, $1);
-};
+// sxp_exident: tk_SxpReservedWord {
+//   SHOWPARSE("sxp_exident -> <Reserved " + $1.str + ">");
+//   $$ = AST::make(at_ident, $1);
+// };
 
 // IDENTIFIERS [2.2]
 blk_ident: tk_BlkIdent {
