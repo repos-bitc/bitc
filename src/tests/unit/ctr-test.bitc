@@ -39,7 +39,10 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(union (unin 'a 'b) (C1 c1:'a c11:'b) (C2 c2:'a))
+boxed union unin('a, 'b)
+is C1 is c1 : 'a
+         c11 : 'b
+   C2 is c2:'a
  
 (def value (C2 0:int32)) 
   

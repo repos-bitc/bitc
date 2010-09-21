@@ -39,8 +39,11 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(struct St:unboxed f:(mutable bool))
+unboxed struct St
+is f: mutable bool
+
 (def x:St (St true))
+
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     (set! x.f false)

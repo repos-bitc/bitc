@@ -39,19 +39,23 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(trait (EQL 'a)
-  === : (fn 'a 'a -> bool)
-  )
+trait EQL('a)
+is === : fn('a, 'a) -> bool
 
-(forall ((EQL 'a)) 
-  (trait (ORD 'a)
-    <<== : (fn 'a 'a -> bool)
-  ))
+trait ORD('a)
+  where EQL('a)
+is <<== : fn('a,'a) -> bool
 
 //(instance (EQL 'a) ==)
-(instance (EQL bool) (=== = ==))
-(instance (EQL int32) (=== = ==))
-(instance (ORD int32) (<<== = <=))
+instance EQL(bool) 
+is === = ==
+
+instance EQL(int32)
+is === = ==
+
+instance ORD(int32)
+is <<== = <=
+
 //(instance (ORD int64) (lambda (x y) (<= x y)))
  
 
@@ -67,11 +71,13 @@ provide bitc.main main
 //(instance (ORD int64) <=)
 //(def RPQ (<<== (the int64 123) 456)) 
 
-(instance (Eq (list 'a)) 
-  (_==_ = (lambda (x y) true))
-  (_!=_ = (lambda (x y) false)))
+instance Eq(list('a))
+is _==_ = lambda (x, y) true
+   _!=_ = lambda (x, y) false
 
-(instance (EQL (list 'a)) (=== = ==))
+instance EQL(list('a))
+is === = ==
+
 (def (f x:(list 'a)) (=== x x))
 
 (def main.main:(fn (vector string) -> int32)

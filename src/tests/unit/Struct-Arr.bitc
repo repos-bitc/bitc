@@ -44,9 +44,9 @@ provide bitc.main main
 
 boxed struct s
 
-(struct s
-  a : int32
-  b : (array int32 3))
+boxed struct s
+is a : int32
+   b : int32[3]
 
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

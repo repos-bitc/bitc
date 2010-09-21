@@ -43,12 +43,12 @@ provide bitc.main main
  
 (def (FUN x:'a y:'a) true)
 
-(trait (ABC 'a)
-  FN: (fn 'a 'a -> bool))
+trait ABC('a)
+is FN: fn('a, 'a) -> bool
 
-(forall ((IntLit 'a)) 
-  (instance (ABC 'a)
-    (FN = FUN)))
+instance ABC('a)
+  where IntLit('a)
+is FN = FUN
 
 // must not work
 //(instance  (ABC int32)

@@ -39,11 +39,15 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(union unin:unboxed C1 (C2 c21:int32 c22:bool) C3) 
+unboxed union unin
+is C1
+   C2 is c21:int32
+         c22:bool
+   C3
 
-(instance (Eq unin) 
-  (_==_ = (lambda (x y) true))
-  (_!=_ = (lambda (x y) false)))
+instance Eq(unin) 
+is _==_ = lambda (x, y) true
+   _!=_ = lambda (x, y) false
 
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

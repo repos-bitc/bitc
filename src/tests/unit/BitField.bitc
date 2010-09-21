@@ -40,13 +40,13 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(struct s
-  a : (bitfield uint32 2)
-  b : (bitfield uint32 30))
+boxed struct s
+is a : uint32(2)
+   b : uint32(30)
 
-(union u
-  (a aa:(bitfield uint32 2))
-  (b bb:(bitfield uint32 30)))
+boxed union u
+is a is aa : uint32(2)
+   b is bb : uint32(30)
 
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

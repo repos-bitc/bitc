@@ -350,9 +350,10 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_common_definition
 %type <ast> sxp_value_declaration
 %type <ast> blk_value_declaration
-%type <ast> sxp_ptype_name
+// %type <ast> sxp_ptype_name
 %type <ast> sxp_val blk_val blk_optval
-%type <ast> sxp_openclosed blk_openclosed
+%type <ast> blk_openclosed
+// %type <ast> sxp_openclosed
 %type <ast> blk_ptype_name
 %type <ast> sxp_type_definition blk_type_definition
 %type <ast> sxp_typeapp blk_typeapp
@@ -366,15 +367,15 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_type_cpair sxp_unqual_expr_cpair
 %type <ast> blk_type_cpair
 %type <ast> sxp_value_definition blk_value_definition 
-%type <ast> sxp_tc_definition sxp_ti_definition
+// %type <ast> sxp_tc_definition sxp_ti_definition
 %type <ast> blk_tc_definition blk_ti_definition
 // %type <ast> sxp_import_definition sxp_provide_definition
 %type <ast> blk_import_definition blk_provide_definition
-%type <ast> sxp_tc_decls // sxp_tc_decl
+// %type <ast> sxp_tc_decls sxp_tc_decl
 %type <ast> blk_tc_decls // blk_tc_decl
 %type <ast> sxp_declares sxp_declare sxp_decls sxp_decl
 %type <ast> blk_opt_declares blk_declares blk_declare blk_decl
-%type <ast> sxp_constructors sxp_constructor
+// %type <ast> sxp_constructors sxp_constructor
 %type <ast> blk_constructors blk_constructor
 %type <ast> sxp_repr_constructors sxp_repr_constructor
 %type <ast> sxp_repr_reprs sxp_repr_repr
@@ -397,9 +398,9 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_mixfix_arglist
 %type <ast> blk_tqual_expr
 %type <ast> blk_expr
-%type <ast> sxp_method_decls sxp_method_decl
+// %type <ast> sxp_method_decls sxp_method_decl
 %type <ast> blk_method_decls blk_method_decl
-%type <ast> sxp_method_bindings sxp_method_binding
+// %type <ast> sxp_method_bindings sxp_method_binding
 %type <ast> blk_method_bindings blk_method_binding
 %type <ast> sxp_constraints sxp_constraint_seq sxp_constraint
 %type <ast> blk_constraints blk_constraint_seq blk_constraint
@@ -417,10 +418,11 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_field_type sxp_type_pl_byref sxp_type_args_pl_byref
 %type <ast> blk_field_type blk_type_pl_byref blk_type_args_pl_byref
 %type <ast> int_type uint_type any_int_type float_type bool_type
-%type <ast> sxp_tvlist blk_tvlist
+%type <ast> blk_tvlist
+// %type <ast> sxp_tvlist
 %type <ast> sxp_fields sxp_field
 %type <ast> blk_fields blk_field
-%type <ast> sxp_fields_and_methods sxp_methods_only sxp_methdecl
+// %type <ast> sxp_fields_and_methods sxp_methods_only sxp_methdecl
 %type <ast> blk_fields_and_methods blk_methods_only blk_methdecl
 %type <ast> trn_literal typevar //mod_ident
 %type <ast> sxp_switch_matches sxp_switch_match
@@ -429,7 +431,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_exident blk_exident
 %type <ast> trn_docstring trn_optdocstring
 %type <ast> sxp_condcases sxp_condcase
-%type <ast> sxp_fntype sxp_method_type
+%type <ast> sxp_fntype // sxp_method_type
 %type <ast> blk_fntype blk_method_type
 %type <ast> trn_fneffect
  //%type <ast> reprbody reprbodyitems reprbodyitem reprtags reprcase reprcaseleg
@@ -821,20 +823,20 @@ blk_type_val_definition: blk_tc_definition {
   $$ = $1;
 };
 
-sxp_type_val_definition: sxp_tc_definition {
-  SHOWPARSE("sxp_type_val_definition -> sxp_tc_definition");
-  $$ = $1;
-};
+// sxp_type_val_definition: sxp_tc_definition {
+//   SHOWPARSE("sxp_type_val_definition -> sxp_tc_definition");
+//   $$ = $1;
+// };
 
 blk_type_val_definition: blk_ti_definition {
   SHOWPARSE("blk_type_val_definition -> blk_ti_definition");
   $$ = $1;
 };
 
-sxp_type_val_definition: sxp_ti_definition {
-  SHOWPARSE("sxp_type_val_definition -> sxp_ti_definition");
-  $$ = $1;
-};
+// sxp_type_val_definition: sxp_ti_definition {
+//   SHOWPARSE("sxp_type_val_definition -> sxp_ti_definition");
+//   $$ = $1;
+// };
 
 // DECLARE [8.4.2]
 //common_definition: sxp_declare {
@@ -930,18 +932,18 @@ blk_ptype_name: blk_defident '(' blk_tvlist ')' %prec '(' {
   $$ = AST::make(at_Null, $1->loc, $1, $3);
 };
 
-sxp_ptype_name: sxp_defident {
-  SHOWPARSE("sxp_ptype_name -> sxp_defident");
-  shared_ptr<AST> tvlist = AST::make(at_tvlist, $1->loc);
-  shared_ptr<AST> constraints = AST::make(at_constraints, $1->loc);
-  $$ = AST::make(at_Null, $1->loc, $1, tvlist, constraints);
-};
+// sxp_ptype_name: sxp_defident {
+//   SHOWPARSE("sxp_ptype_name -> sxp_defident");
+//   shared_ptr<AST> tvlist = AST::make(at_tvlist, $1->loc);
+//   shared_ptr<AST> constraints = AST::make(at_constraints, $1->loc);
+//   $$ = AST::make(at_Null, $1->loc, $1, tvlist, constraints);
+// };
 
-sxp_ptype_name: '(' sxp_defident sxp_tvlist ')' {
-  SHOWPARSE("sxp_ptype_name -> '(' sxp_defident sxp_tvlist ')'");
-  shared_ptr<AST> constraints = AST::make(at_constraints, $2->loc);
-  $$ = AST::make(at_Null, $2->loc, $2, $3, constraints);
-};
+// sxp_ptype_name: '(' sxp_defident sxp_tvlist ')' {
+//   SHOWPARSE("sxp_ptype_name -> '(' sxp_defident sxp_tvlist ')'");
+//   shared_ptr<AST> constraints = AST::make(at_constraints, $2->loc);
+//   $$ = AST::make(at_Null, $2->loc, $2, $3, constraints);
+// };
 
 // These were the originals, where the FORALL did not yet wrap the
 // outermost form. This style later abandoned in the S-Expression
@@ -968,15 +970,14 @@ blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints trn_optdoc
   $$->child(0)->defForm = $$;
 };
 
-sxp_type_definition: LP tk_STRUCT sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_fields_and_methods RP {
-  SHOWPARSE("sxp_type_definition -> ( DEFSTRUCT sxp_ptype_name sxp_val "
-            "trn_optdocstring sxp_declares sxp_fields_and_methods )");
-  $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $4,
-               $6, $7);
-  $$->child(0)->defForm = $$;
-  $$->addChild($3->child(2));
-};
-
+// sxp_type_definition: LP tk_STRUCT sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_fields_and_methods RP {
+//   SHOWPARSE("sxp_type_definition -> ( DEFSTRUCT sxp_ptype_name sxp_val "
+//            "trn_optdocstring sxp_declares sxp_fields_and_methods )");
+//   $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $4,
+//                $6, $7);
+//   $$->child(0)->defForm = $$;
+//   $$->addChild($3->child(2));
+// };
 
 // UNION TYPES [3.6.2]              
 blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares IsILCB blk_constructors IRCB {
@@ -992,18 +993,18 @@ blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints trn_optdocs
   $$->child(0)->defForm = $$;
 }
 
-sxp_type_definition: LP tk_UNION sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_constructors  RP  {
-  SHOWPARSE("sxp_type_definition -> ( DEFUNION sxp_ptype_name sxp_val "
-            "trn_optdocstring sxp_declares sxp_constructors");
-  $$ = AST::make(at_defunion, $2.loc, 
-                 $3->child(0),  /* ident */
-                 $3->child(1),  /* tvlist */
-                 $4,            /* category */
-                 $6,            /* declares */
-                 $7,           /* constructors */
-                 $3->child(2)); /* constraints */
-  $$->child(0)->defForm = $$;
-};
+// sxp_type_definition: LP tk_UNION sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_constructors  RP  {
+//   SHOWPARSE("sxp_type_definition -> ( DEFUNION sxp_ptype_name sxp_val "
+//             "trn_optdocstring sxp_declares sxp_constructors");
+//   $$ = AST::make(at_defunion, $2.loc, 
+//                  $3->child(0),  /* ident */
+//                  $3->child(1),  /* tvlist */
+//                  $4,            /* category */
+//                  $6,            /* declares */
+//                  $7,           /* constructors */
+//                  $3->child(2)); /* constraints */
+//   $$->child(0)->defForm = $$;
+// };
 
 /* // REPR TYPES */
 /* type_definition: '(' tk_REPR sxp_defident sxp_val trn_optdocstring sxp_declares reprbody  ')'  { */
@@ -1196,20 +1197,20 @@ blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints trn_optdocstring b
   $$->child(0)->defForm = $$;
 };
 
-sxp_type_definition: LP tk_OBJECT sxp_ptype_name trn_optdocstring sxp_declares sxp_methods_only RP  {
-  SHOWPARSE("sxp_type_definition -> ( DEFOBJECT sxp_ptype_name "
-            "trn_optdocstring sxp_declares sxp_methods_only )");
-
-  // For the moment, all objects are value types:
-  shared_ptr<AST> valCat = 
-    AST::make(at_unboxedCat, LToken(tk_UNBOXED, "unboxed"));
-
-  $$ = AST::make(at_defobject, $2.loc, $3->child(0), $3->child(1),
-                 valCat,
-                 $5, $6);
-  $$->child(0)->defForm = $$;
-  $$->addChild($3->child(2));
-};
+// sxp_type_definition: LP tk_OBJECT sxp_ptype_name trn_optdocstring sxp_declares sxp_methods_only RP  {
+//   SHOWPARSE("sxp_type_definition -> ( DEFOBJECT sxp_ptype_name "
+//             "trn_optdocstring sxp_declares sxp_methods_only )");
+// 
+//   // For the moment, all objects are value types:
+//   shared_ptr<AST> valCat = 
+//     AST::make(at_unboxedCat, LToken(tk_UNBOXED, "unboxed"));
+// 
+//   $$ = AST::make(at_defobject, $2.loc, $3->child(0), $3->child(1),
+//                  valCat,
+//                  $5, $6);
+//   $$->child(0)->defForm = $$;
+//   $$->addChild($3->child(2));
+// };
 
 
 // STRUCTURE DECLARATIONS
@@ -1360,16 +1361,16 @@ blk_openclosed: tk_CLOSED {
   $$ = AST::make(at_oc_closed, $1);
 };
 
-sxp_openclosed: {
-  SHOWPARSE("sxp_closed -> <empty>");
-  $$ = AST::make(at_oc_open);
-  $$->printVariant = pf_IMPLIED;
-};
+// sxp_openclosed: {
+//   SHOWPARSE("sxp_closed -> <empty>");
+//   $$ = AST::make(at_oc_open);
+//   $$->printVariant = pf_IMPLIED;
+// };
 
-sxp_openclosed: ':' tk_CLOSED {
-  SHOWPARSE("sxp_closed -> ':' CLOSED");
-  $$ = AST::make(at_oc_closed, $2);
-};
+// sxp_openclosed: ':' tk_CLOSED {
+//   SHOWPARSE("sxp_closed -> ':' CLOSED");
+//   $$ = AST::make(at_oc_closed, $2);
+// };
 
 // EXCEPTION DEFINITION [3.10]
 blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring {
@@ -1434,13 +1435,13 @@ blk_tc_definition: blk_openclosed tk_TRAIT blk_ptype_name blk_constraints trn_op
   $$->child(0)->defForm = $$;
 };
 
-sxp_tc_definition: LP tk_TRAIT sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_openclosed sxp_method_decls RP {
-  SHOWPARSE("sxp_tc_definition -> ( DEFTYPECLASS sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_openclosed sxp_method_decls)");
-  $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0),
-                 $3->child(1), $5, $6, $7);
-  $$->addChild($3->child(2));
-  $$->child(0)->defForm = $$;
-};
+// sxp_tc_definition: LP tk_TRAIT sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_openclosed sxp_method_decls RP {
+//   SHOWPARSE("sxp_tc_definition -> ( DEFTYPECLASS sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_openclosed sxp_method_decls)");
+//  $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0),
+//                  $3->child(1), $5, $6, $7);
+//   $$->addChild($3->child(2));
+//   $$->child(0)->defForm = $$;
+// };
 
 //tc_definition: '(' tk_TRAIT sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_method_decls ')' {
 //  SHOWPARSE("sxp_tc_definition -> ( DEFTYPECLASS sxp_ptype_name trn_optdocstring sxp_tc_decls sxp_openclosed sxp_method_decls)");
@@ -1472,10 +1473,10 @@ blk_tc_decls: {
 //  $$ = AST::make(at_tyfn, $2.loc, $3, $6);
 //};
 
-sxp_tc_decls: {
-  SHOWPARSE("sxp_tcdecls -> <empty>");
-  $$ = AST::make(at_tcdecls);
-};
+// sxp_tc_decls: {
+//   SHOWPARSE("sxp_tcdecls -> <empty>");
+//   $$ = AST::make(at_tcdecls);
+// };
 
 // This used to support TYFN. I've left in the empty node
 // as a placeholder against the possible need for other
@@ -1506,17 +1507,17 @@ blk_method_decls: blk_method_decls SC blk_method_decl {
   $$ = $1;
   $$->addChild($3);
 };
-sxp_method_decls: /* Nothing */ {
-  SHOWPARSE("sxp_method_decls -> ");
-  LexLoc loc;
-  $$ = AST::make(at_method_decls, loc);
-};
+// sxp_method_decls: /* Nothing */ {
+//   SHOWPARSE("sxp_method_decls -> ");
+//   LexLoc loc;
+//   $$ = AST::make(at_method_decls, loc);
+// };
 
-sxp_method_decls: sxp_method_decls sxp_method_decl {
-  SHOWPARSE("sxp_method_decls -> sxp_method_decls sxp_method_decl");
-  $$ = $1;
-  $$->addChild($2);
-};
+// sxp_method_decls: sxp_method_decls sxp_method_decl {
+//   SHOWPARSE("sxp_method_decls -> sxp_method_decls sxp_method_decl");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
 
 blk_method_decl: blk_ident ':' blk_fntype {
   SHOWPARSE("blk_method_decl -> blk_ident : blk_fntype");
@@ -1525,12 +1526,12 @@ blk_method_decl: blk_ident ':' blk_fntype {
   $$ = AST::make(at_method_decl, $1->loc, $1, $3);
 };
 
-sxp_method_decl: sxp_ident ':' sxp_fntype {
-  SHOWPARSE("sxp_method_decl -> sxp_ident : sxp_fntype");
-  $1->flags |= ID_IS_GLOBAL;
-  $1->identType = id_tcmethod;
-  $$ = AST::make(at_method_decl, $1->loc, $1, $3);
-};
+// sxp_method_decl: sxp_ident ':' sxp_fntype {
+//   SHOWPARSE("sxp_method_decl -> sxp_ident : sxp_fntype");
+//   $1->flags |= ID_IS_GLOBAL;
+//   $1->identType = id_tcmethod;
+//   $$ = AST::make(at_method_decl, $1->loc, $1, $3);
+// };
 
 // TYPE CLASS INSTANTIATIONS [4.2]
 blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring {
@@ -1543,17 +1544,17 @@ blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring I
   $$ = AST::make(at_definstance, $1.loc, $2, $6, $3);
 };
 
-sxp_ti_definition: LP tk_INSTANCE sxp_constraint trn_optdocstring RP {
-  SHOWPARSE("sxp_ti_definition -> ( DEFINSTANCE sxp_constraint [docstring])");
-  $$ = AST::make(at_definstance, $2.loc, $3,
-                 AST::make(at_tcmethods, $5.loc),
-                 AST::make(at_constraints, $3->loc));
-};
-sxp_ti_definition: LP tk_INSTANCE sxp_constraint trn_optdocstring sxp_method_bindings RP {
-  SHOWPARSE("sxp_ti_definition -> ( DEFINSTANCE sxp_constraint [docstring] sxp_method_bindings)");
-  $$ = AST::make(at_definstance, $2.loc, $3, $5,
-                 AST::make(at_constraints, $3->loc));
-};
+// sxp_ti_definition: LP tk_INSTANCE sxp_constraint trn_optdocstring RP {
+//   SHOWPARSE("sxp_ti_definition -> ( DEFINSTANCE sxp_constraint [docstring])");
+//   $$ = AST::make(at_definstance, $2.loc, $3,
+//                  AST::make(at_tcmethods, $5.loc),
+//                  AST::make(at_constraints, $3->loc));
+// };
+// sxp_ti_definition: LP tk_INSTANCE sxp_constraint trn_optdocstring sxp_method_bindings RP {
+//   SHOWPARSE("sxp_ti_definition -> ( DEFINSTANCE sxp_constraint [docstring] sxp_method_bindings)");
+//   $$ = AST::make(at_definstance, $2.loc, $3, $5,
+//                  AST::make(at_constraints, $3->loc));
+// };
 
 blk_method_bindings: blk_method_binding {
   SHOWPARSE("blk_method_bindings -> blk_method_binding");
@@ -1571,26 +1572,26 @@ blk_method_binding: blk_ident '=' blk_expr {
   $$ = AST::make(at_tcmethod_binding, $1->loc, $1, $3);
 };
 
-sxp_method_bindings: sxp_method_binding {
-  SHOWPARSE("sxp_method_bindings -> sxp_method_binding");
-  $$ = AST::make(at_tcmethods, $1->loc, $1);
-};
-sxp_method_bindings: sxp_method_bindings sxp_method_binding {
-  SHOWPARSE("sxp_method_bindings -> sxp_method_bindings sxp_method_binding");
-  $$ = $1;
-  $$->addChild($2);
-};
+// sxp_method_bindings: sxp_method_binding {
+//   SHOWPARSE("sxp_method_bindings -> sxp_method_binding");
+//   $$ = AST::make(at_tcmethods, $1->loc, $1);
+// };
+// sxp_method_bindings: sxp_method_bindings sxp_method_binding {
+//   SHOWPARSE("sxp_method_bindings -> sxp_method_bindings sxp_method_binding");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
 
-sxp_method_binding: '(' sxp_ident sxp_ident sxp_expr ')' {
-  SHOWPARSE("sxp_method_binding -> ( sxp_ident = sxp_expr )");
-
-  if ($3->s != "=") {
-    cerr << $2->loc << ": Syntax error, expecting `='.\n";
-    lexer->num_errors++;
-  }
-
-  $$ = AST::make(at_tcmethod_binding, $1.loc, $2, $4);
-};
+// sxp_method_binding: '(' sxp_ident sxp_ident sxp_expr ')' {
+//   SHOWPARSE("sxp_method_binding -> ( sxp_ident = sxp_expr )");
+// 
+//   if ($3->s != "=") {
+//     cerr << $2->loc << ": Syntax error, expecting `='.\n";
+//     lexer->num_errors++;
+//   }
+// 
+//   $$ = AST::make(at_tcmethod_binding, $1.loc, $2, $4);
+// };
 
 // DEFINE  [5.1]
 //blk_value_definition: tk_DEF blk_defpattern blk_constraints '=' blk_expr {
@@ -1949,15 +1950,15 @@ blk_constructors: blk_constructors SC blk_constructor {
   $$ = $1;
   $$->addChild($3);
 };
-sxp_constructors: sxp_constructor {
-  SHOWPARSE("sxp_constructors -> sxp_constructor");
-  $$ = AST::make(at_constructors, $1->loc, $1);
-};
-sxp_constructors: sxp_constructors sxp_constructor {
-  SHOWPARSE("sxp_constructors -> sxp_constructors sxp_constructor");
-  $$ = $1;
-  $$->addChild($2);
-};
+// sxp_constructors: sxp_constructor {
+//   SHOWPARSE("sxp_constructors -> sxp_constructor");
+//   $$ = AST::make(at_constructors, $1->loc, $1);
+// };
+// sxp_constructors: sxp_constructors sxp_constructor {
+//   SHOWPARSE("sxp_constructors -> sxp_constructors sxp_constructor");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
 
 blk_constructor: blk_ident { /* simple constructor */
   SHOWPARSE("blk_constructor -> blk_ident");
@@ -1971,17 +1972,17 @@ blk_constructor: blk_ident IsILCB blk_fields IRCB { /* compound constructor */
   $$->addChildrenFrom($3);
 };
 
-sxp_constructor: sxp_ident {                          /* simple constructor */
-  SHOWPARSE("sxp_constructor -> sxp_ident");
-  $1->flags |= (ID_IS_GLOBAL);
-  $$ = AST::make(at_constructor, $1->loc, $1);
-};
-sxp_constructor: '(' sxp_ident sxp_fields ')' {  /* compound constructor */
-  SHOWPARSE("sxp_constructor ->  ( sxp_ident sxp_fields )");
-  $2->flags |= (ID_IS_GLOBAL);
-  $$ = AST::make(at_constructor, $2->loc, $2);
-  $$->addChildrenFrom($3);
-};
+// sxp_constructor: sxp_ident {                          /* simple constructor */
+//   SHOWPARSE("sxp_constructor -> sxp_ident");
+//   $1->flags |= (ID_IS_GLOBAL);
+//   $$ = AST::make(at_constructor, $1->loc, $1);
+// };
+// sxp_constructor: '(' sxp_ident sxp_fields ')' {  /* compound constructor */
+//   SHOWPARSE("sxp_constructor ->  ( sxp_ident sxp_fields )");
+//   $2->flags |= (ID_IS_GLOBAL);
+//   $$ = AST::make(at_constructor, $2->loc, $2);
+//   $$->addChildrenFrom($3);
+// };
 
 /* defrepr Constructors */
 sxp_repr_constructors: sxp_repr_constructor {
@@ -2106,41 +2107,41 @@ blk_methdecl: blk_ident ':' blk_method_type {
   $$ = AST::make(at_methdecl, $1->loc, $1, $3);
 };
 
-sxp_methods_only: sxp_methdecl  {
-  SHOWPARSE("sxp_methods_only -> sxp_methdecl");
-  $$ = AST::make(at_fields, $1->loc, $1);
-};
+// sxp_methods_only: sxp_methdecl  {
+//   SHOWPARSE("sxp_methods_only -> sxp_methdecl");
+//   $$ = AST::make(at_fields, $1->loc, $1);
+// };
 
-sxp_methods_only: sxp_methods_only sxp_methdecl  {
-  SHOWPARSE("sxp_methods_only -> sxp_methods_only sxp_methdecl");
-  $$ = $1;
-  $$->addChild($2);
-};
+// sxp_methods_only: sxp_methods_only sxp_methdecl  {
+//   SHOWPARSE("sxp_methods_only -> sxp_methods_only sxp_methdecl");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
 
-sxp_methdecl: sxp_ident ':' sxp_method_type {
-  SHOWPARSE("sxp_methdecl -> sxp_ident : sxp_method_type");
-  $$ = AST::make(at_methdecl, $1->loc, $1, $3);
-};
+// sxp_methdecl: sxp_ident ':' sxp_method_type {
+//   SHOWPARSE("sxp_methdecl -> sxp_ident : sxp_method_type");
+//   $$ = AST::make(at_methdecl, $1->loc, $1, $3);
+// };
 
 blk_fields_and_methods: blk_methdecl  {
   SHOWPARSE("blk_fields_and_methods -> blk_methdecl");
   $$ = AST::make(at_fields, $1->loc, $1);
 };
 
-sxp_fields_and_methods: sxp_methdecl  {
-  SHOWPARSE("sxp_fields_and_methods -> sxp_methdecl");
-  $$ = AST::make(at_fields, $1->loc, $1);
-};
+// sxp_fields_and_methods: sxp_methdecl  {
+//   SHOWPARSE("sxp_fields_and_methods -> sxp_methdecl");
+//   $$ = AST::make(at_fields, $1->loc, $1);
+// };
 
 blk_fields_and_methods: blk_field  {
   SHOWPARSE("blk_fields_and_methods -> blk_field");
   $$ = AST::make(at_fields, $1->loc, $1);
 };
 
-sxp_fields_and_methods: sxp_field  {
-  SHOWPARSE("sxp_fields_and_methods -> sxp_field");
-  $$ = AST::make(at_fields, $1->loc, $1);
-};
+// sxp_fields_and_methods: sxp_field  {
+//   SHOWPARSE("sxp_fields_and_methods -> sxp_field");
+//   $$ = AST::make(at_fields, $1->loc, $1);
+// };
 
 blk_fields_and_methods: blk_fields_and_methods SC blk_methdecl {
   SHOWPARSE("blk_fields_and_methods -> blk_fields_and_methods SC blk_methdecl ");
@@ -2148,11 +2149,11 @@ blk_fields_and_methods: blk_fields_and_methods SC blk_methdecl {
   $$->addChild($3);
 };
 
-sxp_fields_and_methods: sxp_fields_and_methods sxp_methdecl {
-  SHOWPARSE("sxp_fields_and_methods -> sxp_fields_and_methods sxp_methdecl ");
-  $$ = $1;
-  $$->addChild($2);
-};
+// sxp_fields_and_methods: sxp_fields_and_methods sxp_methdecl {
+//   SHOWPARSE("sxp_fields_and_methods -> sxp_fields_and_methods sxp_methdecl ");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
 
 blk_fields_and_methods: blk_fields_and_methods SC blk_field {
   SHOWPARSE("blk_fields_and_methods -> blk_fields_and_methods SC blk_field ");
@@ -2160,11 +2161,11 @@ blk_fields_and_methods: blk_fields_and_methods SC blk_field {
   $$->addChild($3);
 };
 
-sxp_fields_and_methods: sxp_fields_and_methods sxp_field {
-  SHOWPARSE("sxp_fields_and_methods -> sxp_fields_and_methods sxp_field ");
-  $$ = $1;
-  $$->addChild($2);
-};
+// sxp_fields_and_methods: sxp_fields_and_methods sxp_field {
+//   SHOWPARSE("sxp_fields_and_methods -> sxp_fields_and_methods sxp_field ");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
 
 // Block tvlist is currently the same as sxp_tvlist, and these may
 // merge, but we might still need to change this to comma-separated,
@@ -2179,15 +2180,15 @@ blk_tvlist: blk_tvlist ',' typevar {
   $1->addChild($3);
 };
 
-sxp_tvlist: typevar  {
-  SHOWPARSE("sxp_tvlist -> typevar");
-  $$ = AST::make(at_tvlist, $1->loc, $1);
-};
-sxp_tvlist: sxp_tvlist typevar {
-  SHOWPARSE("sxp_tvlist -> sxp_tvlist typevar");
-  $$ = $1;
-  $1->addChild($2);
-};
+// sxp_tvlist: typevar  {
+//   SHOWPARSE("sxp_tvlist -> typevar");
+//   $$ = AST::make(at_tvlist, $1->loc, $1);
+// };
+// sxp_tvlist: sxp_tvlist typevar {
+//   SHOWPARSE("sxp_tvlist -> sxp_tvlist typevar");
+//   $$ = $1;
+//   $1->addChild($2);
+// };
 
 // TYPES [3]
 //  Unfortunately, the grammar for block types requires precedence
@@ -2509,21 +2510,21 @@ blk_method_type: trn_fneffect tk_METHOD '(' ')' tk_FNARROW blk_type {
   $$ = AST::make(at_methType, $1->loc, fnargVec, $6);
 };
 
-sxp_method_type: '(' trn_fneffect tk_METHOD tk_FNARROW sxp_type ')' {
-  SHOWPARSE("sxp_method_type -> ( trn_fneffect METHOD -> sxp_type )");
-  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
-  $$ = AST::make(at_methType, $1.loc, fnargVec, $5);
-};
+// sxp_method_type: '(' trn_fneffect tk_METHOD tk_FNARROW sxp_type ')' {
+//   SHOWPARSE("sxp_method_type -> ( trn_fneffect METHOD -> sxp_type )");
+//   shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
+//   $$ = AST::make(at_methType, $1.loc, fnargVec, $5);
+// };
 
 blk_method_type: trn_fneffect tk_METHOD '(' blk_type_args_pl_byref ')' tk_FNARROW blk_type {
   SHOWPARSE("blk_method_type -> trn_fneffect METHOD ( blk_type_args_pl_byref ) -> blk_type )");
   $$ = AST::make(at_fn, $1->loc, $4, $7);
 };
 
-sxp_method_type: '(' trn_fneffect tk_METHOD sxp_type_args_pl_byref tk_FNARROW sxp_type ')' {
-  SHOWPARSE("sxp_method_type -> ( trn_fneffect METHOD sxp_type_args_pl_byref -> sxp_type )");
-  $$ = AST::make(at_methType, $1.loc, $4, $6);
-};
+// sxp_method_type: '(' trn_fneffect tk_METHOD sxp_type_args_pl_byref tk_FNARROW sxp_type ')' {
+//   SHOWPARSE("sxp_method_type -> ( trn_fneffect METHOD sxp_type_args_pl_byref -> sxp_type )");
+//   $$ = AST::make(at_methType, $1.loc, $4, $6);
+// };
 
 /* type: '(' tk_METHOD tvapp fntype')' { */
 /*   SHOWPARSE("METHOD tcapp sxp_fntype )"); */

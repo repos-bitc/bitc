@@ -41,7 +41,8 @@ provide bitc.main main
 
 (def i0 (the int32 0))
 
-(struct (st 'a 'b) a: 'a)
+boxed struct st('a, 'b)
+is a: 'a
 
 (def c (st true))
 (def main.main:(fn (vector string) -> int32)

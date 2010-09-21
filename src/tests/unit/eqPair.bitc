@@ -48,11 +48,13 @@ provide bitc.main main
 (def (returnTrue x y) true)
 (def (returnFalse x y) false)
 
-(instance (Eq (boxed (pair bool bool)))
-  (_==_ = returnTrue) (_!=_ = returnTrue))
+instance Eq(boxed(pair(bool,bool)))
+is _==_ = returnTrue
+   _!=_ = returnTrue
 
-(instance (Eq (boxed (pair (mutable bool) (mutable bool))))
-  (_==_ = returnFalse) (_!=_ = returnFalse))
+instance Eq(boxed(pair (mutable(bool), mutable(bool))))
+is _==_ = returnFalse
+   _!=_ = returnFalse
 
 (def p (dup (true, false)))
 (def mp:(boxed (pair (mutable bool) (mutable bool))) 

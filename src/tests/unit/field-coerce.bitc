@@ -39,7 +39,10 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(struct (st 'a) f1:(bitfield int32 20) f2: 'a)
+boxed struct st('a) 
+is f1 : int32(20)
+   f2 : 'a
+
 (def st1 (st 10 true))
 (def st2 (st 10 35:uint32))
 (def main.main:(fn (vector string) -> int32)

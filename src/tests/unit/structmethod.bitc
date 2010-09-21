@@ -39,9 +39,9 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(struct S
-  i: int32
-  m: (method -> bool))
+boxed struct S
+is i: int32
+   m: method () -> bool
 
 (def (S.m s:S) true)
 

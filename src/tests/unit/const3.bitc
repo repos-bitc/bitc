@@ -39,7 +39,8 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(struct (St 'a)  f:(const 'a))
+boxed struct St('a)
+is f : (const 'a)
   
 (def x (St true))
 (def x2 (St true):(St (mutable bool)))

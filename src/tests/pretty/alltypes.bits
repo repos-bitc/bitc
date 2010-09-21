@@ -85,8 +85,8 @@ module alltypes_test is {
                   int32[5],       /* array */
                   int32[]);       /* vector */
 
-  def prefix : ( unboxed boxed(S),   /* prefix */
-                 unboxed int32 reference); /* test of precedence */
+  def prefix : ( unboxed(boxed(S)),   /* prefix */
+                 unboxed(int32 reference)); /* test of precedence */
 
   def fntype : ( fn () -> (),      /* no args */
                  fn (int32) -> bool, /* one arg */

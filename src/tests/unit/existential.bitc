@@ -39,9 +39,9 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(struct Obj:unboxed
-  inc: (fn -> ())
-  odd: (fn -> bool)) 
+unboxed struct Obj
+is inc: fn () -> ()
+   odd: fn ()-> bool
 
 (def (hasOdd oList)
   (switch x oList 

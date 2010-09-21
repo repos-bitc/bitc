@@ -39,7 +39,9 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(struct sf f:(fn int32 -> int32))
+boxed struct sf 
+is
+  f : fn (int32) -> int32
 
 (def (int32id x:int32) x)
 

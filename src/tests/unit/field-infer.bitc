@@ -39,8 +39,12 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(struct S1:unboxed i: int32)
-(struct S2:boxed b:bool i: int32)
+unboxed struct S1
+is i: int32
+
+boxed struct S2
+is b : bool 
+   i : int32
 
 (def (f x) x.i)
 

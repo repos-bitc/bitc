@@ -46,6 +46,7 @@ bitc version 0.11
 
 import bitc.main as main
 provide bitc.main main
+
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) p1 p2 0))
 

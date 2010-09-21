@@ -39,9 +39,14 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(struct st1 a:int32 b:(list bool))
+boxed struct st1
+is a : int32
+   b : list(bool)
 
-(struct (st2 'a 'b) a:'a b:'b)
+boxed struct st2('a, 'b)
+is a:'a 
+   b:'b
+
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
     (cons 

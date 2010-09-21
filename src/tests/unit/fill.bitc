@@ -41,11 +41,17 @@ provide bitc.main main
 
 (def i0 (the int32 0))
 
-(struct (Struct 'a 'b)
-  a:'a (the 'b b) (fill (bitfield uint32 16)) c: int32) 
+boxed struct Struct('a, 'b)
+is a : 'a
+   b : 'b 
+   fill : uint32(16)
+   c : int32
 
-(union (Unin 'a)
-  U1 (U2 a:'a (fill (bitfield uint32 16))) (U3 u:(Unin 'a)))
+boxed union Unin('a)
+is U1 
+   U2 is a:'a 
+         fill : uint32(16)
+   U3 is u : Unin('a)
  
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec)

@@ -39,8 +39,12 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(struct S1 f: (fn -> int32))
-(struct S2 i:int32 f: (method -> int32))
+boxed struct S1 
+is f: fn () -> int32
+
+boxed struct S2 
+is i : int32
+   f: method () -> int32
 
 (def (S2.f s:S2) s.i)
 (def (zero) 0:int32)

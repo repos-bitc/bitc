@@ -42,9 +42,9 @@ provide bitc.main main
 (def i0 (the int32 0))
 (def i1 (the int32 1))
 
-(struct s
-  a : int32
-  b : (vector int32))
+boxed struct s
+is a : int32
+   b : int32[]
 
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 
