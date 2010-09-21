@@ -374,12 +374,12 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_import_definition blk_provide_definition
 // %type <ast> sxp_tc_decls sxp_tc_decl
 %type <ast> blk_tc_decls // blk_tc_decl
-%type <ast> sxp_declares sxp_declare sxp_decls sxp_decl
+// %type <ast> sxp_declares sxp_declare sxp_decls sxp_decl
 %type <ast> blk_opt_declares blk_declares blk_declare blk_decl
 // %type <ast> sxp_constructors sxp_constructor
 %type <ast> blk_constructors blk_constructor
-%type <ast> sxp_repr_constructors sxp_repr_constructor
-%type <ast> sxp_repr_reprs sxp_repr_repr
+// %type <ast> sxp_repr_constructors sxp_repr_constructor
+// %type <ast> sxp_repr_reprs sxp_repr_repr
 %type <ast> blk_repr_constructors blk_repr_constructor
 %type <ast> blk_repr_reprs blk_repr_repr
 %type <ast> sxp_bindingpattern sxp_lambdapatterns sxp_lambdapattern
@@ -1131,15 +1131,15 @@ blk_repr_repr: blk_ident tk_EQUALS intLit {
   $$ = AST::make(at_reprrepr, $2.loc, $1, $3);
 };
 
-sxp_type_definition: LP tk_REPR sxp_defident sxp_val trn_optdocstring sxp_declares sxp_repr_constructors  RP {
-  SHOWPARSE("sxp_type_definition -> ( DEFREPR sxp_defident sxp_val "
-            "trn_optdocstring sxp_declares sxp_repr_constructors");
-  $$ = AST::make(at_defrepr, $2.loc, $3, 
-                 AST::make(at_tvlist), /* empty tvlist */
-                 $4, $6, $7,
-                 AST::make(at_constraints)); /* empty constraints */
-  $$->child(0)->defForm = $$;
-};
+// sxp_type_definition: LP tk_REPR sxp_defident sxp_val trn_optdocstring sxp_declares sxp_repr_constructors  RP {
+//   SHOWPARSE("sxp_type_definition -> ( DEFREPR sxp_defident sxp_val "
+//             "trn_optdocstring sxp_declares sxp_repr_constructors");
+//   $$ = AST::make(at_defrepr, $2.loc, $3, 
+//                  AST::make(at_tvlist), /* empty tvlist */
+//                  $4, $6, $7,
+//                  AST::make(at_constraints)); /* empty constraints */
+//   $$->child(0)->defForm = $$;
+// };
 
 // Type Declarations
 // External declarations
@@ -1892,31 +1892,41 @@ blk_declare: tk_DECLARE blk_decl {
   $$ = $2;
 };
 
-sxp_declares: {
-  SHOWPARSE("sxp_declares -> <empty>");
-  $$ = AST::make(at_declares);
-};
-sxp_declares: sxp_declares sxp_declare {
-  SHOWPARSE("sxp_declares -> sxp_declares sxp_declare");
-  $$ = $1;
-  $$->addChildrenFrom($2);
-};
+// sxp_declares: {
+//   SHOWPARSE("sxp_declares -> <empty>");
+//   $$ = AST::make(at_declares);
+// };
+// sxp_declares: sxp_declares sxp_declare {
+//   SHOWPARSE("sxp_declares -> sxp_declares sxp_declare");
+//   $$ = $1;
+//   $$->addChildrenFrom($2);
+// };
 
-sxp_declare: '(' tk_DECLARE sxp_decls ')' {
-  SHOWPARSE("sxp_declare -> ( DECLARE sxp_decls )");
-  $$ = $3;
-};
+// sxp_declare: '(' tk_DECLARE sxp_decls ')' {
+//   SHOWPARSE("sxp_declare -> ( DECLARE sxp_decls )");
+//   $$ = $3;
+// };
 
-sxp_decls: sxp_decl {
-  SHOWPARSE("sxp_decls -> sxp_decl");
-  $$ = AST::make(at_declares, $1->loc, $1);
-};
+// sxp_decls: sxp_decl {
+//   SHOWPARSE("sxp_decls -> sxp_decl");
+//   $$ = AST::make(at_declares, $1->loc, $1);
+// };
 
-sxp_decls: sxp_decls sxp_decl {
-  SHOWPARSE("sxp_decls -> sxp_decls sxp_decl");
-  $$ = $1;
-  $$->addChild($2);
-};
+// sxp_decls: sxp_decls sxp_decl {
+//   SHOWPARSE("sxp_decls -> sxp_decls sxp_decl");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
+
+// sxp_decl: '(' sxp_ident sxp_field_type ')' {
+//   SHOWPARSE("sxp_decl -> ( sxp_ident sxp_field_type )");
+//   $$ = AST::make(at_declare, $2->loc, $2, $3);
+// };
+
+// sxp_decl: sxp_ident {
+//   SHOWPARSE("sxp_decl -> sxp_ident");
+//   $$ = AST::make(at_declare, $1->loc, $1);
+// };
 
 // For tag type declaration.
 blk_decl: blk_ident tk_AS blk_field_type {
@@ -1924,21 +1934,12 @@ blk_decl: blk_ident tk_AS blk_field_type {
   $$ = AST::make(at_declare, $1->loc, $1, $3);
 };
 
-sxp_decl: '(' sxp_ident sxp_field_type ')' {
-  SHOWPARSE("sxp_decl -> ( sxp_ident sxp_field_type )");
-  $$ = AST::make(at_declare, $2->loc, $2, $3);
-};
 //decl: '(' sxp_ident ')' {
 //  SHOWPARSE("sxp_decl -> ( sxp_ident )");
 //  $$ = AST::make(at_declare, $2->loc, $2);
 //};
 blk_decl: blk_ident {
   SHOWPARSE("blk_decl -> blk_ident");
-  $$ = AST::make(at_declare, $1->loc, $1);
-};
-
-sxp_decl: sxp_ident {
-  SHOWPARSE("sxp_decl -> sxp_ident");
   $$ = AST::make(at_declare, $1->loc, $1);
 };
 
@@ -1988,48 +1989,43 @@ blk_constructor: blk_ident IsILCB blk_fields IRCB { /* compound constructor */
 // };
 
 /* defrepr Constructors */
-sxp_repr_constructors: sxp_repr_constructor {
-  SHOWPARSE("sxp_repr_constructors -> sxp_repr_constructor");
-  $$ = AST::make(at_reprctrs, $1->loc, $1);
-};
-sxp_repr_constructors: sxp_repr_constructors sxp_repr_constructor {
-  SHOWPARSE("sxp_repr_constructors -> sxp_repr_constructors sxp_repr_constructor");
-  $$ = $1;
-  $$->addChild($2);
-};
-/* repr_constructor: sxp_ident sxp_repr_reprs {                          /\* simple sxp_constructor *\/  */
-/*   SHOWPARSE("sxp_repr_constructor -> sxp_defident"); */
-/*   $1->flags |= (ID_IS_GLOBAL); */
-/*   $$ = AST::make(at_reprctr, $1->loc, $1); */
-/* }; */
-sxp_repr_constructor: '(' sxp_ident sxp_fields '(' tk_WHERE sxp_repr_reprs ')' ')' {  /* compound sxp_constructor */
-  SHOWPARSE("sxp_repr_constructor ->  ( sxp_ident sxp_fields ( WHERE sxp_repr_reprs ) )");
-  $2->flags |= (ID_IS_GLOBAL);
-  shared_ptr<AST> ctr = AST::make(at_constructor, $2->loc, $2);
-  ctr->addChildrenFrom($3);
-  $$ = AST::make(at_reprctr, $2->loc, ctr);
-  $$->addChildrenFrom($6);
-};
+// sxp_repr_constructors: sxp_repr_constructor {
+//   SHOWPARSE("sxp_repr_constructors -> sxp_repr_constructor");
+//   $$ = AST::make(at_reprctrs, $1->loc, $1);
+// };
+// sxp_repr_constructors: sxp_repr_constructors sxp_repr_constructor {
+//   SHOWPARSE("sxp_repr_constructors -> sxp_repr_constructors sxp_repr_constructor");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
+// sxp_repr_constructor: '(' sxp_ident sxp_fields '(' tk_WHERE sxp_repr_reprs ')' ')' {  /* compound sxp_constructor */
+//   SHOWPARSE("sxp_repr_constructor ->  ( sxp_ident sxp_fields ( WHERE sxp_repr_reprs ) )");
+//   $2->flags |= (ID_IS_GLOBAL);
+//   shared_ptr<AST> ctr = AST::make(at_constructor, $2->loc, $2);
+//   ctr->addChildrenFrom($3);
+//   $$ = AST::make(at_reprctr, $2->loc, ctr);
+//   $$->addChildrenFrom($6);
+// };
 
-sxp_repr_reprs: sxp_repr_repr {
-  SHOWPARSE("sxp_repr_reprs -> sxp_repr_repr");
-  $$ = AST::make(at_Null, $1->loc, $1);
-};
-sxp_repr_reprs: sxp_repr_reprs sxp_repr_repr {
-  SHOWPARSE("sxp_repr_reprs -> sxp_repr_reprs sxp_repr_repr");
-  $$ = $1;
-  $$->addChild($2);
-};
-sxp_repr_repr: '(' sxp_ident sxp_ident intLit')' {
-  SHOWPARSE("sxp_repr_repr ->  ( = sxp_ident intLit )");
-
-  if ($2->s != "==") {
-    cerr << $2->loc << ": Syntax error, expecting `=='.\n";
-    lexer->num_errors++;
-  }
-
-  $$ = AST::make(at_reprrepr, $2->loc, $3, $4);
-};
+// sxp_repr_reprs: sxp_repr_repr {
+//   SHOWPARSE("sxp_repr_reprs -> sxp_repr_repr");
+//   $$ = AST::make(at_Null, $1->loc, $1);
+// };
+// sxp_repr_reprs: sxp_repr_reprs sxp_repr_repr {
+//   SHOWPARSE("sxp_repr_reprs -> sxp_repr_reprs sxp_repr_repr");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
+// sxp_repr_repr: '(' sxp_ident sxp_ident intLit')' {
+//   SHOWPARSE("sxp_repr_repr ->  ( = sxp_ident intLit )");
+// 
+//   if ($2->s != "==") {
+//     cerr << $2->loc << ": Syntax error, expecting `=='.\n";
+//     lexer->num_errors++;
+//   }
+// 
+//   $$ = AST::make(at_reprrepr, $2->loc, $3, $4);
+// };
 
 /* defstruct / sxp_constructor / exception sxp_fields */
 blk_fields: blk_field  {
