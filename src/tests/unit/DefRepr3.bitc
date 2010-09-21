@@ -39,14 +39,23 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(repr theRepr :unboxed
-  (Ct1 i:int32 k:int32 j:bool   (where (== i 10) (== k 10)))
-  (Ct2 i:int32 k:int32 (where (== i 1) (== k 10)))
+unboxed repr theRepr
+is Ct1 is i:int32
+          k:int32
+          j:bool
+       where i == 10, k == 10
+   Ct2 is i:int32
+          k:int32
+       where i == 1, k == 10
 
   // MUST NOT WORK
-  //(Ct3 i:int32 j:bool k:int32  (where (== i 30))) 
-  //(Ct4 i:int32 r:quad (where (== i 40) (== r 10))) 
-  )
+  // Ct3 is i:int32
+  //        j:bool
+  //        k:int32
+  //     where i == 30
+  // Ct4 is i:int32
+  //        r:quad
+  //     where i == 40, r == 10
  
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

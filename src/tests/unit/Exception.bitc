@@ -42,7 +42,7 @@ provide bitc.main main
 (def i0 0:int32)
 (def i1 1:int32)
 
-(exception exFred)
+exception exFred
 
 (def (f) (try (throw exFred) 
 		 (catch xyz (exFred i1))))

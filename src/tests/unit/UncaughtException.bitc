@@ -42,7 +42,7 @@ provide bitc.main main
 (def i0 0:int32)
 (def i1 1:int32)
 
-(exception exFred)
+exception exFred
 
 (def somelist (cons i0 (cons i1 nil)))
 

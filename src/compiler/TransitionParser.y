@@ -351,14 +351,14 @@ static unsigned VersionMinor(const std::string s)
 // %type <ast> sxp_value_declaration
 %type <ast> blk_value_declaration
 // %type <ast> sxp_ptype_name
-%type <ast> sxp_val blk_val blk_optval
+// %type <ast> sxp_val
+%type <ast> blk_val blk_optval
 %type <ast> blk_openclosed
 // %type <ast> sxp_openclosed
 %type <ast> blk_ptype_name
-%type <ast> sxp_type_definition blk_type_definition
 %type <ast> sxp_typeapp blk_typeapp
-%type <ast> blk_type_decl
-// %type <ast> sxp_type_decl
+%type <ast> blk_type_definition blk_type_decl
+// %type <ast> sxp_type_definition sxp_type_decl
 %type <ast> blk_externals
 // %type <ast> sxp_externals
 // %type <ast> sxp_importList sxp_provideList
@@ -406,7 +406,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_method_bindings blk_method_binding
 %type <ast> sxp_constraints sxp_constraint_seq sxp_constraint
 %type <ast> blk_constraints blk_constraint_seq blk_constraint
-%type <ast> sxp_type_args sxp_type sxp_bitfieldtype
+%type <ast> sxp_type_args sxp_type // sxp_bitfieldtype
 
 // in order of precedence, *lowest* first:
 %type <ast> blk_type
@@ -417,12 +417,13 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_primary_type
 
 %type <ast> blk_type_args blk_bitfieldtype
-%type <ast> sxp_field_type sxp_type_pl_byref sxp_type_args_pl_byref
+%type <ast> sxp_type_pl_byref sxp_type_args_pl_byref
+// %type <ast> sxp_field_type
 %type <ast> blk_field_type blk_type_pl_byref blk_type_args_pl_byref
 %type <ast> int_type uint_type any_int_type float_type bool_type
 %type <ast> blk_tvlist
 // %type <ast> sxp_tvlist
-%type <ast> sxp_fields sxp_field
+// %type <ast> sxp_fields sxp_field
 %type <ast> blk_fields blk_field
 // %type <ast> sxp_fields_and_methods sxp_methods_only sxp_methdecl
 %type <ast> blk_fields_and_methods blk_methods_only blk_methdecl
@@ -796,10 +797,10 @@ blk_type_val_definition: blk_type_definition {
   $$ = $1;
 };
 
-sxp_type_val_definition: sxp_type_definition {
-  SHOWPARSE("sxp_type_val_definition -> sxp_type_definition");
-  $$ = $1;
-};
+// sxp_type_val_definition: sxp_type_definition {
+//   SHOWPARSE("sxp_type_val_definition -> sxp_type_definition");
+//   $$ = $1;
+// };
 
 blk_type_val_definition: blk_value_definition {
   SHOWPARSE("blk_type_val_definition -> blk_value_definition");
@@ -1334,24 +1335,24 @@ blk_val: tk_OPAQUE {
   $$ = AST::make(at_opaqueCat, $1);
 };
 
-sxp_val: {
-  SHOWPARSE("sxp_val -> <empty>");
-  $$ = AST::make(at_boxedCat);
-  $$->printVariant = pf_IMPLIED;
-};
+// sxp_val: {
+//   SHOWPARSE("sxp_val -> <empty>");
+//   $$ = AST::make(at_boxedCat);
+//   $$->printVariant = pf_IMPLIED;
+// };
 
-sxp_val: ':' tk_UNBOXED {
-  SHOWPARSE("sxp_val -> ':' UNBOXED");
-  $$ = AST::make(at_unboxedCat, $2);
-};
-sxp_val: ':' tk_OPAQUE {
-  SHOWPARSE("sxp_val -> ':' OPAQUE");
-  $$ = AST::make(at_opaqueCat, $2);
-};
-sxp_val: ':' tk_BOXED {
-  SHOWPARSE("sxp_val -> BOXED");
-  $$ = AST::make(at_boxedCat);
-}
+// sxp_val: ':' tk_UNBOXED {
+//   SHOWPARSE("sxp_val -> ':' UNBOXED");
+//   $$ = AST::make(at_unboxedCat, $2);
+// };
+// sxp_val: ':' tk_OPAQUE {
+//   SHOWPARSE("sxp_val -> ':' OPAQUE");
+//   $$ = AST::make(at_opaqueCat, $2);
+// };
+// sxp_val: ':' tk_BOXED {
+//   SHOWPARSE("sxp_val -> BOXED");
+//   $$ = AST::make(at_boxedCat);
+// }
 
 blk_openclosed: {
   SHOWPARSE("blk_closed -> <empty>");
@@ -1389,18 +1390,18 @@ blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring {
   $$->child(0)->defForm = $$;
 };
 
-sxp_type_definition: LP tk_EXCEPTION sxp_ident sxp_val trn_optdocstring RP {
-  SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident sxp_val )");
-  $3->flags |= ID_IS_GLOBAL;
-  $$ = AST::make(at_defexception, $2.loc, 
-                 $3,                         /* ident */
-                 AST::make(at_tvlist), /* empty tvlist */
-                 $4,                   /* category */
-                 AST::make(at_declares), /* empty declares */
-                 AST::make(at_fields), /* empty fields */
-                 AST::make(at_constraints)); /* empty constraints */
-  $$->child(0)->defForm = $$;
-};
+// sxp_type_definition: LP tk_EXCEPTION sxp_ident sxp_val trn_optdocstring RP {
+//   SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident sxp_val )");
+//   $3->flags |= ID_IS_GLOBAL;
+//   $$ = AST::make(at_defexception, $2.loc, 
+//                  $3,                         /* ident */
+//                  AST::make(at_tvlist), /* empty tvlist */
+//                  $4,                   /* category */
+//                  AST::make(at_declares), /* empty declares */
+//                  AST::make(at_fields), /* empty fields */
+//                  AST::make(at_constraints)); /* empty constraints */
+//   $$->child(0)->defForm = $$;
+// };
 
 blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring IsILCB blk_fields IRCB {
   SHOWPARSE("blk_type_definition -> exception blk_ident { blk_fields }");
@@ -1415,18 +1416,18 @@ blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring IsILCB b
   $$->child(0)->defForm = $$;
 };
 
-sxp_type_definition: LP tk_EXCEPTION sxp_ident sxp_val trn_optdocstring sxp_fields RP {
-  SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident sxp_val sxp_fields )");
-  $3->flags |= ID_IS_GLOBAL;
-  $$ = AST::make(at_defexception, $2.loc,
-                 $3,             /* ident */
-                 AST::make(at_tvlist), /* empty tvlist */
-                 $4,                   /* category */
-                 AST::make(at_declares), /* empty declares */
-                 $6,                     /* fields */
-                 AST::make(at_constraints)); /* empty constraints */
-  $$->child(0)->defForm = $$;
-};
+// sxp_type_definition: LP tk_EXCEPTION sxp_ident sxp_val trn_optdocstring sxp_fields RP {
+//   SHOWPARSE("sxp_type_definition -> ( defexception sxp_ident sxp_val sxp_fields )");
+//   $3->flags |= ID_IS_GLOBAL;
+//   $$ = AST::make(at_defexception, $2.loc,
+//                  $3,             /* ident */
+//                  AST::make(at_tvlist), /* empty tvlist */
+//                  $4,                   /* category */
+//                  AST::make(at_declares), /* empty declares */
+//                  $6,                     /* fields */
+//                  AST::make(at_constraints)); /* empty constraints */
+//   $$->child(0)->defForm = $$;
+// };
 
 // TYPE CLASSES [4]
 // TYPE CLASS DEFINITION [4.1]
@@ -2027,6 +2028,39 @@ blk_constructor: blk_ident IsILCB blk_fields IRCB { /* compound constructor */
 //   $$ = AST::make(at_reprrepr, $2->loc, $3, $4);
 // };
 
+// sxp_fields: sxp_field  {
+//   SHOWPARSE("sxp_fields -> sxp_field");
+//   $$ = AST::make(at_fields, $1->loc, $1);
+// };
+
+// sxp_fields: sxp_fields sxp_field {
+//   SHOWPARSE("sxp_fields -> sxp_fields sxp_field ");
+//   $$ = $1;
+//   $$->addChild($2);
+// };
+
+// sxp_field: sxp_ident ':' sxp_field_type  {
+//   SHOWPARSE("sxp_field -> sxp_ident : sxp_field_type");
+//   $$ = AST::make(at_field, $1->loc, $1, $3);
+// };
+
+// sxp_field: '(' tk_THE sxp_field_type sxp_ident ')'  {
+//   SHOWPARSE("sxp_field -> '(' THE sxp_field_type sxp_ident ')'");
+//   $$ = AST::make(at_field, $1.loc, $4, $3);
+// };
+
+// sxp_field: '(' tk_FILL sxp_bitfieldtype ')'  {
+//   SHOWPARSE("sxp_field -> '(' FILL sxp_bitfieldtype ')'");
+//   $$ = AST::make(at_fill, $1.loc, $3);
+// };
+
+// Some low level data structures have reserved bit positions that are
+// required to hold designated values.
+// sxp_field: '(' tk_RESERVED sxp_bitfieldtype natLit ')'  {
+//   SHOWPARSE("sxp_field -> '(' RESERVED sxp_bitfieldtype natLit ')'");
+//   $$ = AST::make(at_fill, $1.loc, $3, $4);
+// };
+
 /* defstruct / sxp_constructor / exception sxp_fields */
 blk_fields: blk_field  {
   SHOWPARSE("blk_fields -> blk_field");
@@ -2037,17 +2071,6 @@ blk_fields: blk_fields SC blk_field {
   SHOWPARSE("sxp_fields -> sxp_fields SC sxp_field ");
   $$ = $1;
   $$->addChild($3);
-};
-
-sxp_fields: sxp_field  {
-  SHOWPARSE("sxp_fields -> sxp_field");
-  $$ = AST::make(at_fields, $1->loc, $1);
-};
-
-sxp_fields: sxp_fields sxp_field {
-  SHOWPARSE("sxp_fields -> sxp_fields sxp_field ");
-  $$ = $1;
-  $$->addChild($2);
 };
 
 blk_field: blk_ident ':' blk_field_type {
@@ -2066,28 +2089,6 @@ blk_field: tk_FILL ':' blk_bitfieldtype {
 blk_field: tk_RESERVED ':' blk_bitfieldtype '=' natLit  {
   SHOWPARSE("blk_field -> RESERVED ':' blk_bitfieldtype = natLit");
   $$ = AST::make(at_fill, $1.loc, $3, $5);
-};
-
-sxp_field: sxp_ident ':' sxp_field_type  {
-  SHOWPARSE("sxp_field -> sxp_ident : sxp_field_type");
-  $$ = AST::make(at_field, $1->loc, $1, $3);
-};
-
-// sxp_field: '(' tk_THE sxp_field_type sxp_ident ')'  {
-//   SHOWPARSE("sxp_field -> '(' THE sxp_field_type sxp_ident ')'");
-//   $$ = AST::make(at_field, $1.loc, $4, $3);
-// };
-
-sxp_field: '(' tk_FILL sxp_bitfieldtype ')'  {
-  SHOWPARSE("sxp_field -> '(' FILL sxp_bitfieldtype ')'");
-  $$ = AST::make(at_fill, $1.loc, $3);
-};
-
-// Some low level data structures have reserved bit positions that are
-// required to hold designated values.
-sxp_field: '(' tk_RESERVED sxp_bitfieldtype natLit ')'  {
-  SHOWPARSE("sxp_field -> '(' RESERVED sxp_bitfieldtype natLit ')'");
-  $$ = AST::make(at_fill, $1.loc, $3, $4);
 };
 
 blk_methods_only: blk_methdecl  {
@@ -2648,23 +2649,18 @@ blk_bitfieldtype: bool_type '(' natLit ')' {
   $$ = AST::make(at_bitfieldType, $1->loc, $1, $3);
 };
 
-sxp_bitfieldtype: '(' tk_BITFIELD any_int_type natLit ')' {
-  SHOWPARSE("sxp_bitfieldtype -> ( BITFIELD any_int_type natLit )");
-  $$ = AST::make(at_bitfieldType, $2.loc, $3, $4);
-};
-sxp_bitfieldtype: '(' tk_BITFIELD bool_type natLit ')' {
-  SHOWPARSE("sxp_bitfieldtype -> ( BITFIELD bool_type natLit )");
-  $$ = AST::make(at_bitfieldType, $2.loc, $3, $4);
-};
+// sxp_bitfieldtype: '(' tk_BITFIELD any_int_type natLit ')' {
+//   SHOWPARSE("sxp_bitfieldtype -> ( BITFIELD any_int_type natLit )");
+//   $$ = AST::make(at_bitfieldType, $2.loc, $3, $4);
+// };
+// sxp_bitfieldtype: '(' tk_BITFIELD bool_type natLit ')' {
+//   SHOWPARSE("sxp_bitfieldtype -> ( BITFIELD bool_type natLit )");
+//   $$ = AST::make(at_bitfieldType, $2.loc, $3, $4);
+// };
 
 // Any non-by-ref type, including bitfield type
 blk_field_type: blk_bitfieldtype {
   SHOWPARSE("blk_field_type -> blk_bitfieldtype");
-  $$ = $1;
-};
-
-sxp_field_type: sxp_bitfieldtype {
-  SHOWPARSE("sxp_field_type -> sxp_bitfieldtype");
   $$ = $1;
 };
 
@@ -2673,10 +2669,15 @@ blk_field_type: blk_type {
   $$ = $1;
 };
 
-sxp_field_type: sxp_type {
-  SHOWPARSE("sxp_field_type -> sxp_type");
-  $$ = $1;
-};
+// sxp_field_type: sxp_bitfieldtype {
+//   SHOWPARSE("sxp_field_type -> sxp_bitfieldtype");
+//   $$ = $1;
+// };
+
+// sxp_field_type: sxp_type {
+//   SHOWPARSE("sxp_field_type -> sxp_type");
+//   $$ = $1;
+// };
 
 // by-ref sxp_type_args are not a part of general `type' rule.
 // They are gramatiocally restricted to apprae only on

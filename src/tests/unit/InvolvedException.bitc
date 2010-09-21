@@ -39,9 +39,12 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(exception Xn1)
-(exception Xn2 a:int32 b:char)
-(exception Xn3)
+exception Xn1
+exception Xn2 
+is a:int32
+   b:char
+
+exception Xn3
 
 (def (f) (try (if true (throw (Xn2 (throw Xn3) 'c')) (throw Xn1)) 
 		 (catch xyz 
