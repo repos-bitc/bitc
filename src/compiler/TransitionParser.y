@@ -2344,7 +2344,7 @@ uint_type: tk_UINT32 {
   $$ = AST::make(at_primaryType, $1);
 };
 uint_type: tk_UINT64 {
-  SHOWPARSE("sxp_type -> UINT64");
+  SHOWPARSE("uint_type -> UINT64");
   $$ = AST::make(at_primaryType, $1);
 };
 
