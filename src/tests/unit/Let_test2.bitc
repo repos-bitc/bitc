@@ -40,14 +40,12 @@ import bitc.main as main
 provide bitc.main main
 
 (def i0 0:int32)
-(def i1 1:int32)
-(def i2 2:int32)
 
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec)
     // This crashes during doInstantate. The "expr" of the let
     // reaches doInstantiate with the 'letTest still present
-    (let ((j (let ((i:'letTest i2))
+    (let ((j (let ((i:'letTest i0))
                 i)))
       j)
     i0))
