@@ -1,0 +1,2 @@
+string-lex.bitc:42:8: Unterminated string constant. Missing end quote?
+string-lex.bitc:42:8: Syntax error in input: unexpected '}' (possibly inserted by layout)
