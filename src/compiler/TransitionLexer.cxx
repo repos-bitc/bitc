@@ -1258,7 +1258,15 @@ TransitionLexer::getNextInputToken()
             endLoc.updateWith(thisToken);
             RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
           }
-        } while (c != '\'');
+        } while (c != '\'' && c != EOF);
+
+        if (c == EOF) {
+          errStream << startLoc
+                    << ": Unterminated character constant. Missing end quote?"
+                    << std::endl;
+          num_errors++;
+          RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
+        }
 
         if (LitValue::DecodeCharacter(thisToken) >= 0) {
           endLoc.updateWith(thisToken);
