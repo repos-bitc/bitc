@@ -1,3 +1,3 @@
-vec-badly-typed.bitc:46:7: Type Error. Expected (vector 'a24680|'a24677), Obtained (array 'a24717 5)
+vec-badly-typed.bitc:46:7: Type Error. Expected (vector 'a24680|'a24677), Obtained (array 'a24729 5)
 Real Error!
 Exiting due to errors during Type Checking

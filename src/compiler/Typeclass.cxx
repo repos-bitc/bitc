@@ -102,7 +102,7 @@ Instance::equals(shared_ptr<Instance> ins,
 }
 
 // Check Instance overlapping:
-// Currently, all instances must be absolurely non-overlapping --
+// Currently, all instances must be absolutely non-overlapping --
 // that is, non-unifiable.
 //
 // The operlapping check is different from equality check
@@ -187,7 +187,7 @@ Typeclass::addFnDep(shared_ptr<Type> dep)
 }
 
 void
-TCConstraints::collectAllFnDeps(set<shared_ptr<Type> >& fnDeps)
+TCConstraints::collectAllFnDeps(TypeSet& fnDeps)
 {
   for (iterator itr = begin(); itr != end(); ++itr) {
     shared_ptr<Typeclass> pr = (*itr)->getType();    
@@ -204,7 +204,7 @@ TCConstraints::collectAllFnDeps(set<shared_ptr<Type> >& fnDeps)
 // Very important: if using pointer comparison, always add
 // getType()s to closure and compare with getType()s only.
 // I am relying on the fact that no unification happens
-// at this stage. Otherwise, a equals() ir strictlyEquals()
+// at this stage. Otherwise, a equals() or strictlyEquals()
 // must be used.
 
 void 

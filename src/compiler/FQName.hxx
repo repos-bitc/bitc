@@ -43,6 +43,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <set>
 
 #define FQ_NOIF ""
 
@@ -99,7 +100,14 @@ struct FQName {
   FQName(const std::string& nm);
 
   std::string asString() const;
+
+  int operator<(FQName& rhs)
+  {
+    return asString() < rhs.asString();
+  }
 };
+
+typedef std::set<FQName, std::less<FQName> > FQNameSet;
 
 inline
 std::ostream& operator<<(std::ostream& strm, const FQName& fqn)

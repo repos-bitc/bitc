@@ -1546,7 +1546,7 @@ InferTypeClass(std::ostream& errStream, shared_ptr<AST> ast,
   
   assert(!instEnv->getBinding(ident->fqn.asString()));
 
-  InstanceSet *instSet = new set<shared_ptr<Instance> >;
+  InstanceSet *instSet = new InstanceSet;
   shared_ptr<InstanceSet> instSetPtr(instSet);
   
   instEnv->addBinding(ident->fqn.asString(), instSetPtr);

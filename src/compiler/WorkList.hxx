@@ -50,7 +50,7 @@
 
 template <class T, const bool isDoneSet>
 struct BaseWorkList {
-  typedef std::set<T> WorkSet;
+  typedef std::set<T, std::less<T> > WorkSet;
   WorkSet set;
   
   typedef typename WorkSet::iterator iterator;

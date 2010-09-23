@@ -64,7 +64,7 @@ namespace Options {
   bool ppFQNS = false;
   bool ppDecorate = false;
   unsigned verbose = 0;
-  set<FQName> entryPts;
+  FQNameSet entryPts;
   BackEnd *backEnd = 0;
   string outputFileName;
   vector<filesystem::path> libDirs;

@@ -286,7 +286,10 @@ const TypeFlags TY_SP_MASK  =
   (TypeFlags(TY_CT_SELF) | TY_RIGID | TY_CCC | TY_CLOS | TY_COERCE | TY_ARG_IN_CONST);
 
 struct Type;
-typedef std::set<boost::shared_ptr<Type > > TypeSet;
+
+typedef std::less<boost::shared_ptr<Type> > TypePtrLess;
+typedef std::set<boost::shared_ptr<Type>,
+                 TypePtrLess > TypeSet;
 
 struct TypeScheme;
 
@@ -869,7 +872,20 @@ public:
                            typeTag == ty_vector);
     return CompType(0);
   }
+
+  int operator<(const Type& rhs) const {
+    return uniqueID < rhs.uniqueID;
+  }
 };
+
+// Impose a canonical sort order on pointers to Type, so that
+// operations involving sets of Type pointers will procede in a
+// deterministic order
+static int operator<(const boost::shared_ptr<Type>& lhs, 
+                     const boost::shared_ptr<Type>& rhs)
+{
+  return (*lhs) < (*rhs);
+}
 
 inline
 std::ostream& operator<<(std::ostream& strm, Type& t)

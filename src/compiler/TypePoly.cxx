@@ -597,7 +597,7 @@ TypeScheme::generalize(std::ostream& errStream,
     }
 
     if (cleared) {
-      set< shared_ptr<Typeclass> > oldPreds = tcc->pred;
+      ConstraintSet oldPreds = tcc->pred;
       tcc->pred.clear();
       
       for (TypeSet::iterator itr = oldPreds.begin();

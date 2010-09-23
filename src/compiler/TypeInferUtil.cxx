@@ -130,12 +130,12 @@ useIFInsts(const std::string& idName,
   for (InstEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++itr) {
     std::string s = itr->first;
-    shared_ptr<Binding<set<shared_ptr<Instance> > > > bdng = itr->second;
+    shared_ptr<Binding<InstanceSet> > bdng = itr->second;
     
     if (bdng->flags & BF_PRIVATE)
       continue;
     
-    shared_ptr<set<shared_ptr<Instance> > > insts = bdng->val;
+    shared_ptr<InstanceSet> insts = bdng->val;
     
     if (idName.size())
       s = idName + FQName::LocalBindingSep + s;

@@ -217,7 +217,7 @@ template shared_ptr<Binding<AST> >
 Environment<AST>::getLocalBinding(const std::string& nm) const;
 template shared_ptr<Binding<TypeScheme> >
 Environment<TypeScheme>::getLocalBinding(const std::string& nm) const;
-template shared_ptr<Binding<set<shared_ptr<Instance> > > >
+template shared_ptr<Binding<InstanceSet> >
 InstEnvironment::getLocalBinding
 (const std::string& nm) const;
 
@@ -227,7 +227,7 @@ Environment<AST>::doGetBinding(const std::string& nm,
 template shared_ptr<Binding<TypeScheme> >
 Environment<TypeScheme>::doGetBinding(const std::string& nm,
                                shared_ptr<Environment<TypeScheme> >) const;
-template shared_ptr<Binding<set<shared_ptr<Instance> > > >
+template shared_ptr<Binding<InstanceSet> >
 InstEnvironment::doGetBinding
 (const std::string& nm, shared_ptr<InstEnvironment>) const;
 
@@ -240,7 +240,7 @@ Environment<TypeScheme>::addBinding(const std::string& nm,
                                     bool rebind);
 template void
 InstEnvironment::addBinding
-(const std::string& nm, shared_ptr<set<shared_ptr<Instance> > > val, bool rebind);
+(const std::string& nm, shared_ptr<InstanceSet> val, bool rebind);
 
 
 template void

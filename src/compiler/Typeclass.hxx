@@ -55,6 +55,9 @@ typedef Type Typeclass;
 typedef Typeclass Constraint; 
 typedef TCConstraints Constraints; 
 
+typedef TypeSet TypeclassSet;
+typedef TypeSet ConstraintSet;
+
 struct Instance {
   boost::shared_ptr<TypeScheme> ts;
   boost::shared_ptr<AST> ast;
@@ -76,11 +79,25 @@ struct Instance {
   bool overlaps(boost::shared_ptr<Instance> ins) const;
   bool satisfies(boost::shared_ptr<Typeclass> pred, 
                  boost::shared_ptr<const InstEnvironment > instEnv) const;
-  std::string asString();
+  std::string asString() const;
 
   std::string asXML();
   void asXML(sherpa::INOstream &out);
+
+  int operator<(const struct Instance& rhs) const {
+    return (asString() < rhs.asString());
+  }
 };
+
+// Impose a canonical sort order on pointers to Instance, so that
+// operations involving sets of Instance pointers will procede in a
+// deterministic order
+static int operator<(const boost::shared_ptr<Instance>& lhs, 
+                     const boost::shared_ptr<Instance>& rhs)
+{
+  return (*lhs) < (*rhs);
+}
+
 
 
 /* Type class constraints */

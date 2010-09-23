@@ -850,7 +850,7 @@ TypeScheme::asString(shared_ptr<TvPrinter> tvP, bool norm)
 }
 
 std::string 
-Instance::asString()
+Instance::asString() const
 {
   return ts->tau->asString();
 }

@@ -76,6 +76,8 @@ BUILD/badsyntax: EXPECT_STATUS=1
 BUILD/cyclic: COMPILE_ERROUTPUT=cyclic.errout
 
 string-lex.test: TEST_MODE=compile
+string-lex.test: EXPECT_STATUS=1
+BUILD/string-lex: TEST_MODE=compile
 BUILD/string-lex: EXPECT_STATUS=1
 BUILD/string-lex: COMPILE_ERROUTPUT=string-lex.errout
 

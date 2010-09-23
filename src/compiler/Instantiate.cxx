@@ -256,13 +256,13 @@ importInstBindings(shared_ptr<InstEnvironment > fromEnv,
 {
   for (InstEnvironment::iterator itr = fromEnv->begin();
       itr != fromEnv->end(); ++ itr) {
-    shared_ptr<Binding<set<shared_ptr<Instance> > > > bdng =
+    shared_ptr<Binding<InstanceSet> > bdng =
       itr->second;
 
     if (bdng->flags & BF_PRIVATE)
       continue;
 
-    shared_ptr<set<shared_ptr<Instance> > > fromInsts = bdng->val;
+    shared_ptr<InstanceSet> fromInsts = bdng->val;
     if (fromInsts->size() == 0)
       continue;
 
@@ -270,17 +270,17 @@ importInstBindings(shared_ptr<InstEnvironment > fromEnv,
     // the instance set, reach into that instance's definition's AST,
     // the get the AST of the Typeclass being defined and then its
     // FQN.
-    set<shared_ptr<Instance> >::iterator itr = fromInsts->begin();
+    InstanceSet::iterator itr = fromInsts->begin();
 
     shared_ptr<AST> instAST = (*itr)->ast;
     shared_ptr<AST> tcAST = instAST->child(0)->child(0)->symbolDef;
     string tcFQN = tcAST->fqn.asString();
 
-    shared_ptr<set<shared_ptr<Instance> > > toInsts = toEnv->getBinding(tcFQN);
+    shared_ptr<InstanceSet> toInsts = toEnv->getBinding(tcFQN);
     if (toInsts) {
       cerr << "Available non-private instance for "
            << tcFQN << ": ";
-      for (set<shared_ptr<Instance> >::iterator itr_j = toInsts->begin();
+      for (InstanceSet::iterator itr_j = toInsts->begin();
            itr_j != toInsts->end(); ++itr_j)
         cerr << (*itr_j)->asString() << "     ";
       cerr << endl;
@@ -1023,10 +1023,10 @@ getDefToInstantiate(ostream &errStream, shared_ptr<UocInfo> unifiedUOC,
     // instance among all the instances we have for the
     // current typeclass.
 
-    shared_ptr<set<shared_ptr<Instance> > > insts =
+    shared_ptr<InstanceSet> insts =
       unifiedUOC->instEnv->getBinding(tcID->fqn.asString());
 
-    set<shared_ptr<Instance> >::iterator matchingInstance;
+    InstanceSet::iterator matchingInstance;
 
     for (matchingInstance = insts->begin();
         matchingInstance != insts->end(); ++matchingInstance) {
@@ -2213,7 +2213,7 @@ UocInfo::instantiate(ostream &errStream, const FQName& epName)
 
 bool
 UocInfo::instantiateBatch(ostream &errStream,
-                          set<FQName>& epNames)
+                          FQNameSet& epNames)
 {
   bool errFree = true;
   UpdateMegaEnvs(shared_from_this());
@@ -2234,7 +2234,7 @@ UocInfo::instantiateBatch(ostream &errStream,
          instantiateFQN(errStream, 
                         FQName("bitc.prelude","IndexBoundsError")));
 
-  for (set<FQName>::iterator itr = epNames.begin();
+  for (FQNameSet::iterator itr = epNames.begin();
       itr != epNames.end(); ++itr)
     CHKERR(errFree, instantiateFQN(errStream, (*itr)));
 

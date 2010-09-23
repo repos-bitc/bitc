@@ -424,7 +424,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
                         << (trial_mode ? " [TRIAL]" : "")
                         << std::endl;
 
-  shared_ptr<set<shared_ptr<Instance> > > insts = 
+  shared_ptr<InstanceSet> insts = 
     instEnv->getBinding(pred->defAst->fqn.asString());
   
   if (!insts) {
@@ -442,7 +442,7 @@ handleTCPred(std::ostream &errStream, shared_ptr<Trail> trail,
   }
 
   shared_ptr<TypeScheme> instScheme = GC_NULL;  
-  for (set<shared_ptr<Instance> >::iterator itr_j = insts->begin();
+  for (InstanceSet::iterator itr_j = insts->begin();
       itr_j != insts->end(); ++itr_j) {
     shared_ptr<TypeScheme> ts = (*itr_j)->ts->ts_instance();
     shared_ptr<Type> inst = ts->tau;

@@ -191,7 +191,7 @@ TypeScheme::normalize()
   ftvs = newTvs;
   
   if (tcc) {
-    set< shared_ptr<Constraint> > allPreds = tcc->pred;
+    ConstraintSet allPreds = tcc->pred;
     tcc->pred.clear();
     
     for (TypeSet::iterator itr = allPreds.begin();

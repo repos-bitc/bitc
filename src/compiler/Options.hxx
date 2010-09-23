@@ -75,7 +75,7 @@ namespace Options {
   extern bool dumpTypesAfterMidEnd;
   extern std::set<std::string> showTypesUocs;
   extern std::set<std::string> xmlTypesUocs;
-  extern std::set<FQName> entryPts;
+  extern FQNameSet entryPts;
   extern BackEnd *backEnd;
   extern std::string outputFileName;
   extern std::vector<boost::filesystem::path> libDirs;

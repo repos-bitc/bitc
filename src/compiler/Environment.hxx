@@ -205,7 +205,12 @@ public:
 // to change this or we will need to make use of lexically nested
 // instance environments.
 struct Instance;
-typedef std::set<boost::shared_ptr<Instance> > InstanceSet;
+
+typedef std::less<boost::shared_ptr<Instance> > InstancePtrLess;
+
+typedef std::set<boost::shared_ptr<Instance>,
+                 InstancePtrLess > InstanceSet;
+
 typedef Environment<InstanceSet> InstEnvironment;
 
 struct AST;
