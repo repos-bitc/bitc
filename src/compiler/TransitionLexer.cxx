@@ -1178,7 +1178,15 @@ TransitionLexer::getNextInputToken()
         if (c == '\\') {
           (void) getChar();        // just ignore it -- will validate later
         }
-      } while (c != '"');
+      } while (c != '"' && c != EOF);
+
+      if (c == EOF) {
+        errStream << startLoc
+                  << ": Unterminated string constant. Missing end quote?"
+                  << std::endl;
+        num_errors++;
+        RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
+      }
       
       unsigned badpos = LitValue::validate_string(thisToken.c_str());
 
