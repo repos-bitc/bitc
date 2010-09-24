@@ -40,8 +40,8 @@ import bitc.main as main
 provide bitc.main main
 
 (def i0 0:int16)
-(def i1 1:int16)
-(def i2 2:int16)
+def i1 = 1:int16
+def i2 = 2:int16
 
 (def (fact x) (if (== x i0) i1 (* x (fact (- x 1)))))
 (def main.main:(fn (vector string) -> int32)
