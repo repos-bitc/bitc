@@ -3547,8 +3547,8 @@ sxp_unqual_expr: '(' tk_IF sxp_expr sxp_expr sxp_expr ')' {
 };
 
 // WHEN [7.15.2]
-blk_expr: tk_WHEN blk_expr tk_DO blk_expr {
-  SHOWPARSE("blk_expr -> WHEN blk_expr DO blk_expr");
+blk_expr: tk_WHEN blk_expr tk_THEN blk_expr {
+  SHOWPARSE("blk_expr -> WHEN blk_expr THEN blk_expr");
   $$ = AST::make(at_when, $1.loc, $2, $4);
 };
 sxp_unqual_expr: '(' tk_WHEN sxp_expr sxp_block ')' {
