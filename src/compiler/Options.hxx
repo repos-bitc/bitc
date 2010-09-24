@@ -64,6 +64,8 @@ namespace Options {
   extern bool ppDecorate;
   extern unsigned verbose;        // 0 = no, 1 = show exec, 2 = forward
 
+  extern unsigned mixfixDebug;
+
   /// @brief Suppress load of the prelude.
   ///
   /// This is an internal testing option to suppress loading the

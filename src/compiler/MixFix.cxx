@@ -68,6 +68,7 @@
 #include <iostream>
 #include "shared_ptr.hxx"
 
+#include "Options.hxx"
 #include "AST.hxx"
 #include "MixFix.hxx"
 #include "UocInfo.hxx"
@@ -81,8 +82,7 @@
 // 3 = shifting
 // 2 = reduce actions
 // 1 = Summary input and result
-#define MIXFIX_DEBUG_LEVEL 0
-#define MIXDEBUG(n) if (MIXFIX_DEBUG_LEVEL >= (n))
+#define MIXDEBUG(n) if (Options::mixfixDebug >= (n))
 
 using namespace std;
 using namespace boost;

@@ -142,6 +142,7 @@ using namespace sherpa;
                                    language. */
 #define LOPT_NOALLOC      279   /* Statically reject heap-allocating
                                    operations and constructs */
+#define LOPT_MIXDEBUG     280   /* Debug level for the mixfix parser */
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
@@ -159,6 +160,8 @@ struct option longopts[] = {
   { "help",                 0,  0, LOPT_HELP },
   // Use heuristic inference instead of complete inference
   { "heuristic-inf",        0,  0, LOPT_HEURISTIC },
+  // Set the debug level for the mixfix parser:
+  { "mixfix-debug",         1,  0, LOPT_MIXDEBUG },
   // Disallow any construct that would cause heap allocation at runtime.
   { "no-alloc",             0,  0, LOPT_NOALLOC },
   // Do not link the garbage collector.
@@ -632,6 +635,26 @@ main(int argc, char *argv[])
           std::cerr << "Unknown target language.\n";
           exit(1);
         }
+
+        break;
+      }
+
+    case LOPT_MIXDEBUG:
+      {
+        if (Options::mixfixDebug > 0) {
+          // already set
+          std::cerr << "Warning: overriding previous setting of mixfix-debug.\n";
+        }
+
+        // Validation:
+        for (const char *arg = optarg; *arg; arg++) {
+          if(!isdigit(*arg)) {
+            std::cerr << "Argument to --mixfix-debug must be a number.\n";
+            exit(1);
+          }
+        }
+
+        Options::mixfixDebug = strtoul(optarg, 0, 0);
 
         break;
       }

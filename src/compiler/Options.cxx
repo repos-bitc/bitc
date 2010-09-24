@@ -64,6 +64,7 @@ namespace Options {
   bool ppFQNS = false;
   bool ppDecorate = false;
   unsigned verbose = 0;
+  unsigned mixfixDebug = 0;
   FQNameSet entryPts;
   BackEnd *backEnd = 0;
   string outputFileName;
