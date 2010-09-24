@@ -1,6 +1,7 @@
 /**************************************************************************
  *
- * Copyright (C) 2008, Johns Hopkins University.
+ * Copyright (C) 2010, Jonathan S. Shapiro
+ * Portions Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -54,10 +55,13 @@
 #include "TypeInfer.hxx"
 #include "inter-pass.hxx"
 #include "TypeScheme.hxx"
+#include "libsherpa/EnumSet.hxx"
 
 using namespace boost;
 using namespace sherpa;
 using namespace std;
+
+const PrettyPrintFlags NonRecursiveFlags = pp_InLayoutBlock | pp_FinalNewline;
 
 // At the moment, the "pretty" part of the pretty printing is broken.
 static void
@@ -74,56 +78,41 @@ print_type(INOstream& out, shared_ptr <const AST> ast)
 }
 
 static void
-sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool);
+sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags);
 
 static void
-blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool);
+blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags);
 
 /// @brief Wrapper to iterate across all children of @p ast starting
 /// at @p from, optionally padding the first element with leading
 /// white space if @p firstPad is true and optionally printing types
 /// according to @p showTypes.
 static void
-doChildren(void (*BitcP)(INOstream& out, shared_ptr <const AST> ast, bool),
+doChildren(void (*BitcP)(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags),
            INOstream& out, shared_ptr <const AST> ast, size_t from,
            const std::string& startMark,
            const std::string& sep,
            const std::string& endMark,
-           bool showTypes)
+           PrettyPrintFlags flags)
 {
+  assert( (flags & NonRecursiveFlags) == pp_NONE );
+
   if (from == ast->children.size())
     return;
 
-#if 0
-  if (ast->children.size() > 1 || from) {
-    for (size_t c = from; c < ast->children.size(); c++) {
-      if (c == from)
-        out << firstSep;
-      else if (c > from)
-        out << sep;
-      BitcP(out, ast->child(c), showTypes);
-    }
-  }
-  if (ast->children.size() == 1) {
-    assert(from == 0);
-    out << firstSep;
-    BitcP(out, ast->child(0), showTypes);
-  };
-#else
   out << startMark;
   for (size_t c = from; c < ast->children.size(); c++) {
     if (c > from)
       out << sep;
-    BitcP(out, ast->child(c), showTypes);
+    BitcP(out, ast->child(c), flags);
   }
   out << endMark;
-#endif
 }
 
 static void
 sxp_doChildren(INOstream& out, shared_ptr <const AST> ast, size_t from,
                bool firstPad,
-               bool showTypes)
+               PrettyPrintFlags flags)
 {
   // Avoid redundant constructions:
   static std::string space = " ";
@@ -134,7 +123,7 @@ sxp_doChildren(INOstream& out, shared_ptr <const AST> ast, size_t from,
              firstPad ? space : empty, 
              space,
              "",
-             showTypes);
+             flags);
 }
 
 #if 0
@@ -156,7 +145,7 @@ blk_pp_constraints(INOstream& out, shared_ptr<const AST> constraints,
 
 static void
 sxp_maybe_open_quantifier(INOstream& out, shared_ptr<const AST> defn,
-                      const bool showTypes)
+                          PrettyPrintFlags flags)
 {
   size_t nChildren = defn->children.size();
   shared_ptr<const AST> constraints = defn->child(nChildren-1);
@@ -166,13 +155,13 @@ sxp_maybe_open_quantifier(INOstream& out, shared_ptr<const AST> defn,
     return;
 
   out << "(forall ";
-  sxp_BitcP(out, constraints, showTypes);
+  sxp_BitcP(out, constraints, flags);
   out << " ";
 }
 
 static void
 sxp_maybe_close_quantifier(INOstream& out, shared_ptr<const AST> defn,
-                       const bool showTypes)
+                           PrettyPrintFlags flags)
 {
   size_t nChildren = defn->children.size();
   shared_ptr<const AST> constraints = defn->child(nChildren-1);
@@ -186,28 +175,42 @@ sxp_maybe_close_quantifier(INOstream& out, shared_ptr<const AST> defn,
 static void
 sxp_show_qual_name(INOstream &out,  shared_ptr <const AST> ident,
                    shared_ptr <const AST> tvlist,
-                   const bool showTypes)
+                   PrettyPrintFlags flags)
 {
   bool argsPresent = (tvlist->children.size() > 0);
 
   if (argsPresent) {
     out << "(" ;
-    sxp_BitcP(out, ident, showTypes);
+    sxp_BitcP(out, ident, flags);
     out << " ";
-    sxp_BitcP(out, tvlist, showTypes);
+    sxp_BitcP(out, tvlist, flags);
     out << ")" ;
   }
   else {
-    sxp_BitcP(out, ident, showTypes);
+    sxp_BitcP(out, ident, flags);
   }
 }
 
+// Not yet handled:
+//
+//  at_docstring
+//  at_Null - should it be? (no)
+//  at_declare
+//
+//  at_qualType   - obsolete; last use removed from MethDecl.cxx
+//
+//  at_inner_ref  - deferred, not currently supported
+//  at_suspend    - deferred, not currently supported
+//  
 static void
-blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
+blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
 {
   size_t startIndent = out.indentToHere();
 
-    // The following just recurse:
+  PrettyPrintFlags nrFlags = flags & NonRecursiveFlags;
+  flags &= ~NonRecursiveFlags;
+
+  // The following just recurse:
   switch(ast->astType) {
   case at_module:
     {
@@ -217,7 +220,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       // dressing, and we do not preserve it.
 
       out.more();
-      doChildren(blk_BitcP, out, ast, 0, " is\n", "\n\n", "", showTypes);
+      doChildren(blk_BitcP, out, ast, 0, " is\n", "\n\n", "", flags);
       out.less();
       break;
     }
@@ -228,10 +231,10 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       // Put name on same line:
       out << " ";
-      blk_BitcP(out, ast->child(0), showTypes);
+      blk_BitcP(out, ast->child(0), flags);
 
       out.more();
-      doChildren(blk_BitcP, out, ast, 1, " is\n", "\n\n", "", showTypes);
+      doChildren(blk_BitcP, out, ast, 1, " is\n", "\n\n", "", flags);
       out.less();
 
       break;
@@ -241,8 +244,8 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       out << ast->atKwd();
       out << " ";
-      blk_BitcP(out, ast->child(0), showTypes);
-      doChildren(blk_BitcP, out, ast, 1, " ", ", ", "", showTypes);
+      blk_BitcP(out, ast->child(0), flags);
+      doChildren(blk_BitcP, out, ast, 1, " ", ", ", "", flags);
       break;
     }
 
@@ -261,7 +264,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     { 
       out << ast->atKwd();
 
-      doChildren(blk_BitcP, out, ast, 0, " ", " as ", "", showTypes);
+      doChildren(blk_BitcP, out, ast, 0, " ", " as ", "", flags);
 
       break;
     }
@@ -270,9 +273,9 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << ast->atKwd();
 
       out << " ";
-      blk_BitcP(out, ast->child(0), showTypes);
+      blk_BitcP(out, ast->child(0), flags);
 
-      doChildren(blk_BitcP, out, ast, 1, " ", ", ", "", showTypes);
+      doChildren(blk_BitcP, out, ast, 1, " ", ", ", "", flags);
 
       break;
     }
@@ -286,13 +289,13 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> methods = ast->child(4);
       shared_ptr<AST> constraints = ast->child(5);
 
-      blk_BitcP(out, openclosed, showTypes);
+      blk_BitcP(out, openclosed, flags);
       out << ast->atKwd() << " ";
-      blk_BitcP(out, ident, showTypes);
-      doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", showTypes);
+      blk_BitcP(out, ident, flags);
+      doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", flags);
       out.more();
-      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ", ", "", showTypes);
-      //      blk_BitcP(out, tcdecls, showTypes);
+      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ", ", "", flags);
+      //      blk_BitcP(out, tcdecls, flags);
       out.less();
 
       if (methods->children.size()) {
@@ -301,7 +304,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
         out.indentToHere();
         doChildren(blk_BitcP, out, methods, 0, "", 
                    "\n",
-                   "", showTypes);
+                   "", flags);
       }
       else
         out << " {}";
@@ -316,24 +319,24 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> constraints = ast->child(2);
 
       out << ast->atKwd() << " ";
-      blk_BitcP(out, tapp, showTypes);
+      blk_BitcP(out, tapp, flags);
 
       out.more();
-      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ", ", "", showTypes);
+      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ", ", "", flags);
       out.less();
 
       if (methods->children.size()) {
         out << "\nis ";
 
         out.indentToHere();
-        doChildren(blk_BitcP, out, methods, 0, "", "\n", "", showTypes);
+        doChildren(blk_BitcP, out, methods, 0, "", "\n", "", flags);
       }
 
       break;
     }
   case at_tcmethod_binding:
     {
-      doChildren(blk_BitcP, out, ast, 0, "", " = ", "", showTypes);
+      doChildren(blk_BitcP, out, ast, 0, "", " = ", "", flags);
       break;
     }
 
@@ -349,7 +352,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> fc = ast->child(4);
       shared_ptr<AST> constraints = ast->child(5);
 
-      blk_BitcP(out, category, showTypes);
+      blk_BitcP(out, category, flags);
 
       // Careful! Reprs are transformed into unions by the reprSimp
       // pass, so what we get here might actually be a repr:
@@ -357,12 +360,12 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
         out << "repr ";
       else
         out << ast->atKwd() << " ";
-      blk_BitcP(out, ident, showTypes);
-      doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", showTypes);
+      blk_BitcP(out, ident, flags);
+      doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", flags);
 
       out.more();
-      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ", ", "", showTypes);
-      doChildren(blk_BitcP, out, declares, 0, "\n", "\n", "", showTypes);
+      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ", ", "", flags);
+      doChildren(blk_BitcP, out, declares, 0, "\n", "\n", "", flags);
       out.less();
 
       if (fc->children.size()) {
@@ -375,7 +378,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 #else
                    "\n",
 #endif
-                   "", showTypes);
+                   "", flags);
       }
 
       break;
@@ -385,16 +388,16 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       bool emittedSome = false;
 
-      blk_BitcP(out, ast->child(0), showTypes);
+      blk_BitcP(out, ast->child(0), flags);
       out << "\nwhere ";
       out.indentToHere();
 
-      doChildren(blk_BitcP, out, ast, 1, "", ",\n", "", showTypes);
+      doChildren(blk_BitcP, out, ast, 1, "", ",\n", "", flags);
       break;
     }
   case at_reprrepr:
     {
-      doChildren(blk_BitcP, out, ast, 0, "", " == ", "", showTypes);
+      doChildren(blk_BitcP, out, ast, 0, "", " == ", "", flags);
       break;
     }
 
@@ -403,16 +406,16 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       bool isRepr = false;
 
       if (ast->children.size() == 1) {
-        blk_BitcP(out, ast->child(0), showTypes);
+        blk_BitcP(out, ast->child(0), flags);
       }
       else {
-        blk_BitcP(out, ast->child(0), showTypes);
+        blk_BitcP(out, ast->child(0), flags);
         out << " ";
         (void) out.indentToHere(); // record the "is" depth
 
         out << "is ";
         size_t isDepth = out.indentToHere();
-        doChildren(blk_BitcP, out, ast, 1, "", "\n", "", showTypes);
+        doChildren(blk_BitcP, out, ast, 1, "", "\n", "", flags);
         out.setIndent(isDepth);
 
         for(size_t c = 1; c < ast->children.size(); c++) {
@@ -436,7 +439,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
               if (emittedSome)
                 out << ",\n";
 
-              blk_BitcP(out, fld->child(0), showTypes); // field name
+              blk_BitcP(out, fld->child(0), flags); // field name
               out << " == "
                   << fld->unin_discm;
               emittedSome = true;
@@ -457,16 +460,16 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> category = ast->child(2);
       shared_ptr<AST> constraints = ast->child(5);
 
-      blk_BitcP(out, category, showTypes);
+      blk_BitcP(out, category, flags);
       if (ast->flags & UNION_IS_REPR)
         out << "repr ";
       else
         out << ast->atKwd() << " ";
-      blk_BitcP(out, ident, showTypes);
-      doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", showTypes);
+      blk_BitcP(out, ident, flags);
+      doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", flags);
 
       out.more();
-      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ",", "", showTypes);
+      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ",", "", flags);
       if (ident->flags & DEF_IS_EXTERNAL) {
         out << "\nexternal";
         if (ident->externalName.size())
@@ -485,12 +488,12 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> constraints = ast->child(2);
 
       out << " " << ast->atKwd() << " ";
-      blk_BitcP(out, ident, showTypes);
+      blk_BitcP(out, ident, flags);
       out << " : ";
-      blk_BitcP(out, proc_type, showTypes);
+      blk_BitcP(out, proc_type, flags);
 
       out.more();
-      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ",", "", showTypes);
+      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ",", "", flags);
 
       if (ident->flags & DEF_IS_EXTERNAL) {
         out << "\nexternal";
@@ -507,10 +510,10 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     ////////////////////////////////////////////////////////////////////
   case at_fill:
     out << ast->atKwd() << " : ";
-    blk_BitcP(out, ast->child(0), showTypes);
+    blk_BitcP(out, ast->child(0), flags);
     if (ast->children.size() > 0) { // if RESERVED
       out << " = ";
-      blk_BitcP(out, ast->child(0), showTypes);
+      blk_BitcP(out, ast->child(0), flags);
     }
       
     break;
@@ -518,9 +521,14 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_field:
   case at_methdecl:
   case at_method_decl:          // TC method
-    doChildren(blk_BitcP, out, ast, 0, "", " : ", "", showTypes);
+    doChildren(blk_BitcP, out, ast, 0, "", " : ", "", flags);
     break;
 
+  case at_fieldType:
+    {
+      blk_BitcP(out, ast->child(0), flags);
+      break;
+    }
   case at_ident:
   case at_ifident:
     out << ast->s;
@@ -532,12 +540,6 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << "*/";
     }
 
-    if (showTypes) print_type(out, ast);
-
-    break;
-
-  case at_usesel:
-    doChildren(blk_BitcP, out, ast, 0, "", ".", "", showTypes);
     break;
 
   case at_tcapp:
@@ -545,18 +547,19 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     {
       /// @bug Decide whether the shape of these should be similar to
       /// the shape of procedure application.
-      blk_BitcP(out, ast->child(0), showTypes);
-      doChildren(blk_BitcP, out, ast, 1, "(", ", ", ")", showTypes);
+      blk_BitcP(out, ast->child(0), flags);
+      doChildren(blk_BitcP, out, ast, 1, "(", ", ", ")", flags);
       break;
     }
 
   case at_methType:
   case at_fn:
+  case at_tyfn:
     {
       out << ast->atKwd();
-      blk_BitcP(out, ast->child(0), showTypes);
+      blk_BitcP(out, ast->child(0), flags);
       out << " -> ";
-      blk_BitcP(out, ast->child(1), showTypes);
+      blk_BitcP(out, ast->child(1), flags);
       break;
     }
 
@@ -565,7 +568,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_argVec:
     {
       out << "(";
-      doChildren(blk_BitcP, out, ast, 0, "", ", ", "", showTypes);
+      doChildren(blk_BitcP, out, ast, 0, "", ", ", "", flags);
       out << ")";
       break;
     }
@@ -577,12 +580,20 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << ast->s;
     break;
 
+  case at_mixExpr:
+    {
+      // This should never occur in production, but we need it to
+      // support --dumpafter for the early passes:
+      doChildren(blk_BitcP, out, ast, 0, "", " ", "", flags);
+      break;
+    }
+
   case at_mutableType:
   case at_constType:
   case at_arrayRefType:
   case at_byRefType:
     out << ast->atKwd() << " ";
-    blk_BitcP(out, ast->child(0), showTypes);
+    blk_BitcP(out, ast->child(0), flags);
     break;
 
     /// @bug Temporary expedient: use alternate forms for postfix types:
@@ -592,7 +603,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_arrayType:
     {
       out << ast->atKwd();
-      doChildren(blk_BitcP, out, ast, 0, "(", ",", ")", showTypes);
+      doChildren(blk_BitcP, out, ast, 0, "(", ",", ")", flags);
       break;
     }
 
@@ -601,7 +612,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_bitfieldType:
     {
       out << ast->atKwd();
-      doChildren(blk_BitcP, out, ast, 0, "(", ",", ")", showTypes);
+      doChildren(blk_BitcP, out, ast, 0, "", "(", ")", flags);
       break;
     }
 
@@ -628,8 +639,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     ////////////////////////////////////////////////////////////////////
   case at_tqexpr:
     // Argument order was swapped.
-    doChildren(blk_BitcP, out, ast, 0, "", " : ", "", false);
-    if (showTypes) print_type(out, ast);
+    doChildren(blk_BitcP, out, ast, 0, "", " : ", "", flags & ~pp_ShowTypes);
     break;
 
   case at_boolLiteral:
@@ -638,25 +648,480 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case at_floatLiteral:
 
     out << ast->s;
-    out << " /* " << ast->litValue << " */";
-    if (showTypes) print_type(out, ast);
+    if (flags & pp_LitValues)
+      out << " /* " << ast->litValue << " */";
     break;
 
   case at_stringLiteral:
     out << "\"" << ast->s << "\"";
 
-    if (showTypes) print_type(out, ast);
     break;
 
-
-    ////////////////////////////////////////////////////////////////////
-    // Things that (for the moment) we pass back to the s-expression printer:
-    ////////////////////////////////////////////////////////////////////
-  case at_define:
   case at_recdef:
+    {
+      shared_ptr<AST> identPattern = ast->child(0);
+      shared_ptr<AST> iLambda = ast->child(1);
+      shared_ptr<AST> constraints = ast->child(2);
 
-    sxp_BitcP(out, ast, showTypes);
+      out << ast->atKwd() << " ";
+
+      // Procedure name:
+      blk_BitcP(out, identPattern, flags);
+
+      // Procedure arguments:
+      shared_ptr<AST> iLamArgs = iLambda->child(0);
+      shared_ptr<AST> iLamRetBlock = iLambda->child(1);
+      if (iLamArgs->children.size())
+        doChildren(blk_BitcP, out, iLamArgs, 0, "(", ", ", ")", flags);
+      else
+        out << "()";
+
+      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ", ", "", flags);
+      out << " = " ;
+
+      out.more();
+
+      // Because of the way we build lambdas, the body is always an
+      // at_labeledBlock for __return, and we are going to suppress
+      // that during pretty print. The body of *that* is the true body
+      // of the lambda:
+      shared_ptr<AST> iLamBody = iLamRetBlock->child(1);
+
+      // If it's a begin form, let the opening brace be on the same
+      // line as the '='. This requires that we emit the '{' here.
+      if (iLamBody->astType == at_begin)
+        out << "{\n";
+      else
+        out << "\n";
+
+      blk_BitcP(out, iLamRetBlock, flags| pp_InLayoutBlock);
+
+      if (iLamBody->astType == at_begin) {
+        out.less();
+        out << "\n}";
+      }
+
+      out << "\n";
+      break;
+    }
+
+  case at_define:
+    {
+      shared_ptr<AST> identPattern = ast->child(0);
+      shared_ptr<AST> expr = ast->child(1);
+      shared_ptr<AST> constraints = ast->child(2);
+
+      out << ast->atKwd() << " ";
+
+      // Procedure name:
+      blk_BitcP(out, identPattern, flags);
+
+      doChildren(blk_BitcP, out, constraints, 0, "\nwhere ", ", ", "\n ", flags);
+
+      out << " = " ;
+      blk_BitcP(out, expr, flags);
+      break;
+    }
+
+  case at_identPattern:
+    doChildren(blk_BitcP, out, ast, 0, "", " : ", "", flags);
     break;
+
+  case at_container:
+    {
+      out << "__letSSA ";
+      size_t outer = out.indentToHere();
+      doChildren(blk_BitcP, out, ast->child(0), 0, "", "\n", "", flags);
+      out.setIndent(outer);
+      out << "\nin ";
+      out.indentToHere();
+      blk_BitcP(out, ast->child(1), flags | pp_InLayoutBlock);
+      break;
+    }
+
+  case at_localFrame:
+    {
+      out << ast->atKwd();
+      size_t outer = out.indentToHere();
+      doChildren(blk_BitcP, out, ast->child(0), 0, "", "\n", "", flags);
+      out.setIndent(outer);
+      out << "\nin ";
+      out.indentToHere();
+      blk_BitcP(out, ast->child(1), flags | pp_InLayoutBlock);
+      break;
+    }
+
+  case at_letStar:
+  case at_let:
+  case at_letrec:
+    {
+      out << ast->atKwd() << " ";
+      size_t outer = out.indentToHere();
+      doChildren(blk_BitcP, out, ast->child(0), 0, "", "\n", "", flags);
+      out.setIndent(outer);
+      out << "\nin ";
+      out.indentToHere();
+      blk_BitcP(out, ast->child(1), flags | pp_InLayoutBlock);
+      break;
+    }
+  case at_letbinding:
+    {
+      doChildren(blk_BitcP, out, ast, 0, "", " = ", "", flags);
+      break;
+    }
+  case at_loopbinding:
+    {
+      blk_BitcP(out, ast->child(0), flags);
+      out << " = ";
+      blk_BitcP(out, ast->child(1), flags);
+      out << " then ";
+      blk_BitcP(out, ast->child(2), flags);
+      break;
+    }
+
+  case at_dummyType:
+  case at_exceptionType:
+    {
+      out << ast->atKwd();
+      break;
+    }
+
+  case at_begin:
+    {
+      if (nrFlags & pp_InLayoutBlock) {
+        doChildren(blk_BitcP, out, ast, 0, "", "\n", "", flags);
+      }
+      else {
+        out << "{\n";
+        out.more();
+        doChildren(blk_BitcP, out, ast, 0, "", "\n", "", flags);
+        out.less();
+        out << "\n}";
+      }
+      break;
+    }
+
+  case at_labeledBlock:
+    {
+      // labeled blocks get automatically inserted to handle return
+      // and continue. The labels used are compiler-reserved symbols,
+      // so we need to undo the labeling in those two cases.
+      std::string label = ast->child(0)->s;
+
+      if ((flags & pp_Raw) ||
+          (label != "__return" && label != "__continue")) {
+        out << ast->atKwd() << " ";
+        blk_BitcP(out, ast->child(0), flags);
+        out << "\nin ";
+        out.indentToHere();
+        blk_BitcP(out, ast->child(1), flags | pp_InLayoutBlock);
+      }
+      else {
+        // Preserve the layout block context here, since if we are the
+        // expression in a layout block context, and we are
+        // suppressing the labels, then our body is in a layout block
+        // context.
+        blk_BitcP(out, ast->child(1), flags | (nrFlags & pp_InLayoutBlock));
+      }
+
+      break;
+    }
+
+  case at_return_from:
+    {
+      // __return and __continue are internally inserted. Emit
+      // those the way the user keyed them.
+      string ident = ast->child(0)->s;
+      
+      if (ident == "__continue") {
+        out << "continue";
+      }
+      else if (ident == "__return") {
+        out << "return ";
+        blk_BitcP(out, ast->child(1), flags);
+      }
+      else {
+        out << "from ";
+        blk_BitcP(out, ast->child(0), flags);
+        out << "return ";
+        blk_BitcP(out, ast->child(1), flags);
+      }
+      break;
+    }
+
+  case at_lambda:
+    {
+      if (ast->printVariant && pf_IMPLIED) {
+        // While this test is true while printing whole top-level forms,
+        // it is not true in the case of  individual expressions. Hence
+        // I have disabled it. If the final version of the compiler has
+        // no expression printing, we may re-enable it.
+        std::cerr << "The pretty printer should never be printing an "
+                  << "at_ilambda pattern!\n";
+        exit(1);
+      }
+  
+      shared_ptr<AST> lamArgs = ast->child(0);
+      shared_ptr<AST> lamRetBlock = ast->child(1);
+
+      out << ast->atKwd();
+      if (lamArgs->children.size())
+        doChildren(blk_BitcP, out, lamArgs, 0, "(", ", ", ") ", flags);
+      else
+        out << "() ";
+
+      blk_BitcP(out, lamRetBlock, flags| pp_InLayoutBlock);
+      break;
+    }
+
+  case at_usesel:
+  case at_fqCtr:
+  case at_sel_ctr:
+  case at_select:
+    {
+      doChildren(blk_BitcP, out, ast, 0, "", ".", "", flags);
+      break;
+    }
+
+  case at_nth:
+  case at_array_nth:
+  case at_array_ref_nth:
+  case at_vector_nth:
+    {
+      doChildren(blk_BitcP, out, ast, 0, "", "[", "]", flags);
+      break;
+    }
+
+  case at_loop:
+    {
+      out << ast->atKwd() << " ";
+      size_t baseIndent = out.indentToHere();
+      doChildren(blk_BitcP, out, ast->child(0), 0, "", "\n", "", flags);
+      out.setIndent(baseIndent);
+      out << "\n  until ";
+      out.indentToHere();
+      blk_BitcP(out, ast->child(1), flags);
+      out.setIndent(baseIndent);
+      out << "\nin ";
+      out.indentToHere();
+      
+      shared_ptr<AST> loopBody = ast->child(2);
+
+      // Following is not true in gen-c.cxx, because an at_letStar has
+      // been emitted.
+      if (flags.lacks(pp_Raw) && 
+          loopBody->astType == at_labeledBlock) {
+        assert ((loopBody->astType == at_labeledBlock)
+                && (loopBody->child(0)->s == "__continue"));
+        loopBody = loopBody->child(1);
+        // For the moment, I'm wrapping loop bodies in a BEGIN with a
+        // trailing () for typing purposes. Suppress that:
+        assert((loopBody->astType == at_begin)
+               && (loopBody->children.size() == 2)
+               && (loopBody->child(1)->astType == at_unit));
+        loopBody = loopBody->child(0);
+      }
+
+      blk_BitcP(out, loopBody, flags | pp_InLayoutBlock);
+
+      break;
+    }
+
+  case at_looptest:
+    {
+      // The at_looptest node is now vestigial, but I don't want to
+      // make that change simultaneous with this one.
+      blk_BitcP(out, ast->child(0), flags);
+      break;
+    }
+
+  case at_uswitch:
+    {
+      // switch id = expr
+      // case T in block
+      // otherwise block
+
+      out << ast->atKwd() << " ";
+      blk_BitcP(out, ast->child(0), flags);
+      out << " = ";
+      blk_BitcP(out, ast->child(1), flags);
+      out << "\n";
+      doChildren(blk_BitcP, out, ast->child(2), 0, "", "\n", "", flags);
+      if (ast->child(3)->astType != at_Null)
+        blk_BitcP(out, ast->child(3), flags);
+      
+      break;
+    }
+
+  case at_usw_leg:
+    {
+      // Technically, the AST allows for multiple matches, and we
+      // should add support for that in the grammar.
+      out << ast->atKwd() << " ";
+      blk_BitcP(out, ast->child(2), flags);
+      out << " in ";
+      out.indentToHere();
+      blk_BitcP(out, ast->child(1), flags);
+      break;
+    }
+
+  case at_otherwise:
+    {
+      // Can be under at_uswitch or at_try
+      out << "\n" << ast->atKwd() << " ";
+      blk_BitcP(out, ast->child(0), flags);
+      break;
+    }
+
+  case at_try:
+    {
+      out << ast->atKwd() << " ";
+      blk_BitcP(out, ast->child(0), flags);
+      out << "\ncatch ";
+      blk_BitcP(out, ast->child(1), flags);
+
+      doChildren(blk_BitcP, out, ast->child(2), 0, "", "\n", "", flags);
+
+      if (ast->child(3)->astType != at_Null)
+        blk_BitcP(out, ast->child(3), flags);
+      break;
+    }
+
+  case at_apply:
+  case at_struct_apply:
+  case at_object_apply:
+  case at_ucon_apply:
+    {
+      blk_BitcP(out, ast->child(0), flags);
+      out << "(";
+      doChildren(blk_BitcP, out, ast, 1, "", ", ", "", flags);
+      out << ")";
+      break;
+    }
+
+  case at_setbang:
+    {
+      doChildren(blk_BitcP, out, ast, 0, "", " := ", "", flags);
+      break;
+    }
+
+  case at_unit:
+    {
+      out << "()";
+      break;
+    }
+
+    // Apply-style output, but built-in:
+  case at_deref:
+  case at_dup:
+  case at_sizeof:
+  case at_bitsizeof:
+  case at_MakeVector:
+  case at_vector:
+  case at_array:
+  case at_allocREF:
+  case at_copyREF:
+  case at_mkClosure:
+  case at_setClosure:
+  case at_mkArrayRef:
+#ifdef HAVE_INDEXABLE_LENGTH_OPS
+  case at_array_length:
+  case at_array_ref_length:
+  case at_vector_length:
+#endif
+    {
+      out << ast->atKwd() << "(";
+      doChildren(blk_BitcP, out, ast, 0, "", ", ", "", flags);
+      out << ")";
+      break;
+    }
+
+  case at_throw:
+    {
+      out << ast->atKwd() << " ";
+      blk_BitcP(out, ast->child(0), flags);
+      break;
+    }
+
+    // Following three are legacy transition from the S-expression
+    // syntax, and can be removed once the transition is complete:
+  case at_cond:
+    {
+      shared_ptr<AST> legs = ast->child(0);
+      shared_ptr<AST> condElse = ast->child(1);
+
+      if (legs->children.size()) {
+        doChildren(blk_BitcP, out, legs, 0, "", "\nelse ", "", flags);
+
+        out << "\nelse ";
+        blk_BitcP(out, condElse, flags);
+      }
+      else {
+        // No legs - simplifies to just the else case:
+        blk_BitcP(out, condElse, flags);
+      }
+
+      break;
+    }
+
+  case at_cond_leg:
+    {
+      out << "if ";
+      blk_BitcP(out, ast->child(0), flags);
+      out << "\nthen ";
+      blk_BitcP(out, ast->child(1), flags);
+      break;
+    }
+
+  case at_if:
+    {
+      out << ast->atKwd() << " ";
+      blk_BitcP(out, ast->child(0), flags);
+      out << "\nthen ";
+
+      size_t thenIndent = out.indentToHere();
+      blk_BitcP(out, ast->child(1), flags | pp_InLayoutBlock );
+      out.setIndent(thenIndent);
+
+      if (ast->children.size() > 2) {
+        out << "\nelse ";
+        blk_BitcP(out, ast->child(2), flags | pp_InLayoutBlock );
+      }
+      break;
+    }
+
+  case at_when:
+    {
+      out << ast->atKwd() << " ";
+      blk_BitcP(out, ast->child(0), flags);
+      out << "\ndo ";
+      out.indentToHere();
+      blk_BitcP(out, ast->child(1), flags | pp_InLayoutBlock);
+      break;
+    }
+
+    // Apply-style output, but these two must be handled specially:
+  case at_and:
+    {
+      out << "_and_(";
+      doChildren(blk_BitcP, out, ast, 0, "", ", ", "", flags);
+      out << ")";
+      break;
+    }
+  case at_or:
+    {
+      out << "_or_(";
+      doChildren(blk_BitcP, out, ast, 0, "", ", ", "", flags);
+      out << ")";
+      break;
+    }
+
+  case at_letGather:
+    {
+      std::cerr << "blk_BitcP() should never be asked to print an internal node of type "
+                << ast->tagName() << std::endl;
+      assert(false);
+    }
 
   default:
     {
@@ -667,29 +1132,22 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   }
 
 
-  if (showTypes) print_type(out, ast);
+  if (flags & pp_ShowTypes) print_type(out, ast);
 
   out.setIndent(startIndent);
 }
 
 /// @brief Core of the pretty printer.
 static void
-sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
+sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
 {
   size_t startIndent = out.indentToHere();
 
   switch(ast->astType) {
-  case at_module:
-  case at_interface:
-  case at_declrepr:
-  case at_declunion:
-  case at_declstruct:
-  case at_defstruct:
-  case at_defunion:
-  case at_defrepr:
-  case at_defexception:
+  case at_module:               // migrated
+  case at_interface:            // migrated
     {
-      blk_BitcP(out, ast, showTypes);
+      blk_BitcP(out, ast, flags);
       break;
     }
 
@@ -697,60 +1155,58 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     // Things that are implemented in blk_BitcP, but still need to be
     // here in support of something that hasn't moved yet:
     ////////////////////////////////////////////////////////////////////
-  case at_boxedCat:
+  case at_boxedCat:             // migrated
     if (!(ast->printVariant & pf_IMPLIED))
       out << ":boxed";
     break;
-  case at_unboxedCat:
+  case at_unboxedCat:           // migrated
     out << ":unboxed";
     break;
-  case at_opaqueCat:
+  case at_opaqueCat:            // migrated
     out << ":opaque";
     break;
 
-  case at_oc_closed:
+  case at_oc_closed:            // migrated
     out << ":closed";
     break;
 
-  case at_oc_open:
+  case at_oc_open:              // migrated
     break;
 
     //////////////////////////////////////////////
     // Things that still need to be migrated:
     //////////////////////////////////////////////
   case at_docString:
-    sxp_doChildren(out, ast, 0, true, showTypes);
+    sxp_doChildren(out, ast, 0, true, flags);
     break;
 
   case at_Null:
     break;
 
-  case at_mixExpr:
+  case at_mixExpr:              // migrated
     out << "(" << ast->atKwd();
     out.more();
-    sxp_doChildren(out, ast, 0, true, showTypes);
+    sxp_doChildren(out, ast, 0, true, flags);
     out << ")";
     out.less();
     break;
 
-  case at_boolLiteral:
-  case at_charLiteral:
-  case at_intLiteral:
-  case at_floatLiteral:
+  case at_boolLiteral:          // migrated
+  case at_charLiteral:          // migrated
+  case at_intLiteral:           // migrated
+  case at_floatLiteral:         // migrated
 
     out << ast->s;
-    out << " /* " << ast->litValue << " */";
-    if (showTypes) print_type(out, ast);
+    if (flags & pp_LitValues)
+      out << " /* " << ast->litValue << " */";
     break;
 
-  case at_stringLiteral:
+  case at_stringLiteral:        // migrated
     out << "\"" << ast->s << "\"";
-
-    if (showTypes) print_type(out, ast);
     break;
 
-  case at_ident:
-  case at_ifident:
+  case at_ident:                // migrated
+  case at_ifident:              // migrated
     out << ast->s;
     if (Options::ppFQNS) {
       out << "{" << ast->fqn;
@@ -759,26 +1215,19 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       }
       out << "}";
     }
-
-    if (showTypes) print_type(out, ast);
-
     break;
 
-  case at_usesel:
-    sxp_BitcP(out, ast->child(0), showTypes);
-    out << ".";
-    sxp_BitcP(out, ast->child(1), showTypes);
-    break;
-
-  case at_fqCtr:
-  case at_sel_ctr:
-  case at_select:
+  case at_usesel:               // migrated
+  case at_fqCtr:                // migrated
+  case at_sel_ctr:              // migrated
+  case at_select:               // migrated
     {
-      sxp_BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), flags);
       out << ".";
-      sxp_BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), flags);
     }
     break;
+
     ///////////////////////////////////////////////////////////
     //
     // at_define needs to be handled specially, because if
@@ -786,9 +1235,9 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     // the convenience syntax.
     //
     ///////////////////////////////////////////////////////////
-  case at_recdef:
+  case at_recdef:               // migrated
     {
-      sxp_maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, flags);
 
       out << "(" << ast->atKwd();
 
@@ -797,11 +1246,11 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out << " (";
 
       // Procedure name:
-      sxp_BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), flags);
 
       // Procedure arguments:
       shared_ptr<AST> iLambda = ast->child(1);
-      sxp_doChildren(out, iLambda->child(0), 0, true, showTypes);
+      sxp_doChildren(out, iLambda->child(0), 0, true, flags);
 
       out << ")";
 
@@ -809,82 +1258,80 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       out.setIndent(oldIndent);
 
       out.more();
-      sxp_doChildren(out, iLambda, 1, true, showTypes);
+      sxp_doChildren(out, iLambda, 1, true, flags);
       out << ")";
 
-      sxp_maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, flags);
 
       break;
     }
 
-  case at_define:
+  case at_define:               // migrated
     {
-      sxp_maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, flags);
 
       if (ast->child(1)->astType == at_lambda) {
         out << "(" << ast->atKwd() << " ";
 
         // Procedure name:
-        sxp_BitcP(out, ast->child(0), showTypes);
+        sxp_BitcP(out, ast->child(0), flags);
 
         out << endl;
         out.more();
 
-        sxp_doChildren(out, ast, 1, false, showTypes);
+        sxp_doChildren(out, ast, 1, false, flags);
         out << ")";
       }
       else {
         // Handle as normal s-expr:
         out << "(" << ast->atKwd();
         out.more();
-        sxp_doChildren(out, ast, 0, true, showTypes);
+        sxp_doChildren(out, ast, 0, true, flags);
         out << ")";
         out.less();
       }
 
-      sxp_maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, flags);
       break;
     }
 
-  case at_try:
+  case at_try:                  // migrated
     out << "(" << ast->atKwd() << " ";
-    sxp_BitcP(out, ast->child(0), showTypes);
+    sxp_BitcP(out, ast->child(0), flags);
     out << endl;
     out.more();
     out << "(catch ";
-    sxp_BitcP(out, ast->child(1), showTypes);
+    sxp_BitcP(out, ast->child(1), flags);
     out << " ";
-    sxp_BitcP(out, ast->child(2), showTypes);
+    sxp_BitcP(out, ast->child(2), flags);
     out << " ";
-    sxp_BitcP(out, ast->child(3), showTypes);
+    sxp_BitcP(out, ast->child(3), flags);
     out << ")";
     out.less();
     out << ")";
     break;
 
-  case at_primaryType:
+  case at_primaryType:          // migrated
     if (ast->s == "unit")
       out << "()";
     else
       out << ast->s;
     break;
 
-  case at_deref:
+  case at_deref:                // migrated
     if (ast->printVariant && pf_IMPLIED) {
-      sxp_doChildren(out, ast, 0, true, showTypes);
+      sxp_doChildren(out, ast, 0, true, flags);
       out << "^";
     }
     else {
       out << "(deref ";
-      sxp_doChildren(out, ast, 0, false, showTypes);
+      sxp_doChildren(out, ast, 0, false, flags);
       out << ")";
     }
     break;
 
-#if 0
-  case at_lambda:
+  case at_lambda:               // migrated
     {
-#if 0
       if (ast->printVariant && pf_IMPLIED) {
       // While this test is true while printing whole top-level forms,
       // it is not true in the case of  individual expressions. Hence
@@ -895,15 +1342,13 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
         exit(1);
       }
       else
-#endif
         {
           out << "(" << ast->atKwd();
-          sxp_doChildren(out, ast, 0, true, showTypes);
+          sxp_doChildren(out, ast, 0, true, flags);
           out << ")";
         }
       break;
     }
-#endif
 
     ///////////////////////////////////////////////////////////
     //
@@ -912,14 +1357,14 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     //
     ///////////////////////////////////////////////////////////
 
-  case at_letGather:
-  case at_apply:
-  case at_struct_apply:
-  case at_object_apply:
-  case at_ucon_apply:
+  case at_letGather:            // migrated
+  case at_apply:                // migrated
+  case at_struct_apply:         // migrated
+  case at_object_apply:         // migrated
+  case at_ucon_apply:           // migrated
     {
       out << "(";
-      sxp_BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), flags);
       out << " ";
       (void) out.indentToHere();
 
@@ -930,55 +1375,58 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
           else
             out << std::endl;
         }
-        sxp_BitcP(out, ast->child(c), showTypes);
+        sxp_BitcP(out, ast->child(c), flags);
       }
 
       out << ")";
       break;
     }
 
-  case at_when:
+  case at_when:                 // migrated
     {
       out << "(" << ast->atKwd() << " ";
 
       (void) out.indentToHere();
 
-      sxp_BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), flags);
       out << endl;
-      sxp_doChildren(out, ast, 1, false, showTypes);
+      sxp_doChildren(out, ast, 1, false, flags);
       out << ")";
       break;
     }
 
-  case at_block:
-  case at_return_from:
+  case at_labeledBlock:         // migrated
+  case at_return_from:          // migrated
     {
+      /// @bug The emission for labelled block appears to be simply
+      /// wrong.
+
       // Some blocks are implicitly introduced in the parser. These
       // require special handling
       string ident = ast->child(0)->s;
       if (ident == "__return") {
-        if (ast->astType == at_block) {
+        if (ast->astType == at_labeledBlock) {
           // This is the (block __return <body>) that implicitly wraps
           // every user-introduced lambda body. Simply pretty print the
           // <body>.
-          sxp_BitcP(out, ast->child(1), showTypes);
+          sxp_BitcP(out, ast->child(1), flags);
           break;
         }
         else {
           // (RETURN expr) is encoded as (RETURN-FROM __return expr).
           // Print it in the form that the user gave:
           out << "(return ";
-          sxp_BitcP(out, ast->child(1), showTypes);
+          sxp_BitcP(out, ast->child(1), flags);
           out << ")";
         }
 
         break;
       }
       else if (ident == "__continue") {
-        if (ast->astType == at_block) {
-          // This is the (block __return <body>) that implicitly wraps
+        if (ast->astType == at_labeledBlock) {
+          // This is the (block __continue <body>) that implicitly wraps
           // every loop body. Simply pretty print the <body>.
-          sxp_BitcP(out, ast->child(1), showTypes);
+          sxp_BitcP(out, ast->child(1), flags);
           break;
         }
         else {
@@ -994,11 +1442,11 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
     }
 
 
-  case at_begin:
-  case at_if:
-  case at_and:
-  case at_or:
-  case at_reprrepr:
+  case at_begin:                // migrated
+  case at_if:                   // migrated
+  case at_and:                  // migrated
+  case at_or:                   // migrated
+  case at_reprrepr:             // migrated
     {
       out << "(" << ast->atKwd() << " ";
 
@@ -1007,90 +1455,90 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       for (size_t c = 0; c < ast->children.size(); c++) {
         if (c > 0)
           out << std::endl;
-        sxp_BitcP(out, ast->child(c), showTypes);
+        sxp_BitcP(out, ast->child(c), flags);
       }
 
       out << ")";
       break;
     }
 
-  case at_uswitch:
-  case at_vector:
-  case at_vectorType:
-  case at_MakeVector:
-  case at_array:
-  case at_arrayType:
-  case at_byRefType:
-  case at_arrayRefType:
-  case at_boxedType:
-  case at_unboxedType:
-  case at_letStar:
+  case at_uswitch:              // migrated
+  case at_vector:               // migrated
+  case at_vectorType:           // migrated
+  case at_MakeVector:           // migrated
+  case at_array:                // migrated
+  case at_arrayType:            // migrated
+  case at_byRefType:            // migrated
+  case at_arrayRefType:         // migrated
+  case at_boxedType:            // migrated
+  case at_unboxedType:          // migrated
+  case at_letStar:              // migrated
   case at_declare:
-  case at_cond:
-  case at_throw:
-  case at_setbang:
-  case at_mutableType:
-  case at_constType:
-  case at_condelse:
+  case at_cond:                 // migrated
+  case at_throw:                // migrated
+  case at_setbang:              // migrated
+  case at_mutableType:          // migrated
+  case at_constType:            // migrated
+  case at_condelse:             // not migrated - explicit
 #ifdef HAVE_INDEXABLE_LENGTH_OPS
-  case at_array_length:
-  case at_array_ref_length:
-  case at_vector_length:
+  case at_array_length:         // migrated
+  case at_array_ref_length:     // migrated
+  case at_vector_length:        // migrated
 #endif
-  case at_localFrame:
-  case at_frameBindings:
-  case at_loop:
-  case at_dup:
+  case at_localFrame:           // migrated
+  case at_frameBindings:        // not migrated - explicit
+  case at_loop:                 // migrated
+  case at_dup:                  // migrated
   case at_inner_ref:
   case at_suspend:
-  case at_fill:
-  case at_sizeof:
-  case at_bitsizeof:
-  case at_mkArrayRef:
+  case at_fill:                 // migrated
+  case at_sizeof:               // migrated
+  case at_bitsizeof:            // migrated
+  case at_mkArrayRef:           // migrated
     //case at_reprbody:
     {
       out << "(" << ast->atKwd();
-      sxp_doChildren(out, ast, 0, true, showTypes);
+      sxp_doChildren(out, ast, 0, true, flags);
       out << ")";
       break;
     }
 
-  case at_nth:
-  case at_array_nth:
-  case at_array_ref_nth:
-  case at_vector_nth:
+  case at_nth:                  // migrated
+  case at_array_nth:            // migrated
+  case at_array_ref_nth:        // migrated
+  case at_vector_nth:           // migrated
     {
-      sxp_BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), flags);
       out << "[";
-      sxp_BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), flags);
       out << "]";
       break;
     }
 
-  case at_methType:
-  case at_fn:
+  case at_methType:             // migrated
+  case at_fn:                   // migrated
     {
       // Reworked by shap on 10/9/2008 to use arrow syntax
       out << "(" << ast->atKwd();
-      sxp_doChildren(out, ast->child(0), 0, true, showTypes);
+      sxp_doChildren(out, ast->child(0), 0, true, flags);
       out << " ->";
-      sxp_doChildren(out, ast, 1, true, showTypes);
+      sxp_doChildren(out, ast, 1, true, flags);
       out << ")";
       break;
     }
 
-  case at_constraints:
+  case at_constraints:          // not migrated - explicit
     {
       if (ast->children.size() > 0) {
         out << "(";
-        sxp_doChildren(out, ast, 0, false, showTypes);
+        sxp_doChildren(out, ast, 0, false, flags);
         out << ")";
       }
       break;
     }
 
-  case at_letrec:
-  case at_let:
+  case at_letrec:               // migrated
+  case at_let:                  // migrated
     {
       shared_ptr<AST> constraints = ast->child(2);
       if (constraints->children.size()) {
@@ -1103,7 +1551,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
             else
               out << std::endl;
           }
-          sxp_BitcP(out, ast->child(c), showTypes);
+          sxp_BitcP(out, ast->child(c), flags);
         }
         out << endl;
         out.setIndent(startIndent);
@@ -1112,10 +1560,10 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       out << "(" << ast->atKwd() << " ";
 
-      sxp_BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), flags);
       out << endl;
       out.more();
-      sxp_BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), flags);
 
       out << ")";
 
@@ -1125,104 +1573,79 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       break;
     }
 
-  case at_exceptionType:
-  case at_dummyType:
+  case at_exceptionType:        // migrated
+  case at_dummyType:            // migrated
     {
       out << ast->atKwd();
       break;
     }
 
-  case at_unit:
+  case at_unit:                 // migrated
     out << "()";
     break;
 
-  case at_tqexpr:
+  case at_tqexpr:               // migrated
     // Argument order was swapped.
-    sxp_BitcP(out, ast->child(0), showTypes);
+    sxp_BitcP(out, ast->child(0), flags);
     out << " : ";
-    sxp_BitcP(out, ast->child(1), showTypes);
+    sxp_BitcP(out, ast->child(1), flags);
 #if 0
     out << "(the ";
-    sxp_BitcP(out, ast->child(1), showTypes);
+    sxp_BitcP(out, ast->child(1), flags);
     out << " ";
-    sxp_BitcP(out, ast->child(0), showTypes);
+    sxp_BitcP(out, ast->child(0), flags);
     out << ")";
 #endif
 
-    if (showTypes) print_type(out, ast);
-
     break;
 
-  case at_fnargVec:
-  case at_argVec:
+  case at_tvlist:               // migrated
+  case at_fnargVec:             // migrated
+  case at_argVec:               // migrated
     out << "(";
-    sxp_doChildren(out, ast, 0, false, showTypes);
+    sxp_doChildren(out, ast, 0, false, flags);
     out << ")";
 
-    if (showTypes) print_type(out, ast);
-
     break;
 
-  case at_allocREF:
-  case at_copyREF:
-  case at_mkClosure:
-  case at_setClosure:
+  case at_allocREF:             // migrated
+  case at_copyREF:              // migrated
+  case at_mkClosure:            // migrated
+  case at_setClosure:           // migrated
     {
-      if (ast->printVariant && pf_IMPLIED) {
-        out << "(";
-        sxp_BitcP(out, ast->child(0), showTypes);
-        out << ", ";
-        sxp_BitcP(out, ast->child(1), showTypes);
-        out << ")";
-
-        if (showTypes) print_type(out, ast);
-      }
-      else {
-        out << "(" << ast->atKwd();
-        sxp_doChildren(out, ast, 0, true, showTypes);
-        out << ")";
-      }
+      out << "(" << ast->atKwd();
+      sxp_doChildren(out, ast, 0, true, flags);
+      out << ")";
       break;
     }
 
-  case at_importAs:
-#if 1
-    blk_BitcP(out, ast, showTypes);
-    break;
-#else
+  case at_importAs:             // migrated
     {
       shared_ptr<AST> ifAst = ast->child(0);
       shared_ptr<AST> idAst = ast->child(1);
 
       out << "(" << ast->atKwd() << " ";
-      sxp_BitcP(out, ifAst, showTypes);
+      sxp_BitcP(out, ifAst, flags);
       out << " as ";
-      sxp_BitcP(out, idAst, showTypes);
+      sxp_BitcP(out, idAst, flags);
       out << ")";
       break;
     }
-#endif
 
-#if 0
-  case at_defexception:
+  case at_defexception:         // migrated
     out << "(" << ast->atKwd();
-    sxp_doChildren(out, ast, 0, true, showTypes);
-    out << ")";
-    break;
-#endif
-
-  case at_provide:
-  case at_import:
-#if 1
-    blk_BitcP(out, ast, showTypes);
-    break;
-#else
-    out << "(" << ast->atKwd();
-    sxp_doChildren(out, ast, 0, true, showTypes);
+    sxp_doChildren(out, ast, 0, true, flags);
     out << ")";
     break;
 
-  case at_ifsel:
+  case at_provide:              // migrated
+  case at_import:               // migrated
+    out << "(" << ast->atKwd();
+    sxp_doChildren(out, ast, 0, true, flags);
+    out << ")";
+    break;
+
+  case at_ifsel:                // migrated
     if (ast->child(0)->s == ast->child(1)->s)
       out << ast->child(0)->s;
     else
@@ -1231,41 +1654,29 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
           << ast->child(0)->s
           << ")";
     break;
-#endif
 
-#if 1
-  case at_proclaim:
-    blk_BitcP(out, ast, showTypes);
-    break;
-#else
-  case at_proclaim:
+  case at_proclaim:             // migrated
     {
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> proc_type = ast->child(1);
       shared_ptr<AST> constraints = ast->child(2);
 
       out << "(" << ast->atKwd() << " ";
-      sxp_BitcP(out, ident, showTypes);
+      sxp_BitcP(out, ident, flags);
       out << " : ";
-      sxp_BitcP(out, proc_type, showTypes);
+      sxp_BitcP(out, proc_type, flags);
       if (ident->flags & DEF_IS_EXTERNAL) {
         out << " external";
         if (ident->externalName.size())
           out << " " << ident->externalName;        
       }
 
-      sxp_BitcP(out, ast->child(2), showTypes);
+      sxp_BitcP(out, ast->child(2), flags);
       out << ")";
     }
     break;
-#endif
 
-#if 1
-  case at_deftypeclass:
-    blk_BitcP(out, ast, showTypes);
-    break;
-#else
-  case at_deftypeclass:
+  case at_deftypeclass:         // migrated
     {
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> tvlist = ast->child(1);
@@ -1274,92 +1685,85 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> methods = ast->child(4);
       shared_ptr<AST> constraints = ast->child(5);
 
-      sxp_maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, flags);
 
       out << "(" << ast->atKwd() << " ";
-      sxp_show_qual_name(out, ident, tvlist, showTypes);
+      sxp_show_qual_name(out, ident, tvlist, flags);
       if(openclosed->astType != at_Null) {
         out << " ";
-        sxp_BitcP(out, openclosed, showTypes);
+        sxp_BitcP(out, openclosed, flags);
       }
       out << " ";
-      sxp_BitcP(out, tcdecls, showTypes);
+      sxp_BitcP(out, tcdecls, flags);
       out << " ";
-      sxp_BitcP(out, methods, showTypes);
+      sxp_BitcP(out, methods, flags);
       out << ")";
 
-      sxp_maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, flags);
 
       break;
     }
-#endif
 
-#if 1
-  case at_definstance:
-    blk_BitcP(out, ast, showTypes);
-#else
-  case at_definstance:
+  case at_definstance:          // migrated
     {
       shared_ptr<AST> tapp = ast->child(0);
       shared_ptr<AST> methods = ast->child(1);
       shared_ptr<AST> constraints = ast->child(2);
 
-      sxp_maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, flags);
 
       out << "(" << ast->atKwd() << " ";
-      sxp_BitcP(out, tapp, showTypes);
-      sxp_BitcP(out, methods, showTypes);
+      sxp_BitcP(out, tapp, flags);
+      sxp_BitcP(out, methods, flags);
       out << ")";
 
-      sxp_maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, flags);
 
       break;
     }
 
-  case at_tcmethods:
+  case at_tcmethods:            // not migrated - explicit recurse
     {
-      sxp_doChildren(out, ast, 0, false, showTypes);
+      sxp_doChildren(out, ast, 0, false, flags);
       break;
     }
 
-  case at_tcmethod_binding:
+  case at_tcmethod_binding:     // migrated
     {
       out << "(= " << ast->child(0)->s
           << " " << ast->child(1)->s
           << ")";
       break;
     }
-#endif
  
-  case at_tyfn:
+  case at_tyfn:                 // migrated
     out << "(" << ast->atKwd();
     out << "(";
-    sxp_BitcP(out, ast->child(0), showTypes);
+    sxp_BitcP(out, ast->child(0), flags);
     out << ")";
-    sxp_BitcP(out, ast->child(1), showTypes);
+    sxp_BitcP(out, ast->child(1), flags);
     out << ")";
     break;
 
     /// @bug Should this have been merged with at_methdecl? I'm not
     /// clear if we needed a distinct AST type for this. Check the
     /// handling in the resolver and the type inference pass.
-  case at_method_decl:
-    sxp_BitcP(out, ast->child(0), showTypes);
+  case at_method_decl:          // migrated
+    sxp_BitcP(out, ast->child(0), flags);
     out << " : ";
-    sxp_BitcP(out, ast->child(1), showTypes);
+    sxp_BitcP(out, ast->child(1), flags);
     break;
 
   case at_qualType:
     {
       out << "(forall ";
-      sxp_BitcP(out, ast->child(0), showTypes);
-      sxp_BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(0), flags);
+      sxp_BitcP(out, ast->child(1), flags);
       out << ")";
       break;
     }
 
-#if 0
-  case at_defrepr:
+  case at_defrepr:              // migrated
     {
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> tvlist = ast->child(1); // empty
@@ -1370,22 +1774,20 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
 
       out << "(" << ast->atKwd() << " ";
       out.indentToHere();
-      sxp_show_qual_name(out, ident, tvlist, showTypes);
-      sxp_BitcP(out, category, showTypes);
+      sxp_show_qual_name(out, ident, tvlist, flags);
+      sxp_BitcP(out, category, flags);
       out << endl;
-      sxp_BitcP(out, declares, showTypes);
+      sxp_BitcP(out, declares, flags);
       if (declares->children.size())
         out << endl;
 
-      sxp_BitcP(out, fc, showTypes);
+      sxp_BitcP(out, fc, flags);
       out << ")";
       break;
     }
-#endif
 
-#if 0
-  case at_defstruct:
-  case at_defunion:
+  case at_defstruct:            // migrated
+  case at_defunion:             // migrated
     {
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> tvlist = ast->child(1);
@@ -1394,40 +1796,38 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       shared_ptr<AST> fc = ast->child(4);
       shared_ptr<AST> constraints = ast->child(5);
 
-      sxp_maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, flags);
 
       out << "(" << ast->atKwd() << " ";
       out.indentToHere();
-      sxp_show_qual_name(out, ident, tvlist, showTypes);
-      sxp_BitcP(out, category, showTypes);
+      sxp_show_qual_name(out, ident, tvlist, flags);
+      sxp_BitcP(out, category, flags);
       out << endl;
-      sxp_BitcP(out, declares, showTypes);
+      sxp_BitcP(out, declares, flags);
       if (declares->children.size())
         out << endl;
-      sxp_BitcP(out, fc, showTypes);
+      sxp_BitcP(out, fc, flags);
       out << ")";
 
-      sxp_maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, flags);
 
       break;
     }
-#endif
 
-#if 0
-  case at_declunion:
-  case at_declstruct:
-  case at_declrepr:
+  case at_declunion:            // migrated
+  case at_declstruct:           // migrated
+  case at_declrepr:             // migrated
     {
       shared_ptr<AST> ident = ast->child(0);
       shared_ptr<AST> tvlist = ast->child(1);
       shared_ptr<AST> category = ast->child(2);
       shared_ptr<AST> constraints = ast->child(5);
 
-      sxp_maybe_open_quantifier(out, ast, showTypes);
+      sxp_maybe_open_quantifier(out, ast, flags);
 
       out << "(" << ast->atKwd() << " ";
-      sxp_show_qual_name(out, ident, tvlist, showTypes);
-      sxp_BitcP(out, category, showTypes);
+      sxp_show_qual_name(out, ident, tvlist, flags);
+      sxp_BitcP(out, category, flags);
 
       if (ident->flags & DEF_IS_EXTERNAL) {
         out << " external";
@@ -1436,21 +1836,20 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
       }
       out << ")";
 
-      sxp_maybe_close_quantifier(out, ast, showTypes);
+      sxp_maybe_close_quantifier(out, ast, flags);
 
       break;
     }
-#endif
 
-  case at_letbindings:
-  case at_cond_legs:
+  case at_letbindings:          // not migrated - explicit
+  case at_cond_legs:            // not migrated - explicit
     {
       out << "(";
       out.indentToHere();
       for (size_t c = 0; c < ast->children.size(); c++) {
         if (c > 0)
           out << endl;
-        sxp_BitcP(out, ast->child(c), showTypes);
+        sxp_BitcP(out, ast->child(c), flags);
       }
       out << ")";
 
@@ -1459,142 +1858,122 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
         
     // The following are all done in the style of apply --
     // a parenthesized list of children
-  case at_letbinding:
-  case at_loopbindings:
-  case at_loopbinding:
-  case at_looptest:
-  case at_cond_leg:
-  case at_typeapp:
+  case at_letbinding:           // migrated
+  case at_loopbindings:         // not migrated - explicit
+  case at_loopbinding:          // migrated
+  case at_looptest:             // migrated
+  case at_cond_leg:             // migrated
+  case at_typeapp:              // migrated
     //  case at_catchclause:
-  case at_tcapp:
+  case at_tcapp:                // migrated
     {
       if (ast->printVariant && pf_IMPLIED) {
-        sxp_doChildren(out, ast, 1, false, showTypes);
+        sxp_doChildren(out, ast, 1, false, flags);
       }
       else {
         out << "(";
-        sxp_doChildren(out, ast, 0, false, showTypes);
+        sxp_doChildren(out, ast, 0, false, flags);
         out << ")";
         break;
       }
     }
 
-  case at_otherwise:
+  case at_otherwise:            // migrated
     {
       out << "(otherwise ";
-      sxp_BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), flags);
       out << ")";
       break;
     }
 
-  case at_usw_leg:
+  case at_usw_leg:              // migrated
     {
       out << "(";
-      sxp_doChildren(out, ast, 2, false, showTypes);
+      sxp_doChildren(out, ast, 2, false, flags);
       out << " ";
-      sxp_BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), flags);
       out << ")";
       break;
     }
 
-    // The following just recurse:
-  case at_lambda:
-    {
-      out << "(" << ast->atKwd() << " ";
-      sxp_BitcP(out, ast->child(0), showTypes);
-      out.more();
-
-      for (size_t c = 1; c < ast->children.size(); c++) {
-        out << std::endl;
-        sxp_BitcP(out, ast->child(c), showTypes);
-      }
-
-      out << ")";
-
-      if (showTypes) print_type(out, ast);
-
-      break;
-    }
-
-  case at_usw_legs:
-  case at_constructors:
-  case at_reprctrs:
-  case at_fields:
-  case at_declares:
-  case at_method_decls:
+  case at_usw_legs:             // not migrated - explicit
+  case at_constructors:         // not migrated - explicit
+  case at_reprctrs:             // not migrated - explicit
+  case at_fields:               // not migrated - explicit
+  case at_declares:             // not migrated - explicit
+  case at_method_decls:         // not migrated - explicit
     {
       for (size_t c = 0; c < ast->children.size(); c++) {
         if (c > 0) out << std::endl;
-        sxp_BitcP(out, ast->child(c), showTypes);
+        sxp_BitcP(out, ast->child(c), flags);
       }
       break;
     }
 
-  case at_tvlist:
-  case at_tcdecls:
-  case at_fieldType:
+  case at_tcdecls:              // migrated
+  case at_fieldType:            // migrated
     {
-      sxp_doChildren(out, ast, 0, false, showTypes);
+      sxp_doChildren(out, ast, 0, false, flags);
       break;
     }
 
-  case at_constructor:
-  case at_reprctr:
+  case at_constructor:          // migrated
+  case at_reprctr:              // migrated
     {
       if (ast->children.size() > 1) {
         out << "(";
-        sxp_doChildren(out, ast, 0, false, showTypes);
+        sxp_doChildren(out, ast, 0, false, flags);
         out << ")";
       }
       else
-        sxp_BitcP(out, ast->child(0), showTypes);
+        sxp_BitcP(out, ast->child(0), flags);
       break;
     }
 
-  case at_field:
-  case at_methdecl:
+  case at_field:                // migrated
+  case at_methdecl:             // migrated
     {
-      sxp_BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), flags);
       assert(ast->children.size() > 1);
       if (ast->children.size() > 1) {
         out << ":";
-        sxp_BitcP(out, ast->child(1), showTypes);
+        sxp_BitcP(out, ast->child(1), flags);
       }
       break;
     }
 
   //  case at_vpattern:
-  case at_bitfieldType:
+  case at_bitfieldType:         // migrated
     {
       out << "(";
       out << ast->atKwd();
-      sxp_doChildren(out, ast, 0, true, showTypes);
+      sxp_doChildren(out, ast, 0, true, flags);
       out << ")";
       break;
     }
 
-  case at_identPattern:
+  case at_identPattern:         // migrated
     {
-      sxp_BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), flags);
       if (ast->children.size() > 1) {
         out << ":";
-        sxp_BitcP(out, ast->child(1), showTypes);
+        sxp_BitcP(out, ast->child(1), flags);
       }
       break;
     }
 
-  case at_container:
+  case at_container:            // migrated
     {
       out << "({";
-      sxp_BitcP(out, ast->child(0), showTypes);
+      sxp_BitcP(out, ast->child(0), flags);
       out << "} ";
-      sxp_BitcP(out, ast->child(1), showTypes);
+      sxp_BitcP(out, ast->child(1), flags);
       out << ")";
       break;
     }
-  case at_identList:
+  case at_identList:            // not migrated - explictly visited
     {
-      sxp_doChildren(out, ast, 0, false, showTypes);
+      sxp_doChildren(out, ast, 0, false, flags);
       break;
     }
 
@@ -1630,19 +2009,13 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, bool showTypes)
   case agt_expr_or_define:
   case agt_openclosed:
   case agt_uselhs:
-#if 0
-  case at_defrepr:
-  case at_reprcase:
-  case at_reprcaselegR:
-  case at_reprtag:
-#endif
     {
       assert(false);
       break;
     }
   }
 
-  if (showTypes) print_type(out, ast);
+  if (flags & pp_ShowTypes) print_type(out, ast);
 
   out.setIndent(startIndent);
 }
@@ -1803,21 +2176,19 @@ doShowTypes(std::ostream& out, shared_ptr<AST> ast,
 
 /// @brief top-level wrapper for the pretty printer
 void
-AST::PrettyPrint(std::ostream& strm, bool decorated,
-                 bool endline) const
+AST::PrettyPrint(std::ostream& strm, PrettyPrintFlags flags) const
 {
   INOstream out(strm);
-  sxp_BitcP(out, shared_from_this(), decorated);
-  if (endline)
+  blk_BitcP(out, shared_from_this(), flags);
+  if (flags & pp_FinalNewline)
     out << std::endl;
 }
 
 void
-AST::PrettyPrint(INOstream& out, bool decorated,
-                 bool endline) const
+AST::PrettyPrint(INOstream& out, PrettyPrintFlags flags) const
 {
-  sxp_BitcP(out, shared_from_this(), decorated);
-  if (endline)
+  blk_BitcP(out, shared_from_this(), flags);
+  if (flags & pp_FinalNewline)
     out << std::endl;
 }
 
@@ -1826,7 +2197,11 @@ void
 AST::PrettyPrint(bool decorated) const
 {
   INOstream out(std::cerr);
-  sxp_BitcP(out, shared_from_this(), decorated);
+
+  PrettyPrintFlags flags = 
+    decorated ? PrettyPrintFlags(pp_ShowTypes) : PrettyPrintFlags();
+
+  blk_BitcP(out, shared_from_this(), flags);
   out << endl;
 }
 
@@ -1837,7 +2212,9 @@ UocInfo::PrettyPrint(std::ostream& out, bool decorated)
   assert (uocAst->astType == at_module
           || uocAst->astType == at_interface);
 
-  uocAst->PrettyPrint(out, decorated);
+  PrettyPrintFlags flags = 
+    decorated ? PrettyPrintFlags(pp_ShowTypes) : PrettyPrintFlags();
+  uocAst->PrettyPrint(out, flags);
 }
 
 void

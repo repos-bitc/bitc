@@ -2126,7 +2126,7 @@ resolve(std::ostream& errStream,
       break;
     }
     
-  case at_block:
+  case at_labeledBlock:
     {
       RESOLVE(ast->child(0), env, lamLevel, DEF_MODE,
               id_block, currLB, flags);

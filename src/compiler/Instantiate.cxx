@@ -1154,7 +1154,7 @@ UocInfo::recInstantiate(ostream &errStream,
 
   case at_methdecl:
     // FIX: instantiating at_methdecl may not be correct here.
-  case at_block:
+  case at_labeledBlock:
   case at_return_from:
   case at_field:
     {

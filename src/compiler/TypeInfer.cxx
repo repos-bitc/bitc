@@ -3669,7 +3669,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
-  case at_block:
+  case at_labeledBlock:
     {
     /*------------------------------------------------
               A |- x: 'a|'b   A |- e: t
@@ -5404,7 +5404,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
     // similar to the Scheme or Common LISP let* construct.  In the
     // current top-level syntax, there is no way to introduce one of
     // these. This may change with the block syntax, or I may
-    // (probably) just us an at_let with a single binding
+    // (probably) just use an at_let with a single binding
     //
     // at_letStar nodes get introduced during the SSA pass, which is
     // post-polyinstantiation. A consequence is that no generalization

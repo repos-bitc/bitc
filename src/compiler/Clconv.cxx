@@ -493,7 +493,7 @@ findusedef(std::ostream &errStream,
     assert(false);
     break;
 
-  case at_block:
+  case at_labeledBlock:
   case at_return_from:
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(1),
@@ -589,7 +589,7 @@ findusedef(std::ostream &errStream,
       // Test
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(1),
                                  USE_MODE, boundVars, freeVars));
-      // Boody
+      // Body
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(2),
                                  USE_MODE, boundVars, freeVars));
       break;

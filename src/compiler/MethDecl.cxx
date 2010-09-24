@@ -129,6 +129,7 @@ insertMethDecls(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
       size_t nChildren = theTypeDefn->children.size();
       shared_ptr<AST> constraintSet = theTypeDefn->child(nChildren - 1);
 
+#if 0
       if (constraintSet->children.size()) {
         // There are constraints. Wrap the AST describing the type in
         // an at_qualtype node:
@@ -137,6 +138,7 @@ insertMethDecls(shared_ptr<AST> ast, std::ostream& errStream, bool &errFree)
           AST::make(at_qualType, constraintSet->loc,
                     constraintSet->getDeepCopy(), structArgType);
       }
+#endif
 
       methFnArgs->children.insert(methFnArgs->children.begin(),
                                   structArgType);

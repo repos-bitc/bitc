@@ -48,10 +48,11 @@ interface bitc.string {
   def string_map : fn (string, fn (char) -> ()) -> () external bitc_string_map
 
   def stringToList(s) =
-    let lst : mutable list(char) = nil in
-      loop pos = string_length(s) then pos - 1
-      until pos == 0 giving lst 
-      in lst := cons(string_nth(s, pos-1), lst)
+    let lst : mutable list(char) = nil
+    in loop pos = string_length(s) then pos - 1
+         until pos == 0
+       in lst := cons(string_nth(s, pos-1), lst)
+       lst
 
   def listToString: fn (list(char)) -> string 
     external bitc_list_string

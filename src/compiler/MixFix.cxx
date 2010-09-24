@@ -296,17 +296,17 @@ struct MixFixNode {
             ast->s == kwd);
   }
 
-  void PrettyPrint(sherpa::INOstream& out, bool showTypes = false, bool endline = true)
+  void PrettyPrint(sherpa::INOstream& out, PrettyPrintFlags flags)
   {
     if (ast->astType != at_ident)
       out << '{';
 
-    ast->PrettyPrint(out, showTypes, false);
+    ast->PrettyPrint(out, flags & ~pp_FinalNewline);
 
     if (ast->astType != at_ident)
       out << '}';
 
-    if (endline)
+    if (flags & pp_FinalNewline)
       out << endl;
   }
 
@@ -626,6 +626,11 @@ CleanMixFix(INOstream& errStream, ASTPtr ast)
     if (fn == "[_]")
       ast = AST::make(at_nth, ast->loc, ast->child(1), ast->child(2));
 
+    // If we did a rewrite using _(_) above, we'll have exposed a new
+    // function name. Some of those are special cases that now need to
+    // be checked:
+    fn = ast->child(0)->s;
+
     if (fn == "_and_" || fn == "_&&_") {
       ast->astType = at_and;
       ast->children.erase(ast->children.begin());
@@ -687,7 +692,7 @@ ProcessMixFix(std::ostream& err, shared_ptr<AST> mixAST)
         itr != input.rend();
         itr++) {
       if (itr != input.rbegin()) errStream << " ";
-      (*itr).PrettyPrint(errStream, false, false);
+      (*itr).PrettyPrint(errStream, pp_NONE);
     }
     errStream << endl;
     errStream.less();
@@ -706,7 +711,7 @@ ProcessMixFix(std::ostream& err, shared_ptr<AST> mixAST)
 
   MIXDEBUG(2) {
     errStream << "Produced: ";
-    input[0].PrettyPrint(errStream, false, true);
+    input[0].PrettyPrint(errStream, pp_FinalNewline);
   }
 
   shared_ptr<AST> result = CleanMixFix(errStream, input[0].ast);
@@ -714,7 +719,7 @@ ProcessMixFix(std::ostream& err, shared_ptr<AST> mixAST)
 
   MIXDEBUG(1) {
     errStream << "Giving: ";
-    result->PrettyPrint(errStream, false, true);
+    result->PrettyPrint(errStream, pp_FinalNewline);
   }
 
   return result;
@@ -751,7 +756,7 @@ reduce(INOstream& errStream, MixInput& shunt, MixRulePtr rule)
       /// let the proper return label be captured as part of the
       /// thunk's closure.
       shared_ptr<AST> iRetBody = 
-        AST::make(at_block, shunt[i].ast->loc,
+        AST::make(at_labeledBlock, shunt[i].ast->loc,
                   AST::make(at_ident, LToken(tk_BlkIdent, "__return")),
                   shunt[i].ast);
 
@@ -766,7 +771,7 @@ reduce(INOstream& errStream, MixInput& shunt, MixRulePtr rule)
 
   MIXDEBUG(2) {
     errStream << "Reduced " <<  rule->name << " giving ";
-    result->PrettyPrint(errStream, false, true);
+    result->PrettyPrint(errStream, pp_FinalNewline);
   }
 
   return MixFixNode(result, rule);
@@ -823,7 +828,7 @@ MixContext::ParseOneMixFix(INOstream& errStream, MixInput& origInput,
         itr != origInput.rend();
         itr++) {
       errStream << " ";
-      (*itr).PrettyPrint(errStream, false, false);
+      (*itr).PrettyPrint(errStream, pp_NONE);
     }
     errStream << " in context of "<< (*parentRule);
     errStream << endl;
@@ -880,7 +885,7 @@ MixContext::ParseOneMixFix(INOstream& errStream, MixInput& origInput,
             itr != input.rend();
             itr++) {
           errStream << " ";
-          (*itr).PrettyPrint(errStream, false, false);
+          (*itr).PrettyPrint(errStream, pp_NONE);
         }
       errStream << endl;
     }
@@ -891,7 +896,7 @@ MixContext::ParseOneMixFix(INOstream& errStream, MixInput& origInput,
     // matches, so shift that:
     MIXDEBUG(3) {
       errStream << "Shifting first element: ";
-      top(input).PrettyPrint(errStream, false, true);
+      top(input).PrettyPrint(errStream, pp_FinalNewline);
     }
     push(shunt, pop(input));
 
@@ -914,7 +919,7 @@ MixContext::ParseOneMixFix(INOstream& errStream, MixInput& origInput,
       if (rule->isKwd(pos) && top(input).matchesKwd(rule->rhs[pos])) {
         MIXDEBUG(3) {
           errStream << "Shifting: ";
-          top(input).PrettyPrint(errStream, false, true);
+          top(input).PrettyPrint(errStream, pp_FinalNewline);
         }
 
         push(shunt, pop(input));
@@ -926,7 +931,7 @@ MixContext::ParseOneMixFix(INOstream& errStream, MixInput& origInput,
                            rule->isFinalHole(pos) ? rule : MixInputRule)) {
         MIXDEBUG(3) {
           errStream << "Shifting: ";
-          top(input).PrettyPrint(errStream, false, true);
+          top(input).PrettyPrint(errStream, pp_FinalNewline);
         }
 
         push(shunt, pop(input));
@@ -936,7 +941,7 @@ MixContext::ParseOneMixFix(INOstream& errStream, MixInput& origInput,
         // pre-existing expression constructed by the initial parser.
         MIXDEBUG(3) {
           errStream << "Shifting: ";
-          top(input).PrettyPrint(errStream, false, true);
+          top(input).PrettyPrint(errStream, pp_FinalNewline);
         }
 
         push(shunt, pop(input));

@@ -1,6 +1,7 @@
 /**************************************************************************
  *
- * Copyright (C) 2008, Johns Hopkins University.
+ * Copyright (C) 2010, Jonathan S. Shapiro
+ * Portions Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -383,8 +384,8 @@ AST::old_atKwd() const
   case at_begin:
     return "begin";
 
-  case at_block:
-    return "block";
+  case at_labeledBlock:
+    return "label";
 
   case at_return_from:
     return "<return_from>";
@@ -447,7 +448,7 @@ AST::old_atKwd() const
     return "<sw_legs>";
 
   case at_usw_leg:
-    return "<sw_leg>";
+    return "case";
 
   case at_setbang:
     return "set!";

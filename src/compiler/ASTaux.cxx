@@ -101,7 +101,15 @@ std::string
 AST::asString() const
 {
   std::stringstream ss;
-  PrettyPrint(ss, false, false);
+  PrettyPrint(ss, pp_NONE);
+  return ss.str();
+}
+
+std::string
+AST::asString(PrettyPrintFlags flags) const
+{
+  std::stringstream ss;
+  PrettyPrint(ss, flags);
   return ss.str();
 }
 

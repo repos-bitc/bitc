@@ -202,7 +202,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "bitc",             lf_version,           tk_BITC ),
   TransitionLexer::KeyWord( "bitfield",         lf_transition,        tk_BITFIELD ),
   TransitionLexer::KeyWord( "bitsizeof",        lf_transition,        tk_BITSIZEOF ),
-  TransitionLexer::KeyWord( "block",            lf_transition,        tk_BLOCK ),
+//  TransitionLexer::KeyWord( "block",            lf_transition,        tk_BLOCK ),
   TransitionLexer::KeyWord( "bool",             lf_transition,        tk_BOOL ),
   TransitionLexer::KeyWord( "boxed",            lf_transition,        tk_BOXED ),
   TransitionLexer::KeyWord( "break",            lf_transition,        tk_ReservedWord ),
@@ -242,7 +242,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "fn",               lf_transition,        tk_FN ),
   TransitionLexer::KeyWord( "forall",           lf_transition,        tk_FORALL ),
   TransitionLexer::KeyWord( "from",             lf_transition,        tk_FROM ),
-  TransitionLexer::KeyWord( "giving",           lf_transition,        tk_GIVING ),
+//  TransitionLexer::KeyWord( "giving",           lf_transition,        tk_GIVING ),
   TransitionLexer::KeyWord( "if",               lf_transition,        tk_IF ),
   TransitionLexer::KeyWord( "import",           lf_transition,        tk_IMPORT ),
   TransitionLexer::KeyWord( "import!",          lf_transition,        tk_ReservedWord ),
@@ -889,6 +889,7 @@ TransitionLexer::getNextToken()
                         || (lastTokType == tk_IN)
                         || (lastTokType == tk_IS)
                         || (lastTokType == tk_DO)
+                        || (lastTokType == tk_TRY)
                         || (lastTokType == tk_THEN)
                         || (lastTokType == tk_OTHERWISE)
                         || (lastTokType == tk_THROW)
@@ -1031,9 +1032,9 @@ TransitionLexer::getNextToken()
                           tok.tokType == tk_THEN ||
                           tok.tokType == tk_ELSE ||
                           tok.tokType == tk_CASE ||
+                          tok.tokType == tk_CATCH ||
                           tok.tokType == tk_OTHERWISE ||
                           tok.tokType == tk_UNTIL ||
-                          tok.tokType == tk_GIVING ||
                           tok.tokType == tk_IN ||
                           tok.tokType == tk_IS ||
                           tok.tokType == tk_WHERE ||

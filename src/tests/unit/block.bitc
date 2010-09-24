@@ -39,7 +39,6 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (block L
-	   (if true (from L return 0:int32) 25:int32))))
+def main.main(argVec: string[]) =
+  label L
+  in if true then from L return 0:int32 else 25:int32

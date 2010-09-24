@@ -47,6 +47,5 @@ module cyclic is
 
   def array_on_field : (char, int32[5])
 
-  def main.main(argv: string[]) = {
+  def main.main(argv: string[]) in
     0:int32
-  }

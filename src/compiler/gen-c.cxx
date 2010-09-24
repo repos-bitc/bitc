@@ -1,6 +1,7 @@
 /**************************************************************************
  *
- * Copyright (C) 2008, Johns Hopkins University.
+ * Copyright (C) 2010, Jonathan S. Shapiro
+ * Portions Copyright (C) 2008, Johns Hopkins University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -1986,7 +1987,7 @@ toc(std::ostream& errStream,
       break;
     }
 
-  case at_block:
+  case at_labeledBlock:
     {
       // Emit the expression to be evaluated followed by the escape label:
       TOC(errStream, uoc, ast->child(1), out, IDname, decls,
@@ -2857,7 +2858,7 @@ TypesTOC(std::ostream& errStream,
         out << "////////////////////////////////////////" << endl;
         out.setPostindent("// ");
         out << ast->loc << endl
-            << ast->asString() << endl;
+            << ast->asString(pp_Raw) << endl;
         out.setPostindent("");
         out << "////////////////////////////////////////" << endl;
 
@@ -2881,7 +2882,7 @@ TypesTOC(std::ostream& errStream,
         out << "////////////////////////////////////////" << endl;
         out.setPostindent("// ");
         out << ast->loc << endl
-            << ast->asString() << endl;
+            << ast->asString(pp_Raw) << endl;
         out.setPostindent("");
         out << "////////////////////////////////////////" << endl;
 
@@ -2916,7 +2917,7 @@ TypesTOC(std::ostream& errStream,
         out << "////////////////////////////////////////" << endl;
         out.setPostindent("// ");
         out << ast->loc << endl
-            << ast->asString() << endl;
+            << ast->asString(pp_Raw) << endl;
         out.setPostindent("");
         out << "////////////////////////////////////////" << endl;
 
@@ -3017,7 +3018,7 @@ EmitGlobalInitializers(std::ostream& errStream,
         out << "////////////////////////////////////////" << endl;
         out.setPostindent("// ");
         out << ast->loc << endl
-            << ast->asString() << endl;
+            << ast->asString(pp_Raw) << endl;
         out.setPostindent("");
         out << "////////////////////////////////////////" << endl;
         
@@ -3124,7 +3125,7 @@ EmitGlobalInitializers(std::ostream& errStream,
         out << "////////////////////////////////////////" << endl;
         out.setPostindent("// ");
         out << ast->loc << endl
-            << ast->asString() << endl;
+            << ast->asString(pp_Raw) << endl;
         out.setPostindent("");
         out << "////////////////////////////////////////" << endl;
         
@@ -3254,7 +3255,7 @@ ValuesTOH(std::ostream& errStream,
           out << "////////////////////////////////////////" << endl;
           out.setPostindent("// ");
           out << ast->loc << endl
-              << ast->asString() << endl;
+              << ast->asString(pp_Raw) << endl;
           out.setPostindent("");
           out << "////////////////////////////////////////" << endl;
 

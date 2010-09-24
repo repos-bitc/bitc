@@ -643,8 +643,8 @@ AST::tagName(const AstType at)
     return "at_setClosure";
   case at_mkArrayRef:
     return "at_mkArrayRef";
-  case at_block:
-    return "at_block";
+  case at_labeledBlock:
+    return "at_labeledBlock";
   case at_return_from:
     return "at_return_from";
   case at_uswitch:
@@ -964,8 +964,8 @@ AST::nodeName(const AstType at)
     return "setClosure";
   case at_mkArrayRef:
     return "mkArrayRef";
-  case at_block:
-    return "block";
+  case at_labeledBlock:
+    return "labeledBlock";
   case at_return_from:
     return "return_from";
   case at_uswitch:
@@ -1260,7 +1260,7 @@ AST::printName(const AstType at)
   case at_or:
     return "or";
   case at_cond:
-    return "<cond>";
+    return "cond";
   case at_cond_legs:
     return "<cond_legs>";
   case at_cond_leg:
@@ -1285,8 +1285,8 @@ AST::printName(const AstType at)
     return "<setClosure>";
   case at_mkArrayRef:
     return "<mkArrayRef>";
-  case at_block:
-    return "block";
+  case at_labeledBlock:
+    return "label";
   case at_return_from:
     return "<return_from>";
   case at_uswitch:
@@ -1294,7 +1294,7 @@ AST::printName(const AstType at)
   case at_usw_legs:
     return "<usw_legs>";
   case at_usw_leg:
-    return "<usw_leg>";
+    return "case";
   case at_otherwise:
     return "otherwise";
   case at_try:
@@ -1512,7 +1512,7 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00", // at_mkClosure
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00", // at_setClosure
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00", // at_mkArrayRef
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00", // at_block
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00", // at_labeledBlock
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00", // at_return_from
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00", // at_uswitch
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00", // at_usw_legs
@@ -4692,7 +4692,7 @@ AST::isValid() const
     }
     break;
 
-  case at_block: // normal AST:
+  case at_labeledBlock: // normal AST:
     // match at_ident
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());

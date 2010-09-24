@@ -40,7 +40,8 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-def main.main(argv: string[]) = {
+def main.main(argv: string[])
+in
   0:int32 + 4
   0:int32 + 4 * 5
   6 * 0:int32 + 4
@@ -50,4 +51,3 @@ def main.main(argv: string[]) = {
   6 ** 0:int32 + 1 * 4
 
   0:int32
-}

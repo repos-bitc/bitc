@@ -167,7 +167,7 @@ isExpansive(std::ostream& errStream,
 
   case at_try:
   case at_throw:
-  case at_block:
+  case at_labeledBlock:
   case at_return_from:
 #if 0
     {

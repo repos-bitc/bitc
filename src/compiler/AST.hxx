@@ -493,6 +493,36 @@ enum PrintFlagValues {
 };
 typedef sherpa::EnumSet<PrintFlagValues> PrintFlags;
 
+enum PrettyPrintFlagValues {
+  pp_NONE,
+
+  /// @brief Show types during pretty printing
+  pp_ShowTypes,
+
+  /// @brief Show the computed literal value as well as the original.
+  ///
+  /// This is mainly for debugging.
+  pp_LitValues,
+
+  /// @brief Emit a final newline.
+  ///
+  /// Note this one does not recurse!
+  pp_FinalNewline,
+
+  /// @brief Show everything - even stuff we added in.
+  ///
+  /// This is used in the back end.
+  pp_Raw,
+
+  /// @brief Parent context is a layout brace context, so no braces
+  /// are needed for begin blocks.
+  ///
+  /// Note this one does not recurse!
+  pp_InLayoutBlock
+};
+
+typedef sherpa::EnumSet<PrettyPrintFlagValues> PrettyPrintFlags;
+
 struct AST;
 
 /// @brief Set of environments associated with a given AST node.
@@ -672,7 +702,7 @@ enum AstType {
   at_mkClosure,
   at_setClosure,
   at_mkArrayRef,
-  at_block,
+  at_labeledBlock,
   at_return_from,
   at_uswitch,
   at_usw_legs,
@@ -1013,6 +1043,7 @@ public:
   /// @brief Return pretty-printed representation of this AST in the
   /// form of a string.
   std::string asString() const;
+  std::string asString(PrettyPrintFlags flags) const;
 
   /// @brief Get the unique identifier for this AST
   boost::shared_ptr<AST> getID();
@@ -1033,11 +1064,11 @@ public:
   /// @brief Pretty print this AST to @p out, annotating each with its
   /// type if @p showTypes is true, and appending a final end of line
   /// of @p endline is true.
-  void PrettyPrint(std::ostream& out, bool showTypes = false,
-                   bool endline=true) const;
+  void PrettyPrint(std::ostream& out,
+                   PrettyPrintFlags flags = pp_FinalNewline) const;
 
-  void PrettyPrint(sherpa::INOstream& out, bool showTypes = false,
-                   bool endline=true) const;
+  void PrettyPrint(sherpa::INOstream& out,
+                   PrettyPrintFlags flags = pp_FinalNewline) const;
 
   // For use in GDB:
   void PrettyPrint(bool decorated) const;

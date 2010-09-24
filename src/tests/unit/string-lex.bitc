@@ -41,6 +41,6 @@ provide bitc.main main
 
 def s = "This string should be terminated.
 
-def main.main(argv: string[]) = {
+def main.main(argv: string[])
+in
   0:int32
-}

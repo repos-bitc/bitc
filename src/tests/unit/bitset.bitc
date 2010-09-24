@@ -41,8 +41,10 @@ import bitc.main as main
 import bitc.stdio as stdio
 provide bitc.main main
 
-def main.main(argv: string[]) = {
-  let s = bitset.make() in {
+def main.main(argv: string[])
+in
+  let s = bitset.make()
+  in
     bitset.insert(s, 5)
 
     stdio.write_int(stdio.stdout, s.nElem, 10)
@@ -75,5 +77,3 @@ def main.main(argv: string[]) = {
       else stdio.write_string(stdio.stdout, "!Contains 5 (and shouldn't)\n")
 
     0:int32
-  }
-}

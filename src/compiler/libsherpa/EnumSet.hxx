@@ -3,7 +3,7 @@
 
 /**************************************************************************
  *
- * Copyright (C) 2008, The EROS Group, LLC.
+ * Copyright (C) 2010, The EROS Group, LLC.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -181,6 +181,14 @@ namespace sherpa {
       EnumSet b(*this);
       b.repr = ~b.repr;
       return b;
+    }
+
+    bool
+    lacks(const EnumSet<T>& that) const
+    {
+      if (repr & that.repr)
+        return false;
+      return true;
     }
 
 #if 0
