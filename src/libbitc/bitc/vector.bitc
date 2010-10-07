@@ -41,15 +41,16 @@ bitc version 0.11
 interface bitc.vector {
   import bitc.list as lst
 
+  /// @brief Apply procedure @p f to each element of vector @p vec.
   def vector_map(vec, f)
-    "Apply procedure f to each element of vector."
     = loop pos = 0 then 1 + pos
       until pos == vec.length
       in f(vec[pos])
 
   // BUG: This was intended to be tail recursive!
+
+  /// @brief Given a vector @p vec, return a list of its elements.
   def vectorToList(vec : 'a[]) 
-    "Given a vector, return a list of its elements."
     = {
         def subvectorToList(vec, pos, len) = 
             if pos > len
@@ -66,7 +67,7 @@ interface bitc.vector {
     MakeVector(n, lambda(i) {e})
 
 
+  /// @brief Given a list @p l, return a vector of its elements.
   def listToVector(l)
-    "Given a list, return a vector of its elements."
     = MakeVector(length(l), lambda(n) {lst.list_nth(l, n)})
 }

@@ -40,39 +40,40 @@ bitc version 0.11
 
 interface bitc.list {
 
-  def isNull(l:list('a)) 
-    "Return true (false) if list is empty (non-empty)."
-    = if l.nil then true else false
+  /// @brief Return true (false) if list @p l is empty (non-empty).
+  def isNull(l:list('a)) =
+    if l.nil then true else false
 
+  /// @brief Apply procedure @p f to each element of @p list.
   def map(f, lst:list('a))
-    "Apply procedure f to each element of list."
-    = switch x = lst
-      case nil  in true
-      case cons in
-        f(x.car)
-        map(f, x.cdr)
+  in switch x = lst
+     case nil  in true
+     case cons in
+       f(x.car)
+       map(f, x.cdr)
 
   // These are included for convenience, but it is probably not
   // advisable to use them, because it is difficult to show that no
   // exceptions are thrown.
+
+  /// @brief Return first element of @p lst (if non-empty).
   def car(lst)
-    "Return first element of list (if non-empty)."
     = switch x = lst
       case nil  in throw IndexBoundsError
       case cons in x.car
 
+  /// @brief  Return rest of @p lst (if non-empty).
   def cdr(lst)
-    "Return rest of list (if non-empty)."
     = switch x = lst
       case nil  in throw IndexBoundsError
       case cons in x.cdr
 
+  /// @brief "Return element @p n of @p lst."
   def list_nth(lst, n)
-    "Return nth element of list."
     = if n == 0 then car(lst) else list_nth(cdr(lst), n - 1)
 
+  /// @brief Return length of @p lst.
   def list_length(lst)
-    "Return length of list."
     = {
         def length_helper(lst, count) =
           if isNull(lst) 
@@ -86,14 +87,14 @@ interface bitc.list {
     length = list_length
   }
   
+  /// @brief Append list @p l2 to list @p l1.
   def append(l1, l2) 
-    "Append two lists."
     = if isNull(l1)
         then l2
         else cons(car(l1), append(cdr(l1), l2))
 
+  /// @brief Reverse the argument list @p lst.
   def reverse(lst)
-    "Reverse the argument list."
     = {
         def do_reverse(l1, l2) =
           if isNull(l1)

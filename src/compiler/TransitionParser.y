@@ -432,7 +432,6 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_switch_match
 %type <ast> blk_exident
 // %type <ast> sxp_exident
-%type <ast> trn_docstring trn_optdocstring
 %type <ast> sxp_condcases sxp_condcase
 %type <ast> sxp_fntype // sxp_method_type
 %type <ast> blk_fntype blk_method_type
@@ -508,39 +507,18 @@ blk_version: tk_BITC {
   }
 };
 
-// Documentation comments. These are added only in productions where
-// they do NOT appear before expr_seq. If a string trn_literal appears as
-// the first form of a multiform expr_seq, it won't hurt anything. If
-// it is the *only* form, then it is the value in any case, and that
-// is fine. We can figure out which case is which in the documentation
-// extractor.
-trn_docstring: tk_String {
-  SHOWPARSE("trn_docstring -> STRING");
-  $$ = AST::make(at_docString, $1.loc, AST::makeStringLit($1));
-};
-trn_optdocstring: trn_docstring {
-  SHOWPARSE("trn_optdocstring -> trn_docstring");
-  $$ = $1;
-};
-trn_optdocstring: {
-  SHOWPARSE("trn_optdocstring -> ");
-  yyerrok;
-  lexer->showNextError = false;
-  $$ = AST::make(at_docString);
-};
-
 // INTERFACES [8.1]
 trn_interface: tk_INTERFACE blk_ifident {
     if ($2.str.find("bitc.") == 0)
       lexer->isRuntimeUoc = true;
   }
-  trn_optdocstring IsILCB {
+  IsILCB {
     lexer->layoutStack->precedingToken = tk_INTERFACE;
   } trn_if_definitions IRCB {
-  SHOWPARSE("trn_interface -> INTERFACE blk_ifident trn_optdocstring { trn_if_definitions }");
+  SHOWPARSE("trn_interface -> INTERFACE blk_ifident IS { trn_if_definitions }");
   shared_ptr<AST> ifIdent = AST::make(at_ident, $2);
   $$ = AST::make(at_interface, $1.loc, ifIdent);
-  $$->addChildrenFrom($7);
+  $$->addChildrenFrom($6);
 
   if (lexer->isCommandLineInput) {
     const char *s =
@@ -629,11 +607,11 @@ trn_implicit_module: trn_mod_definitions  {
  UocInfo::srcList[uocName] = uoc;
 };
 
-trn_module: tk_MODULE trn_optdocstring IsILCB {
+trn_module: tk_MODULE IsILCB {
     lexer->layoutStack->precedingToken = tk_INTERFACE;
   } trn_mod_definitions IRCB {
- SHOWPARSE("trn_module -> tk_MODULE trn_optdocstring { trn_mod_definitions }");
- $$ = $5;
+ SHOWPARSE("trn_module -> tk_MODULE IS { trn_mod_definitions }");
+ $$ = $4;
  $$->astType = at_module;
 
  string uocName =
@@ -646,11 +624,11 @@ trn_module: tk_MODULE trn_optdocstring IsILCB {
  UocInfo::srcList[uocName] = uoc;
 };
 
-trn_module: tk_MODULE blk_ifident trn_optdocstring IsILCB {
+trn_module: tk_MODULE blk_ifident IsILCB {
     lexer->layoutStack->precedingToken = tk_INTERFACE;
   } trn_mod_definitions IRCB {
- SHOWPARSE("trn_module -> tk_MODULE blk_ifident trn_optdocstring { trn_mod_definitions }");
- $$ = $6;
+ SHOWPARSE("trn_module -> tk_MODULE blk_ifident trn_optdocstring IS { trn_mod_definitions }");
+ $$ = $5;
  $$->astType = at_module;
 
  // Construct, compile, and admit the parsed UoC.
@@ -964,11 +942,11 @@ blk_ptype_name: blk_defident '(' blk_tvlist ')' %prec '(' {
 //};
 
 // STRUCTURE TYPES [3.6.1]         
-blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares IsILCB blk_fields_and_methods IRCB {
+blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints blk_opt_declares IsILCB blk_fields_and_methods IRCB {
   SHOWPARSE("blk_type_definition -> blk_val STRUCT blk_ptype_name blk_constraints "
-            "trn_optdocstring blk_declares { blk_fields }");
+            "blk_declares { blk_fields }");
   $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $1,
-                 $6, $8, $4);
+                 $5, $7, $4);
   $$->child(0)->defForm = $$;
 };
 
@@ -982,15 +960,15 @@ blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints trn_optdoc
 // };
 
 // UNION TYPES [3.6.2]              
-blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares IsILCB blk_constructors IRCB {
+blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints blk_opt_declares IsILCB blk_constructors IRCB {
   SHOWPARSE("blk_type_definition -> blk_val UNION blk_ptype_name blk_constraints "
             "trn_optdocstring blk_opt_declares { blk_constructors }");
   $$ = AST::make(at_defunion, $2.loc,
                  $3->child(0),   /* ident */
                  $3->child(1),   /* tvlist */
                  $1,             /* category */
-                 $6,             /* declares */
-                 $8,             /* constructors */
+                 $5,             /* declares */
+                 $7,             /* constructors */
                  $4);            /* constraints */
   $$->child(0)->defForm = $$;
 }
@@ -1084,12 +1062,12 @@ blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints trn_optdocs
 /* }; */
 
 // REPR TYPES
-blk_type_definition: blk_val tk_REPR blk_defident trn_optdocstring blk_opt_declares IsILCB blk_repr_constructors IRCB {
+blk_type_definition: blk_val tk_REPR blk_defident blk_opt_declares IsILCB blk_repr_constructors IRCB {
   SHOWPARSE("blk_type_definition -> blk_val REPR blk_defident "
-            "trn_optdocstring blk_opt_declares { blk_repr_constructors }");
+            "blk_opt_declares { blk_repr_constructors }");
   $$ = AST::make(at_defrepr, $2.loc, $3, 
                  AST::make(at_tvlist), /* empty tvlist */
-                 $1, $5, $7,
+                 $1, $4, $6,
                  AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
 }
@@ -1185,9 +1163,9 @@ blk_externals: tk_EXTERNAL blk_exident {
 
 
 // OBJECT TYPES [3.6.1]         
-blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints trn_optdocstring blk_opt_declares IsILCB blk_methods_only IRCB  {
+blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints blk_opt_declares IsILCB blk_methods_only IRCB  {
   SHOWPARSE("blk_type_definition -> OBJECT blk_ptype_name blk_constraints "
-            "trn_optdocstring blk_opt_declares blk_methods_only )");
+            "blk_opt_declares blk_methods_only )");
 
   // For the moment, all objects are value types:
   shared_ptr<AST> valCat = 
@@ -1195,7 +1173,7 @@ blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints trn_optdocstring b
 
   $$ = AST::make(at_defobject, $1.loc, $2->child(0), $2->child(1),
                  valCat,
-                 $5, $7, $3);
+                 $4, $6, $3);
   $$->child(0)->defForm = $$;
 };
 
@@ -1375,8 +1353,8 @@ blk_openclosed: tk_CLOSED {
 // };
 
 // EXCEPTION DEFINITION [3.10]
-blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring {
-  SHOWPARSE("blk_type_definition -> EXCEPTION blk_ident");
+blk_type_definition: blk_optval tk_EXCEPTION blk_ident {
+  SHOWPARSE("blk_type_definition -> optval EXCEPTION blk_ident");
   $3->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $2.loc, 
                  $3,            /* ident */
@@ -1401,15 +1379,15 @@ blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring {
 //   $$->child(0)->defForm = $$;
 // };
 
-blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring IsILCB blk_fields IRCB {
-  SHOWPARSE("blk_type_definition -> exception blk_ident { blk_fields }");
+blk_type_definition: blk_optval tk_EXCEPTION blk_ident IsILCB blk_fields IRCB {
+  SHOWPARSE("blk_type_definition -> exception blk_ident IS { blk_fields }");
   $3->flags |= ID_IS_GLOBAL;
   $$ = AST::make(at_defexception, $2.loc, 
                  $3,
                  AST::make(at_tvlist), /* empty tvlist */
                  $1,                   /* category */
                  AST::make(at_declares), /* empty declares */
-                 $6,                     /* fields */
+                 $5,                     /* fields */
                  AST::make(at_constraints)); /* empty constraints */
   $$->child(0)->defForm = $$;
 };
@@ -1430,10 +1408,11 @@ blk_type_definition: blk_optval tk_EXCEPTION blk_ident trn_optdocstring IsILCB b
 // TYPE CLASSES [4]
 // TYPE CLASS DEFINITION [4.1]
 
-blk_tc_definition: blk_openclosed tk_TRAIT blk_ptype_name blk_constraints trn_optdocstring blk_tc_decls IsILCB blk_method_decls IRCB {
-  SHOWPARSE("blk_tc_definition -> blk_openclosed TRAIT blk_ptype_name blk_constraints trn_optdocstring blk_tc_decls blk_method_decls)");
+blk_tc_definition: blk_openclosed tk_TRAIT blk_ptype_name blk_constraints blk_tc_decls IsILCB blk_method_decls IRCB {
+  SHOWPARSE("blk_tc_definition -> blk_openclosed TRAIT blk_ptype_name "
+            "blk_constraints blk_tc_decls blk_method_decls)");
   $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0),
-                 $3->child(1), $6, $1, $8, $4);
+                 $3->child(1), $5, $1, $7, $4);
   $$->child(0)->defForm = $$;
 };
 
@@ -1536,14 +1515,14 @@ blk_method_decl: blk_ident ':' blk_fntype {
 // };
 
 // TYPE CLASS INSTANTIATIONS [4.2]
-blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring {
-  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints [docstring] )");
+blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints {
+  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints)");
   $$ = AST::make(at_definstance, $1.loc, $2,
                  AST::make(at_tcmethods, $1.loc), $3);
 };
-blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints trn_optdocstring IsILCB blk_method_bindings IRCB {
-  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints [docstring] { blk_method_bindings }");
-  $$ = AST::make(at_definstance, $1.loc, $2, $6, $3);
+blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints IsILCB blk_method_bindings IRCB {
+  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints IS { blk_method_bindings }");
+  $$ = AST::make(at_definstance, $1.loc, $2, $5, $3);
 };
 
 // sxp_ti_definition: LP tk_INSTANCE sxp_constraint trn_optdocstring RP {
@@ -1605,22 +1584,17 @@ sxp_value_definition: LP tk_DEF sxp_defpattern sxp_expr RP  {
   $$ = AST::make(at_define, $2.loc, $3, $4);
   $$->addChild(AST::make(at_constraints));
 };
-sxp_value_definition: LP tk_DEF sxp_defpattern trn_docstring sxp_expr RP  {
-  SHOWPARSE("sxp_value_definition -> ( DEFINE  sxp_defpattern trn_docstring sxp_expr )");
-  $$ = AST::make(at_define, $2.loc, $3, $5);
-  $$->addChild(AST::make(at_constraints));
-};
 
-blk_value_definition: tk_DEF blk_defpattern blk_constraints trn_optdocstring '=' blk_expr {
-  SHOWPARSE("blk_value_definition -> DEF blk_defpattern blk_constraints trn_optdocstring = blk_expr");
-  $$ = AST::make(at_define, $1.loc, $2, $6, $3);
+blk_value_definition: tk_DEF blk_defpattern blk_constraints '=' blk_expr {
+  SHOWPARSE("blk_value_definition -> DEF blk_defpattern blk_constraints = blk_expr");
+  $$ = AST::make(at_define, $1.loc, $2, $5, $3);
 };
-blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstring blk_fndef_tail {
-  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_expr");
+blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints blk_fndef_tail {
+  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints blk_expr");
   // $5 = stripDocString($5);
   shared_ptr<AST> iRetBlock =
     AST::make(at_labeledBlock, $1.loc, 
-              AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $7);
+              AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $6);
   shared_ptr<AST> iLambda =
     AST::make(at_lambda, $1.loc, AST::make(at_argVec, $3.loc), iRetBlock);
   iLambda->printVariant = pf_IMPLIED;
@@ -1628,12 +1602,12 @@ blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints trn_optdocstri
   $$ = AST::make(at_recdef, $1.loc, iP, iLambda, $5);
 }
 
-blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constraints trn_optdocstring blk_fndef_tail {
-  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints trn_optdocstring blk_expr");
+blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constraints blk_fndef_tail {
+  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints blk_expr");
   // $5 = stripDocString($5);
   shared_ptr<AST> iRetBlock =
     AST::make(at_labeledBlock, $1.loc, 
-              AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $8);
+              AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $7);
   shared_ptr<AST> iLambda = AST::make(at_lambda, $1.loc, $4, iRetBlock);
   iLambda->printVariant = pf_IMPLIED;
   shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
@@ -1683,8 +1657,8 @@ sxp_value_definition: LP tk_DEF '(' sxp_defident sxp_lambdapatterns ')'
 };
 
 // PROCLAIM DEFINITION -- VALUES [6.2]
-blk_value_declaration: tk_DEF blk_defpattern blk_constraints trn_optdocstring blk_externals {
-  SHOWPARSE("blk_value_declaration -> DEF blk_defpattern blk_constraints trn_optdocstring blk_externals");
+blk_value_declaration: tk_DEF blk_defpattern blk_constraints blk_externals {
+  SHOWPARSE("blk_value_declaration -> DEF blk_defpattern blk_constraints blk_externals");
 
   // I had to use blk_defpattern above to eliminate a reduce/reduce
   // conflict, but in a declaration we require the type to be present
@@ -1695,9 +1669,9 @@ blk_value_declaration: tk_DEF blk_defpattern blk_constraints trn_optdocstring bl
   shared_ptr<AST> declType = $2->child(1);
 
   $$ = AST::make(at_proclaim, $1.loc, declIdent, declType, $3);
-  $$->flags |= $5->flags;
-  $$->getID()->flags |= $5->flags;
-  $$->getID()->externalName = $5->externalName;
+  $$->flags |= $4->flags;
+  $$->getID()->flags |= $4->flags;
+  $$->getID()->externalName = $4->externalName;
 };
 
 // sxp_value_declaration: LP tk_PROCLAIM sxp_defident ':' sxp_type trn_optdocstring sxp_externals RP {
