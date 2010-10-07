@@ -79,8 +79,11 @@ TransitionLexer::valid_ascii_symbol(ucs4_t ucs4)
     // it has behavioral significance for mixfix identifiers
     return false;
 
-  case '#':                     // until S-expressions are gone
+  case '#':                     // thunked hole marker is "#_"
     return false;
+
+  case '@':                     // spacer for non-hole quasi-keywords
+    return false:
 
   case ':':                     // this just broke too much stuff
     return false;
@@ -97,7 +100,6 @@ TransitionLexer::valid_ascii_symbol(ucs4_t ucs4)
   case '>':
   case '=':
   case '?':
-  case '@':
   case '^':
   case '|':
   case '~':
@@ -882,10 +884,12 @@ TransitionLexer::getNextToken()
   // FIX: Once I clean up the surface syntax, this should also be done
   // for tk_DO.
   bool curlyRequired = ((lastTokType == EOF)        // beginning of file
+                        // These are braced for bindings:
                         || (lastTokType == tk_LET)
                         || (lastTokType == tk_LETREC)
                         || (lastTokType == tk_LOOP)
                         || (lastTokType == tk_SWITCH)
+                        // These are braced for blocks:
                         || (lastTokType == tk_IN)
                         || (lastTokType == tk_IS)
                         || (lastTokType == tk_DO)
@@ -1025,6 +1029,8 @@ TransitionLexer::getNextToken()
                           lastTokType == ',' ||
                           lastTokType == '(' ||
                           lastTokType == '[' ||
+                          lastTokType == '=' ||
+                          lastTokType == tk_ASSIGN ||
                           tok.tokType == ')' ||
                           tok.tokType == ']' ||
                           tok.tokType == ';' ||
