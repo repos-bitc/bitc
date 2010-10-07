@@ -236,6 +236,8 @@ matched form is matched as sub-expression 1.")
 	  ":="                          ;assignment
 	  "\\|"
 	  "::"                          ;list construction
+	  "\\|"
+	  "->"                          ;type arrow
 	  "\\)")
   "Regexp to match a single BitC token")
 
