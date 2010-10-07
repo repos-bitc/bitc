@@ -83,7 +83,7 @@ TransitionLexer::valid_ascii_symbol(ucs4_t ucs4)
     return false;
 
   case '@':                     // spacer for non-hole quasi-keywords
-    return false:
+    return false;
 
   case ':':                     // this just broke too much stuff
     return false;
