@@ -46,51 +46,43 @@ module struct_test is
 
   exception mumbleEx
 
-  def i0 = 0:int32
-  def i2 :int32
+   def i0 = 0:int32
 
-  boxed struct forward
+   boxed struct forward
 
-  boxed struct boxedpoly('a)
+   boxed struct boxedpoly('a)
 
-  unboxed struct onefield is
-    a : int32
+   unboxed struct onefield is
+     a : int32
 
-  unboxed struct simple is
-    a : int32
-    f : float
+   unboxed struct simple is
+     a : int32
+     f : float
 
-  unboxed struct poly('a) is
-    a : 'a
-    f : float
-    
-  boxed struct boxedpoly('a) is
-    a : 'a
-    f : float
-    
-  boxed struct constrained('a)
-    where Eq('a)
+   unboxed struct poly('a) is
+     a : 'a
+     f : float
 
-  boxed struct constrained('a) where Eq('a) is
-    a : 'a
-    f : float
-    
-  boxed struct forward is
-    c : char
+   boxed struct boxedpoly('a) is
+     a : 'a
+     f : float
+
+   boxed struct constrained('a)
+     where Eq('a)
+
+   boxed struct constrained('a) where Eq('a) is
+     a : 'a
+     f : float
+
+   boxed struct forward is
+     c : char
 
   def main.main(argv: string[]) = {
     let x = 5
-        y = 6
+        y = 6 in
+      x
+    letrec x = 5
     in
       x
-    let x = 5 in
-      /* comment
-       */
-      x,
-        y
-      {
-      z
-        x
     0:int32
   }
-x  
