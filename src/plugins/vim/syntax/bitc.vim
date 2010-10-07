@@ -21,7 +21,7 @@ syn match bitcOperator "or"
 
 syn keyword bitcType int8 int16 int32 int64
 syn keyword bitcType uint8 uint16 uint32 uint64
-syn keyword bitcType char string
+syn keyword bitcType char string bool
 syn keyword bitcType float double quad
 
 syn keyword bitcStructure struct union repr
