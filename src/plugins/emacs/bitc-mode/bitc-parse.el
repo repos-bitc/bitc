@@ -214,7 +214,10 @@ without moving forward."
   (bitc-showme "Top level forms indent at %S"
     (save-excursion
       (beginning-of-buffer)
-      (re-search-forward bitc-version-re nil 'move)
+      (forward-comment (buffer-size))
+      (when (looking-at bitc-version-number-re)
+        (goto-char (match-end))
+        (forward-comment (buffer-size)))
       (forward-comment (buffer-size))
       (if (looking-at "\\(module\\|interface\\)")
           (progn
@@ -355,8 +358,9 @@ left of point."
         (goto-char 0)
         ;; Skip any initial bitc-version:
         (forward-comment (buffer-size))
-        (re-search-forward bitc-version-re nil 'move)
-        (forward-comment (buffer-size))
+        (when (looking-at bitc-version-number-re)
+          (goto-char (match-end))
+          (forward-comment (buffer-size)))
 
         (unless (looking-at bitc-uoc-form-re)
           (goto-char form-start))
@@ -427,6 +431,21 @@ left of point."
                             (not (equal (caar indent-list) "in-align")))
                   (remove-indent))
                 (remove-indent)           ;the in-align
+                (add-next-indent tok t))
+
+               ((equal tok-str "loop")
+                (add-indent "in-align" tok-col)
+                (add-indent "until-align" tok-col)
+                ; Following is wrong, but we need *something*:
+                (add-indent "then-align" tok-col)
+                (add-next-indent tok t))
+
+               ((equal tok-str "until")
+                ;; kill back to and including, the if-align:
+                (while (and indent-list
+                            (not (equal (caar indent-list) "until-align")))
+                  (remove-indent))
+                (remove-indent)           ;the until-align
                 (add-next-indent tok t))
 
                ((equal tok-str "if")  
@@ -708,6 +727,9 @@ single element.")
   (defun bitc-make-cycle (bol &rest stops)
     "Given the position of the first line `bol', and a set of
 tabstops `stops', return a suitable indent cycle structure."
+
+    (when (null stops)
+      (debug))
 
     (list bol (cycle-lines bol)
           (buffer-chars-modified-tick)
