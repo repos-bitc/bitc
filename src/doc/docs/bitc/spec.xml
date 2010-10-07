@@ -1083,11 +1083,12 @@ a b c /*
                 <li>
                   <p>
                     If the offset of the token is <em>greater
-                    than</em> the current sequence offset,
-                    or if the
-                    last character on the preceding line is ``\''
-                    (signalling that the line is continued),
-                    nothing is inserted.
+                    than</em> the current sequence offset, the token
+                    is ``,'' or ``('', or the preceding token is ``,''
+                    or ``('',
+                    nothing is inserted. This special-case suppression
+                    enables the use of longer string literals as
+                    arguments in I/O.
                   </p>
                 </li>
                 <li>

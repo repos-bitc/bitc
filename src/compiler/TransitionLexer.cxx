@@ -987,9 +987,15 @@ TransitionLexer::getNextToken()
               << ": processing first token..." << std::endl;
 #endif
 
-    // FIX: Consider NOT doing start of line processing in various cases:
+    // This hack provided especially for printf-like things. Let indent
+    // rules be violated for long printf strings:
+    bool autoCloseOK = !(lastTokType == ','
+                         || lastTokType == '('
+                         || tok.tokType == ','
+                         || tok.tokType == ')'
+                         || false);
 
-    if (closeToOffset(startLoc.offset)) {
+    if (autoCloseOK && closeToOffset(startLoc.offset)) {
       pushTokenBack(tok);
 
       LToken newTok = LToken('}', startLoc, endLoc, "}");
@@ -1004,6 +1010,7 @@ TransitionLexer::getNextToken()
   // Rule 4: At end of file, any outstanding inserted blocks are closed.
   if (tok.tokType == EOF) {
     if (layoutStack && layoutStack->inserted) {
+
       pushTokenBack(tok);
 
       LToken newTok = LToken('}', startLoc, endLoc, "}");
