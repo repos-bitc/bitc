@@ -39,15 +39,13 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def (g x:(ArrayRef 'a)) 
-  x.length)
+def g(x:ArrayRef('a)) = x.length
 
-(def (f x:(ArrayRef 'a)) 
-  x[(/ (g x) 2)])
+def f(x:ArrayRef('a)) =x[g(x)/2]
 
-(def arr (array 1 2 3 4 5 6 7 8 9 10))
+def arr = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (f arr)
-    0:int32))
+def main.main(args:string[])
+in
+  f(arr)
+  0:int32

@@ -40,6 +40,6 @@ import bitc.main main
 provide bitc.main main
 import bitc.stdio as stdio
 
-(def main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    0))
+def main(args: string[])
+in
+  0 : int32
