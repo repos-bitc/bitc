@@ -78,7 +78,7 @@ definition.")
 
 ;; The RE for bitc identifiers is depressingly complicated to the
 ;; human, so I build it up in parts:
-(defconst bitc-operator-re "\\(?:[!\\$%&\\*\\+-/<>=\\?^\\|~]+\\)"
+(defconst bitc-operator-re "\\(?:[!$%&*+-/<>=?^|~]+\\)"
   "Regexp to match a BitC operator.")
 
 (defconst bitc-ident-re
@@ -96,20 +96,20 @@ definition.")
          (bitc-mixfix-hole-re "\\(?:@\\|_\\|\\(?:#_\\)\\)"))
 
     ;; Regexp to match a BitC identifier:
-    (concat "\\(?:\\<"
+    (concat "\\(?:\\_<"
             "_*"                        ;leading underscores
             bitc-mixfix-hole-re "?"     ;optional mixfix hole
             bitc-ident-chunk-re
             "\\(?:" bitc-mixfix-hole-re bitc-ident-chunk-re "\\)*" ; more chunks sep by holes
             bitc-mixfix-hole-re "?"     ;optional mixfix hole
-            "\\>\\)"))
+            "\\_>\\)"))
   "Regexp matching a BitC identifier. The regexp accounts for
 leading underscores and holes.")
 
-(defconst bitc-qualified-ident-re (concat "\\(?:\\<"
+(defconst bitc-qualified-ident-re (concat "\\(?:"
                                 bitc-ident-re
                                 "\\(?:\\." bitc-ident-re "\\)*"
-                                "\\>\\)")
+                                "\\)")
   "Regexp matching a (possibly qualified) BitC identifier.")
 
 (defconst bitc-comment-re
