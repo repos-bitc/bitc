@@ -127,17 +127,25 @@ leading underscores and holes.")
   "Regexp to match an optional semicolon.")
 
 (defconst bitc-integer-re
-  "\\(?:\\(?:0[xob]?\\)[1-9][0-9]*\\)"
+  (concat "\\(?:"
+          "\\(?:[1-9][0-9]*\\)"
+          "\\|"
+          "\\(?:0x[0-9a-fA-F]+\\)"
+          "\\|"
+          "\\(?:0o?[0-7]+\\)"
+          "\\|"
+          "\\(?:0b[01]+\\)"
+          "\\)")
   "Regexp to match a bitc integer.")
 
 (defconst bitc-character-re
   (concat
    "\\(?:'\\(?:"
-   "[:print:]"                          ;regular printables (sort-of)
+   "[[:print:]]"                        ;regular printables (sort-of)
    "\\|"
-   "\\\\[:print]"                       ;backslashed single characters (sort-of)
+   "\\\\[[:print:]]"          ;backslashed single characters (sort-of)
    "\\|"
-   "\\\\[a-zA-Z0-9]+"                   ;named characters, numbered characters
+   "\\\\[a-zA-Z0-9]+"           ;named characters, numbered characters
    "\\|"
    "\\(?:\\\\U\\+" bitc-integer-re "\\)"
    "\\)'\\)"
@@ -219,11 +227,11 @@ matched form is matched as sub-expression 1.")
 	  bitc-qualified-ident-re       ;also matches most keywords
                                         ;punctuation, and true/false
 	  "\\|"
-	  bitc-version-number-re
-	  "\\|"
 	  bitc-integer-re
 	  "\\|"
 	  bitc-float-re
+	  "\\|"
+	  bitc-version-number-re
 	  "\\|"
 	  bitc-character-re
 	  "\\|"
