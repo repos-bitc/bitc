@@ -248,7 +248,7 @@ static unsigned VersionMinor(const std::string s)
 
 // %token <tok> tk_THE
 
-%token <tok> tk_WHEN tk_UNLESS
+%token <tok> tk_WHEN
 %token <tok> tk_COND
 %token <tok> tk_SWITCH
 %token <tok> tk_TYPECASE
@@ -386,7 +386,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> sxp_actual_params sxp_nonempty_params
 %type <ast> blk_actual_params blk_nonempty_params
 %type <ast> sxp_block sxp_block_exprs
-%type <ast> blk_iblock
+%type <ast> blk_iblock blk_ieblock
 %type <ast> blk_expr_seq
 // %type <ast> sxp_the_expr
 %type <ast> sxp_expr sxp_unqual_expr
@@ -455,6 +455,9 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> intLit natLit floatLit charLit strLit boolLit
 
 %type <tok> ILCB  IRCB   // one inserted by layout
+ // %type <tok> ErrLCB
+%type <tok> ErrRCB
+ // %type <tok> OptLCB
 %type <tok> OptRCB
 %type <tok> IsILCB  // Used in types
 
@@ -3064,6 +3067,20 @@ blk_iblock: ILCB blk_expr_seq IRCB {
   $$ = $2;
 }
 
+blk_ieblock: ILCB OptRCB {
+  SHOWPARSE("blk_block -> { }");
+  // Empty blocks are okay:
+  $$ = AST::make(at_begin, $1.loc);
+}
+blk_ieblock: ILCB blk_expr_seq ErrRCB {
+  SHOWPARSE("blk_block -> { blk_expr_seq }");
+
+  // Remove redundant blocks eagerly:
+  if ($2->children.size() == 1 && $2->child(0)->astType == at_begin)
+    $2 = $2->child(0);
+  $$ = $2;
+}
+
 blk_expr_seq: blk_expr {
   SHOWPARSE("blk_expr_seq -> blk_expr");
   $$ = AST::make(at_begin, $1->loc, $1);
@@ -3490,9 +3507,13 @@ sxp_unqual_expr: '(' sxp_expr sxp_actual_params ')' { /* apply to zero or more a
 };
 
 // IF [7.15.1]
-blk_expr: tk_IF blk_expr tk_THEN ILCB blk_expr_seq OptRCB tk_ELSE blk_iblock {
+blk_expr: tk_IF blk_expr tk_THEN blk_ieblock tk_ELSE blk_iblock {
   SHOWPARSE("blk_expr -> IF blk_expr THEN blk_ieblock ELSE blk_iblock");
-  $$ = AST::make(at_if, $1.loc, $2, $5, $8);
+  $$ = AST::make(at_if, $1.loc, $2, $4, $6);
+};
+blk_expr: tk_IF blk_expr tk_THEN blk_iblock {
+  SHOWPARSE("blk_expr -> IF blk_expr THEN blk_iblock");
+  $$ = AST::make(at_when, $1.loc, $2, $4);
 };
 sxp_unqual_expr: '(' tk_IF sxp_expr sxp_expr sxp_expr ')' {
   SHOWPARSE("sxp_unqual_expr -> (IF sxp_expr sxp_expr sxp_expr )");
@@ -3500,11 +3521,7 @@ sxp_unqual_expr: '(' tk_IF sxp_expr sxp_expr sxp_expr ')' {
 };
 
 // WHEN [7.15.2]
-blk_expr: tk_WHEN blk_expr tk_DO blk_expr {
-  SHOWPARSE("blk_expr -> WHEN blk_expr THEN blk_expr");
-  $$ = AST::make(at_when, $1.loc, $2, $4);
-};
-blk_expr: tk_UNLESS blk_expr tk_DO blk_expr {
+blk_expr: tk_WHEN blk_expr tk_THEN blk_expr {
   SHOWPARSE("blk_expr -> WHEN blk_expr THEN blk_expr");
   $$ = AST::make(at_when, $1.loc, $2, $4);
 };
@@ -4296,6 +4313,38 @@ IsILCB: '{' {
 //  lexer->showNextError = false;
 //  $$ = tok;
 //}
+
+ErrRCB: '}' {
+  $$ = $1;
+}
+ErrRCB: error {
+  yyerrok;
+
+  //  std::cerr << "Error action triggered at " 
+  //          << yylval.tok.loc
+  //          << endl;
+
+  assert(yychar != YYEMPTY);
+
+  yylval.tok.flags |= TF_REPROCESS;
+
+  LToken tok = LToken('}', yylval.tok.loc, yylval.tok.loc, "}");
+  tok.prevTokType = yylval.tok.prevTokType;
+  yylval.tok.prevTokType = '}';
+  tok.flags |= (TF_INSERTED|TF_BY_PARSER);
+
+  lexer->pushTokenBack(yylval.tok, true);
+  lexer->pushTokenBack(tok, true);
+  lexer->lex(&yylval);    /* re-read for side effects */
+
+  // Force parser to re-fetch the lookahead token after we reduce,
+  // since it may have changed because of the layout rules:
+  if (yychar != YYEMPTY)
+    yyclearin;
+
+  lexer->showNextError = false;
+  $$ = tok;
+}
 
 // TRANSITIONAL SUPPORT FOR MIXED-MODE PARSING
 LP: '(' {

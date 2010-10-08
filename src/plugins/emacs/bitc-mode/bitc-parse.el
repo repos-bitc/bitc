@@ -470,19 +470,6 @@ left of point."
                 (remove-indent)           ;the if-align
                 (add-next-indent tok t))
 
-               ((or (equal tok-str "when")
-                    (equal tok-str "until"))
-                (add-indent "do-align" tok-col)
-                ;; kill back to and including the if-align:
-                (add-next-indent tok t))
-
-               ((equal tok-str "do")
-                (while (and indent-list
-                            (not (equal (caar indent-list) "do-align")))
-                  (remove-indent))
-                (remove-indent)           ;the do-align
-                (add-next-indent tok t))
-
                ((or (equal tok-str "try")  
                     (equal tok-str "switch"))
                 ;; "fake" indent to support stand-alone "catch, case, otherwise":
@@ -688,7 +675,7 @@ canonical indents."
   (bitc-showme "Indent stops %S"
     (bitc-observed-indent-stops)))
 
-(defvar bitc-cycle-indent-info nil
+(defvar bitc-xcycle-indent-info nil
   "Indentation cycle information for the current line, as originally
 computed.
 
@@ -708,10 +695,11 @@ When the current indent is unambiguous, the a-list will have a
 single element.")
 
 (defun bitc-clear-cycle-state ()
-  (setq bitc-cycle-indent-info  nil))
+  (setq bitc-xcycle-indent-info  nil))
 
 (defun bitc-compute-indent-info ()
   (interactive)
+  (bitc-maybe-clear-cycle-state)
 
   (defun do-make-cycle (lst stops first)
     (if (> (length stops) 1)
@@ -751,34 +739,36 @@ tabstops `stops', return a suitable indent cycle structure."
     (save-excursion
       (beginning-of-line)
       (let ((bol (point)))
-        ;; While I have added some heuristics, this could be
-        ;; improved. For example, if we have a "{" stop, and we
-        ;; aren't looking at "}", we should remove everything to the
-        ;; left of the "{" stop. If we *are* looking at "{", we
-        ;; should remove that much less one.
-        (let ((stops (bitc-indent-stops)))
-          (cond ((or (equal (caar stops) "=")
-                     (equal (caar stops) ":="))
-                 ;; Rotate the assignment/binding tab stop back one in
-                 ;; the list:
-                 (setq stops (cons (cadr stops)
-                                   (cons (car stops)
-                                         (cddr stops)))))
-                ((bitc-continuation-linep)
-                 (let* ((tok-str (match-string 0))
-                        (align-marker (concat tok-str "-align")))
-                   (when (member tok-str (mapcar 'car stops))
+        (when (null bitc-xcycle-indent-info)
+          ;; While I have added some heuristics, this could be
+          ;; improved. For example, if we have a "{" stop, and we
+          ;; aren't looking at "}", we should remove everything to the
+          ;; left of the "{" stop. If we *are* looking at "{", we
+          ;; should remove that much less one.
+          (let ((stops (bitc-indent-stops)))
+            (cond ((or (equal (caar stops) "=")
+                       (equal (caar stops) ":="))
+                   ;; Rotate the assignment/binding tab stop back one in
+                   ;; the list:
+                   (setq stops (cons (cadr stops)
+                                     (cons (car stops)
+                                           (cddr stops)))))
+                  ((bitc-continuation-linep)
+                   (let* ((tok-str (match-string 0))
+                          (align-marker (concat tok-str "-align")))
                      (while (and stops
                                  (not (equal (caar stops) align-marker)))
                        (setq stops (cdr stops)))
-                     (setq stops (list (car stops))))))
-                
+                     (setq stops (list (car stops)))))
+                  
 
-                )
-          (apply 'bitc-make-cycle 
-                 (cons bol
-                       (mapcar (lambda (x) (cadr x))
-                               stops))))))))
+                  )
+            (setq bitc-xcycle-indent-info
+                  (apply 'bitc-make-cycle 
+                         (cons bol
+                               (mapcar (lambda (x) (cadr x))
+                                       stops)))))))
+      bitc-xcycle-indent-info)))
 
 (defun bitc-cycle-bol (info)
   (nth 0 info))
@@ -793,8 +783,8 @@ tabstops `stops', return a suitable indent cycle structure."
   (nth 3 info))
 
 (defun bitc-cycle-update-modtick ()
-  (let ((info bitc-cycle-indent-info))
-    (setq bitc-cycle-indent-info
+  (let ((info bitc-xcycle-indent-info))
+    (setq bitc-xcycle-indent-info
           (list (bitc-cycle-bol info)
                 (bitc-cycle-nlines info)
                 (buffer-chars-modified-tick)
@@ -802,21 +792,20 @@ tabstops `stops', return a suitable indent cycle structure."
 
 (defun bitc-get-cycle-info ()
   (defun bitc-maybe-clear-cycle-state ()
-    (when (consp bitc-cycle-indent-info)
+    (when (consp bitc-xcycle-indent-info)
       (save-excursion
         (beginning-of-line)
         (let ((bol (point))
               (cmod-tick (buffer-chars-modified-tick))
-              (info bitc-cycle-indent-info))
+              (info bitc-xcycle-indent-info))
           (when (or (not (= bol (bitc-cycle-bol info)))
                     (not (= cmod-tick (bitc-cycle-tick info))))
             (bitc-clear-cycle-state))))))
 
   (bitc-maybe-clear-cycle-state)
-  (when (null bitc-cycle-indent-info)
-    (debug)
-    (setq bitc-cycle-indent-info (bitc-compute-indent-info)))
-  bitc-cycle-indent-info)    
+  (when (null bitc-xcycle-indent-info)
+    (bitc-compute-indent-info))
+  bitc-xcycle-indent-info)    
 
 (defun bitc-indent-cycle-to (col)
   "Indent the current indent cycle region to begin at `col'. Assumes
@@ -883,6 +872,7 @@ containing point is blank, only that line is re-indented."
             (not (bitc-in-left-indent-areap here t)))
       (backward-delete-char-untabify arg killp)
     (progn
+      (bitc-maybe-clear-cycle-state)
       (let ((stops (bitc-indent-stops))
             (cur-indent (bitc-current-line-current-indent)))
         (while (and stops 
@@ -899,6 +889,7 @@ containing point is blank, only that line is re-indented."
             (not (bitc-in-left-indent-areap here nil)))
       (delete-char n killflag)
     (progn
+      (bitc-maybe-clear-cycle-state)
       (let ((stops (bitc-indent-stops))
             (cur-indent (bitc-current-line-current-indent)))
         (while (and stops 
