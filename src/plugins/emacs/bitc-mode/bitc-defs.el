@@ -76,9 +76,24 @@ use with \\[skip-chars-forward\\] and friends.")
   "Pattern for matching remaining characters when searching for a
 definition.")
 
-;; The RE for bitc identifiers is depressingly complicated to the
-;; human, so I build it up in parts:
-(defconst bitc-operator-re "\\(?:[!$%&*+-/<>=?^|~]+\\)"
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; The identifier REs are a bit tricky. On the one hand, we need to simulate
+;; the behavior of things like a+b as multiple identifiers. On the
+;; other, we need to deal with holes and leading underscores
+;; sensibly. The problem with all this is that we want to anchor the
+;; regexp properly as well, and the EMACS RE mechanism really isn't
+;; geared to do that. What we have to work with is:
+;;
+;;    \<  - matches empty, but only at start of word
+;;    \_< - matches empty, but only at start of symbol
+;;
+;; bitc-mode gives '_', '#', and '@' word syntax, so the RE for
+;; operators is relatively straightforward:
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defconst bitc-operator-re "\\(?:\\_<\\(?:[!$%&*+-/<>=?^|~]+\\)\\_>\\)"
   "Regexp to match a BitC operator.")
 
 (defconst bitc-ident-re
@@ -95,14 +110,29 @@ definition.")
          ;; Match a mixfix hole:
          (bitc-mixfix-hole-re "\\(?:@\\|_\\|\\(?:#_\\)\\)"))
 
-    ;; Regexp to match a BitC identifier:
-    (concat "\\(?:\\_<"
-            "_*"                        ;leading underscores
-            bitc-mixfix-hole-re "?"     ;optional mixfix hole
-            bitc-ident-chunk-re
-            "\\(?:" bitc-mixfix-hole-re bitc-ident-chunk-re "\\)*" ; more chunks sep by holes
-            bitc-mixfix-hole-re "?"     ;optional mixfix hole
-            "\\_>\\)"))
+    ;; Regexp to match an anchored BitC identifier:
+    (concat "\\(?:"
+
+            "\\(?:"
+            ;; Starts with an operator:
+            bitc-operator-re
+            "\\|"
+            ;; Or an alpha ident:
+            "\\(?:\\<" bitc-alpha-chunk-re "\\)"
+            "\\|"
+            ;; Or optional leading underscores followed by a hole and
+            ;; an identifier chunk:
+            "\\(?:\\<_*" bitc-mixfix-hole-re bitc-ident-chunk-re "\\)"
+            "\\)"
+
+            ;; These are followed by an arbitrary sequence of holes
+            ;; and ident chunks:
+            "\\(?:" bitc-mixfix-hole-re bitc-ident-chunk-re "\\)*"
+
+            ;; Followed by an optional trailing hole:
+            bitc-mixfix-hole-re "?"
+
+            "\\)"))
   "Regexp matching a BitC identifier. The regexp accounts for
 leading underscores and holes.")
 
@@ -239,9 +269,9 @@ matched form is matched as sub-expression 1.")
 	  "\\|"
 	  bitc-type-variable-re
 	  "\\|"
-	  "[][{}():;,=]"                ;single-character tokens
-	  "\\|"
 	  ":="                          ;assignment
+	  "\\|"
+	  "[][{}():;,=]"                ;single-character tokens
 	  "\\|"
 	  "::"                          ;list construction
 	  "\\|"

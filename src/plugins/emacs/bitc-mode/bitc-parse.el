@@ -471,7 +471,7 @@ left of point."
                 (add-next-indent tok t))
 
                ((or (equal tok-str "when")
-                    (equal tok-str "until"))
+                    (equal tok-str "unless"))
                 (add-indent "do-align" tok-col)
                 ;; kill back to and including the if-align:
                 (add-next-indent tok t))

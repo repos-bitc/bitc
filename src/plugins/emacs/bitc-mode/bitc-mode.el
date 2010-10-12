@@ -83,12 +83,12 @@
 
 (defvar bitc-mode-syntax-table
   (let ((st (make-syntax-table)))
-    ;; Underscores in identifiers:
+    ;; Underscores and holes in identifiers:
     (modify-syntax-entry ?_ "w" st)
+    (modify-syntax-entry ?@ "w" st)
+    (modify-syntax-entry ?# "w" st)
 
     ;; Operator characters need to have identifier symbol syntax:
-    (modify-syntax-entry ?# "_" st)
-    (modify-syntax-entry ?@ "_" st)
     (modify-syntax-entry ?! "_" st)
     (modify-syntax-entry ?$ "_" st)
     (modify-syntax-entry ?& "_" st)
@@ -100,7 +100,6 @@
     (modify-syntax-entry ?> "_" st)
     (modify-syntax-entry ?= "_" st)
     (modify-syntax-entry ?? "_" st)
-    (modify-syntax-entry ?@ "_" st)
     (modify-syntax-entry ?^ "_" st)
     (modify-syntax-entry ?| "_" st)
     (modify-syntax-entry ?~ "_" st)
