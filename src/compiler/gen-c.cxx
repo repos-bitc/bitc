@@ -2588,13 +2588,16 @@ toc(std::ostream& errStream,
     }
 
   case at_when:
+  case at_unless:
     {
       shared_ptr<AST> testAst = ast->child(0);
       shared_ptr<AST> thenAst = ast->child(1);
 
       out << "if (";
+      if (ast->astType == at_unless) out << "!(";
       TOC(errStream, uoc, testAst, out, IDname, decls,
           ast, 0, flags);
+      if (ast->astType == at_unless) out << ")";
       out << ") {" << endl;
       out.more();
       TOC(errStream, uoc, thenAst, out, IDname, decls,

@@ -420,6 +420,9 @@ AST::old_atKwd() const
   case at_when:
     return "when";
 
+  case at_unless:
+    return "unless";
+
   case at_and:
     return "and";
 

@@ -312,6 +312,7 @@ struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
   TransitionLexer::KeyWord( "uint8",            lf_transition,        tk_UINT8 ),
   TransitionLexer::KeyWord( "unboxed",          lf_transition,        tk_UNBOXED ),
   TransitionLexer::KeyWord( "union",            lf_transition,        tk_UNION ),
+  TransitionLexer::KeyWord( "unless",           lf_transition,        tk_UNLESS ),
   TransitionLexer::KeyWord( "until",            lf_transition,        tk_UNTIL ),
   TransitionLexer::KeyWord( "using",            lf_transition,        tk_ReservedWord ),
   TransitionLexer::KeyWord( "value-at",         lf_transition,        tk_ReservedWord ),

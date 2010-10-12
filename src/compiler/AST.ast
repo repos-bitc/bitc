@@ -1153,7 +1153,7 @@ GROUP eform = literal | var | unit
 //            | array_length | array_ref_length | vector_length
             | lambda | suspend
             | apply | struct_apply | object_apply | ucon_apply
-            | if | when | and | or | cond | uswitch
+            | if | when | unless| and | or | cond | uswitch
             | setbang | dup | deref | inner_ref
             | try | throw | let | letStar | letrec
             | container | loop
@@ -1230,6 +1230,7 @@ AST ucon_apply = ucon expr+;
 AST if ("if") = expr expr expr;
 // IF [7.11.2]
 AST when ("when") = expr expr;
+AST unless ("unless") = expr expr;
 // AND [7.11.3]
 AST and ("and") = expr+;
 // OR [7.11.4]

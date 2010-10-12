@@ -271,6 +271,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
     }
 
   case at_when:
+  case at_unless:
     {
       //markTail(ast->child(0), fn, bps, false);
       markTail(ast->child(1), fn, bps, isTail);

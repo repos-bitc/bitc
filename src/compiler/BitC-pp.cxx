@@ -1091,10 +1091,11 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
     }
 
   case at_when:
+  case at_unless:
     {
       out << ast->atKwd() << " ";
       blk_BitcP(out, ast->child(0), flags);
-      out << "\nthen ";
+      out << "\ndo ";
       out.indentToHere();
       blk_BitcP(out, ast->child(1), flags | pp_InLayoutBlock);
       break;

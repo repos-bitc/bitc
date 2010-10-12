@@ -2322,6 +2322,7 @@ resolve(std::ostream& errStream,
     }
 
   case at_when:
+  case at_unless:
   case at_and:
   case at_or:
     {

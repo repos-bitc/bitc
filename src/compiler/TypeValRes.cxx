@@ -211,6 +211,7 @@ isExpansive(std::ostream& errStream,
     }
 
   case at_when:
+  case at_unless:
     {
       CHKEXP(itsExpansive, isExpansive(errStream, gamma,
                                        ast->child(0)));

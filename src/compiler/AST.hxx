@@ -687,6 +687,7 @@ enum AstType {
   at_ucon_apply,
   at_if,
   at_when,
+  at_unless,
   at_and,
   at_or,
   at_cond,
