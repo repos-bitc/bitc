@@ -351,15 +351,15 @@ module sha1_impl {
                     context.messNdx := context.messNdx + 1
                     context.lenLow := context.lenLow + 8
 
-                    if context.lenLow == 0
-                      then {
-                        context.lenHigh := context.lenHigh + 1
-                        if context.lenHigh == 0
-                          then context.corrupted := sha1.sha_InputTooLong
-                      }
+                    when context.lenLow == 0
+                    do {
+                      context.lenHigh := context.lenHigh + 1
+                      when context.lenHigh == 0
+                      do context.corrupted := sha1.sha_InputTooLong
+                    }
 
-                    if context.messNdx == 64
-                      then sha1ProcessMessageBlock(context)
+                    when context.messNdx == 64
+                    do sha1ProcessMessageBlock(context)
 
                 sha1.sha_Success
               }

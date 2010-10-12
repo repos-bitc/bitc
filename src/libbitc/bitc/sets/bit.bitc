@@ -62,8 +62,8 @@ interface bitc.sets.bit {
 
   def set(s: bitset, n:word, on) = {
     let needWords = (n+32)/32 in
-      if (s.nWords < needWords) then
-        let v = s.bits in {
+      when s.nWords < needWords
+      do let v = s.bits in {
           s.bits := MakeVector(needWords, lambda(n) {
             if n < s.nWords
               then v[n]
@@ -76,11 +76,11 @@ interface bitc.sets.bit {
       let bit = 1 << (n % 32) in
         let want = { if (on) then s.bits[w] | bit
                              else s.bits[w] & ~bit } in
-          if s.bits[w] != want
-            then {
-              s.bits[w] := want;
-              s.nElem := if (on) then s.nElem + 1 else s.nElem - 1
-            }
+          when s.bits[w] != want
+          do {
+            s.bits[w] := want;
+            s.nElem := if (on) then s.nElem + 1 else s.nElem - 1
+          }
   }
 
   def insert(s, n) = set(s, n, true)
