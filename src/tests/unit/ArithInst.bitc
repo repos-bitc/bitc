@@ -39,6 +39,6 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (if (== 1:int32 1) 0 1)))
+def main.main(argvec: string[])
+in
+  if 1:int32 == 1 then 0 else 1:int32

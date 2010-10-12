@@ -43,11 +43,11 @@ boxed struct sf
 is
   f : fn (int32) -> int32
 
-(def (int32id x:int32) x)
+def int32id(x:int32) = x
 
-(def mysf1 (sf int32id))
+def mysf1 = sf(int32id)
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (let ((mysf2 (sf int32id)))
-      (mysf1.f 3))))
+def main.main(argvec: string[])
+in
+  let mysf2 = sf(int32id)
+  in mysf1.f(3)

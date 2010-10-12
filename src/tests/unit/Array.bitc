@@ -43,8 +43,10 @@ def i0 = 0:int32
 def i1 = 1:int32
 def i2 = 2:int32
 
-(def a1 (array i0 i1 i2))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (begin a1.length a1[1])
-    i0))
+def a1 = array(i0, i1, i2)
+
+def main.main(argvec: string[])
+in
+  a1.length
+  a1[1]
+  i0
