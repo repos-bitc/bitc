@@ -93,7 +93,7 @@ definition.")
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defconst bitc-operator-re "\\(?:\\_<\\(?:[!$%&*+-/<>=?^|~]+\\)\\_>\\)"
+(defconst bitc-operator-re "\\(?:\\(?:[!$%&*+-/<>=?^|~]+\\)\\)"
   "Regexp to match a BitC operator.")
 
 (defconst bitc-ident-re
