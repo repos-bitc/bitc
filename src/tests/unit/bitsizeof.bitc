@@ -40,8 +40,7 @@ import bitc.main as main
 import bitc.target.arch as target_arch
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (if (== (bitsizeof (fn 'a -> 'a))
-	    target_arch.WordSize)
-	1 0)))
+def main.main(argvec : string[])
+in
+  if bitsizeof(fn ('a) -> 'a) == target_arch.WordSize
+  then 1 else 0:int32

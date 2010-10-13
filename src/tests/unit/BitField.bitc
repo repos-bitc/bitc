@@ -48,9 +48,10 @@ boxed union u
 is a is aa : uint32(2)
    b is bb : uint32(30)
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (let ((s_instance (s 1 2))
-	  (u_instance (a 1)))
-      (begin (cons 0:int32 (cons 1 nil))
-	     0))))
+def main.main(argvec : string[])
+in
+  let s_instance = s(1, 2)
+      u_instance = a(1)
+  in
+    cons(0:int32, cons(1, nil))
+    0 : int32

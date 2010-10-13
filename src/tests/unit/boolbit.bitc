@@ -43,7 +43,7 @@ boxed struct bst
 is f1 : bool(1) 
    fill : uint32(31)
 
-(def bstv (bst true))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (if bstv.f1 0 1)))
+def bstv = bst(true)
+
+def main.main(argvec : string[])
+in if bstv.f1 then 0 else 1:int32

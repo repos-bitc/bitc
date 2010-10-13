@@ -39,6 +39,7 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-def main.main(argVec: string[]) =
+def main.main(argVec: string[])
+in
   label L
   in if true then from L return 0:int32 else 25:int32

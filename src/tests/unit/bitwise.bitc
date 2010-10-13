@@ -39,13 +39,13 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def i:uint8 0)
+def i:uint8 = 0
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (bit_and i i)
-    (bit_or i i)
-    (bit_not i)
-    (<< i 2)
-    (>> i 2)
-    0))
+def main.main(argvec : string[])
+in
+  bit_and(i, i)
+  bit_or(i, i)
+  bit_not(i)
+  i << 2
+  i >> 2
+  0:int32
