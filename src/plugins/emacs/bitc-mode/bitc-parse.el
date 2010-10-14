@@ -814,7 +814,6 @@ tabstops `stops', return a suitable indent cycle structure."
 
   (bitc-maybe-clear-cycle-state)
   (when (null bitc-cycle-indent-info)
-    (debug)
     (setq bitc-cycle-indent-info (bitc-compute-indent-info)))
   bitc-cycle-indent-info)    
 

@@ -292,6 +292,7 @@ matched form is matched as sub-expression 1.")
   '(
     "and"
     "case"
+    "catch"
     "do"
     "else"
     "if"
