@@ -36,16 +36,19 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(forall ((CopyCompat 'a char))
-  (def charEQ:(fn (boxed 'a) -> bool)
-    (lambda (x) true)))
+
+def charEQ:fn (boxed('a)) -> bool
+  where CopyCompat('a, char) =
+  lambda (x) true
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32) 
-  (lambda (argv)  
-    (let ((const_a:(boxed char) (dup 'a'))
-	  (mutable_a:(boxed (mutable char)) (dup 'a')))
-      (charEQ const_a)
-      (charEQ mutable_a))
-    0))
+
+def main.main(argvec : string[]) 
+in
+  let const_a:boxed(char) = dup('a')
+      mutable_a:boxed(mutable(char)) = dup('a')
+  in
+    charEQ(const_a)
+    charEQ(mutable_a)
+  0:int32
