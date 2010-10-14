@@ -51,11 +51,18 @@ is a:int32
 
 exception Xn3
 
-(def (f) (try (try (throw Xn3)
-		      (catch xyz 
-			     (Xn1 i1)
-			     (Xn2 xyz.a)))
-		 (catch pqr (Xn3 1000))))
+def f()
+in
+  try
+    try throw(Xn3)
+    catch xyz 
+    case Xn1 in i1
+    case Xn2 in xyz.a
+  catch pqr
+  case Xn3 in 1000
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) (f) i0))
+def main.main(argvec : string[])
+in
+  f()
+  i0
+
