@@ -594,6 +594,9 @@ CleanMixFix(INOstream& errStream, ASTPtr ast)
     if (fn == "(@)") {
       ast->astType = at_unit;
       ast->children.clear();
+      // No children, and don't want to flow through to the cases
+      // below if we hit this, so:
+      return ast;
     }
 
     // Array indexing:
