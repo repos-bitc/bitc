@@ -851,6 +851,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
 
   case at_lambda:
     {
+#if 0
       if (ast->printVariant && pf_IMPLIED) {
         // While this test is true while printing whole top-level forms,
         // it is not true in the case of  individual expressions. Hence
@@ -860,6 +861,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
                   << "at_ilambda pattern!\n";
         exit(1);
       }
+#endif
   
       shared_ptr<AST> lamArgs = ast->child(0);
       shared_ptr<AST> lamRetBlock = ast->child(1);
