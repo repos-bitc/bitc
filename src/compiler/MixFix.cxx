@@ -187,19 +187,45 @@ struct QuasiKeywordMap {
   }
 };
 
-static const std::string ThunkMarker = "#_";
-static const std::string HoleMarker = "_";
-static const std::string KwdSeparator = "@";
+enum MixElemModifierValues {
+  MEMV_NONE,
+
+  MEMV_THUNK                    // Hole expression should be thunked.
+};
+typedef sherpa::EnumSet<MixElemModifierValues> MixElemModifiers;
+
+struct MixRuleElement {
+  SyntacticCategory sc;
+  MixElemModifiers mods;
+  std::string name;
+
+  MixRuleElement(SyntacticCategory _sc)
+  {
+    sc = _sc;
+    mods = MEMV_NONE;
+  }
+  MixRuleElement(std::string _name)
+  {
+    sc = msc_keyword;
+    name = _name;
+  }
+
+  bool isHole() { return sc != msc_keyword; };
+};
+typedef std::vector<MixRuleElement> MixElemVec;
 
 struct MixRule : public boost::enable_shared_from_this<MixRule> {
   /// @brief Summary name of this mix rule
   std::string name;
 
   /// @brief Exploded elements of the right-hand side of the production.
-  StringVec rhs;
+  MixElemVec rhs;
 
   /// @brief Fixity - extracted mainly for doc and debug purposes
   int fixity;
+
+  /// @brief The syntactic category that this rule matches
+  SyntacticCategory sc;
 
   /// @brief Precedence for this production (infix only).
   int prec;
@@ -215,26 +241,20 @@ struct MixRule : public boost::enable_shared_from_this<MixRule> {
   bool isClosed()  const { return fixity == closed; }
   bool isPostfix() const { return fixity == postfix; }
 
-  bool isInitialHole(size_t pos) {
-    return ((pos == rhs.size() - 1) &&
-            (rhs[pos] == HoleMarker ||
-             rhs[pos] == ThunkMarker));
-  }
-
-  bool isFinalHole(size_t pos) {
-    return ((pos == rhs.size() - 1) &&
-            (rhs[pos] == HoleMarker ||
-             rhs[pos] == ThunkMarker));
-  }
-
   bool isHole(size_t pos) {
-    return (rhs[pos] == HoleMarker ||
-            rhs[pos] == ThunkMarker);
+    return (rhs[pos].sc != msc_keyword);
   }
 
   bool isKwd(size_t pos) {
-    return (rhs[pos] != HoleMarker &&
-            rhs[pos] != ThunkMarker);
+    return (rhs[pos].sc == msc_keyword);
+  }
+
+  bool isInitialHole(size_t pos) {
+    return (pos == 0) && isHole(pos);
+  }
+
+  bool isFinalHole(size_t pos) {
+    return ((pos == rhs.size() - 1) && isHole(pos));
   }
 
   bool hasLeadingHole() 
@@ -251,8 +271,10 @@ private:
   void extract();
 
 public:
-  MixRule(const std::string& _nm, int _prec, Associativity _assoc = assoc_none)
+  MixRule(SyntacticCategory _sc, const std::string& _nm, int _prec, 
+          Associativity _assoc = assoc_none)
   {
+    sc = _sc;
     name = _nm;
     prec = _prec;
     assoc = _assoc;
@@ -260,9 +282,10 @@ public:
   }
 
   static shared_ptr<MixRule> 
-  make(const std::string& _nm, int _prec, Associativity _assoc = assoc_none)
+  make(SyntacticCategory _sc, const std::string& _nm, int _prec, 
+       Associativity _assoc = assoc_none)
   {
-    MixRule *tmp = new MixRule(_nm, _prec, _assoc);
+    MixRule *tmp = new MixRule(_sc, _nm, _prec, _assoc);
     return boost::shared_ptr<MixRule>(tmp);
   }
 
@@ -290,10 +313,9 @@ struct MixFixNode {
     rule = _rule;
   }
 
-  bool matchesKwd(const std::string& kwd) const {
+  bool matchesKwd(const MixRuleElement& elem) const {
     assert(ast);
-    return (ast->astType == at_ident &&
-            ast->s == kwd);
+    return (elem.sc == msc_keyword && ast->s == elem.name);
   }
 
   void PrettyPrint(sherpa::INOstream& out, PrettyPrintFlags flags)
@@ -311,10 +333,13 @@ struct MixFixNode {
   }
 
   bool isKwd() const
-  { return (rule) ? false : true; }
+  { return (!rule); }
 
   bool isExpr() const 
-  { return (rule) ? true : false; }
+  { return rule && rule->sc == msc_expr; }
+
+  bool isType() const 
+  { return rule && rule->sc == msc_type; }
 };
 
 typedef std::vector<MixFixNode> MixInput;
@@ -388,27 +413,58 @@ MixRule::extract()
   std::string rule = name;
   
   while(rule.size()) {
-    if (rule[0] == HoleMarker[0]) {
-      rhs.push_back(HoleMarker);
+    if (rule[0] == '_') {
+      rhs.push_back(MixRuleElement(sc));
       rule = rule.substr(1);
     }
-    else if (rule.substr(0, 2) == ThunkMarker) {
-      rhs.push_back(ThunkMarker);
+    else if (rule[0] == '#') {  // need to parse it
+      SyntacticCategory sc;
+
+      switch (rule[1]) {
+      case 'e':
+        sc = msc_expr;
+        break;
+      case 't':
+        sc = msc_type;
+        break;
+      case 'k':
+        sc = msc_kind;
+        break;
+      default:
+        assert(false);
+      }
+
+      MixRuleElement elem(sc);
+
       rule = rule.substr(2);
+      while (rule[0] != '_') {
+        switch(rule[0]) {
+        case 'T':
+          elem.mods |= MEMV_THUNK;
+          break;
+        default:
+          assert(false);
+        }
+
+        rule = rule.substr(1);
+      }
+      
+      rhs.push_back(elem);
+      rule = rule.substr(1);
     }
     else {
-      if (rule[0] == KwdSeparator[0])
+      if (rule[0] == '@')       // keyword separator
         rule = rule.substr(1);
 
       // Find the end of this quasi-keyword, or end-of-rule:
       size_t nxt = rule.find_first_of("#_@");
 
       if (nxt == string::npos) {
-        rhs.push_back(rule);
+        rhs.push_back(MixRuleElement(rule));
         rule.clear();
       }
       else {
-        rhs.push_back(rule.substr(0, nxt));
+        rhs.push_back(MixRuleElement(rule.substr(0, nxt)));
         rule = rule.substr(nxt);
       }
     }
@@ -438,7 +494,7 @@ MixContext::cannotPossiblyMatch(sherpa::INOstream& errStream,
                                 MixRulePtr rule, 
                                 const MixInput& input)
 {
-  StringVec& rhs = rule->rhs;
+  MixElemVec& rhs = rule->rhs;
 
   // Are enough components left?
   if (input.size() < rhs.size())
@@ -507,23 +563,23 @@ QuasiKeywordMap::remove(std::string qkwd)
 void 
 MixContext::add(MixRulePtr rule)
 {
-  StringVec& rhs = rule->rhs;
+  MixElemVec& rhs = rule->rhs;
   
   for (size_t i = 0; i < rhs.size(); i++)
-    if (!rule->isHole(i))
-      kwMap.add(rhs[i]);
+    if (rule->isKwd(i))
+      kwMap.add(rhs[i].name);
 
   // Closed and prefix rules start with a token:
   if (!rule->hasLeadingHole())
-    kwMap[rhs[0]].nFirst++;
+    kwMap[rhs[0].name].nFirst++;
 
   // Prefix and infix rules end with a hole:
-  if (rule->hasTrailingHole() && (rhs.size() != 1))
-    kwMap[rhs[rhs.size()-2]].nPre++;
+  if (rule->hasTrailingHole())
+    kwMap[rhs[rhs.size()-2].name].nPre++;
 
   // Postfix and infix rules start with a hole:
-  if (rule->hasLeadingHole() && (rhs.size() != 1))
-    kwMap[rhs[1]].nPost++;
+  if (rule->hasLeadingHole())
+    kwMap[rhs[1].name].nPost++;
 
   rules.insert(rule);
 }
@@ -532,23 +588,23 @@ MixContext::add(MixRulePtr rule)
 void
 MixContext::remove(MixRulePtr rule)
 {
-  StringVec& rhs = rule->rhs;
+  MixElemVec& rhs = rule->rhs;
 
   // Closed and prefix rules start with a token:
   if (!rule->hasLeadingHole())
-    kwMap[rhs[0]].nFirst--;
+    kwMap[rhs[0].name].nFirst--;
 
   // Prefix and infix rules end with a hole:
   if (rule->hasTrailingHole())
-    kwMap[rhs[rhs.size()-2]].nPre--;
+    kwMap[rhs[rhs.size()-2].name].nPre--;
 
   // Postfix and infix rules start with a hole:
   if (rule->hasLeadingHole())
-    kwMap[rhs[1]].nPost--;
+    kwMap[rhs[1].name].nPost--;
 
   for (size_t i = 0; i < rhs.size(); i++)
-    if (!rule->isHole(i))
-      kwMap.remove(rhs[i]);
+    if (rule->isKwd(i))
+      kwMap.remove(rhs[i].name);
 
   rules.erase(rule);
 }
@@ -657,9 +713,9 @@ CheckMixFix(INOstream& errStream, ASTPtr ast)
   return ast;
 }
 
-static MixRulePtr MixNoRuleFound = MixRule::make("_", INT_MIN, assoc_none);
-static MixRulePtr MixStartRule = MixRule::make("_", INT_MIN, assoc_none);
-static MixRulePtr MixInputRule = MixRule::make("(_)", INT_MIN, assoc_none);
+static MixRulePtr MixNoRuleFound = MixRule::make(msc_expr, "_", INT_MIN, assoc_none);
+static MixRulePtr MixStartRule = MixRule::make(msc_expr, "_", INT_MIN, assoc_none);
+static MixRulePtr MixInputRule = MixRule::make(msc_expr, "(_)", INT_MIN, assoc_none);
 
 /// @brief Wrapper for ParseMixFix.
 ///
@@ -741,34 +797,42 @@ reduce(INOstream& errStream, MixInput& shunt, MixRulePtr rule)
   shared_ptr<AST> fnName = 
     AST::make(at_ident, LToken(tk_BlkIdent, rule->name));
 
-  result = AST::make(at_apply, shunt[0].ast->loc, fnName);
+  if (rule->name == "_:#t_") {
+    result = AST::make(at_typeAnnotation, shunt[0].ast->loc);
+  }
+  else if (rule->sc == msc_expr) {
+    result = AST::make(at_apply, shunt[0].ast->loc, fnName);
+  }
+  else if (rule->sc == msc_type) {
+    result = AST::make(at_typeapp, shunt[0].ast->loc, fnName);
+  }
 
   assert(rule->rhs.size() == shunt.size());
 
   for(size_t i = 0; i < shunt.size(); i++) {
-    if (rule->rhs[i] == HoleMarker) {
+    if (rule->rhs[i].isHole()) {
       assert(!shunt[i].isKwd());
-      result->addChild(shunt[i].ast);
-    }
-    else if (rule->rhs[i] == ThunkMarker) {
-      assert(!shunt[i].isKwd());
+      
+      shared_ptr<AST> tree = shunt[i].ast;
 
-      /// @bug If the thunkified code contains a return, this doesn't
-      /// do the right thing at all, so there is a hygiene failure. We
-      /// need to change the lambda mechanism around so that we can
-      /// let the proper return label be captured as part of the
-      /// thunk's closure.
-      shared_ptr<AST> iRetBody = 
-        AST::make(at_labeledBlock, shunt[i].ast->loc,
-                  AST::make(at_ident, LToken(tk_BlkIdent, "__return")),
-                  shunt[i].ast);
+      if (rule->rhs[i].mods & MEMV_THUNK) {
+        /// @bug If the thunkified code contains a return, this doesn't
+        /// do the right thing at all, so there is a hygiene failure. We
+        /// need to change the lambda mechanism around so that we can
+        /// let the proper return label be captured as part of the
+        /// thunk's closure.
+        shared_ptr<AST> iRetBody = 
+          AST::make(at_labeledBlock, tree->loc,
+                    AST::make(at_ident, LToken(tk_BlkIdent, "__return")),
+                    tree);
 
-      shared_ptr<AST> thunk = 
-        AST::make(at_lambda, shunt[i].ast->loc,
-                  AST::make(at_argVec, shunt[i].ast->loc), // empty
-                  iRetBody);
+        tree = 
+          AST::make(at_lambda, tree->loc,
+                    AST::make(at_argVec, tree->loc), // empty
+                    iRetBody);
+      }
 
-      result->addChild(thunk);
+      result->addChild(tree);
     }
   }
 
@@ -1047,35 +1111,35 @@ MixRulePtr MixRules[] =  {
   // Beginning of user-defined mixfix range
   /////////////////////////////////////////////////////////
 
-  MixRule::make("_or_",  0, assoc_left), // lazy OR (syntax)
-  MixRule::make("_||_",  0, assoc_left), // lazy OR (syntax)
-  MixRule::make("_and_", 1, assoc_left), // lazy AND (syntax)
-  MixRule::make("_&&_",  1, assoc_left), // lazy AND (syntax)
-  MixRule::make("_!=_",  2, assoc_left),
-  MixRule::make("_==_",  2, assoc_left),
-  MixRule::make("_<_",   3, assoc_left),
-  MixRule::make("_<=_",  3, assoc_left),
-  MixRule::make("_>_",   3, assoc_left),
-  MixRule::make("_>=_",  3, assoc_left),
-  MixRule::make("_::_",  4, assoc_left), // infix cons
-  MixRule::make("_|_",   5, assoc_left),
-  MixRule::make("_^_",   6, assoc_left),
-  MixRule::make("_&_",   7, assoc_left),
-  MixRule::make("_<<_",  8, assoc_left),
-  MixRule::make("_>>_",  8, assoc_left),
-  MixRule::make("_+_",   9, assoc_left),
-  MixRule::make("_-_",   9, assoc_left),
-  MixRule::make("_%_",  10, assoc_left),
-  MixRule::make("_*_",  10, assoc_left),
-  MixRule::make("_/_",  10, assoc_left),
+  MixRule::make(msc_expr, "_or_",  0, assoc_left), // lazy OR (syntax)
+  MixRule::make(msc_expr, "_||_",  0, assoc_left), // lazy OR (syntax)
+  MixRule::make(msc_expr, "_and_", 1, assoc_left), // lazy AND (syntax)
+  MixRule::make(msc_expr, "_&&_",  1, assoc_left), // lazy AND (syntax)
+  MixRule::make(msc_expr, "_!=_",  2, assoc_left),
+  MixRule::make(msc_expr, "_==_",  2, assoc_left),
+  MixRule::make(msc_expr, "_<_",   3, assoc_left),
+  MixRule::make(msc_expr, "_<=_",  3, assoc_left),
+  MixRule::make(msc_expr, "_>_",   3, assoc_left),
+  MixRule::make(msc_expr, "_>=_",  3, assoc_left),
+  MixRule::make(msc_expr, "_::_",  4, assoc_left), // infix cons
+  MixRule::make(msc_expr, "_|_",   5, assoc_left),
+  MixRule::make(msc_expr, "_^_",   6, assoc_left),
+  MixRule::make(msc_expr, "_&_",   7, assoc_left),
+  MixRule::make(msc_expr, "_<<_",  8, assoc_left),
+  MixRule::make(msc_expr, "_>>_",  8, assoc_left),
+  MixRule::make(msc_expr, "_+_",   9, assoc_left),
+  MixRule::make(msc_expr, "_-_",   9, assoc_left),
+  MixRule::make(msc_expr, "_%_",  10, assoc_left),
+  MixRule::make(msc_expr, "_*_",  10, assoc_left),
+  MixRule::make(msc_expr, "_/_",  10, assoc_left),
 
-  MixRule::make("_**_",    11, assoc_left), // exponentiation
-  MixRule::make("_**_+_",  11, assoc_left),  // hypothetical mul-add for testing
+  MixRule::make(msc_expr, "_**_",    11, assoc_left), // exponentiation
+  MixRule::make(msc_expr, "_**_+_",  11, assoc_left),  // hypothetical mul-add for testing
 
-  MixRule::make("-_",   12, assoc_right), // Unary negation
-  MixRule::make("!_",   13, assoc_right), // Boolean inverse
-  MixRule::make("not_", 13, assoc_right), // Boolean inverse
-  MixRule::make("~_",   14, assoc_right), // Bitwise inverse
+  MixRule::make(msc_expr, "-_",   12, assoc_right), // Unary negation
+  MixRule::make(msc_expr, "!_",   13, assoc_right), // Boolean inverse
+  MixRule::make(msc_expr, "not_", 13, assoc_right), // Boolean inverse
+  MixRule::make(msc_expr, "~_",   14, assoc_right), // Bitwise inverse
 
   //////////////////////////////////////////////////////////
   // End of user-defined mixfix range
@@ -1093,23 +1157,28 @@ MixRulePtr MixRules[] =  {
   // the same first token.
 
   // cpair convenience and precedence override:
-  MixRule::make("(_)",  128, assoc_none),
+  MixRule::make(msc_expr, "(_)",  128, assoc_none),
 
   // list convenience syntax:
-  MixRule::make("[_]",  128, assoc_none),
+  MixRule::make(msc_expr, "[_]",  128, assoc_none),
 
   // The design note called for:
-  //   MixRule::make("__",  0, assoc_left),
+  //   MixRule::make(msc_expr, "__",  0, assoc_left),
   // but I'm giving these a try instead:
 
-  MixRule::make("_,_",  -1, assoc_right), // arg assembly, cpair assembly
+  MixRule::make(msc_expr, "_:#t_", 128, assoc_none),
 
-  MixRule::make("(@)",   129, assoc_left), // unit constructor
+  // Kind matching is not yet implemented:
+  // MixRule::make(msc_type, "_:#k_", 129, assoc_none),
 
-  MixRule::make("_(@)",  130, assoc_left), // nullary application
-  MixRule::make("_(_)",  130, assoc_left), // application
-  MixRule::make("_[_]",  130, assoc_left), // array/vector subscript
-  MixRule::make("_._",   130, assoc_left), // dot notation (select or usesel)
+  MixRule::make(msc_expr, "_,_",  -1, assoc_right), // arg assembly, cpair assembly
+
+  MixRule::make(msc_expr, "(@)",   129, assoc_left), // unit constructor
+
+  MixRule::make(msc_expr, "_(@)",  130, assoc_left), // nullary application
+  MixRule::make(msc_expr, "_(_)",  130, assoc_left), // application
+  MixRule::make(msc_expr, "_[_]",  130, assoc_left), // array/vector subscript
+  MixRule::make(msc_expr, "_._",   130, assoc_left), // dot notation (select or usesel)
 
   // Which might quite possibly be a better approach
 };
@@ -1132,7 +1201,7 @@ HandleMixFix(std::ostream& errStream, shared_ptr<AST> ast)
   for (size_t c = 0; c < ast->children.size(); c++)
     errFree = errFree && HandleMixFix(errStream, ast->child(c));
 
-  if (ast->astType == at_mixExpr) {
+  if (ast->astType == at_mixfix) {
     shared_ptr<AST> newAst = ProcessMixFix(errStream, ast);
 
     if (!newAst)

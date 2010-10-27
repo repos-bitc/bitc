@@ -225,7 +225,7 @@ markTail(shared_ptr<AST> ast, shared_ptr<AST> fn, shared_ptr<AST> bps, bool isTa
       break;
     }
 
-  case at_tqexpr:
+  case at_typeAnnotation:
     {
       markTail(ast->child(0), fn, bps, isTail); 
       break;
