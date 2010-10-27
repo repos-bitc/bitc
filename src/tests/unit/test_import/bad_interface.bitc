@@ -1,0 +1,4 @@
+bitc version 0.11
+interface bad_interface
+is
+  def something:int32

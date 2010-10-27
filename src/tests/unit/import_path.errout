@@ -1,0 +1,2 @@
+import_path.bitc:2:0: Unable to import test_import.bad_interface
+import_path.bitc:4:0: Syntax error in input: unexpected "in"
