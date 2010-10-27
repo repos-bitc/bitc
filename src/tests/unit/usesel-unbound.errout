@@ -1,0 +1,9 @@
+usesel-unbound.bitc:11:4: Identifier `lst' is undefined. Are you missing the name on an import statement?
+usesel-unbound.bitc:11:24: Identifier `stdio' used here, Undefined.
+usesel-unbound.bitc:11:24: Identifier  `stdio' is undefined.
+usesel-unbound.bitc:11:43: Identifier `stdio' used here, Undefined.
+usesel-unbound.bitc:11:43: Identifier  `stdio' is undefined.
+usesel-unbound.bitc:11:57: Identifier `foo' used here, Undefined.
+usesel-unbound.bitc:11:57: Identifier  `foo' is undefined.
+usesel-unbound.bitc:11:73: Identifier `mil' used here, Undefined.
+Exiting due to errors during Symbol Resolution

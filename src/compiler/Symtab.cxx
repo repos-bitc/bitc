@@ -943,6 +943,16 @@ resolve(std::ostream& errStream,
         lookupStream << ":" << iface->s << ":";
         std::string lookupName = lookupStream.str();
         shared_ptr<AST> ifNameAst= aliasEnv->getBinding(lookupName);
+        if (!ifNameAst) {
+          errStream << ast->loc << ": "
+                    << "Identifier `"
+                    << iface->s 
+                    << "' is undefined. Are you missing the name on an import statement?"
+                    << std::endl;
+          errorFree = false;
+          break;
+        }
+
         std::string ifName = ifNameAst->s;
         assert(ifName != "");
       
@@ -1449,9 +1459,9 @@ resolve(std::ostream& errStream,
       shared_ptr<AST> ifAst = ast->child(0);
       if (!importIfBinding(errStream, aliasEnv, ifAst)) {
         errStream << ast->loc << ": "
-                  << "Unable to provide interface \""
+                  << "Unable to provide interface `"
                   << ifAst->s
-                  << "\" - interface file not found. "
+                  << "' - interface file not found. "
                   << std::endl;
         errorFree = false;
         break;
@@ -1498,9 +1508,9 @@ resolve(std::ostream& errStream,
 
       if (!importIfBinding(errStream, aliasEnv, ifAst)) {
         errStream << ast->loc << ": "
-                  << "Unable to import interface \""
+                  << "Unable to import interface `"
                   << ifAst->s
-                  << "\" - interface file not found. "
+                  << "' - interface file not found. "
                   << std::endl;
         errorFree = false;
         break;
@@ -1572,9 +1582,9 @@ resolve(std::ostream& errStream,
 
       if (!importIfBinding(errStream, aliasEnv, ifAst)) {
         errStream << ast->loc << ": "
-                  << "Unable to import interface \""
+                  << "Unable to import interface `"
                   << ifAst->s
-                  << "\" - interface file not found. "
+                  << "' - interface file not found. "
                   << std::endl;
         errorFree = false;
         break;
@@ -2224,12 +2234,9 @@ resolve(std::ostream& errStream,
         }
         else if (!lhs->isIdentType(id_value)) {
           errStream << lhs->loc 
-                    << ": At selection, Identifier "
+                    << ": Identifier "
                     << " `" << lhs->s << "'" 
-                    << " is not an imported interface"
-                    << " or a value, but a " 
-                    << identTypeToString(lhs->identType) 
-                    << "." << std::endl;
+                    << " is undefined." << std::endl;
           errorFree = false;
           break;
         }

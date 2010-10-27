@@ -92,9 +92,16 @@ BUILD/libbitc-bita: COMPILE_SRC=$(LIBBITC_BITA)
 BUILD/libbitc-bita: $(LIBBITC_BITA)
 
 import_path.test: TEST_MODE=compile
+import_path.test: EXPECT_STATUS=1
 BUILD/import_path: COMPILE_ERROUTPUT=import_path.errout
 BUILD/import_path: EXPECT_STATUS=1
 BUILD/import_path: TEST_MODE=compile
 BUILD/import_path: COMPILE_INC=-I.
+
+usesel-unbound.test: TEST_MODE=compile
+usesel-unbound.test: EXPECT_STATUS=1
+BUILD/usesel-unbound: TEST_MODE=compile
+BUILD/usesel-unbound: EXPECT_STATUS=1
+BUILD/usesel-unbound: COMPILE_ERROUTPUT=usesel-unbound.errout
 
 cyclic.test: TEST_MODE=compile
