@@ -84,9 +84,12 @@ BUILD/string-lex: COMPILE_ERROUTPUT=string-lex.errout
 LIBBITC_SHA1_SRC=$(LIBBITC_SRC)/crypt/sha1.bits
 
 BUILD/sha1-test: COMPILE_SRC=$(LIBBITC_SHA1_SRC)
+BUILD/sha1-test: $(LIBBITC_SHA1_SRC)
 BUILD/sha1-file: COMPILE_SRC=$(LIBBITC_SHA1_SRC)
+BUILD/sha1-file: $(LIBBITC_SHA1_SRC)
 
 BUILD/libbitc-bita: COMPILE_SRC=$(LIBBITC_BITA)
+BUILD/libbitc-bita: $(LIBBITC_BITA)
 
 import_path.test: TEST_MODE=compile
 BUILD/import_path: COMPILE_ERROUTPUT=import_path.errout

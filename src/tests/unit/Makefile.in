@@ -156,6 +156,9 @@ BUILD:
 $(LIBBITC_C_RUNTIME): $(BITCC)
 	make -C $(LIBBITC_SRC) BUILD/libbitc.a
 
+$(LIBBITC_BITA): $(BITCC)
+	make -C $(LIBBITC_SRC) BUILD/libbitc.bita
+
 $(LIBBITC_NO_GC): $(BITCC)
 	make -C $(LIBBITC_SRC) BUILD/libbitc-no-gc.a
 
