@@ -192,7 +192,7 @@ isExpansive(std::ostream& errStream,
       break;
     }
 
-  case at_typeAnnotation:
+  case at_tqexpr:
     {
       itsExpansive = isExpansive(errStream, gamma,
                                   ast->child(0));
@@ -479,7 +479,7 @@ isAValue(shared_ptr<const AST> ast)
   case at_usesel:
     return true;
     
-  case at_typeAnnotation:
+  case at_tqexpr:
     return isAValue(ast->child(0));
     
 #ifdef HAVE_INDEXABLE_LENGTH_OPS

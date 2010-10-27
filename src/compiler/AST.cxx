@@ -563,10 +563,10 @@ AST::tagName(const AstType at)
     return "at_dummyType";
   case at_identPattern:
     return "at_identPattern";
-  case at_typeAnnotation:
-    return "at_typeAnnotation";
-  case at_mixfix:
-    return "at_mixfix";
+  case at_tqexpr:
+    return "at_tqexpr";
+  case at_mixExpr:
+    return "at_mixExpr";
   case at_unit:
     return "at_unit";
   case at_suspend:
@@ -725,8 +725,6 @@ AST::tagName(const AstType at)
     return "agt_expr";
   case agt_expr_or_define:
     return "agt_expr_or_define";
-  case agt__AnonGroup0:
-    return "agt__AnonGroup0";
   case agt_eform:
     return "agt_eform";
   case agt_ucon:
@@ -888,10 +886,10 @@ AST::nodeName(const AstType at)
     return "dummyType";
   case at_identPattern:
     return "identPattern";
-  case at_typeAnnotation:
-    return "typeAnnotation";
-  case at_mixfix:
-    return "mixfix";
+  case at_tqexpr:
+    return "tqexpr";
+  case at_mixExpr:
+    return "mixExpr";
   case at_unit:
     return "unit";
   case at_suspend:
@@ -1050,8 +1048,6 @@ AST::nodeName(const AstType at)
     return "expr";
   case agt_expr_or_define:
     return "expr_or_define";
-  case agt__AnonGroup0:
-    return "_AnonGroup0";
   case agt_eform:
     return "eform";
   case agt_ucon:
@@ -1213,10 +1209,10 @@ AST::printName(const AstType at)
     return "<dummyType>";
   case at_identPattern:
     return "<identPattern>";
-  case at_typeAnnotation:
-    return "<typeAnnotation>";
-  case at_mixfix:
-    return "<mixfix>";
+  case at_tqexpr:
+    return "<tqexpr>";
+  case at_mixExpr:
+    return "<mixExpr>";
   case at_unit:
     return "()";
   case at_suspend:
@@ -1375,8 +1371,6 @@ AST::printName(const AstType at)
     return "{expr}";
   case agt_expr_or_define:
     return "{expr_or_define}";
-  case agt__AnonGroup0:
-    return "{_AnonGroup0}";
   case agt_eform:
     return "{eform}";
   case agt_ucon:
@@ -1484,8 +1478,8 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_fieldType
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_dummyType
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_identPattern
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_typeAnnotation
-  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_mixfix
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_tqexpr
+  (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_mixExpr
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_unit
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_suspend
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // at_sizeof
@@ -1563,12 +1557,11 @@ static const unsigned char *astMembers[] = {
   (unsigned char *)"\x00\x00\x00\x00\x00\x00\x70\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00", // agt_fielditem
   (unsigned char *)"\x14\x00\x00\x00\x04\x00\x80\x7f\xff\x00\x00\x00\x00\x00\x00\x00\x00\x12\xc0\x00", // agt_qtype
   (unsigned char *)"\x14\x00\x00\x00\x00\x00\x80\x7f\xff\x00\x00\x00\x00\x00\x00\x00\x00\x12\x80\x00", // agt_type
-  (unsigned char *)"\xf4\x03\x00\x00\x00\x00\x00\x00\x00\xfe\xff\xf7\x3f\xfe\x1f\x67\x50\x0a\x00\x09", // agt_expr
-  (unsigned char *)"\xf4\x03\x00\x00\x00\x03\x00\x00\x00\xfe\xff\xf7\x3f\xfe\x1f\x67\x50\x0a\x00\x0b", // agt_expr_or_define
-  (unsigned char *)"\xf4\x03\x00\x00\x00\x00\x80\x7f\xff\xfe\xff\xf7\x3f\xfe\x1f\x67\x50\x1a\x80\x0d", // agt__AnonGroup0
-  (unsigned char *)"\xf4\x03\x00\x00\x00\x00\x00\x00\x00\xf8\xff\xf7\x3f\xfe\x1f\x67\x50\x0a\x00\x08", // agt_eform
-  (unsigned char *)"\x14\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x02\x00\x10", // agt_ucon
-  (unsigned char *)"\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x20"  // agt_ow
+  (unsigned char *)"\xf4\x03\x00\x00\x00\x00\x00\x00\x00\xfe\xff\xf7\x3f\xfe\x1f\x67\x50\x0a\x00\x05", // agt_expr
+  (unsigned char *)"\xf4\x03\x00\x00\x00\x03\x00\x00\x00\xfe\xff\xf7\x3f\xfe\x1f\x67\x50\x0a\x00\x07", // agt_expr_or_define
+  (unsigned char *)"\xf4\x03\x00\x00\x00\x00\x00\x00\x00\xf8\xff\xf7\x3f\xfe\x1f\x67\x50\x0a\x00\x04", // agt_eform
+  (unsigned char *)"\x14\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x02\x00\x08", // agt_ucon
+  (unsigned char *)"\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\x00\x10"  // agt_ow
 };
 
 bool
@@ -3634,7 +3627,7 @@ AST::isValid() const
     }
     break;
 
-  case at_typeAnnotation: // normal AST:
+  case at_tqexpr: // normal AST:
     // match agt_expr
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
@@ -3665,20 +3658,20 @@ AST::isValid() const
     }
     break;
 
-  case at_mixfix: // normal AST:
-    // match agt__AnonGroup0+
+  case at_mixExpr: // normal AST:
+    // match agt_expr+
     if(c >= children.size()) {
       astChNumError(*this, c+1, children.size());
       errorsPresent = true;
       break;
     }
-    if (!ISSET(astMembers[agt__AnonGroup0], child(c)->astType)) {
-      astChTypeError(*this, agt__AnonGroup0, child(c)->astType, 0);
+    if (!ISSET(astMembers[agt_expr], child(c)->astType)) {
+      astChTypeError(*this, agt_expr, child(c)->astType, 0);
       errorsPresent = true;
     }
     while (c < children.size()) {
-      if (!ISSET(astMembers[agt__AnonGroup0], child(c)->astType))
-        astChTypeError(*this, agt__AnonGroup0, child(c)->astType, c);
+      if (!ISSET(astMembers[agt_expr], child(c)->astType))
+        astChTypeError(*this, agt_expr, child(c)->astType, c);
       c++;
     }
 
@@ -5479,9 +5472,6 @@ AST::isValid() const
     break;
 
   // group ASTagt_expr_or_define gets default
-    break;
-
-  // group ASTagt__AnonGroup0 gets default
     break;
 
   // group ASTagt_eform gets default

@@ -100,7 +100,7 @@ cl_HoistInstLam(shared_ptr<UocInfo> uoc)
           outAsts.push_back(newDef);
 
           shared_ptr<AST> instName = lamName->Use();
-          shared_ptr<AST> the = AST::make(at_typeAnnotation);
+          shared_ptr<AST> the = AST::make(at_tqexpr);
           the->addChild(instName);
           the->addChild(methodValue->symType->asAST(methodValue->loc));
 

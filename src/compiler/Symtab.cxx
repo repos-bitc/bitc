@@ -245,14 +245,12 @@ aliasPublicBindings(const std::string& idName,
   }
 }
 
-static bool
+static void
 importIfBinding(std::ostream& errStream, 
                 shared_ptr<ASTEnvironment > aliasEnv,
                 shared_ptr<AST> ifName)
 {
-  if (!findInterface(errStream, ifName))
-    return false;
-
+  findInterface(errStream, ifName);
   std::string canonicalIfName = ifName->s;
 
   // If we have seen this interface before, use the original import:
@@ -288,7 +286,6 @@ importIfBinding(std::ostream& errStream,
   }
 
   ifName->envs.env = dupEnv;
-  return true;
 }
 
 static bool
@@ -1447,15 +1444,7 @@ resolve(std::ostream& errStream,
   case at_provide:
     {
       shared_ptr<AST> ifAst = ast->child(0);
-      if (!importIfBinding(errStream, aliasEnv, ifAst)) {
-        errStream << ast->loc << ": "
-                  << "Unable to provide interface \""
-                  << ifAst->s
-                  << "\" - interface file not found. "
-                  << std::endl;
-        errorFree = false;
-        break;
-      }
+      importIfBinding(errStream, aliasEnv, ifAst);
 
       shared_ptr<ASTEnvironment > ifEnv = ifAst->envs.env;
 
@@ -1496,15 +1485,7 @@ resolve(std::ostream& errStream,
       shared_ptr<AST> ifAst = ast->child(0); 
       shared_ptr<AST> idAst = ast->child(1);
 
-      if (!importIfBinding(errStream, aliasEnv, ifAst)) {
-        errStream << ast->loc << ": "
-                  << "Unable to import interface \""
-                  << ifAst->s
-                  << "\" - interface file not found. "
-                  << std::endl;
-        errorFree = false;
-        break;
-      }
+      importIfBinding(errStream, aliasEnv, ifAst);
 
       // import ident ifname
       shared_ptr<ASTEnvironment > tmpEnv = env->newScope();
@@ -1570,15 +1551,7 @@ resolve(std::ostream& errStream,
         break;
       }
 
-      if (!importIfBinding(errStream, aliasEnv, ifAst)) {
-        errStream << ast->loc << ": "
-                  << "Unable to import interface \""
-                  << ifAst->s
-                  << "\" - interface file not found. "
-                  << std::endl;
-        errorFree = false;
-        break;
-      }
+      importIfBinding(errStream, aliasEnv, ifAst);
 
       if (ast->children.size() == 1) {
         // This is an import-all form
@@ -2016,7 +1989,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_mixfix:
+  case at_mixExpr:
     {
       // First process the elements:
       for (size_t c = 0; c < ast->children.size(); c++)
@@ -2053,7 +2026,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_typeAnnotation:
+  case at_tqexpr:
     {
       // match agt_eform
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 

@@ -179,8 +179,8 @@ AST::old_atKwd() const
   case at_Null:
     return "NULL";
 
-  case at_mixfix:
-    return "<mixfix>";
+  case at_mixExpr:
+    return "mixExpr";
 
   case at_docString:
     return "<doccomment>";
@@ -331,8 +331,8 @@ AST::old_atKwd() const
   case at_identPattern:
     return "<identPattern>";
 
-  case at_typeAnnotation:
-    return "<typeAnnotation>";
+  case at_tqexpr:
+    return "<tqexpr>";
 
   case at_suspend:
     return "suspend";

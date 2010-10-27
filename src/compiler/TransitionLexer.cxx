@@ -1505,33 +1505,13 @@ TransitionLexer::getNextInputToken()
   while(c == '_')
     c = getChar();
 
-  // Match leading parsed hole
+  // Match leading separator
   if (c == '#') {
-    switch(c = getChar()) {     // syntactic category
-    case 'e':
-      {
-        c = getChar();
-        switch (c) {
-        case '_':               // no modifier
-          ungetChar(c);
-          break;
-        case 'T':               // Thunk modifier
-          break;
-        default:
-          goto malformed_ident;
-        }
-        break;
-      }
-    case 't':                   // no legal modifiers for now
-    case 'k':
-      break;
-    default:
-      goto malformed_ident;
-    }
-
     c = getChar();
     if (c != '_') {
-      goto malformed_ident;
+      ungetChar(c);
+      c = '#';
+      goto ident_done;
     }
 
     c = getChar();
@@ -1566,31 +1546,11 @@ TransitionLexer::getNextInputToken()
 
     // Match internal or trailing separator*
     if (c == '#') {
-      switch(c = getChar()) {     // syntactic category
-      case 'e':
-        {
-          c = getChar();
-          switch (c) {
-          case '_':               // no modifier
-            ungetChar(c);
-            break;
-          case 'T':               // Thunk modifier
-            break;
-          default:
-            goto malformed_ident;
-          }
-          break;
-        }
-      case 't':                   // no legal modifiers for now
-      case 'k':
-        break;
-      default:
-        goto malformed_ident;
-      }
-
       c = getChar();
       if (c != '_') {
-        goto malformed_ident;
+        ungetChar(c);
+        c = '#';
+        goto ident_done;
       }
     }
     c = getChar();
@@ -1601,19 +1561,10 @@ TransitionLexer::getNextInputToken()
   ungetChar(c);
 
   // Might have matched trailing '@' in error. If so, back it out:
-  if (thisToken[thisToken.size()-1] == '@') {
-    ReportParseError(startLoc, thisToken + 
-                     " is not a well-formed identifier. Trailing '@' is not valid.");
-    RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
-  }
-  else {
-    int tokType = kwCheck(thisToken.c_str(), tk_BlkIdent);
-    endLoc.updateWith(thisToken);
-    RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
-  }
+  if (thisToken[thisToken.size()-1] == '@')
+    ungetChar('@');
 
- malformed_ident:
-  ReportParseError(startLoc, thisToken + 
-                   " is not a well-formed identifier.");
-  RETURN_TOKEN(LToken(EOF, startLoc, endLoc, "end of file"));
+  int tokType = kwCheck(thisToken.c_str(), tk_BlkIdent);
+  endLoc.updateWith(thisToken);
+  RETURN_TOKEN(LToken(tokType, startLoc, endLoc, thisToken));
 }

@@ -63,13 +63,6 @@ enum Fixity {
   closed                      // sometimes called "outfix"
 };
 
-enum SyntacticCategory {
-  msc_keyword,                  // ??
-  msc_expr,
-  msc_type,
-  msc_kind,                     // not yet implemented
-};
-
 /// @brief Given a mixfix expression AST, convert it into a
 /// expression tree according to the prevailing mixfix rules.
 boost::shared_ptr<AST>

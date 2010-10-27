@@ -3354,7 +3354,7 @@ typeInfer(std::ostream& errStream, shared_ptr<AST> ast,
       break;
     }
 
-  case at_typeAnnotation:
+  case at_tqexpr:
     {
       /*------------------------------------------------
               A |- e:t1  U(t = t1)

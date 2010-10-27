@@ -1868,7 +1868,7 @@ toc(std::ostream& errStream,
         shared_ptr<AST> p = ast;
         size_t c = 1;
         
-        while (e->astType == at_typeAnnotation) {
+        while (e->astType == at_tqexpr) {
           p = e;
           c = 0;
           e = e->child(0);
@@ -1917,7 +1917,7 @@ toc(std::ostream& errStream,
       break;
     }
 
-  case at_typeAnnotation:
+  case at_tqexpr:
     {
       // match agt_eform
       TOC(errStream, uoc, ast->child(0), out, IDname, decls,
@@ -2619,7 +2619,7 @@ toc(std::ostream& errStream,
           ast, 0, flags);
 
       shared_ptr<AST> lExpr = ast->child(1);
-      if (lExpr->astType == at_typeAnnotation)
+      if (lExpr->astType == at_tqexpr)
         lExpr = lExpr->child(0);
 
       switch(lExpr->astType) {

@@ -168,9 +168,20 @@ $(BITCC):
 include expect.mk
 
 BUILD/%: %.bitc $(BITCC) $(LIBBITC_C_RUNTIME) | BUILD
-	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} -e ${COMPILE_ERROUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) $(COMPILE_INC) -v -o $@  $< $(COMPILE_SRC) $(LIBBITC_C_RUNTIME)
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} -e ${COMPILE_ERROUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_C_RUNTIME)
 
 # .PRECIOUS: $(SOURCE:%.bitc=%.c)
+
+LIBBITC_SHA1_SRC=@top_srcdir@/libbitc/crypt/sha1.bits
+
+BUILD/sha1-test: sha1-test.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | BUILD
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} -e ${COMPILE_ERROUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
+
+BUILD/sha1-file: sha1-file.bitc  $(BITCC) $(LIBBITC_SHA1_SRC) | BUILD
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} -e ${COMPILE_ERROUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_SHA1_SRC) $(LIBBITC_C_RUNTIME)
+
+BUILD/libbitc-bita: libbitc-bita.bitc  $(BITCC) $(LIBBITC_BITA) | BUILD
+	@../compileit.sh -m ${TEST_MODE} ${TESTOPTS} -s ${EXPECT_STATUS} -o ${COMPILE_OUTPUT} -e ${COMPILE_ERROUTPUT} $(RUN_BITCC) $(BITOPT) $(INC) -v -o $@  $< $(LIBBITC_BITA) $(LIBBITC_C_RUNTIME)
 
 #BUILD/%.c: %.bitc  $(BITCC)
 #	$(RUN_BITCC) $(BITCOPT) $(INC) --emit c -o $@ $<

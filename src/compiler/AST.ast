@@ -1138,10 +1138,10 @@ AST identPattern = var qtype?;
 
 
 // TYPE QUALIFIED EXPRESSIONS  [7.3]
-GROUP expr = eform | typeAnnotation | mixfix;
+GROUP expr = eform | tqexpr | mixExpr;
 GROUP expr_or_define = expr | define | recdef;
-AST typeAnnotation = expr type;
-AST mixfix = (expr|type)+;
+AST tqexpr = expr type;
+AST mixExpr = expr+;
 
 // EXPRESSIONS [7]
 GROUP eform = literal | var | unit

@@ -580,7 +580,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       out << ast->s;
     break;
 
-  case at_mixfix:
+  case at_mixExpr:
     {
       // This should never occur in production, but we need it to
       // support --dumpafter for the early passes:
@@ -637,7 +637,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
     ////////////////////////////////////////////////////////////////////
     // EXPRESSIONS
     ////////////////////////////////////////////////////////////////////
-  case at_typeAnnotation:
+  case at_tqexpr:
     // Argument order was swapped.
     doChildren(blk_BitcP, out, ast, 0, "", " : ", "", flags & ~pp_ShowTypes);
     break;
@@ -1186,7 +1186,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
   case at_Null:
     break;
 
-  case at_mixfix:              // migrated
+  case at_mixExpr:              // migrated
     out << "(" << ast->atKwd();
     out.more();
     sxp_doChildren(out, ast, 0, true, flags);
@@ -1587,7 +1587,7 @@ sxp_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
     out << "()";
     break;
 
-  case at_typeAnnotation:               // migrated
+  case at_tqexpr:               // migrated
     // Argument order was swapped.
     sxp_BitcP(out, ast->child(0), flags);
     out << " : ";

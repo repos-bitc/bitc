@@ -15,9 +15,9 @@ syn match bitcOperator "::"
 syn match bitcOperator ":="
 syn match bitcOperator "="
 syn match bitcOperator "->"
-syn keyword bitcOperator "not"
-syn keyword bitcOperator "and"
-syn keyword bitcOperator "or"
+syn match bitcOperator "not"
+syn match bitcOperator "and"
+syn match bitcOperator "or"
 
 syn keyword bitcType int8 int16 int32 int64
 syn keyword bitcType uint8 uint16 uint32 uint64

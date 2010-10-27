@@ -393,11 +393,12 @@ static unsigned VersionMinor(const std::string s)
 // Primary exprs are the truly primitive things.
 // Closed exprs are things like LET, DO, WHILE that are bracketed on
 // all sides.
-%type <ast> blk_expr_primary
-%type <ast> blk_expr_apply
+%type <ast> blk_primary_expr
+%type <ast> blk_apply_expr
+%type <ast> blk_expr_type_annotation
 %type <ast> blk_expr
 
-%type <ast> blk_expr_mixfix blk_mixfix_elem
+%type <ast> blk_mixfix_expr blk_mixfix_elem
 %type <ast> blk_mixfix_arglist
 
 %type <ast> blk_expr_if_then_else blk_expr_when blk_expr_unless
@@ -2910,78 +2911,84 @@ sxp_lambdapattern: sxp_ident ':' sxp_type_pl_byref {
 // common production.
 
 // MIXFIX: This needs a replacement...
-blk_expr_primary: blk_iblock {
-  SHOWPARSE("blk_expr_primary -> blk_iblock");
+blk_primary_expr: blk_iblock {
+  SHOWPARSE("blk_primary_expr -> blk_iblock");
   $$ = $1;
 }
 
-// blk_expr_primary: '(' blk_expr ')' {
-//  SHOWPARSE("blk_expr_primary -> ( blk_expr )");
+// blk_primary_expr: '(' blk_expr ')' {
+//  SHOWPARSE("blk_primary_expr -> ( blk_expr )");
 //   $$ = $2;
 //   // Be careful to preserve precedence when pretty printing:
 //   $$->printVariant |= pf_PARENWRAP;
 // }
 
-blk_expr_apply: blk_expr_primary {
-  SHOWPARSE("blk_expr_apply -> blk_expr_primary");
+blk_apply_expr: blk_primary_expr {
+  SHOWPARSE("blk_apply_expr -> blk_primary_expr");
   $$ = $1;
 }
-blk_expr_apply: tk_SIZEOF '(' blk_type ')' {
-  SHOWPARSE("blk_expr_apply -> SIZEOF (blk_type)");
+blk_apply_expr: tk_SIZEOF '(' blk_type ')' {
+  SHOWPARSE("blk_apply_expr -> SIZEOF (blk_type)");
   $$ = AST::make(at_sizeof, $1.loc, $3);
 };
-blk_expr_apply: tk_BITSIZEOF '(' blk_type ')' {
-  SHOWPARSE("blk_expr_apply -> BITSIZEOF (blk_type)");
+blk_apply_expr: tk_BITSIZEOF '(' blk_type ')' {
+  SHOWPARSE("blk_apply_expr -> BITSIZEOF (blk_type)");
   $$ = AST::make(at_bitsizeof, $1.loc, $3);
 };
 // FIX: This should be a built-in procedure
-blk_expr_apply: tk_DUP '(' blk_expr ')' {
-  SHOWPARSE("blk_expr_apply -> DUP ( blk_expr )");
+blk_apply_expr: tk_DUP '(' blk_expr ')' {
+  SHOWPARSE("blk_apply_expr -> DUP ( blk_expr )");
   $$ = AST::make(at_dup, $1.loc, $3);
 };
-blk_expr_apply: tk_DEREF '(' blk_expr ')' {
-  SHOWPARSE("blk_expr_apply -> DEREF ( blk_expr )");
+blk_apply_expr: tk_DEREF '(' blk_expr ')' {
+  SHOWPARSE("blk_apply_expr -> DEREF ( blk_expr )");
   $$ = AST::make(at_deref, $1.loc, $3);
 };
-blk_expr_apply: tk_MAKE_VECTOR '(' blk_expr ',' blk_expr ')' {
-  SHOWPARSE("blk_expr_apply -> MAKE-VECTOR ( blk_expr , blk_expr )");
+blk_apply_expr: tk_MAKE_VECTOR '(' blk_expr ',' blk_expr ')' {
+  SHOWPARSE("blk_apply_expr -> MAKE-VECTOR ( blk_expr , blk_expr )");
   $$ = AST::make(at_MakeVector, $1.loc, $3, $5);
 };
-blk_expr_apply: tk_VECTOR '(' blk_actual_params ')' {
-  SHOWPARSE("blk_expr_apply -> VECTOR (blk_actual_params)");
+blk_apply_expr: tk_VECTOR '(' blk_actual_params ')' {
+  SHOWPARSE("blk_apply_expr -> VECTOR (blk_actual_params)");
   $$ = $3;
   $$->astType = at_vector;
   $$->loc = $1.loc;
 };
-blk_expr_apply: tk_ARRAY '(' blk_nonempty_params ')' {
+blk_apply_expr: tk_ARRAY '(' blk_nonempty_params ')' {
   // Zero-length vector is illegal
-  SHOWPARSE("blk_expr_apply -> (ARRAY blk_nonempty_params)");
+  SHOWPARSE("blk_apply_expr -> (ARRAY blk_nonempty_params)");
   $$ = $3;
   $$->astType = at_array;
   $$->loc = $1.loc;
 };
 
-blk_expr_mixfix: blk_mixfix_elem %prec prec_PreferShift {
-  SHOWPARSE("blk_expr_mixfix -> blk_mixfix_elem");
+// In C, the cast operator appears at this point in the hierarchy:
+blk_expr_type_annotation: blk_apply_expr {
+  SHOWPARSE("blk_expr_type_annotation -> blk_apply_expr");
   $$ = $1;
 }
 
-blk_expr_mixfix: blk_expr_mixfix blk_mixfix_elem {
-  SHOWPARSE("blk_expr_mixfix -> blk_expr_mixfix blk_mixfix_elem");
+blk_mixfix_expr: blk_mixfix_elem %prec prec_PreferShift {
+  SHOWPARSE("blk_mixfix_expr -> blk_mixfix_elem");
+  $$ = $1;
+}
+
+blk_mixfix_expr: blk_mixfix_expr blk_mixfix_elem {
+  SHOWPARSE("blk_mixfix_expr -> blk_mixfix_expr blk_mixfix_elem");
   $1->addChildrenFrom($2);
   $$ = $1;
 }
 
-// blk_mixfix_elem: blk_expr_mixfix '.' blk_ident {
-//   SHOWPARSE("blk_expr_mixfix -> blk_expr_mixfix . blk_ident");
+// blk_mixfix_elem: blk_mixfix_expr '.' blk_ident {
+//   SHOWPARSE("blk_mixfix_expr -> blk_mixfix_expr . blk_ident");
 //   $$ = $1;
 //   $$->addChild(at_ident, $1));
 //   $$->addChild($3);
 // }
 
-blk_mixfix_elem: blk_expr_apply {
-  SHOWPARSE("blk_mixfix_elem -> blk_expr_apply");
-  $$ = AST::make(at_mixfix, $1->loc, $1);
+blk_mixfix_elem: blk_expr_type_annotation {
+  SHOWPARSE("blk_mixfix_elem -> blk_expr_type_annotation");
+  $$ = AST::make(at_mixExpr, $1->loc, $1);
 }
 
 // This entry is rather strange because it allows mixfix expressions
@@ -2996,49 +3003,44 @@ blk_mixfix_elem: blk_expr_apply {
 
 // blk_mixfix_elem: ',' {
 //   SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + ">");
-//   $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1));
+//   $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
 // };
 
 // Note that the "_._" rule is the only rule admitting '.', and will
 // force an expr match on the left, which is what we want.
 blk_mixfix_elem: '.' blk_ident {
-  SHOWPARSE("blk_mixfix_elem -> '.' <Ident " + $1.str + "> blk_ident");
-  $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1), $2);
+  SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + "> blk_ident");
+  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1), $2);
 };
-
-blk_mixfix_elem: ':' blk_type {
-  SHOWPARSE("blk_mixfix_elem -> ':' blk_type");
-  $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1), $2);
-}
 
 blk_mixfix_arglist: blk_expr {
   SHOWPARSE("blk_mixfix_arglist -> blk_expr");
-  $$ = AST::make(at_mixfix, $1->loc, $1);
+  $$ = AST::make(at_mixExpr, $1->loc, $1);
 }
 
 blk_mixfix_arglist: blk_mixfix_arglist ',' blk_expr {
   SHOWPARSE("blk_mixfix_arglist -> blk_mixfix_arglist , blk_expr");
   $$ = $1;
   $$->addChild(AST::make(at_ident, $2));
-  $$->addChild(AST::make(at_mixfix, $3->loc, $3));
+  $$->addChild(AST::make(at_mixExpr, $3->loc, $3));
 }
 
 blk_mixfix_elem: '(' blk_mixfix_arglist ')' {
   SHOWPARSE("blk_mixfix_elem -> ( blk_mixfix_arglist )");
-  $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1));
+  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
   $$->addChildrenFrom($2);
   $$->addChild(AST::make(at_ident, $3));
 }
 
 blk_mixfix_elem: '(' ')' {
   SHOWPARSE("blk_mixfix_elem -> ( )");
-  $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1));
+  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
   $$->addChild(AST::make(at_ident, $2));
 }
 
 blk_mixfix_elem: '[' blk_mixfix_arglist ']' {
   SHOWPARSE("blk_mixfix_elem -> [ blk_mixfix_arglist ]");
-  $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1));
+  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
   $$->addChildrenFrom($2);
   $$->addChild(AST::make(at_ident, $3));
 }
@@ -3046,8 +3048,8 @@ blk_mixfix_elem: '[' blk_mixfix_arglist ']' {
 // This is the only production defining blk_expr. It is causing
 // a (correctly resolved) S/R ambiguity that we should probably try to
 // clean up.
-blk_expr: blk_expr_mixfix %prec prec_PreferShift {
-  SHOWPARSE("blk_expr -> blk_expr_mixfix");
+blk_expr: blk_mixfix_expr %prec prec_PreferShift {
+  SHOWPARSE("blk_expr -> blk_mixfix_expr");
   $$ = $1;
 }
 
@@ -3158,7 +3160,10 @@ sxp_nonempty_params: sxp_nonempty_params sxp_expr {
 };
 
 // TYPE QUALIFIED EXPRESSIONS  [7.3]
-// Block syntax handles this with mixfix.
+blk_expr_type_annotation: blk_expr_type_annotation ':' blk_type {
+  SHOWPARSE("blk_expr_type_annotation -> blk_expr_type_annotation : blk_type");
+  $$ = AST::make(at_tqexpr, $1->loc, $1, $3);
+};
 
 sxp_expr: sxp_unqual_expr {
   SHOWPARSE("sxp_expr -> sxp_unqual_expr");
@@ -3166,7 +3171,7 @@ sxp_expr: sxp_unqual_expr {
 };
 sxp_expr: sxp_expr ':' sxp_type {
   SHOWPARSE("sxp_expr -> sxp_expr : sxp_type");
-  $$ = AST::make(at_typeAnnotation, $1->loc, $1, $3);
+  $$ = AST::make(at_tqexpr, $1->loc, $1, $3);
 };
 // sxp_expr: sxp_the_expr {
 //   SHOWPARSE("sxp_expr -> sxp_the_expr");
@@ -3176,7 +3181,7 @@ sxp_expr: sxp_expr ':' sxp_type {
 // sxp_the_expr: '(' tk_THE sxp_type sxp_unqual_expr ')' {
 //   SHOWPARSE("sxp_the_expr -> ( THE sxp_type sxp_unqual_expr )");
 //   // Note: argument order swapped for historical reasons.
-//   $$ = AST::make(at_typeAnnotation, $2.loc, $4, $3);
+//   $$ = AST::make(at_tqexpr, $2.loc, $4, $3);
 // };
 
 
@@ -3187,8 +3192,8 @@ sxp_expr: '(' tk_SUSPEND sxp_useident sxp_expr ')' {
 };
 
 // LITERALS  [7.1]
-blk_expr_primary: trn_literal {
-  SHOWPARSE("blk_expr_primary -> Literal");
+blk_primary_expr: trn_literal {
+  SHOWPARSE("blk_primary_expr -> Literal");
   $$ = $1;
 };
 sxp_unqual_expr: trn_literal {
@@ -3207,8 +3212,8 @@ sxp_unqual_expr: '(' tk_BITSIZEOF sxp_type ')' {
 };
 
 // UNIT EXPRESSIONS   [7.4.1]
-// blk_expr_primary: '(' ')' {
-//   SHOWPARSE("blk_expr_primary -> ()");
+// blk_primary_expr: '(' ')' {
+//   SHOWPARSE("blk_primary_expr -> ()");
 //   $$ = AST::make(at_unit, $1.loc);
 // };
 sxp_unqual_expr: '(' ')' {
@@ -3227,8 +3232,8 @@ sxp_unqual_expr: sxp_useident {
 but for the ambiguity with record (field) selection.
 So, the burden is now passed to further stages */
 
-blk_expr_primary: blk_ident {
-  SHOWPARSE("blk_expr_primary -> blk_ident");
+blk_primary_expr: blk_ident {
+  SHOWPARSE("blk_primary_expr -> blk_ident");
   $$ = $1;
 };
 sxp_unqual_expr: sxp_ident {
@@ -3397,8 +3402,8 @@ sxp_unqual_expr: '(' tk_BEGIN sxp_block_exprs ')' {
 // expressions. Note that we only want a local identifier here in any
 // case, and not an operator, so using tk_BlkIdent is fine here.
 
-blk_expr_primary: tk_LABEL tk_BlkIdent tk_IN blk_iblock {
-  SHOWPARSE("blk_expr_primary -> LABEL ident in blk_iblock");
+blk_primary_expr: tk_LABEL tk_BlkIdent tk_IN blk_iblock {
+  SHOWPARSE("blk_primary_expr -> LABEL ident in blk_iblock");
   $$ = AST::make(at_labeledBlock, $1.loc,
                  AST::make(at_ident, $2),
                  $4);
@@ -3616,14 +3621,14 @@ sxp_condcase: '(' sxp_expr sxp_block ')'  {
 };
 
 // SET! [7.16]                
-blk_expr: blk_expr_mixfix tk_ASSIGN blk_expr %prec tk_ASSIGN {
+blk_expr: blk_mixfix_expr tk_ASSIGN blk_expr %prec tk_ASSIGN {
   /* Strictly speaking, RHS could be a higher-level parse form,, but
    * none of those are l-values in any case. Need postfix_expr in
    * order to pick up things like 'a.b'. There is a location check
    * later in the compiler, but might as well reject what we can
    * early.
    */
-  SHOWPARSE("blk_assignment -> blk_expr_mixfix := blk_expr");
+  SHOWPARSE("blk_assignment -> blk_mixfix_expr := blk_expr");
   $$ = AST::make(at_setbang, $2.loc, $1, $3);
 };
 sxp_unqual_expr: '(' tk_SET sxp_expr sxp_expr ')' {
