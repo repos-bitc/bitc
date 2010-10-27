@@ -51,7 +51,7 @@ interface bitc.sets.bit {
   def contains(s:bitset, n:word) = {
     if s.nWords*32 > n
       then {
-        let w = (n+1)/32 in
+        let w = n/32 in
           let bit = 1 << (n % 32) in
             (s.bits[w] & bit) != 0
       }
@@ -72,7 +72,7 @@ interface bitc.sets.bit {
 	  s.nWords := needWords
         }
 
-    let w = (n+1)/32 in
+    let w = n/32 in
       let bit = 1 << (n % 32) in
         let want = { if (on) then s.bits[w] | bit
                              else s.bits[w] & ~bit } in

@@ -76,4 +76,18 @@ in
       then stdio.write_string(stdio.stdout, "Contains 5 (and shouldn't)\n")
       else stdio.write_string(stdio.stdout, "!Contains 5 (and shouldn't)\n")
 
+    try bitset.insert(s, 31)
+    catch e
+      otherwise
+        stdio.write_string(stdio.stdout, "Insert failed on word boundry\n")
+        ()
+
+    if try bitset.contains(s, 31)
+      catch e
+        otherwise
+          stdio.write_string(stdio.stdout, "Contains failed on word boundry\n")
+          false 
+      then stdio.write_string(stdio.stdout, "Contains 31 (and should)\n")
+      else stdio.write_string(stdio.stdout, "!Contains 31 (and should)\n")
+
     0:int32
