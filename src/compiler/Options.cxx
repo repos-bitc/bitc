@@ -63,6 +63,7 @@ namespace Options {
   set<string> xmlTypesUocs;
   bool ppFQNS = false;
   bool ppDecorate = false;
+  bool show_usage = false;
   unsigned verbose = 0;
   unsigned mixfixDebug = 0;
   FQNameSet entryPts;

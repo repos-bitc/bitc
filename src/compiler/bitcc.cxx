@@ -85,12 +85,15 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <fcntl.h>
 #include <signal.h>
 
 
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 #include <getopt.h>
 #include <langinfo.h>
@@ -143,6 +146,7 @@ using namespace sherpa;
 #define LOPT_NOALLOC      279   /* Statically reject heap-allocating
                                    operations and constructs */
 #define LOPT_MIXDEBUG     280   /* Debug level for the mixfix parser */
+#define LOPT_USAGE        281   /* Show resource usage. */
 
 struct option longopts[] = {
   /*  name,           has-arg, flag, val           */
@@ -178,6 +182,7 @@ struct option longopts[] = {
   { "raw-tvars",            0,  0, LOPT_RAW_TVARS },
   // Show all Type class constraints, including subsumed ones
   { "show-all-tccs",        0,  0, LOPT_SA_TCC },
+  { "show-resources",       0,  0, LOPT_USAGE },
   // Print tokens as they are accepted. Primarily useful for debugging
   // parse errors.
   { "showlex",              0,  0, LOPT_SHOWLEX },
@@ -193,6 +198,7 @@ struct option longopts[] = {
   { "stopafter",            1,  0, LOPT_STOPAFTER },
   // Change the standard search prefix directory, similar to gcc --system
   { "system",               1,  0, LOPT_SYSTEM },
+  { "times",                0,  0, LOPT_USAGE }, // convenience alias
   // Run verbosely. Not clear that this is actually being used anyware.
   { "verbose",              0,  0, 'v' },
   // Print compiler version and exit
@@ -691,6 +697,10 @@ main(int argc, char *argv[])
       Options::SystemDirs.push_back(optarg);
       break;
 
+    case LOPT_USAGE:
+      Options::show_usage = true;
+      break;
+
     case 'l':
       {
         AddLinkArgumentForGCC("-l");
@@ -929,6 +939,39 @@ main(int argc, char *argv[])
                                        unifiedUOC);
     if (!done)
       exit(1);
+  }
+
+  if (Options::show_usage) {
+    struct rusage my_rusage;
+    struct rusage child_rusage;
+
+    getrusage(RUSAGE_CHILDREN, &child_rusage);
+    getrusage(RUSAGE_SELF, &my_rusage);
+
+    std::cout << "Time in bitcc:  " 
+              << my_rusage.ru_utime.tv_sec
+              << "."
+              << std::setw(6) << std::setfill('0')
+              << my_rusage.ru_utime.tv_usec
+              << "u "
+              << my_rusage.ru_stime.tv_sec
+              << "."
+              << std::setw(6) << std::setfill('0')
+              << my_rusage.ru_stime.tv_usec
+              << 's'
+              << std::endl;
+    std::cout << "Time in gcc/ld: " 
+              << child_rusage.ru_utime.tv_sec
+              << "."
+              << std::setw(6) << std::setfill('0')
+              << child_rusage.ru_utime.tv_usec
+              << "u "
+              << child_rusage.ru_stime.tv_sec
+              << "."
+              << std::setw(6) << std::setfill('0')
+              << child_rusage.ru_stime.tv_usec
+              << 's'
+              << std::endl;
   }
 
   exit(0);

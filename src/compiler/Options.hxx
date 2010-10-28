@@ -62,6 +62,7 @@ namespace Options {
   extern bool showPasses;
   extern bool ppFQNS;
   extern bool ppDecorate;
+  extern bool show_usage;
   extern unsigned verbose;        // 0 = no, 1 = show exec, 2 = forward
 
   extern unsigned mixfixDebug;
