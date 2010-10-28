@@ -558,18 +558,29 @@ MixContext::remove(MixRulePtr rule)
 static ASTPtr
 CleanMixFix(INOstream& errStream, ASTPtr ast)
 {
-  if (ast->astType == at_apply) {
+  // This used to be an else-less IF designed to allow fall-through
+  // intentionally. That led to a number of bugs, because the value of
+  // 'fn' could become stale. I've therefore switched to a loop
+  // structure.
+
+  while (ast->astType == at_apply) {
     std::string fn = ast->child(0)->s;
 
     // This is the start rule - take all of these out.
-    if (fn == "_")
+    if (fn == "_") {
       ast = ast->child(1);
+      continue;
+    }
 
-    if (fn == "_._")
+    if (fn == "_._") {
       ast = AST::make(at_select, ast->loc, ast->child(1), ast->child(2));
+      break;
+    }
 
-    if (fn == "(_)")
+    if (fn == "(_)") {
       ast = ast->child(1);
+      continue;
+    }
 
     if (fn == "_(_)") {
       shared_ptr<AST> argAst = ast->child(2);
@@ -583,12 +594,15 @@ CleanMixFix(INOstream& errStream, ASTPtr ast)
         argAst = argAst->child(2);
       }
       ast->addChild(argAst);
+      break;
     }
 
     if (fn == "_(@)") {
       // Rotate the applied function into the proper position
       ast->children[0] = ast->children[1];
       ast->children.erase(ast->children.begin()+1, ast->children.end());
+
+      break;
     }
 
     if (fn == "(@)") {
@@ -596,12 +610,14 @@ CleanMixFix(INOstream& errStream, ASTPtr ast)
       ast->children.clear();
       // No children, and don't want to flow through to the cases
       // below if we hit this, so:
-      return ast;
+      break;
     }
 
     // Array indexing:
-    if (fn == "_[_]")
+    if (fn == "_[_]") {
       ast = AST::make(at_nth, ast->loc, ast->child(1), ast->child(2));
+      break;
+    }
 
 #if 0
     // Check for ([a, b, c]) convenience syntax. Otherwise eliminate
@@ -619,30 +635,34 @@ CleanMixFix(INOstream& errStream, ASTPtr ast)
             argAst = argAst->child(2);
         }
         ast->addChild(argAst);
+        break;
       }
       else {
         ast = ast->child(1);
+        continue;
       }
     }
 #endif
 
-    if (fn == "[_]")
+    if (fn == "[_]") {
       ast = AST::make(at_nth, ast->loc, ast->child(1), ast->child(2));
-
-    // If we did a rewrite using _(_) above, we'll have exposed a new
-    // function name. Some of those are special cases that now need to
-    // be checked:
-    fn = ast->child(0)->s;
+      break;
+    }
 
     if (fn == "_and_" || fn == "_&&_") {
       ast->astType = at_and;
       ast->children.erase(ast->children.begin());
+      break;
     }
 
     if (fn == "_or_" || fn == "_||_") {
       ast->astType = at_or;
       ast->children.erase(ast->children.begin());
+      break;
     }
+
+    // None of the above:
+    break;
   }
 
   for (size_t c = 0; c < ast->children.size(); c++)

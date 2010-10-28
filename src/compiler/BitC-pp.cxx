@@ -1103,19 +1103,14 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       break;
     }
 
-    // Apply-style output, but these two must be handled specially:
   case at_and:
     {
-      out << "_and_(";
-      doChildren(blk_BitcP, out, ast, 0, "", ", ", "", flags);
-      out << ")";
+      doChildren(blk_BitcP, out, ast, 0, "((", ") && (", "))", flags);
       break;
     }
   case at_or:
     {
-      out << "_or_(";
-      doChildren(blk_BitcP, out, ast, 0, "", ", ", "", flags);
-      out << ")";
+      doChildren(blk_BitcP, out, ast, 0, "((", ") || (", "))", flags);
       break;
     }
 
