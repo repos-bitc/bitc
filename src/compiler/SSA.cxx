@@ -128,7 +128,7 @@ warnTmp(std::ostream &errStream, shared_ptr<AST> ast)
   case at_deref:
     return true;
     
-  case at_tqexpr:
+  case at_typeAnnotation:
     return warnTmp(errStream, ast->child(0));
     
   default:
@@ -188,7 +188,7 @@ isTrivialInit(shared_ptr<AST> ast)
       return ast->symType->isAtomic();
     }
 
-  case at_tqexpr:
+  case at_typeAnnotation:
     {
       return isTrivialInit(ast->child(0));
     }
@@ -438,7 +438,7 @@ ssa(std::ostream& errStream,
       break;
     }
 
-  case at_tqexpr:
+  case at_typeAnnotation:
     {
       // match agt_eform
       SSA(errStream, uoc, ast->child(0), grandLet, identList, 

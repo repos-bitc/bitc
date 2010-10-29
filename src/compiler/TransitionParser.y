@@ -2988,7 +2988,7 @@ blk_mixfix_expr: blk_mixfix_expr blk_mixfix_elem {
 
 blk_mixfix_elem: blk_expr_type_annotation {
   SHOWPARSE("blk_mixfix_elem -> blk_expr_type_annotation");
-  $$ = AST::make(at_mixExpr, $1->loc, $1);
+  $$ = AST::make(at_mixfix, $1->loc, $1);
 }
 
 // This entry is rather strange because it allows mixfix expressions
@@ -3003,44 +3003,44 @@ blk_mixfix_elem: blk_expr_type_annotation {
 
 // blk_mixfix_elem: ',' {
 //   SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + ">");
-//   $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
+//   $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1));
 // };
 
 // Note that the "_._" rule is the only rule admitting '.', and will
 // force an expr match on the left, which is what we want.
 blk_mixfix_elem: '.' blk_ident {
   SHOWPARSE("blk_mixfix_elem -> <Ident " + $1.str + "> blk_ident");
-  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1), $2);
+  $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1), $2);
 };
 
 blk_mixfix_arglist: blk_expr {
   SHOWPARSE("blk_mixfix_arglist -> blk_expr");
-  $$ = AST::make(at_mixExpr, $1->loc, $1);
+  $$ = AST::make(at_mixfix, $1->loc, $1);
 }
 
 blk_mixfix_arglist: blk_mixfix_arglist ',' blk_expr {
   SHOWPARSE("blk_mixfix_arglist -> blk_mixfix_arglist , blk_expr");
   $$ = $1;
   $$->addChild(AST::make(at_ident, $2));
-  $$->addChild(AST::make(at_mixExpr, $3->loc, $3));
+  $$->addChild(AST::make(at_mixfix, $3->loc, $3));
 }
 
 blk_mixfix_elem: '(' blk_mixfix_arglist ')' {
   SHOWPARSE("blk_mixfix_elem -> ( blk_mixfix_arglist )");
-  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
+  $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1));
   $$->addChildrenFrom($2);
   $$->addChild(AST::make(at_ident, $3));
 }
 
 blk_mixfix_elem: '(' ')' {
   SHOWPARSE("blk_mixfix_elem -> ( )");
-  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
+  $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1));
   $$->addChild(AST::make(at_ident, $2));
 }
 
 blk_mixfix_elem: '[' blk_mixfix_arglist ']' {
   SHOWPARSE("blk_mixfix_elem -> [ blk_mixfix_arglist ]");
-  $$ = AST::make(at_mixExpr, $1.loc, AST::make(at_ident, $1));
+  $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1));
   $$->addChildrenFrom($2);
   $$->addChild(AST::make(at_ident, $3));
 }
@@ -3162,7 +3162,7 @@ sxp_nonempty_params: sxp_nonempty_params sxp_expr {
 // TYPE QUALIFIED EXPRESSIONS  [7.3]
 blk_expr_type_annotation: blk_expr_type_annotation ':' blk_type {
   SHOWPARSE("blk_expr_type_annotation -> blk_expr_type_annotation : blk_type");
-  $$ = AST::make(at_tqexpr, $1->loc, $1, $3);
+  $$ = AST::make(at_typeAnnotation, $1->loc, $1, $3);
 };
 
 sxp_expr: sxp_unqual_expr {
@@ -3171,7 +3171,7 @@ sxp_expr: sxp_unqual_expr {
 };
 sxp_expr: sxp_expr ':' sxp_type {
   SHOWPARSE("sxp_expr -> sxp_expr : sxp_type");
-  $$ = AST::make(at_tqexpr, $1->loc, $1, $3);
+  $$ = AST::make(at_typeAnnotation, $1->loc, $1, $3);
 };
 // sxp_expr: sxp_the_expr {
 //   SHOWPARSE("sxp_expr -> sxp_the_expr");
@@ -3181,7 +3181,7 @@ sxp_expr: sxp_expr ':' sxp_type {
 // sxp_the_expr: '(' tk_THE sxp_type sxp_unqual_expr ')' {
 //   SHOWPARSE("sxp_the_expr -> ( THE sxp_type sxp_unqual_expr )");
 //   // Note: argument order swapped for historical reasons.
-//   $$ = AST::make(at_tqexpr, $2.loc, $4, $3);
+//   $$ = AST::make(at_typeAnnotation, $2.loc, $4, $3);
 // };
 
 

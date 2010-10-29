@@ -1043,8 +1043,8 @@ getDefToInstantiate(ostream &errStream, shared_ptr<UocInfo> unifiedUOC,
 
     // If an immediate lambda was present, then InstLamHoist hoisted
     // it and left us with an ID wrapped by a THE.
-    assert (theMethod->astType == at_ident || theMethod->astType == at_tqexpr);
-    if (theMethod->astType == at_tqexpr)
+    assert (theMethod->astType == at_ident || theMethod->astType == at_typeAnnotation);
+    if (theMethod->astType == at_typeAnnotation)
       theMethod = theMethod->child(0);
 
     // Finally, we have the instance we want to instantiate,
@@ -1254,13 +1254,13 @@ UocInfo::recInstantiate(ostream &errStream,
       break;
     }
 
-  case at_tqexpr:
+  case at_typeAnnotation:
     {
       ast->child(0) = recInstantiate(errStream,
                                      ast->child(0),
                                      errFree, worklist);
 
-      if (ast->child(0)->astType == at_tqexpr) {        
+      if (ast->child(0)->astType == at_typeAnnotation) {        
         // We already generated a qualified expression
         // See IntLit / FloatLit case
         assert(ast->child(0)->child(0)->astType == at_intLiteral ||
@@ -1305,7 +1305,7 @@ UocInfo::recInstantiate(ostream &errStream,
       
       assert(ast->symType->isConcrete());
 
-      ast = AST::make(at_tqexpr, ast->loc, ast,
+      ast = AST::make(at_typeAnnotation, ast->loc, ast,
                       typeAsAst(ast->symType, ast->loc));
       RANDT_DROP(ast, "[[IntFloat R&T]]", UNIFIED_ENVS);
       break;        

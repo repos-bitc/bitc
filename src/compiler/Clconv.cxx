@@ -321,7 +321,7 @@ findusedef(std::ostream &errStream,
       break;
     }
 
-  case at_tqexpr:
+  case at_typeAnnotation:
     {
       CHKERR(errFree, findusedef(errStream, topAst, ast->child(0),
                                  USE_MODE, boundVars, freeVars));

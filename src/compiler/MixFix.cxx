@@ -1152,7 +1152,7 @@ HandleMixFix(std::ostream& errStream, shared_ptr<AST> ast)
   for (size_t c = 0; c < ast->children.size(); c++)
     errFree = errFree && HandleMixFix(errStream, ast->child(c));
 
-  if (ast->astType == at_mixExpr) {
+  if (ast->astType == at_mixfix) {
     shared_ptr<AST> newAst = ProcessMixFix(errStream, ast);
 
     if (!newAst)

@@ -2026,7 +2026,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_mixExpr:
+  case at_mixfix:
     {
       // First process the elements:
       for (size_t c = 0; c < ast->children.size(); c++)
@@ -2050,7 +2050,7 @@ resolve(std::ostream& errStream,
             RESOLVE(tree, env, lamLevel, USE_MODE, 
                     idc_apply, currLB, flags);        
 
-          // Finally, clobber the at_mixExpr node in-place with the
+          // Finally, clobber the at_mixfix node in-place with the
           // processed result:
           REWRITE_AST_IN_PLACE(ast, tree);
         }
@@ -2063,7 +2063,7 @@ resolve(std::ostream& errStream,
       break;
     }
 
-  case at_tqexpr:
+  case at_typeAnnotation:
     {
       // match agt_eform
       RESOLVE(ast->child(0), env, lamLevel, USE_MODE, 
