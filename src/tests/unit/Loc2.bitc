@@ -36,7 +36,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 bitc version 0.11
-(def (id x) x)
+def id(x) = x
 
 import bitc.main as main
 provide bitc.main main

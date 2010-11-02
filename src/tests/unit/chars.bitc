@@ -39,12 +39,15 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def (id x) x)
+def id(x) = x
 
-(def a 'a')
-(def s '\space')
-(def d '\U+1ab')
+def a = 'a'
+def s = '\space'
+def d = '\U+1ab'
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (id a) (id s) (id d) 0)) 
+def main.main(argvec: string[])
+in
+  id(a)
+  id(s)
+  id(d)
+  0:int32

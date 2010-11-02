@@ -41,7 +41,7 @@ provide bitc.main main
 
 def i0 = 0:int32
  
-(def (FUN x:'a y:'a) true)
+def FUN(x:'a, y:'a) = true
 
 trait ABC('a)
 is FN: fn('a, 'a) -> bool
@@ -54,7 +54,8 @@ is FN = FUN
 //(instance  (ABC int32)
 // FUN)
   
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (FN i0 i0) i0))
+def main.main(argvec:string[])
+in
+  FN(i0, i0)
+  i0
 

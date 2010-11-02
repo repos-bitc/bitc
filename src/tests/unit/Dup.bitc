@@ -43,9 +43,11 @@ def i0 = 0:int32
 def i1 = 1:int32
 def i2 = 2:int32
 
-(def duped (dup i2))
-(def dpair (dup (i0, false)))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (deref duped) (deref dpair).fst
-    i0))
+def duped = dup(i2)
+def dpair = dup((i0, false))
+
+def main.main(argvec:string[])
+in
+  deref(duped)
+  deref(dpair).fst
+  i0

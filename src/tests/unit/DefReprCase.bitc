@@ -46,8 +46,9 @@ is Ct1 is i:int32
    Ct2 is i:int32
        where i == 1
  
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (switch x (Ct1 true)
-      ((Ct1 Ct2) x.i))))
+def main.main(argvec:string[])
+in
+  switch x = Ct1(true)
+  case Ct1, Ct2 in
+    x.i
   

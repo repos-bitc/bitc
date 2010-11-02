@@ -1141,7 +1141,7 @@ AST identPattern = var qtype?;
 GROUP expr = eform | typeAnnotation | mixfix;
 GROUP expr_or_define = expr | define | recdef;
 AST typeAnnotation = expr type;
-AST mixfix = expr+;
+AST mixfix = (expr|type)+;
 
 // EXPRESSIONS [7]
 GROUP eform = literal | var | unit

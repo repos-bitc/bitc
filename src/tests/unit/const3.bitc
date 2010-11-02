@@ -42,12 +42,12 @@ provide bitc.main main
 boxed struct St('a)
 is f : (const 'a)
   
-(def x (St true))
-(def x2 (St true):(St (mutable bool)))
-(def y (St 10:int32))
-(def z (St (lambda (x) x)))
+def x = St(true)
+def x2 = St(true):St(mutable bool)
+def y = St(10:int32)
+def z = St(lambda (x) { x })
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    x
-    0))
+def main.main(argvec: string[])
+in
+  x
+  0:int32

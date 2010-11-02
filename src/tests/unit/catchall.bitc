@@ -39,14 +39,16 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    // The pattern being tested here is the "recovery block", wherein
-    // some piece of postaction code is supposed to happen even if an
-    // inner expression fails. To do that, we need to be able to write
-    // a try block having ONLY an otherwise clause:
-    (try 
-     0:int32
-     (catch e 
-	    (otherwise 0:int32 (throw e))))))
+def main.main(argvec: string[])
+in
+  // The pattern being tested here is the "recovery block", wherein
+  // some piece of postaction code is supposed to happen even if an
+  // inner expression fails. To do that, we need to be able to write
+  // a try block having ONLY an otherwise clause:
+  try 
+    0:int32
+  catch e
+  otherwise
+    0:int32
+    throw(e)
 

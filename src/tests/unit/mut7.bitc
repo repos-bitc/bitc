@@ -43,7 +43,7 @@ bitc version 0.11
 
 import bitc.list as ls
 
-(def (id x) x)
+def id(x) = x
 
 (def m1:(mutable int32) 1)
 (def m2:(mutable int32) 2)

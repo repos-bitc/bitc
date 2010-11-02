@@ -44,10 +44,13 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def (fnxn x) (let ((log (== x 0))) true))
+def fnxn(x) = let log = x == 0
+              in true
 
-(def (f2) (let ((p:(mutable 'a) 0)) p))
+def f2() = let p:mutable('a) = 0
+           in p
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (fnxn 0:word) 0))
+def main.main(argvec: string[])
+in
+  fnxn(0:word)
+  0:int32

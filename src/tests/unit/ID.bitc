@@ -43,7 +43,7 @@ def i0 = 0:int32
 def i1 = 1:int32
 def i2 = 2:int32
  
-(def (id x) x)
+def id(x) = x
 
 (def main.main:(fn (vector string) -> int32)
   (lambda (argvec) 

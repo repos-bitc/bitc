@@ -42,7 +42,7 @@ provide bitc.main main
 def id: fn('a) -> 'a
 def id: fn('b) -> 'b
 
-(def (id x) x)
+def id(x) = x
 
 // Cannot do this anymore
 //(proclaim id: (fn ('c) 'c))

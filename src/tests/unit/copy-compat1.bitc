@@ -37,19 +37,22 @@
 
 bitc version 0.11
 
-(forall ((CopyCompat 'a 'b)) 
-  (def abc: (fn 'a 'b -> ())
-    (lambda (x:'a y:'b) ())))
+def abc(x:'a, y:'b)
+  where CopyCompat('a, 'b)
+in
+  ()
 
-(forall ((CopyCompat (boxed 'a) (boxed 'a)))
-  (def fgh:(fn 'a 'b -> ())
-    (lambda (x:'a y:'b) ())))
+def fgh(x: 'a, y: 'b)
+  where CopyCompat(boxed('a), boxed('a))
+in
+  ()
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32) 
-  (lambda (argv)  
-    (abc (10, 20):(pair int32 (mutable int32))
-	 (10, 20):(pair int32 int32) )
-    0))
+
+def main.main(argv: string[])
+in
+  abc((10, 20):pair(int32, mutable(int32)),
+      (10, 20):pair(int32, int32))
+  0:int32
 

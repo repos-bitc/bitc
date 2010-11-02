@@ -39,13 +39,14 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (let ((x 25)
-	  (y:(const 'a) 25))
-      (let ((z y))
-	(set! x y)
-	(set! z x)
-	(- x y)
-	))))
+def main.main(argvec: string[])
+in
+  let x = 25:int32
+      y : const('a) = 25
+  in
+    let z = y
+    in
+      x := y
+      z := x
+      x - y    
 

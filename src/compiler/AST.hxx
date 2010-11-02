@@ -743,6 +743,7 @@ enum AstType {
   agt_type,
   agt_expr,
   agt_expr_or_define,
+  agt__AnonGroup0,
   agt_eform,
   agt_ucon,
   agt_ow,

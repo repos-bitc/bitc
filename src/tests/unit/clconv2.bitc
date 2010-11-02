@@ -46,14 +46,14 @@ import bitc.stdio as stdio
 import bitc.main as main
 provide bitc.main main
 
-(def (id x) x)
+def id(x) = x
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (def i:int32 0)
-    (def l:(list bool) nil)
-    (def out stdio.stdout)
-    (def (f) (id (i, l, out)))
-    
-    0))
+def main.main(argvec: string[])
+in
+  def i:int32 = 0
+  def l:list(bool) = nil
+  def out = stdio.stdout  
+  def f() = id ((i, l, out))
+
+  0 : int32
 

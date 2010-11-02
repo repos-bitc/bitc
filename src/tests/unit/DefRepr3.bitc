@@ -57,6 +57,7 @@ is Ct1 is i:int32
   //        r:quad
   //     where i == 40, r == 10
  
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (Ct1 false) 0))
+def main.main(argvec:string[])
+in
+  Ct1(false)
+  0:int32

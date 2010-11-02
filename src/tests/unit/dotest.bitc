@@ -39,10 +39,13 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (loop ((a 0:int32 (+ a 1))
-	   (b 1:int32 (+ b 2)))
-	(true 0)
-	false)))
+def main.main(argvec:string[])
+in
+  loop a = 0:int32 then a + 1
+       b = 1:int32 then b + 2
+  until true
+  in
+    false
+
+  0:int32    
  
