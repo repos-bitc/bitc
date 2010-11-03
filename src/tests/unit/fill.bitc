@@ -53,8 +53,8 @@ is U1
          fill : uint32(16)
    U3 is u : Unin('a)
  
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (Struct i0 i0 i0)
-    (U2 true)
-    i0)) 
+def main.main(argvec: string[])
+in
+  Struct(i0, i0, i0)
+  U2(true)
+  i0

@@ -46,12 +46,12 @@ boxed struct S2
 is i : int32
    f: method () -> int32
 
-(def (S2.f s:S2) s.i)
-(def (zero) 0:int32)
+def S2.f(s:S2) = s.i
+def zero() = 0:int32
 
-(def (fm_poly s) (s.f))
+def fm_poly(s) = s.f()
 
-(def (main.main argv:(vector string))
-  (fm_poly (S1 zero))
-  (fm_poly (S2 0))
-  )
+def main.main(argvec: string[])
+in
+  fm_poly(S1(zero))
+  fm_poly(S2(0))  

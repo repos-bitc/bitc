@@ -49,11 +49,13 @@ instance Eq(unin)
 is _==_ = lambda (x, y) true
    _!=_ = lambda (x, y) false
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (let ((n:(mutable int32) 10))
-      C1 (C2 10 true)
-      (== C1 (C2 n true))
-      (== C3 C1)
-      0)))
+def main.main(argvec: string[])
+in
+  let n:mutable(int32) = 10
+  in
+    C1
+    C2(10, true)
+    C1 == C2(n, true)
+    C3 == C1
+    0:int32    
 

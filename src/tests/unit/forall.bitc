@@ -66,17 +66,17 @@ is *!* = lambda (x, y) true
 def abc: fn('a, 'b) -> bool
   where TC2('a, 'b)
 
-(forall ((TC2 'a 'b)) 
-  (def abc:(fn 'a 'b -> bool)
-    (lambda (x y) true)))
+def abc: fn('a, 'b) -> bool
+  where TC2('a, 'b) =
+  lambda(x,y) {true}
 
-(def Q *!*)
+def Q = *!*
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-  (S2 i0 i0)
-  (u2 true false)
-  i0))
+def main.main(argvec: string[])
+in
+  S2(i0, i0)
+  u2(true, false)  
+  i0
 
 
 

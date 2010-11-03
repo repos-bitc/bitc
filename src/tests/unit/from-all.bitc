@@ -41,8 +41,8 @@ import bitc.main
 import bitc.list
 provide bitc.main main
 
-(def main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (map (lambda (x) x) (cons true nil))
-    0))
+def main(argvec: string[])
+in
+  map(lambda (x) {x}, cons(true, nil))
+  0:int32
 

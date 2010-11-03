@@ -46,8 +46,9 @@ boxed struct S2
 is b : bool 
    i : int32
 
-(def (f x) x.i)
+def f(x) = x.i
 
-(def (main.main argv:(vector string))
-  (f (S1 10))
-  (f (S2 true 0)))
+def main.main(argvec: string[])
+in
+  f(S1(10))
+  f(S2(true, 0))

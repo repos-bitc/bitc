@@ -43,8 +43,9 @@ boxed struct st('a)
 is f1 : int32(20)
    f2 : 'a
 
-(def st1 (st 10 true))
-(def st2 (st 10 35:uint32))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (- st1.f1 st2.f1)))
+def st1 = st(10, true)
+def st2 = st(10, 35:uint32)
+
+def main.main(argvec: string[])
+in
+  st1.f1 - st2.f1

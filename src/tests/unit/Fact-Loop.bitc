@@ -39,12 +39,19 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-
-(def (fact x) (loop ((ans 1 (* ans i)) 
-		      (i x (- i 1)))
-		     ((== i 0) ans) ()))
-
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (fact 5)))
+// This test case is no longer expressable in the new syntax,
+// which lacks a "giving" clause for imperative loop
+def fact(x)
+in
+  let ans = 1
+  in
+    loop i = x then i - 1
+    until i == 0
+    in
+      ans := ans * i
+    ans
+    
+def main.main(argvec: string[])
+in
+  fact(5):int32
 
