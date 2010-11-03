@@ -41,11 +41,11 @@ provide bitc.main main
 
 import bitc.stdio as stdio
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (loop ((i:word 0 (+ i 1)))
-  	((== i argvec.length) ())
-	(begin
-	  (stdio.write_string stdio.stdout argvec[i])
-	  (stdio.write_char stdio.stdout '\linefeed')))
-    0))
+def main.main(argvec : string[])
+in
+  loop i:word = 0 then i + 1
+  until i == argvec.length
+  in
+    stdio.write_string(stdio.stdout, argvec[i])
+    stdio.write_char(stdio.stdout, '\linefeed')
+  0:int32

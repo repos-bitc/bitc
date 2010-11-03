@@ -45,8 +45,8 @@ provide bitc.main main
 // rec-instantiated, the application of the method still works on the 
 // original type. 
 
-(def (returnTrue x y) true)
-(def (returnFalse x y) false)
+def returnTrue(x, y) = true
+def returnFalse(x, y) = false
 
 instance Eq(boxed(pair(bool,bool)))
 is _==_ = returnTrue
@@ -56,12 +56,12 @@ instance Eq(boxed(pair (mutable(bool), mutable(bool))))
 is _==_ = returnFalse
    _!=_ = returnFalse
 
-(def p (dup (true, false)))
-(def mp:(boxed (pair (mutable bool) (mutable bool))) 
-  (dup (true, false)))
+def p = dup((true, false))
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (if (== mp mp) 0:int32 1)
-    (if (== p p) 0 1)
-    ))
+def mp:boxed(pair(mutable(bool), mutable(bool))) =
+  dup((true, false))
+
+def main.main(argvec : string[])
+in
+  if mp == mp then 0:int32 else 1
+  if p == p then 0:int32 else 1

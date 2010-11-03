@@ -43,20 +43,23 @@ def i0 = 0:int16
 def i1 = 1:int16
 def i2 = 2:int16
 
-(def (fact x) (if (== x i0) i1 (* x (fact (- x 1)))))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-  (begin 
-   (let ((x:int32 (SignExtend 0:int8)))
-     true)
-   (let ((x:uint32 (ZeroExtend 0:uint8)))
-     true)
-   (let ((x:uint8 (Truncate 0:uint32)))
-     true)
-   //(let ((x:uint32 (ZeroExtend 0:(bitfield uint8 2))))
-   //  true)
-   (let ((x:uint8 (unsigned 0:int8)))
-     true)
-   (let ((x:int8 (signed 0:uint8)))
-     true)
-   0)))
+def fact(x) = if x == i0 then i1 else x * fact(x - 1)
+
+def main.main(argvec : string[])
+in
+  let x:int32 = SignExtend(0:int8)
+  in true      
+
+  let x:uint32 = ZeroExtend(0:uint8)
+  in true      
+
+  let x:uint8 = Truncate(0:uint32)
+  in true      
+
+  let x:uint8 = unsigned(0:int8)
+  in true      
+
+  let x:int8 = signed(0:uint8)
+  in true      
+
+  0:int32

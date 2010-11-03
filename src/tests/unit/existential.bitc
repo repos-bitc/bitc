@@ -43,42 +43,41 @@ unboxed struct Obj
 is inc: fn () -> ()
    odd: fn ()-> bool
 
-(def (hasOdd oList)
-  (switch x oList 
-    (nil false)
-    (cons (or (x.car.odd) (hasOdd x.cdr)))))
+def hasOdd(oList)
+in
+  switch x = oList
+  case nil in false
+  case cons in x.car.odd() or hasOdd(x.cdr)
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argVec)
+def main.main(argvec : string[])
+in
+  // An object with encapsulated integer state
+  def obji = {
+    def i = 10:int32
+    def inc_i() = i := i + 1
+    def odd_i() = (i % 2) != 0
+    Obj(inc_i, odd_i)
+  }
+   
+  // An object with encapsulated float state
+  def objf = {
+    def f = 10.0:float
+    def inc_f() = f := f + 1.0
+    def odd_f() = false         // :)
+    Obj(inc_f, odd_f)
+  }   
 
-    // An object with encapsulated integer state
-    (def obji
-      (begin
-	(def i 10:int32)               //state
-	(def (inc_i) (set! i (+ i 1))) //methods
-	(def (odd_i) (!= (% i 2) 0))
-	(Obj inc_i odd_i)))
+  // An object with encapsulated boolean state
+  def objb = {
+    def b = true
+    def inc_b() = b := true       // :)
+    def odd_b() = true          // :)
+    Obj(inc_b, odd_b)
+  }
+
+  // All objects have the same type Obj, no way to recover the inner
+  // hidden state.
+  def objList = cons(obji, cons(objf, cons(objb, nil)))
     
-    // An object with encapsulated float state
-    (def objf 
-      (begin
-	(def f 10.0:float)
-	(def (inc_f) (set! f (+ f 1.0)))
-	(def (odd_f) false) // :)
-	(Obj inc_f odd_f)))
-	
-    // An object with encapsulated boolean state
-    (def objb
-      (begin
-	(def b true)
-	(def (inc_b) (set! b true))  // :)
-	(def (odd_b) true)           // :)
-	(Obj inc_b odd_b)))
-
-    // All objects have the same type Obj, no way to recover the inner
-    // hidden state.
-    (def objList (cons obji (cons objf (cons objb nil))))
-    
-    // Operation on list of objects
-    (if (hasOdd objList) 0:int32 1:int32)
-    ))
+  // Operation on list of objects
+  if hasOdd(objList) then 0:int32 else 1:int32

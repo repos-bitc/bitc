@@ -44,7 +44,14 @@ def i1 = 1:int32
 
 exception exFred
 
-(def (f) (try (throw exFred) 
-		 (catch xyz (exFred i1))))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) (f)  i0))
+def f()
+in
+  try
+    throw(exFred) 
+  catch xyz
+  case exFred in i1
+
+def main.main(argvec : string[])
+in
+  f()
+  i0  

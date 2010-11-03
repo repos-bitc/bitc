@@ -59,13 +59,14 @@ is <<== = <=
 //(instance (ORD int64) (lambda (x y) (<= x y)))
  
 
-(def P ===)
-(def (T a b) (and (<<== a b) (=== a b)))
-(def (U a) (<<== a a))
-//(def R (P 123:int32 456))
+def P = ===
+def T(a, b) = <<==(a, b) and ===(a, b)
+def U(a) = <<==(a, a)
+
+//def R = P(123:int32, 456)
 
 // Should not work
-//(def RR (P 123:int64 456))
+//def RR = P(123:int64, 456)
 
 // Should not work
 //(instance (ORD int64) <=)
@@ -78,12 +79,13 @@ is _==_ = lambda (x, y) true
 instance EQL(list('a))
 is === = ==
 
-(def (f x:(list 'a)) (=== x x))
+def f (x:list('a)) = ===(x, x)
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (=== 10:int32 20)
-    (=== true false)
-    (=== nil nil)
-    (P true false) 0))
+def main.main(argvec : string[])
+in
+  ===(10:int32, 20)
+  ===(true, false)
+  ===(nil, nil)
+  P(true, false)
+  0:int32
 
