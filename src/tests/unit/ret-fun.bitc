@@ -41,8 +41,10 @@ provide bitc.main main
 
 def id(x) = x
 
-(def (idf) id)
+def idf() = id
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) idf 0))
+def main.main(argvec: string[])
+in
+  idf
+  0:int32
 
