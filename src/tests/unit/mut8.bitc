@@ -38,10 +38,12 @@
 bitc version 0.11
 import bitc.main as main
 provide bitc.main main
-(def p:(mutable bool) false) 
-(def V1  (vector true p))
-(def V2  (vector p))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    V1[0]
-    0))
+
+def p:mutable bool = false
+def V1 = vector(true, p)
+def V2 = vector(p)
+
+def main.main(argvec: string[])
+in
+  V1[0]
+  0:int32

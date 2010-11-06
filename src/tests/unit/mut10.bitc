@@ -38,12 +38,13 @@
 bitc version 0.11
 
 // Test for mutability inference and hint propagation.
-(def p (if true 
-	      (pair true false):(pair (mutable bool) bool) 
-	      (pair false true):(pair bool (mutable bool))))
+def p = if true
+        then pair(true, false) : pair(mutable bool, bool)           
+        else pair(false, true) : pair(bool, mutable bool)           
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argv) 0))
 
+def main.main(argvec: string[])
+in
+  0:int32

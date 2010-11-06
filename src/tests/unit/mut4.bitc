@@ -48,9 +48,10 @@ unboxed struct St
 is f1: mutable int32
    f2: mutable bool
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (let ((p (St 10 true)))
-      (set! p.f1 25)
-      (set! p (St p.f1 p.f2)))
-    0))
+def main.main(argvec: string[])
+in
+  let p = St(10, true)
+  in
+    p.f1 := 25
+    p := St(p.f1, p.f2)
+  0:int32  

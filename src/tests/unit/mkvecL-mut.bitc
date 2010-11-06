@@ -44,8 +44,11 @@ def id(x) = x
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argv)
-    (let ((vec:(vector (mutable int32)) 
-	       (MakeVector 30 (lambda (x) (convert x)))))
-      vec) 0))
+
+def main.main(argvec: string[])
+in
+  let vec:mutable int32[] =
+        MakeVector(30, lambda(x) {convert(x)})
+  in
+    vec    
+  0:int32

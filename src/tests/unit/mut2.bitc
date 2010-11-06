@@ -39,15 +39,14 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def (len x:(list 'a)) 
-  (switch y x
-	  (nil 0)
-	  (cons (+ 1 (len y.cdr)))))
+def len(x:list('a)) =
+  switch y = x
+  case nil in 0
+  case cons in 1 + len(y.cdr)
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (let ((p (len (cons 0:int32 nil)):int32))
-      (set! p 0)
-      p)))
-  
-
+def main.main(argvec: string[])
+in
+  let p = len(cons(0:int32, nil)) : int32
+  in
+    p := 0
+    p    

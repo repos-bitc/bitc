@@ -41,11 +41,13 @@ provide bitc.main main
 
 def id(x) = x
 
-(def X (let ((myID id))
-            (myID true)
-	    (myID 10:int32)))
+def X = let myID = id
+        in
+          myID(true)
+          myID(10:int32)
  
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    X 0)) 
+def main.main(argvec: string[])
+in
+  X
+  0:int32  
 

@@ -43,21 +43,20 @@ bitc version 0.11
 // the letrec. But at the top level expression `p', the copy of f need
 // not be mutable and the type of p is generalized.
 
-(def p
- (letrec ((f (lambda (x) x))
-	   (g (lambda (x) (vector f)))
-	   (h (lambda (x) f:(mutable 'a))))
+def p = letrec f = lambda(x) { x }
+               g = lambda(x) { vector(f) }
+               h = lambda(x) { f:mutable 'a }
+        in
+          f := lambda(y) { y }
 
-   (set! f (lambda (y) y))
-
-   // Use this if you want to see the 
-   // Value restricted types.
-   // ((f, g), h)
-   )
- )
+          // Use this if you want to see the
+          // Value restricted types:
+          // f(g)(h)
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 0))
+
+def main.main(argvec: string[])
+in
+  0:int32
 

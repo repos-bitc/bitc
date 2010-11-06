@@ -45,37 +45,37 @@ import bitc.list as ls
 
 def id(x) = x
 
-(def m1:(mutable int32) 1)
-(def m2:(mutable int32) 2)
+def m1:mutable int32 = 1
+def m2:mutable int32 = 2
 
-(def v1 (id m1))
-(def v1q:(mutable int32) (id m1))
+def v1 = id(m1)
+def v1q:mutable int32 = id(m1)
 
-(def v2 (cons m1 nil))
-(def v2q:(list (mutable int32)) (cons m1 nil))
-(def v2q2:(mutable (list (mutable int32))) (cons m1 nil))
+def v2 = cons(m1, nil)
+def v2q:list(mutable int32) = cons(m1, nil)
+def v2q2:mutable list(mutable int32) = cons(m1, nil)
 
-(def v31 (if true m1 2))
-(def v32 (if true m1 m2))
-(def v33 (if true m1 2:int32))
-(def v33q:(mutable int32) (if true m1 2:int32))
+def v31 = if true then m1 else 2
+def v32 = if true then m1 else m2
+def v33 = if true then m1 else 2:int32
+def v33q:mutable int32 = if true then m1 else 2:int32
 
-(def (l2v lst)
-  (MakeVector (length lst) 
-		(lambda (n) (ls.list_nth lst n))))
-(def l2vq:(fn (list 'a) -> (vector 'a))
-  (lambda (lst)
-    (MakeVector (length lst) 
-		  (lambda (n) (ls.list_nth lst n)))))
+def l2v(lst) =
+  MakeVector(length(lst),
+             lambda(n) { ls.list_nth(lst, n) })
 
+def l2vq:fn(list('a)) -> vector('a) =
+  lambda(lst) {
+    MakeVector(length(lst),
+               lambda(n) { ls.list_nth(lst, n) }) }
 
-(def (lvm lst:(list (mutable char)))
-  (l2v lst))
-(def (lvmq lst:(list (mutable char)))
-  (l2vq lst))
+def lvm(lst:list(mutable char)) = l2v(lst)
+def lvmq(lst:list(mutable char)) = l2vq(lst)
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 0))
+
+def main.main(argvec: string[])
+in
+  0:int32
 

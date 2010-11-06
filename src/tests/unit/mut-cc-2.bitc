@@ -45,20 +45,21 @@ unboxed struct St('a, 'b)
 is f1:mutable ('a[])
    f2:'b
 
-(def q1 (St (vector true) false))
-(def q2:(mutable 'a) (St (vector true) false))
+def q1 = St(vector(true), false)
+def q2:mutable 'a = St(vector(true), false)
 
 //WORKS OK because of CopyCompatibility at arg position of vector
 //constructor !
-(def q3:(St (mutable bool) bool) (St (vector true) false))
+def q3:St(mutable bool, bool) = St(vector(true), false)
 //SHOULD NOT WORK
 //(def q4:(St (mutable bool) bool) 
 // (St (vector true):(vector bool) false))
 
-(def q5:(St  bool (mutable bool)) (St (vector true) false))
+def q5:St(bool, mutable bool) = St(vector(true), false)
  
 import bitc.main as main
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 0))
+def main.main(argvec: string[])
+in
+  0:int32

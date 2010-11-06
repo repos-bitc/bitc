@@ -40,13 +40,16 @@ bitc version 0.11
 // Test for porper instantiation in the presence of
 // full-CopyCompatibility. 
 
-(def mb:(mutable bool) true)
-(def p1:(pair bool (mutable bool)) (pair true mb))
-(def p2:(pair (mutable bool) bool) p1)
+def mb:mutable bool = true
+def p1:pair(bool, mutable bool) = pair(true, mb)
+def p2:pair(mutable bool, bool) = p1
 
 import bitc.main as main
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) p1 p2 0))
+def main.main(argvec: string[])
+in
+  p1
+  p2
+  0:int32  
 

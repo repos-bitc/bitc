@@ -45,15 +45,16 @@ unboxed struct St('a, 'b)
 is f1: mutable 'a
    f2:'b
 
-(def p1 (St true false))
-(def p2:(mutable 'a) (St true false))
+def p1 = St(true, false)
+def p2:mutable 'a = St(true, false)
 //SHOULD NOT WORK
 //(def p3:(St (mutable bool) bool) (St true false))
 
-(def p4:(St  bool (mutable bool)) (St true false))
+def p4:St(bool, mutable bool) = St(true, false)
 
 import bitc.main as main
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 0))
+def main.main(argvec: string[])
+in
+  0:int32

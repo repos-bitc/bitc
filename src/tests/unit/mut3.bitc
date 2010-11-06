@@ -39,15 +39,20 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 def id(x) = x
-(def (f x) 
-  (let ((n 25))
-    (f n) 
-    (set! x 35)
-    (set! n x)))
-(def (g x) (g x))
-(def (h x y) (set! x y) x)
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (id f) (id g)
-    (h (h 10:int32 20) (h 35:int32 40))
-    0))
+
+def f(x) = 
+let n = 25
+in f(n)
+   x := 35
+   n := x
+
+def g(x) = g(x)
+
+def h(x, y) = { x := y; x }
+
+def main.main(argvec: string[])
+in
+  id(f)
+  id(g)
+  h(h(10:int32, 20), h(35:int32, 40))  
+  0:int32  

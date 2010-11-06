@@ -39,11 +39,12 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def x:(array (mutable int32) 3) (array 10 20 30))
-(def y:(array int32 3) x)
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (set! x (array 0 0 0))
-    // Must not work
-    // (set! y x)
-    x[0]))
+def x:mutable int32[3] = array(10, 20, 30)
+def y:int32[3] = x
+
+def main.main(argvec: string[])
+in
+  x := array(0,0,0)
+  // Must not work:
+  // x := y  
+  x[0]

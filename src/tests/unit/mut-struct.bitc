@@ -42,10 +42,10 @@ provide bitc.main main
 unboxed struct St
 is f: mutable bool
 
-(def x:St (St true))
+def x:St = St(true)
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (set! x.f false)
-    (set! x (St true))
-    (if x.f 0 1)))
+def main.main(argvec: string[])
+in
+  x.f := false;
+  x := St(true)  
+  if x.f then 0 else 1:int32

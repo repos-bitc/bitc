@@ -39,5 +39,6 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def (main.main argv:(vector string))
-  0:int32)
+def main.main(argvec: string[])
+in
+  0:int32

@@ -39,13 +39,12 @@ bitc version 0.11
 import bitc.main as main
  provide bitc.main main
 
-(def p:(mutable bool) true)
-(def (f x) p)
+def p:mutable bool = true
+def f(x) = p
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (f 0:int32)
-    (set! p false)
-    (f p)
-    0))
-
+def main.main(argvec: string[])
+in
+  f(0:int32)
+  p := false;
+  f(p)
+  0:int32  
