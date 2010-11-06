@@ -39,19 +39,19 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def (addone x) (+ x 1))
+def addone(x) = x + 1
 
-(def (addtwo x) (+ x 2.0))
+def addtwo(x) = x + 2.0
 
-(def XYZ
-  (begin
-    (addone 10:int32)
-    (addone 20:int64)))
+def XYZ = {
+  addone(10:int32)
+  addone(20:int64)  
+}  
 
-(def ABC
-  (begin
-    (addone 10:int32)
-    (addone 20:int64)))
+def ABC = {
+  addone(10:int32)
+  addone(20:int64)
+}
 
 // should not work
 // XXYYZZ will be given dummy types
@@ -60,9 +60,8 @@ provide bitc.main main
 //    (let ((p 25))
 //      p)))
   
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    XYZ ABC 0))
-
-
-
+def main.main(argvec: string[])
+in
+  XYZ
+  ABC
+  0:int32

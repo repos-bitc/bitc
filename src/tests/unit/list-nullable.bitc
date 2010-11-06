@@ -42,6 +42,9 @@ provide bitc.main main
 // Check to ensure that (list (nullable bool)) occupies
 // only one word in the list, similar to (list (boxed bool))
 
-(def ln (cons (not_null (dup true)) nil))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) ln 0))
+def ln = cons(not_null(dup(true)), nil)
+
+def main.main(argvec: string[])
+in
+  ln
+  0:int32  

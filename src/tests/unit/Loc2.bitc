@@ -40,7 +40,7 @@ def id(x) = x
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-//  (set! (array 1 2 3)[2] 25:int32)
-    (array (id 0:int32) (id (id 0)) 0)[1]))
+
+def main.main(argvec: string[])
+in
+  array(id(0:int32), id(id(0)), 0)[1]

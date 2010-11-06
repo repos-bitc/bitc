@@ -38,16 +38,19 @@
 bitc version 0.11
 import bitc.vector listToVector
 
-(def (lv_m lst:(list (mutable char)))
-  (listToVector lst))
+def lv_m(lst:list(mutable char))
+in
+  listToVector(lst)
 
-(def (lv_nm lst:(list char))
-  (listToVector lst))
+def lv_nm(lst:list(char))
+in
+  listToVector(lst)
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argv)
-    (lv_m (cons 'a' nil:(list (mutable char))))
-    (lv_nm (cons 'a' nil))
-    0))
+
+def main.main(argvec: string[])
+in
+  lv_m(cons('a', nil:list(mutable char)))
+  lv_nm(cons('a', nil))
+  0:int32  

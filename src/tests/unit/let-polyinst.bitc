@@ -40,15 +40,17 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def (abc x)
-  (let ((id (lambda (y) y)))
-    (id 1:int32)
-    (id true)
-    (id x)))
+def abc(x)
+in
+  let id = lambda (y) {y}
+  in
+    id(1:int32)
+    id(true)
+    id(x)    
  
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (abc 10:int32) 
-    (abc 10:int64) 
-    0))
-  
+def main.main(argvec: string[])
+in
+  abc(10:int32) 
+  abc(10:int64) 
+  0:int32
+

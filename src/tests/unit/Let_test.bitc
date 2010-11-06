@@ -43,7 +43,11 @@ def i0 = 0:int32
 def i1 = 1:int32
 def i2 = 2:int32
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (let ((i i0) (j (let ((i i2)) i))) (+ i j))
-    i0))
+def main.main(argvec: string[])
+in
+  let i = i0
+      j = let i = i2
+          in i
+  in
+    i + j
+  i0    
