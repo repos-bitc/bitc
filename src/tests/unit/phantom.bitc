@@ -42,9 +42,10 @@ provide bitc.main main
 boxed struct St('a,'phantom)
 is n:'a
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argVec) 
-    (let ((s1:(St int32 int32) (St 10))
-	  (s2:(St int32 bool)  (St 10)))
-      //(if true s1 s2) // will not work
-      (- s1.n s2.n))))
+def main.main(argvec: string[])
+in
+  let s1:St(int32, int32) = St(10)
+      s2:St(int32, bool) = St(10)
+  in
+    //if true then s1 else s2 // will not work
+    s1.n - s2.n

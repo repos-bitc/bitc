@@ -42,6 +42,10 @@ provide bitc.main main
 def i0 = 0:int32
 def i1 = 1:int32
 
-(def (f) (letrec ((lam (lambda (x) x))) i0))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) (f) i0))
+def f() = letrec lam = lambda(x) {x}
+          in i0
+
+def main.main(argvec: string[])
+in
+  f()
+  i0  

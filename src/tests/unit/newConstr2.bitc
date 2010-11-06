@@ -41,10 +41,10 @@ bitc version 0.11
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)   
-    (switch x nil
-      (list.nil 0:int32)
-      (list.cons x.car))))
 
+def main.main(argvec: string[])
+in
+  switch x = nil
+  case list.nil in 0:int32         
+  case list.cons in x.car
 

@@ -45,8 +45,8 @@ exception Xn2
 is f1:int32
    f2:bool
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)   
-    (throw Xn)
-    (throw (Xn2 10 false))
-    0)) 
+def main.main(argvec: string[])
+in
+  throw Xn
+  throw Xn2(10, false)
+  0:int32        

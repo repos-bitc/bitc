@@ -43,13 +43,13 @@ provide bitc.main main
 def i0 = 0:int32
 def i1 = 1:int32
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (begin (== i0 i1)
-	   (+ i0 i1)
-	   (- i0 i1)
-	   (* i0 i1)
-	   (/ i0 i1)
-	   (% i0 i1))
-    i0))
-  
+def main.main(argvec: string[])
+in
+  i0 == i1
+  i0 + i1
+  i0 - i1
+  i0 * i1
+  i0 / i1
+  i0 % i1
+  i0
+

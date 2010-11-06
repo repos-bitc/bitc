@@ -48,7 +48,7 @@ def id(x) = x
 //(proclaim id: (fn ('c) 'c))
 //(proclaim id: (fn ('d) 'd))
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (id 0))) 
+def main.main(argvec: string[])
+in
+  0:int32
 

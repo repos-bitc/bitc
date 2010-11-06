@@ -43,13 +43,19 @@ bitc version 0.11
 // This test case is expected to segfault due to infinite recursion at
 // initialization of oe.
 
-(def oe
-  (letrec ((odd (lambda (x) (even x)))
-	   (even (lambda(x) (odd x))))
-    (odd true):bool
-    (odd 10:int32):int32 ))
+// shap 11/6/2010: I think this may be a test case for something that
+// was subsequently repaired.
+
+def oe =
+  letrec odd = lambda(x) { even(x) }
+         even = lambda(x) { odd(x) }
+  in
+    odd(true):bool
+    odd(10:int32):int32
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 0))
+
+def main.main(argvec: string[])
+in
+  0:int32

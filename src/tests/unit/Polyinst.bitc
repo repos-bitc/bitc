@@ -47,10 +47,10 @@ boxed struct st2('a, 'b)
 is a:'a 
    b:'b
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (cons 
-     (st2 (st2 true (cons 0:int32 nil)) 
-	  (st1 0:int32 (cons true nil)))
-     nil) 0))
+def main.main(argvec: string[])
+in
+  cons(st2(st2(true, cons(0:int32, nil)),
+           st1(0:int32, cons(true, nil))),
+       nil)       
+  0:int32
 

@@ -64,10 +64,10 @@ is en31
    en32
    ptr3 is p : nullable(boxed(int32))
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (let ((n (dup 10)))
-      (ptr1 n)
-      (ptr2 n)
-      (ptr3 (not_null n)) 
-      0)))
+def main.main(argvec: string[])
+in
+  let n = dup(10)
+  in ptr1(n)
+     ptr2(n)
+     ptr3(not_null(n))     
+     0:int32

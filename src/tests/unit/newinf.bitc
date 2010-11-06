@@ -39,15 +39,18 @@ bitc version 0.11
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (let ((id (lambda (x) x)))
-      (id true)
-      (id '\t')
-      //(set! id id)// must not work
-      (let ((idid (id, id)))
-	// Only ONE of the following two lines must work!
-	(idid.fst idid.fst)
-       //(set! idid.fst idid.snd))
-	))
-    0))
+
+def main.main(argvec: string[])
+in
+  let id = lambda(x) { x }
+  in
+    id(true)
+    id('\t')
+    // must not work:
+    // id := id
+    let idid = (id, id)
+    in
+      // Only ONE of the following two lines must work!
+      idid.fst(idid.fst)
+      // idid.fst := idid.snd      
+  0:int32  

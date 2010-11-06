@@ -39,13 +39,16 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def (f x:(vector int32)) x[0])
+def f(x:int32[]) = x[0]
 
-(def vec1:(vector int32) (vector 1 2 3))
-(def vec2:(mutable (vector int32)) (vector 1 2 3)) 
+def vec1:int32[] = vector(1, 2, 3)
+def vec2:mutable(int32[]) = vector(1, 2, 3)
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)   
-    (f vec1) (f vec2) 0))
+
+def main.main(argvec: string[])
+in
+  f(vec1)
+  f(vec2)
+  0:int32  

@@ -42,15 +42,22 @@ provide bitc.main main
 def even : fn('a) -> bool
   where Arith('a), IntLit('a)
 
-(def (odd x) (cond ((< x 0) (odd (- x 0)))
-		      ((== x 0) false)
-		      (otherwise (even (- x 1)))))
+def odd(x) =
+  if x < 0
+  then odd(-x)
+  else if x == 0
+       then false
+       else even(x - 1)
 
-(def (even x) (cond ((< x 0) (even (- x 0))) 
-		      ((== x 0) true)
-		      (otherwise (odd (- x 1)))))
+def even(x) =
+  if x < 0
+  then even(-x)
+  else if x == 0
+       then true
+       else odd(x-1)
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (odd 10:int32) 0))
+def main.main(argvec: string[])
+in
+  odd(10:int32)
+  0:int32  
 
