@@ -897,7 +897,6 @@ TransitionLexer::getNextToken()
                         || (lastTokType == tk_TRY)
                         || (lastTokType == tk_THEN)
                         || (lastTokType == tk_OTHERWISE)
-                        || (lastTokType == tk_THROW)
                         || (lastTokType == tk_ELSE)
                         || false);
 
