@@ -421,7 +421,7 @@ static unsigned VersionMinor(const std::string s)
 // in order of precedence, *lowest* first:
 %type <ast> blk_type
 %type <ast> blk_postfix_type
-%type <ast> blk_shallowperm_type
+%type <ast> blk_prefix_type
 %type <ast> primary_type
 %type <ast> blk_primary_type
 %type <ast> sxp_primary_type
@@ -2187,13 +2187,14 @@ blk_tvlist: blk_tvlist ',' typevar {
 //
 //  blk_primary_type -> {identifiers, keywords}
 //
-//  blk_postfix_type -> blk_primary_type
+//  blk_prefix_type -> blk_primary_type
+//  blk_prefix_type -> REF blk_prefix_type
+//  blk_prefix_type -> MUTABLE blk_prefix_type
+//
+//  blk_postfix_type -> blk_prefix_type
 //  blk_postfix_type -> blk_postfix_type '[' ']'
 //  blk_postfix_type -> blk_postfix_type '[' intLit ']'
 //  blk_postfix_type -> blk_postfix_type '(' type args ')'
-//
-//  blk_prefix_type -> blk_postfix_type
-//  blk_prefix_type -> REF blk_prefix_type
 //
 //  blk_type -> blk_postfix_type
 //
@@ -2204,13 +2205,22 @@ blk_tvlist: blk_tvlist ',' typevar {
 // the context for resolving '.' is never actually ambiguous, so it
 // doesn't matter here.
 
-blk_postfix_type: blk_primary_type {
-  SHOWPARSE("blk_postfix_type -> blk_primary_type");
+blk_prefix_type: blk_primary_type {
+  SHOWPARSE("blk_prefix_type -> blk_primary_type");
   $$ = $1;
 }
 
-blk_postfix_type: blk_shallowperm_type {
-  SHOWPARSE("blk_postfix_type -> blk_shallowperm_type");
+blk_prefix_type: tk_MUTABLE blk_prefix_type {
+  SHOWPARSE("blk_prefix_type -> MUTABLE blk_prefix_type");
+  $$ = AST::make(at_mutableType, $1.loc, $2);
+}
+blk_prefix_type: tk_CONST blk_prefix_type {
+  SHOWPARSE("blk_prefix_type -> CONST blk_prefix_type");
+  $$ = AST::make(at_constType, $1.loc, $2);
+}
+
+blk_postfix_type: blk_prefix_type {
+  SHOWPARSE("blk_postfix_type -> blk_prefix_type");
   $$ = $1;
 }
 
@@ -2608,15 +2618,6 @@ sxp_typeapp: '(' sxp_useident sxp_type_args ')' {
 };
 
 // MUTABLE TYPE [3.7]            
-blk_shallowperm_type: tk_MUTABLE blk_type {
-  SHOWPARSE("blk_shallowperm_type -> MUTABLE blk_type");
-  $$ = AST::make(at_mutableType, $1.loc, $2);
-}
-blk_shallowperm_type: tk_CONST blk_type {
-  SHOWPARSE("blk_shallowperm_type -> CONST blk_type");
-  $$ = AST::make(at_constType, $1.loc, $2);
-}
-
 sxp_type: '(' tk_MUTABLE sxp_type ')' {
   SHOWPARSE("sxp_type -> ( MUTABLE sxp_type )");
   $$ = AST::make(at_mutableType, $2.loc, $3);

@@ -42,7 +42,7 @@ bitc version 0.11
 
 // Structure with RefType Wrapper
 unboxed struct St('a, 'b)
-is f1:mutable 'a[]
+is f1:mutable ('a[])
    f2:'b
 
 (def q1 (St (vector true) false))

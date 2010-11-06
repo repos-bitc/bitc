@@ -41,7 +41,7 @@ interface bitc.sets.bit {
   boxed struct bitset {
     nElem : mutable word
     nWords : mutable word
-    bits : mutable (mutable uint32)[]
+    bits : mutable (mutable uint32[])
   }
 
   def make() = bitset(0, 0, vector(0))
