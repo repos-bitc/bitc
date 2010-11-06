@@ -42,88 +42,102 @@ import bitc.main as main
 provide bitc.main main
 
 
-(def (TS str ts)
-  (stdio.write_string stdio.stdout str)
-  (stdio.write_int stdio.stdout ts 10)  
-  (stdio.write_char stdio.stdout '\linefeed'))  
+def TS(str, ts)
+in
+  stdio.write_string(stdio.stdout, str)
+  stdio.write_int(stdio.stdout, ts, 10)  
+  stdio.write_char(stdio.stdout, '\linefeed')
 
-(def (zero x) 0)
+def zero(x) = 0
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (def len:word 5000)
-    (def first (stdlib.getTimeStamp))
-    (def start (stdlib.getTimeStamp)) 
-    (def stop (stdlib.getTimeStamp)) 
-  //(TS "Time Stamping: " (- stop start))
+def main.main(argvec: string[])
+in
+  def len:word = 5000
+  def first = stdlib.getTimeStamp()
+  def start = stdlib.getTimeStamp()
+  def stop = stdlib.getTimeStamp()
+
+  //TS("Time Stamping: ", stop - start)
+  
+  def vec:mutable uint8[] = MakeVector(len, zero)    
     
-    (def vec:(vector (mutable uint8))
-      (MakeVector len zero))
+  start := stdlib.getTimeStamp()
+  stdio.write_string(stdio.stdout, "This is a test string\n")
+  stop := stdlib.getTimeStamp()
+
+  //TS("Print to stdout: ", stop - start)
     
-    (set! start (stdlib.getTimeStamp))
-    (stdio.write_string stdio.stdout "This is a test string\n")
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Print to stdout: " (- stop start))
+  start := stdlib.getTimeStamp()
+  def iStream = stdio.open(argvec[1], "r")
+  stop := stdlib.getTimeStamp()
+
+  //TS("Open Read Stream: ", stop - start)
     
-    (set! start (stdlib.getTimeStamp))
-    (def iStream (stdio.open argvec[1] "r"))
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Open Read Stream: " (- stop start))
+  start := stdlib.getTimeStamp()
+  def oStream = stdio.open("BUILD/_WRITE_", "w")
+  stop := stdlib.getTimeStamp()
+
+  //TS("Open Write Stream: ", stop - start)
     
-    (set! start (stdlib.getTimeStamp))
-    (def oStream (stdio.open "BUILD/_WRITE_" "w"))
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Open Write Stream: " (- stop start))
+  start := stdlib.getTimeStamp()
+  def temp = stdio.read_byte(iStream)
+  stop := stdlib.getTimeStamp()
+
+  //TS("Read 1 Byte from file: ", stop - start)
     
-    (set! start (stdlib.getTimeStamp))
-    (def temp (stdio.read_byte iStream))
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Read 1 Byte from file: " (- stop start))
+  start := stdlib.getTimeStamp()
+  loop i = 0 then i + 1
+  until i >= len
+  in
+    vec[i] := stdio.read_byte(iStream)
+  stop := stdlib.getTimeStamp()
+
+  //TS("Input from File: ", stop - start)
     
-    (set! start (stdlib.getTimeStamp))
-    (loop ((i 0 (+ i 1)))
-	((>= i len) ())
-	(set! vec[i] (stdio.read_byte iStream)))  
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Input from File: " (- stop start))
+  start := stdlib.getTimeStamp()
+  loop i = 0 then i + 1
+  until i >= len
+  in
+    stdio.write_byte(stdio.stdout, vec[i])
+  stop := stdlib.getTimeStamp()
+
+  //TS("Write to stdout: ", stop - start)
     
-    (set! start (stdlib.getTimeStamp))
-    (loop ((i 0 (+ i 1)))
-	((>= i len) ())
-	(stdio.write_byte stdio.stdout vec[i]))  
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Write to stdout: " (- stop start))
+  start := stdlib.getTimeStamp()
+  loop i = 0 then i + 1
+  until i >= len
+  in
+    vec[i] := if not stdio.isEOF(iStream)
+              then stdio.read_byte(iStream)
+              else 0
+  stop := stdlib.getTimeStamp()
+
+  //TS("Checked Input From file: ", stop - start)
     
-    (set! start (stdlib.getTimeStamp))
-    (loop ((i 0 (+ i 1)))
-	((>= i len) ())
-	(set!  vec[i]
-	       (if (not (stdio.isEOF iStream))
-		   (stdio.read_byte iStream) 0)))  
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Checked Input From file: " (- stop start))
+  start := stdlib.getTimeStamp()
+  loop i = 0 then i + 1
+  until i >= len
+  in
+    stdio.write_byte(oStream, vec[i])
+  stop := stdlib.getTimeStamp()
+
+  //TS("Write to file: ", stop - start)
     
-    (set! start (stdlib.getTimeStamp))
-    (loop ((i 0 (+ i 1)))
-	((>= i len) ())
-	(stdio.write_byte oStream vec[i]))  
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Write to file: " (- stop start))
+  start := stdlib.getTimeStamp()
+  stdio.close(iStream)
+  stop := stdlib.getTimeStamp()
+
+  //TS("Close iStream: ", stop - start)
     
+  start := stdlib.getTimeStamp()
+  stdio.close(oStream)
+  stop := stdlib.getTimeStamp()
+
+  //TS("Close oiStream: ", stop - start)
+
+  stop := stdlib.getTimeStamp()
+  //TS("Total: ", stop - first)
     
-    (set! start (stdlib.getTimeStamp))
-    (stdio.close iStream)
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Close iStream: " (- stop start))
-    
-    (set! start (stdlib.getTimeStamp))
-    (stdio.close oStream)
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Close oStream: " (- stop start))
-    
-    (set! stop (stdlib.getTimeStamp)) 
-  //(TS "Total: " (- stop first))
-    
-    0))
+  0:int32
   
   

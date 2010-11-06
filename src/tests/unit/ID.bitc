@@ -45,9 +45,10 @@ def i2 = 2:int32
  
 def id(x) = x
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (if (id true) 
-      (id (id i1))
-      (id (id (id (id i2)))))
-    i0))
+def main.main(argvec: string[])
+in
+  if id(true)
+  then id(id(i1))
+  else id(id(id(id(i2))))
+
+  i0

@@ -46,7 +46,8 @@ instance Eq(unin)
 is _==_ = lambda (x, y) true
    _!=_ = lambda (x, y) false
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (== C C) 0))
+def main.main(argvec: string[])
+in
+  C == C
+  0:int32  
 

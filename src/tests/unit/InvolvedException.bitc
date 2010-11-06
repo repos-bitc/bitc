@@ -46,11 +46,16 @@ is a:int32
 
 exception Xn3
 
-(def (f) (try (if true (throw (Xn2 (throw Xn3) 'c')) (throw Xn1)) 
-		 (catch xyz 
-			(Xn1 1:int32)
-			(Xn2 xyz.a)
-			(otherwise 250))))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (f) 0))
+def f()
+in
+  try
+    if true then throw Xn2(throw Xn3, 'c') else throw(Xn1)
+  catch xyz
+  case Xn1 in 1:int32
+  case Xn2 in xyz.a
+  otherwise 250
+
+def main.main(argvec: string[])
+in
+  f()
+  0:int32

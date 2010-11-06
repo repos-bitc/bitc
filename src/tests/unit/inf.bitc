@@ -39,8 +39,9 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
  
-(def (f x) (f x))
+def f(x) = f(x)
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    f 0)) 
+def main.main(argvec: string[])
+in
+  f
+  0:int32
