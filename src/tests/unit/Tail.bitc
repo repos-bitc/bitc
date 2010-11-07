@@ -43,7 +43,9 @@ def i0 = 0:int32
 def i1 = 1:int32
 def i2 = 2:int32
 
-(def (ret0 x) (if (== x i0) i0 (ret0 (- x 1))))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (ret0 i2) i0))
+def ret0(x) = if x == i0 then i0 else ret0(x - 1)
+
+def main.main(argvec: string[])
+in
+  ret0(i2)
+  i0

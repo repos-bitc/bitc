@@ -37,14 +37,17 @@
 
 bitc version 0.11
 
-(def  (somefun lst:(list 'a))
-  (let ((v:'a true))  // should resolve to the same tvar
-    (let ((xyz (lambda (LST) ())))
-      true)))
-
+def somefun(lst:list('a))
+in
+  let v:'a = true               // should resolve to the same tvar
+  in let xyz = lambda(LST) { () }
+     in
+       true
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (somefun nil) 0))
+
+def main.main(argvec: string[])
+in
+  somefun(nil)
+  0:int32  

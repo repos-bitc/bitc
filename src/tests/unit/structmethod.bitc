@@ -43,8 +43,9 @@ boxed struct S
 is i: int32
    m: method () -> bool
 
-(def (S.m s:S) true)
+def S.m(s:S) = true
 
-(def (main.main argv:(vector string))
-  ((S 32).m)
-  0:int32)
+def main.main(argvec: string[])
+in
+  S(32).m()
+  0:int32

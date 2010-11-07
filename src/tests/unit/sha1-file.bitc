@@ -43,77 +43,88 @@ import bitc.main as main
 provide bitc.main main
 
 
-(def (TS str ts)
-  (stdio.write_string stdio.stdout str)
-  (stdio.write_int stdio.stdout ts 10)  
-  (stdio.write_char stdio.stdout '\linefeed'))  
+def TS(str, ts)
+in
+  stdio.write_string(stdio.stdout, str)
+  stdio.write_int(stdio.stdout, ts, 10)  
+  stdio.write_char(stdio.stdout, '\linefeed')
 
-(def (id x) (convert x))
+def id(x) = convert(x)
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (def start:(mutable uint64) 0)
-    (def stop:(mutable uint64) 0)
-// (def start (stdlib.getTimeStamp))
-    (def sha (sha1.sha1Context
-		 (array 0 0 0 0 0) 0 0 
-		 (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-			0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-			0 0 0 0) 0 false sha1.sha_Success))
+def main.main(argvec: string[])
+in
+  def start:mutable uint64 = 0
+  def stop:mutable uint64 = 0
+  // def start = stdlib.getTimeStamp()
+
+  def sha = sha1.sha1Context(
+              array(0, 0, 0, 0, 0), 0, 0, 
+              array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0), 0, false, sha1.sha_Success)
+
+  def digest:mutable uint8[20] =
+    array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+  def len:word = convert(stdlib.atoi(argvec[2]))
+  // def stop = stdlib.getTimeStamp() 
+  // TS("Initialization: ", stop - start)
     
-    (def digest:(array (mutable uint8) 20)
-      (array 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
-    (def len:word (convert (stdlib.atoi argvec[2])))
- //(def stop (stdlib.getTimeStamp)) 
- //(TS "Initialization: " (- stop start))
-    
- //(set! start (stdlib.getTimeStamp))
-    (def iStream (stdio.open argvec[1] "r"))
-    (def input:(vector (mutable uint8)) 
-      (MakeVector (convert len)
-		   (lambda (i) 
-		     (if (not (stdio.isEOF iStream))
-			 (stdio.read_byte iStream) 0))))
+  // start := stdlib.getTimeStamp()
+  def iStream = stdio.open(argvec[1], "r")
+  def input:mutable uint8[] =
+    MakeVector(convert(len), lambda(i) {
+                               if not(stdio.isEOF(iStream))
+                               then stdio.read_byte(iStream)
+                               else 0 })                                    
   //(loop ((i 0 (+ i 1)))
   //    ((>= i len) ())
   //    (set! input[i] 
   //	    (if (not (stdio.isEOF iStream))
   //		(stdio.read_byte iStream) 0)))  
-    (stdio.close iStream)
+  stdio.close(iStream)
+
+  // stop := stdlib.getTimeStamp()
+  // TS("Input: ", stop - start)
     
- //(set! stop (stdlib.getTimeStamp)) 
- //(TS "Input: " (- stop start))
+  def examine(res, mesg) =
+    switch x = res
+    case sha1.sha_Success in ()
+    otherwise
+      stdio.write_string(stdio.stdout, "Failed ")
+      stdio.write_string(stdio.stdout, mesg)
+      stdio.write_string(stdio.stdout, ": ")
+      stdio.write_string(stdio.stdout, sha1.shaResultAsString(res))
+      stdio.write_char(stdio.stdout, '\linefeed')
     
-    (def (examine res mesg)
-      (switch x res
-	(sha1.sha_Success ())
-	(otherwise (stdio.write_string stdio.stdout "Failed ")
-		   (stdio.write_string stdio.stdout mesg)
-		   (stdio.write_string stdio.stdout ": ")
-		   (stdio.write_string stdio.stdout (sha1.shaResultAsString res))
-		   (stdio.write_char stdio.stdout '\linefeed'))))
+  start := stdlib.getTimeStamp()
+
+  loop i:word = 0 then i + 1
+  until i >= 500
+  in        
+    examine(sha1.sha1Reset(sha), "Reset")
+    examine(sha1.sha1Input(sha, input), "Input")
+    examine(sha1.sha1Result(sha, digest), "Result")
+
+  stop := stdlib.getTimeStamp()
+  // TS("SHA1: ", stop - start)
     
-    (set! start (stdlib.getTimeStamp)) 
-    (loop ((i:word 0 (+ i 1)))
-	((>= i 500) ())
-	(examine (sha1.sha1Reset sha) "Reset")
-	(examine (sha1.sha1Input sha input) "Input")
-	(examine (sha1.sha1Result sha digest) "Result"))
-    (set! stop (stdlib.getTimeStamp)) 
-// (TS "SHA1: " (- stop start))
+  // start := stdlib.getTimeStamp()
+  loop i = 0 then i + 1
+  until i >= 20
+  in
+    when i > 0
+    do
+      stdio.write_char(stdio.stdout, '\space')
+    stdio.write_int(stdio.stdout, digest[i], 16)
+  stdio.write_char(stdio.stdout, '\linefeed')
     
-//(set! start (stdlib.getTimeStamp))
-    (loop ((i 0 (+ i 1)))
-	((>= i 20) ())
-	(if (> i 0)
-	    (begin (stdio.write_char stdio.stdout '\space') ())
-	    ())
-	(stdio.write_int stdio.stdout digest[i] 16))
-    (stdio.write_char stdio.stdout '\linefeed')
-    
-//(set! stop (stdlib.getTimeStamp)) 
-//(TS "Output: " (- stop start))
-    0))
+  // stop := stdlib.getTimeStamp()
+  // TS("Output: ", stop - start)
+  0:int32
   
   

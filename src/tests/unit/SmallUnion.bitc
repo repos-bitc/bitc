@@ -42,8 +42,9 @@ provide bitc.main main
 def i0 = 0:int32
 def i1 = 1:int32
 
-(def somelist (cons i0 (cons i1 nil)))
+def somelist = cons(i0, cons(i1, nil))
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (begin somelist i0)))
+def main.main(argvec: string[])
+in
+  somelist
+  i0

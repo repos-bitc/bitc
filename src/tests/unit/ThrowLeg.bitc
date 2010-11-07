@@ -41,10 +41,10 @@ provide bitc.main main
 
 exception exFred
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (try 0:int32
-	 (catch id
-		(exFred (throw id))
-		(otherwise 0:int32)))))
+def main.main(argvec: string[])
+in
+  try 0:int32
+  catch id
+  case exFred in throw id
+  otherwise 0:int32                       
   

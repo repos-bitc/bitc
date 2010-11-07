@@ -47,18 +47,18 @@ is C1 is c1:'a
          c11:'b
    C2 is c2:'a
  
-(def value (C2 i0)) 
+def value = C2(i0)
 
-(def xin (switch xyz value 
-		   (C1 xyz.c1)
-		   (C2 xyz.c2)))
-(def out (switch xyz value 
-		    (C1 xyz.c1)
-		    (otherwise i0)))
-  
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    out
-    xin))
-  
+def Xin = switch xyz = value
+          case C1 in xyz.c1
+          case C2 in xyz.c2
+
+def out = switch xyz = value
+          case C1 in xyz.c1
+          otherwise i0
+
+def main.main(argvec: string[])
+in
+  out
+  Xin  
 

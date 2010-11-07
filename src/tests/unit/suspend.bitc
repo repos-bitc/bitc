@@ -41,7 +41,7 @@ provide bitc.main main
 
 // suspend cannot be tested until (if at all) we have definvariant
 // definvariant property
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-// (suspend property i0)
-    0))
+def main.main(argvec: string[])
+in
+  // suspend property i0
+  0:int32

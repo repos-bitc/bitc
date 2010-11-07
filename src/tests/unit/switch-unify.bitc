@@ -40,7 +40,7 @@ import bitc.list as lst
 import bitc.main as main
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (lst.list_length nil:(list char))
-    0))
+def main.main(argvec: string[])
+in
+  lst.list_length(nil:list(char))
+  0:int32

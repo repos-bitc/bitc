@@ -44,6 +44,10 @@ def i0 = 0:int32
 boxed struct st('a, 'b)
 is a: 'a
 
-(def c (st true))
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) c 0))
+def c = st(true)
+
+def main.main(argvec: string[])
+in
+  c
+  0:int32
+  
