@@ -41,11 +41,12 @@ import bitc.main as main
 provide bitc.main main
 
 // This should not type check:
-(def (weird-but-correct e)
-  (let ((tmp e[4]))
-    e:(array 'a 5)
-    tmp))
+def weird_but_correct(e)
+in
+  let tmp = e[4]
+  in e:'a[5]
+     tmp     
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (args)
-    0))
+def main.main(argvec: string[])
+in
+  0:int32

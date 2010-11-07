@@ -39,9 +39,9 @@ bitc version 0.11
 import bitc.main as main
 provide bitc.main main
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    // The following *should* cause an exception:
-    (let ((v (MakeVector 10 (lambda (n) 'c'))))
-      v[12])
-    0))
+def main.main(argvec: string[])
+in
+  // The following *should* cause an exception:
+  let v = MakeVector(10, (lambda (n) {'c'}))
+  in v[12]      
+  0:int32

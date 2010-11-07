@@ -40,8 +40,8 @@ import bitc.main as main
 provide bitc.main main
 import bitc.stdio as stdio
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)
-    (stdio.write_char stdio.stdout 'a')
-    (stdio.write_char stdio.stdout '\linefeed')
-    0))
+def main.main(argvec: string[])
+in
+  stdio.write_char(stdio.stdout, 'a')
+  stdio.write_char(stdio.stdout, '\linefeed')
+  0:int32

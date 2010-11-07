@@ -44,10 +44,11 @@ def i1 = 1:int32
 
 exception exFred
 
-(def somelist (cons i0 (cons i1 nil)))
+def somelist = cons(i0, cons(i1, nil))
 
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec) 
-    (begin (throw exFred)
-	   somelist i0)))
+def main.main(argvec: string[])
+in
+  throw exFred
+  somelist        
+  0:int32
   
