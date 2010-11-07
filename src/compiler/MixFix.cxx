@@ -1159,14 +1159,14 @@ MixRulePtr MixRules[] =  {
   // list convenience syntax:
   MixRule::make(msc_expr, "[_]",  128, assoc_none),
 
-  // The design note called for:
-  //   MixRule::make(msc_expr, "__",  0, assoc_left),
-  // but I'm giving these a try instead:
-
   MixRule::make(msc_expr, "_:#t_", 128, assoc_none),
 
   // Kind matching is not yet implemented:
   // MixRule::make(msc_type, "_:#k_", 129, assoc_none),
+
+  // The design note called for:
+  //   MixRule::make(msc_expr, "__",  0, assoc_left),
+  // but I'm giving these a try instead:
 
   MixRule::make(msc_expr, "_,_",  -1, assoc_right), // arg assembly, cpair assembly
 
