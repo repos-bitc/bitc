@@ -484,8 +484,7 @@ block         bool          boxed
 ByRef         case          catch         
 char          cond          const         
 continue      declare       def           
-defaxiom      definvariant  deftheory     
-defthm        exception     deref         
+exception     deref         
 disable       do            double        
 dup           enable        exception     
 extends       external      false         
@@ -500,29 +499,28 @@ mutable       not           object
 opaque        or            otherwise     
 pair          proclaim      provide       
 pure          quad          repr          
-return        set!          sizeof        
+return        sizeof        
 string        struct        suspend       
 switch        tag           the           
 throw         trait         try           
-true          tyfn          uint8         
-uint16        uint32        uint64        
-unboxed       union         use           
-vector        version       where         
-until         word</literallayout>
+true          uint8         uint16        
+uint32        uint64        unboxed       
+union         use           vector        
+version       where         until         
+word</literallayout>
 	<p>
 	  The following identifiers are reserved for use as future
 	  keywords:
 	</p>
 	<literallayout indent="no">
 assert        break         check         
-coindset      constrain     deep-const    
-defequiv      object     defrefine     
-deftype       defvariant    do*           
-import!       indset        inner-ref     
+constrain     deep          object        
+deftype       do*           inner-ref     
 int           let*          list          
 location      module        namespace     
-read-only     require       ref           
-sensory       super         tycon         
+ptr           read-only     require       
+ref           sensory       super         
+tycon         tyfn          typedef       
 using         value-at</literallayout>
 	<p>
           In addition to the reserved words identified above, all

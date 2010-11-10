@@ -289,7 +289,6 @@ static unsigned VersionMinor(const std::string s)
 %token <tok> tk_TAG
 
 %token <tok> tk_MUTABLE
-%token <tok> tk_SET
 %token <tok> tk_DEREF
 %token <tok> tk_INNER_REF
 %token <tok> tk_UNBOXED
