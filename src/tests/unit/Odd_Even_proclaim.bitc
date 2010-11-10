@@ -40,7 +40,7 @@ import bitc.main as main
 provide bitc.main main
 
 def even : fn('a) -> bool
-  where Arith('a), IntLit('a)
+  forall Arith('a), IntLit('a)
 
 def odd(x) =
   if x < 0

@@ -40,7 +40,7 @@ bitc version 0.11
 def dupize1(x) = dup(x)
 
 def dupize2:fn ('a) -> boxed('b)
-  where CopyCompat('a, 'b) =
+  forall CopyCompat('a, 'b) =
   lambda (x) dup(x)
 
 import bitc.main as main

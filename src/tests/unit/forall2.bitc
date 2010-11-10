@@ -45,29 +45,29 @@ trait TC2('a,'b)
 is *!* : fn ('a, 'b) -> bool
 
 boxed struct S2('a, 'b)
-  where TC2('a, 'b)
+  forall TC2('a, 'b)
 is f1:'a
    f2:'b
 
 boxed union U2('a, 'b)
-  where TC2('a, 'b)
+  forall TC2('a, 'b)
 is u1
    u2 is a:'a
          b:'b
    u3 is r: U2('a, 'b)
 	
 trait TC3('a, 'b, 'c)
-  where TC2('a,'b)
+  forall TC2('a,'b)
 is $: fn('a, 'b) -> 'c
 
 instance TC2('a, 'a) 
 is *!* = lambda (x, y) true
 
 def abc: fn('a, 'b) -> bool
-  where TC2('a, 'b)
+  forall TC2('a, 'b)
 
 def abc:fn('a, 'b) -> bool
-  where TC2('a, 'b) =
+  forall TC2('a, 'b) =
   lambda(x, y) {true}
 
 def Q = *!*

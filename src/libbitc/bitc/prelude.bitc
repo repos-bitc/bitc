@@ -93,9 +93,7 @@ interface bitc.prelude {
     some { value : 'a }
   }
 
-  unboxed union nullable('a)
-   where 
-    RefTypes('a) {
+  unboxed union nullable('a) forall RefTypes('a) {
       null
       not_null { ptr: 'a }
   }
@@ -215,7 +213,7 @@ interface bitc.prelude {
   // TYPE CLASS FOR INTEGER LITERALS
   ///////////////////////////////////////////////////////////
 
-  closed trait IntLit('a) where LiteralType('a) {}
+  closed trait IntLit('a) forall LiteralType('a) {}
 
   instance IntLit(word)
   instance IntLit( int8)
@@ -230,20 +228,20 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPE CLASS FOR FLOATING POINT LITERALS
   ///////////////////////////////////////////////////////////
-  closed trait FloatLit('a) where LiteralType('a) {}
+  closed trait FloatLit('a) forall LiteralType('a) {}
 
   instance FloatLit(float)
   instance FloatLit(double)
   instance FloatLit(quad)  
 
-  closed trait Unsigned('a) where IntLit('a) {}
+  closed trait Unsigned('a) forall IntLit('a) {}
   instance Unsigned(word)
   instance Unsigned(uint8)
   instance Unsigned(uint16)
   instance Unsigned(uint32)
   instance Unsigned(uint64)
 
-  closed trait Signed('a) where IntLit('a) {}
+  closed trait Signed('a) forall IntLit('a) {}
   instance Signed( int8)
   instance Signed( int16)
   instance Signed( int32)
@@ -264,7 +262,7 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING ORDERING
   ///////////////////////////////////////////////////////////
-  trait Ord('a) where Eq('a) {
+  trait Ord('a) forall Eq('a) {
     _<_  : fn('a, 'a) -> bool
     _>_  : fn('a, 'a) -> bool
     _<=_ : fn('a, 'a) -> bool
@@ -280,7 +278,7 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING (FOUR-FUNCTION) ARITHMETIC
   ///////////////////////////////////////////////////////////
-  trait Arith('a) where Ord('a) {
+  trait Arith('a) forall Ord('a) {
     _+_ : fn('a, 'a) -> 'a
     _-_ : fn('a, 'a) -> 'a
     _*_ : fn('a, 'a) -> 'a
@@ -309,7 +307,7 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING INTEGER MODULUS ARITHMETIC
   ///////////////////////////////////////////////////////////
-  trait IntArith('a) where Arith('a), IntLit('a) {
+  trait IntArith('a) forall Arith('a), IntLit('a) {
     _%_ : fn('a, 'a) -> 'a
   }
 
@@ -319,7 +317,7 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING BITWISE ARITHMETIC
   ///////////////////////////////////////////////////////////
-  trait Bitwise('a) where Unsigned('a) {
+  trait Bitwise('a) forall Unsigned('a) {
       bit_and  : fn('a, 'a)   -> 'a   // Bitwise AND
       bit_or   : fn('a, 'a)   -> 'a   // Bitwise OR
       bit_not  : fn('a)       -> 'a   // One's Complement

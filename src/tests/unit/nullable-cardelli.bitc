@@ -53,7 +53,7 @@ is en11
 
 // Constrained Reference type
 unboxed union un_ct_ref('a)
-  where RefTypes('a)
+  forall RefTypes('a)
 is en21
    en22
    ptr2 is p:'a

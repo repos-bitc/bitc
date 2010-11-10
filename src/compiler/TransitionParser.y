@@ -692,8 +692,8 @@ blk_constraints: {
   $$ = AST::make(at_constraints);
 }
 
-blk_constraints: tk_WHERE blk_constraint_seq {
-  SHOWPARSE("blk_constraints -> blk_constraint_seq");
+blk_constraints: tk_FORALL blk_constraint_seq {
+  SHOWPARSE("blk_constraints -> FORALL blk_constraint_seq");
   $$ = $2;
 }
 

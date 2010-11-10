@@ -65,8 +65,8 @@ module union_test is
   //   (defunion (constrained 'a) :ref))
 
   // boxed union constrained('a)
-  //   where Eq('a)
+  //   forall Eq('a)
 
-  boxed union constrained('a) where Eq('a) is
+  boxed union constrained('a) forall Eq('a) is
     empty
     full { a : 'a }

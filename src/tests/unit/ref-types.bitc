@@ -38,11 +38,11 @@
 bitc version 0.11
 
 def abc:boxed(int32)
-  where RefTypes(boxed(int32)) =
+  forall RefTypes(boxed(int32)) =
   dup(10)
 
 def refID:fn('a) -> 'a
-  where RefTypes(boxed(int32)) =
+  forall RefTypes(boxed(int32)) =
   lambda(x) {x}
 
 import bitc.main as main

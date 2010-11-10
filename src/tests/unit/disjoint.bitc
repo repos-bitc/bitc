@@ -47,7 +47,7 @@ trait ABC('a)
 is FN: fn('a, 'a) -> bool
 
 instance ABC('a)
-  where IntLit('a)
+  forall IntLit('a)
 is FN = FUN
 
 // must not work

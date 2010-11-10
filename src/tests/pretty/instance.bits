@@ -43,7 +43,7 @@ module instance_test is
 
   closed trait mumble('a, 'b) {}
 
-  trait MyOrd('a) where Eq('a)
+  trait MyOrd('a) forall Eq('a)
   is
     _*<_ : fn('a, 'a) -> bool
     _*>_ : fn('a, 'a) -> bool

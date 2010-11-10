@@ -70,9 +70,9 @@ module mixed_types is
   //   (defstruct (constrained 'a) :ref))
 
   // boxed struct constrained('a)
-  //   where Eq('a)
+  //   forall Eq('a)
 
-  boxed struct constrained('a) where Eq('a) is
+  boxed struct constrained('a) forall Eq('a) is
     a : 'a
     f : float
     
@@ -92,8 +92,8 @@ module mixed_types is
     g { i:int32 }
 
   // boxed union uconstrained('a)
-  //   where Eq('a)
+  //   forall Eq('a)
 
-  boxed union uconstrained('a) where Eq('a) is
+  boxed union uconstrained('a) forall Eq('a) is
     empty
     full { a : 'a }

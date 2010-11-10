@@ -43,7 +43,7 @@ trait EQL('a)
 is === : fn('a, 'a) -> bool
 
 trait ORD('a)
-  where EQL('a)
+  forall EQL('a)
 is <<== : fn('a,'a) -> bool
 
 //(instance (EQL 'a) ==)
