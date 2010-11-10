@@ -13,6 +13,12 @@
       the flexibility, safety, and richness of Standard ML or Haskell with the
       low-level expressiveness of C.
     </p>
+    <p>
+     <b>Please Note</b>: BitC has just made a transition from a
+    LISP-like (s-expression) syntax to a more conventional syntax. The
+    specification and the web site haven't caught up yet, and of
+    course some of the published papers predate the change.
+    </p>
     <h2>Objectives</h2>
     <p>
       BitC is a programming language that tries to meet the following
@@ -43,8 +49,8 @@
 	  mechanisms to programmers who can't give up performance to
 	  get them:</p>
 <pre>
-(define (add-one x) (+ 1 x))
-add-one: (forall (Arith 'a) (fn 'a -> 'a))
+def add-one(x) = 1 + x
+add-one: fn 'a -> 'a where Arith('a)
 </pre>
       </li>
       <li>
