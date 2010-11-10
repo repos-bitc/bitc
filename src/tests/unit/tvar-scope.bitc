@@ -43,11 +43,17 @@ def i0 = 0:int32
 
 //(def p (if true:'a 10:int32 20))
 
-(def p1 (let ((l:'a (lambda (x) x))) (l true) (l i0) ))
+def p1 = let l:'a = lambda(x) { x }
+         in l(true)
+            l(i0)
 
-(def p2 (let ((l (lambda (x:'a) x))) (l true) (l ()) ))
+def p2 = let l = lambda(x:'a) { x }
+         in l(true)
+            l(())
 
-(def p3 (let ((l (lambda (x) x))) (l:'a true) (l i0) ))
+def p3 = let l = lambda(x) { x }
+         in (l:'a)(true)
+            l(i0)
 
 // MUST NOT WORK
 //(def p4 (let ((l:'a (lambda (x) x))) (l:'a true) (l i0) ))
@@ -64,5 +70,7 @@ def i0 = 0:int32
 
 import bitc.main as main
 provide bitc.main main
-(def main.main:(fn (vector string) -> int32)
-  (lambda (argvec)  0))
+
+def main.main(argvec: string[])
+in
+  0:int32  
