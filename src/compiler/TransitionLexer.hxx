@@ -140,13 +140,9 @@ private:
 
 public:
   enum LangFlagsValues {
-    lf_sexpr = 0x1u,
-    lf_block = 0x2u,
-    lf_transition = 0x3u,
-    lf_version = 0x4u
+    lf_block = 0x1u,
+    lf_version = 0x2u
   };
-
-  int lispParenDepth;
 
   typedef sherpa::EnumSet<LangFlagsValues> LangFlags;
 
@@ -293,11 +289,9 @@ public:
      *
      */
     LangFlags whichLang;
-    int sexprTokValue;
-    int blockTokValue;
+    int tokValue;
 
     KeyWord(const char *_nm, LangFlags _whichLang, int _tokValue);
-    KeyWord(const char *_nm, LangFlags _whichLang, int _lispTokValue, int _blockTokValue);
   };
 
 private:

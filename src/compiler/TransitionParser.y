@@ -165,10 +165,8 @@ static unsigned VersionMinor(const std::string s)
 %nonassoc <tok> prec_PreferShift
 
 %nonassoc <tok> tk_ReservedWord        /* reserved words */
-%nonassoc <tok> tk_SxpReservedWord     /* S-expression reserved words */
 
 /* Categorical terminals: */
-%nonassoc <tok> tk_SxpIdent
 %nonassoc <tok> tk_BlkIdent
 %nonassoc <tok> tk_NotApply
 
@@ -331,65 +329,39 @@ static unsigned VersionMinor(const std::string s)
 
 //%token <tok> tk_SUPER
 %token <tok> tk_SUSPEND
-// %type <tok>  sxp_ifident
 %type <tok>  blk_ifident
 
 //%token <tok> tk_EXPORT
  
-%type <tok> LP RP
-
 %type <ast> trn_module trn_implicit_module trn_module_seq
 %type <ast> trn_interface
-%type <ast> sxp_defpattern blk_defpattern
-%type <ast> sxp_mod_definition blk_mod_definition
+%type <ast> blk_defpattern
+%type <ast> blk_mod_definition
 %type <ast> trn_mod_definitions trn_mod_definition
 %type <ast> trn_if_definitions trn_if_definition
-%type <ast> sxp_common_definition
 %type <ast> blk_common_definition
-// %type <ast> sxp_value_declaration
 %type <ast> blk_value_declaration
-// %type <ast> sxp_ptype_name
-// %type <ast> sxp_val
 %type <ast> blk_val blk_optval
 %type <ast> blk_openclosed
-// %type <ast> sxp_openclosed
 %type <ast> blk_ptype_name
-%type <ast> sxp_typeapp blk_typeapp
+%type <ast> blk_typeapp
 %type <ast> blk_type_definition blk_type_decl
-// %type <ast> sxp_type_definition sxp_type_decl
 %type <ast> blk_externals
-// %type <ast> sxp_externals
-// %type <ast> sxp_importList sxp_provideList
-// %type <ast> sxp_alias
 %type <ast> blk_importList blk_provideList
 %type <ast> blk_alias
-%type <ast> sxp_type_cpair sxp_unqual_expr_cpair
 %type <ast> blk_type_cpair
-%type <ast> sxp_value_definition
 %type <ast> blk_value_definition blk_fndef_tail
-// %type <ast> sxp_tc_definition sxp_ti_definition
 %type <ast> blk_tc_definition blk_ti_definition
-// %type <ast> sxp_import_definition sxp_provide_definition
 %type <ast> blk_import_definition blk_provide_definition
-// %type <ast> sxp_tc_decls sxp_tc_decl
 %type <ast> blk_tc_decls // blk_tc_decl
-// %type <ast> sxp_declares sxp_declare sxp_decls sxp_decl
 %type <ast> blk_opt_declares blk_declares blk_declare blk_decl
-// %type <ast> sxp_constructors sxp_constructor
 %type <ast> blk_constructors blk_constructor
-// %type <ast> sxp_repr_constructors sxp_repr_constructor
-// %type <ast> sxp_repr_reprs sxp_repr_repr
 %type <ast> blk_repr_constructors blk_repr_constructor
 %type <ast> blk_repr_reprs blk_repr_repr
-%type <ast> sxp_bindingpattern sxp_lambdapatterns sxp_lambdapattern
 %type <ast> blk_bindingpattern blk_lambdapatterns blk_lambdapattern
-%type <ast> sxp_actual_params sxp_nonempty_params
 %type <ast> blk_actual_params blk_nonempty_params
-%type <ast> sxp_block sxp_block_exprs
 %type <ast> blk_iblock
 %type <ast> blk_expr_seq
-// %type <ast> sxp_the_expr
-%type <ast> sxp_expr sxp_unqual_expr
 // Primary exprs are the truly primitive things.
 // Closed exprs are things like LET, DO, WHILE that are bracketed on
 // all sides.
@@ -414,9 +386,7 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_method_decls blk_method_decl
 // %type <ast> sxp_method_bindings sxp_method_binding
 %type <ast> blk_method_bindings blk_method_binding
-%type <ast> sxp_constraints sxp_constraint_seq sxp_constraint
 %type <ast> blk_constraints blk_constraint_seq blk_constraint
-%type <ast> sxp_type_args sxp_type // sxp_bitfieldtype
 
 // in order of precedence, *lowest* first:
 %type <ast> blk_type
@@ -424,43 +394,23 @@ static unsigned VersionMinor(const std::string s)
 %type <ast> blk_prefix_type
 %type <ast> primary_type
 %type <ast> blk_primary_type
-%type <ast> sxp_primary_type
 
 %type <ast> blk_type_args blk_bitfieldtype
-%type <ast> sxp_type_pl_byref sxp_type_args_pl_byref
-// %type <ast> sxp_field_type
 %type <ast> blk_field_type blk_type_pl_byref blk_type_args_pl_byref
 %type <ast> int_type uint_type any_int_type float_type bool_type
 %type <ast> blk_tvlist
-// %type <ast> sxp_tvlist
-// %type <ast> sxp_fields sxp_field
 %type <ast> blk_fields blk_field
-// %type <ast> sxp_fields_and_methods sxp_methods_only sxp_methdecl
 %type <ast> blk_fields_and_methods blk_methods_only blk_methdecl
 %type <ast> trn_literal typevar //mod_ident
-%type <ast> sxp_switch_matches sxp_switch_match
 %type <ast> blk_expr_switch_matches blk_expr_switch_match
 %type <ast> blk_exident
-// %type <ast> sxp_exident
-%type <ast> sxp_condcases sxp_condcase
-%type <ast> sxp_fntype // sxp_method_type
 %type <ast> blk_fntype blk_method_type
 %type <ast> trn_fneffect
- //%type <ast> reprbody reprbodyitems reprbodyitem reprtags reprcase reprcaseleg
-//%type <ast> typecase_leg typecase_legs
-%type <ast> sxp_sw_legs sxp_sw_leg sxp_otherwise sxp_opt_otherwise
 %type <ast> blk_sw_legs blk_sw_leg
 %type <ast> blk_otherwise blk_opt_otherwise
-//%type <ast> catchclauses catchclause
-%type <ast> sxp_letbindings sxp_letbinding
 %type <ast> blk_letbindings blk_letbinding
-%type <ast> sxp_loopbindings sxp_nonempty_loopbindings sxp_loopbinding sxp_looptest
 %type <ast> blk_loopbindings blk_nonempty_loopbindings blk_expr_loopbinding
-%type <ast> sxp_let_eform
-%type <ast> sxp_type_val_definition blk_type_val_definition
-%type <ast> sxp_constrained_definition
-
-%type <ast> sxp_ident sxp_defident sxp_useident
+%type <ast> blk_type_val_definition
 %type <ast> blk_ident blk_defident blk_useident
 %type <ast> intLit natLit floatLit charLit strLit boolLit
 
@@ -662,11 +612,6 @@ trn_if_definitions: trn_if_definitions SC trn_if_definition {
   $$->addChild($3); 
 };
 
-trn_if_definition: sxp_common_definition {
-  SHOWPARSE("trn_if_definition -> sxp_common_definition");
-  $$ = $1;
-};
-
 trn_if_definition: blk_common_definition {
   SHOWPARSE("trn_if_definition -> blk_common_definition");
   $$ = $1;
@@ -675,22 +620,6 @@ trn_if_definition: blk_common_definition {
 // TOP LEVEL DEFINITIONS [2.5.1]
 // Note that the block syntax has no direct analog to this, since we
 // moved the constraints back inside the defining form.
-sxp_constrained_definition: LP tk_FORALL sxp_constraints sxp_type_val_definition RP {
-  // HACK ALERT!!! For reasons of ancient history, there is no
-  // at_forall AST. Instead, all of the sxp_type_val_definition ASTs have
-  // their sxp_constraints tacked on at the end. This is rather badly
-  // glitched and we need to fix it, but the immediate goal was to
-  // move the (forall ...) syntax to the outside without doing major
-  // surgery on the compiler internals.
-
-  uint32_t nChildren = $4->children.size();
-
-  shared_ptr<AST> tvConstraints= $4->child(nChildren-1);
-  assert(tvConstraints);
-  tvConstraints->addChildrenFrom($3);
-  $$ = $4;
-};
-
 trn_mod_definitions: trn_mod_definition {
   SHOWPARSE("trn_mod_definitions -> trn_mod_definition");
   $$ = AST::make(at_Null, $1->loc, $1);
@@ -700,11 +629,6 @@ trn_mod_definitions: trn_mod_definitions SC trn_mod_definition {
   SHOWPARSE("trn_mod_definitions -> trn_mod_definitions SC trn_mod_definition");
   $$ = $1;
   $$->addChild($3); 
-};
-
-trn_mod_definition: sxp_mod_definition {
-  SHOWPARSE("trn_mod_definition -> sxp_mod_defintion");
-  $$ = $1;
 };
 
 trn_mod_definition: blk_mod_definition {
@@ -727,28 +651,13 @@ blk_mod_definition: blk_common_definition {
   $$ = $1;
 };
 
-sxp_mod_definition: sxp_common_definition {
-  SHOWPARSE("sxp_mod_definition -> sxp_common_definition");
-  $$ = $1;
-};
-
 blk_common_definition: blk_import_definition {
   SHOWPARSE("blk_common_definition -> blk_import_definition");
   $$ = $1;
 }
 
-// sxp_common_definition: sxp_import_definition {
-//   SHOWPARSE("sxp_common_definition -> sxp_import_definition");
-//   $$ = $1;
-// };
-
 blk_common_definition: blk_type_val_definition {
   SHOWPARSE("blk_common_definition -> blk_type_val_definition");
-  $$ = $1;
-};
-
-sxp_common_definition: sxp_type_val_definition {
-  SHOWPARSE("sxp_common_definition -> sxp_type_val_definition");
   $$ = $1;
 };
 
@@ -760,20 +669,10 @@ sxp_common_definition: sxp_type_val_definition {
 //  $$ = $1;
 //}
 
-sxp_common_definition: sxp_constrained_definition {
-  SHOWPARSE("sxp_common_definition -> sxp_constrained_definition");
-  $$ = $1;
-};
-
 blk_type_val_definition: blk_type_decl {
   SHOWPARSE("blk_type_val_definition -> blk_type_decl");
   $$ = $1;
 };
-
-// sxp_type_val_definition: sxp_type_decl {
-//   SHOWPARSE("sxp_type_val_definition -> sxp_type_decl");
-//   $$ = $1;
-// };
 
 blk_type_val_definition: blk_type_definition {
   SHOWPARSE("blk_type_val_definition -> blk_type_definition");
@@ -790,30 +689,15 @@ blk_type_val_definition: blk_value_definition {
   $$ = $1;
 };
 
-sxp_type_val_definition: sxp_value_definition {
-  SHOWPARSE("sxp_type_val_definition -> sxp_value_definition");
-  $$ = $1;
-};
-
 blk_type_val_definition: blk_value_declaration {
   SHOWPARSE("blk_type_val_definition -> blk_value_declaration");
   $$ = $1;
 };
 
-// sxp_type_val_definition: sxp_value_declaration {
-//   SHOWPARSE("sxp_type_val_definition -> sxp_value_declaration");
-//   $$ = $1;
-// };
-
 blk_type_val_definition: blk_tc_definition {
   SHOWPARSE("blk_type_val_definition -> blk_tc_definition");
   $$ = $1;
 };
-
-// sxp_type_val_definition: sxp_tc_definition {
-//   SHOWPARSE("sxp_type_val_definition -> sxp_tc_definition");
-//   $$ = $1;
-// };
 
 blk_type_val_definition: blk_ti_definition {
   SHOWPARSE("blk_type_val_definition -> blk_ti_definition");
@@ -863,32 +747,6 @@ blk_constraint: blk_useident %prec prec_PreferShift {
  $$ = AST::make(at_tcapp, $1->loc, $1);
 };
 
-sxp_constraints: '(' sxp_constraint_seq ')' {
- SHOWPARSE("sxp_constraints -> ( sxp_constraint_seq )");
- $$ = $2;
-};
-
-sxp_constraint_seq: sxp_constraint_seq sxp_constraint {
- SHOWPARSE("sxp_constraint_seq -> sxp_constraint_seq sxp_constraint");
- $$ = $1;
- $$->addChild($2);
-};
-
-sxp_constraint_seq: sxp_constraint {
- SHOWPARSE("sxp_constraint_seq -> sxp_constraint");
- $$ = AST::make(at_constraints, $1->loc, $1);
-};
-
-sxp_constraint: sxp_typeapp {
-  $1->astType = at_tcapp;
-  $$ = $1;
-}
-
-sxp_constraint: sxp_useident {
- SHOWPARSE("sxp_constraint -> sxp_useident");
- $$ = AST::make(at_tcapp, $1->loc, $1);
-};
-
 // Issue: parameterized type names in the block syntax have a
 // shift/reduce ambiguity at:
 //
@@ -919,35 +777,6 @@ blk_ptype_name: blk_defident '(' blk_tvlist ')' %prec '(' {
   $$ = AST::make(at_Null, $1->loc, $1, $3);
 };
 
-// sxp_ptype_name: sxp_defident {
-//   SHOWPARSE("sxp_ptype_name -> sxp_defident");
-//   shared_ptr<AST> tvlist = AST::make(at_tvlist, $1->loc);
-//   shared_ptr<AST> constraints = AST::make(at_constraints, $1->loc);
-//   $$ = AST::make(at_Null, $1->loc, $1, tvlist, constraints);
-// };
-
-// sxp_ptype_name: '(' sxp_defident sxp_tvlist ')' {
-//   SHOWPARSE("sxp_ptype_name -> '(' sxp_defident sxp_tvlist ')'");
-//   shared_ptr<AST> constraints = AST::make(at_constraints, $2->loc);
-//   $$ = AST::make(at_Null, $2->loc, $2, $3, constraints);
-// };
-
-// These were the originals, where the FORALL did not yet wrap the
-// outermost form. This style later abandoned in the S-Expression
-// syntax, though in hindsight it was structurally better as-was and
-// perhaps should not have been abandoned.
-
-//ptype_name: '(' tk_FORALL sxp_constraints sxp_defident ')' {
-//  SHOWPARSE("sxp_ptype_name -> '(' FORALL sxp_constraints '(' sxp_defident sxp_tvlist ')' ')' ");
-//  shared_ptr<AST> tvlist = AST::make(at_tvlist, $4->loc);
-//  $$ = AST::make(at_Null, $2.loc, $4, tvlist, $3);
-//};
-//
-//ptype_name: '(' tk_FORALL sxp_constraints '(' sxp_defident sxp_tvlist ')' ')' {
-//  SHOWPARSE("sxp_ptype_name -> '(' FORALL sxp_constraints '(' sxp_defident sxp_tvlist ')' ')' ");
-//  $$ = AST::make(at_Null, $2.loc, $5, $6, $3);
-//};
-
 // STRUCTURE TYPES [3.6.1]         
 blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints blk_opt_declares IsILCB blk_fields_and_methods IRCB {
   SHOWPARSE("blk_type_definition -> blk_val STRUCT blk_ptype_name blk_constraints "
@@ -956,15 +785,6 @@ blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints blk_opt_de
                  $5, $7, $4);
   $$->child(0)->defForm = $$;
 };
-
-// sxp_type_definition: LP tk_STRUCT sxp_ptype_name sxp_val trn_optdocstring sxp_declares sxp_fields_and_methods RP {
-//   SHOWPARSE("sxp_type_definition -> ( DEFSTRUCT sxp_ptype_name sxp_val "
-//            "trn_optdocstring sxp_declares sxp_fields_and_methods )");
-//   $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $4,
-//                $6, $7);
-//   $$->child(0)->defForm = $$;
-//   $$->addChild($3->child(2));
-// };
 
 // UNION TYPES [3.6.2]              
 blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints blk_opt_declares IsILCB blk_constructors IRCB {
@@ -1586,11 +1406,6 @@ blk_method_binding: blk_ident '=' blk_expr {
 //  SHOWPARSE("blk_value_definition -> DEF  blk_defpattern blk_constraints = blk_expr");
 //  $$ = AST::make(at_define, $1.loc, $2, $5, $3);
 //};
-sxp_value_definition: LP tk_DEF sxp_defpattern sxp_expr RP  {
-  SHOWPARSE("sxp_value_definition -> ( DEFINE  sxp_defpattern sxp_expr )");
-  $$ = AST::make(at_define, $2.loc, $3, $4);
-  $$->addChild(AST::make(at_constraints));
-};
 
 blk_value_definition: tk_DEF blk_defpattern blk_constraints '=' blk_expr {
   SHOWPARSE("blk_value_definition -> DEF blk_defpattern blk_constraints = blk_expr");
@@ -1630,39 +1445,6 @@ blk_fndef_tail: tk_IN blk_iblock {
   $$ = $2;
 }
 
-// Define convenience syntax case 1: no arguments
-// No trn_docstring here because of sxp_block
-sxp_value_definition: LP tk_DEF '(' sxp_defident ')' sxp_block RP {
-  SHOWPARSE("sxp_value_definition -> ( DEFINE  ( sxp_defident ) [docstring] sxp_block )");
-  $6 = stripDocString($6);
-  shared_ptr<AST> iRetBlock =
-    AST::make(at_labeledBlock, $2.loc, 
-              AST::make(at_ident, LToken(tk_SxpIdent, "__return")), $6);
-  shared_ptr<AST> iLambda =
-    AST::make(at_lambda, $2.loc, AST::make(at_argVec, $3.loc), iRetBlock);
-  iLambda->printVariant = pf_IMPLIED;
-  shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
-  $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
-  $$->addChild(AST::make(at_constraints));
-};
-
-// Define convenience syntax case 3: one or more arguments
-// No trn_docstring here because of sxp_block
-sxp_value_definition: LP tk_DEF '(' sxp_defident sxp_lambdapatterns ')'
-                  sxp_block RP {
-  SHOWPARSE("sxp_value_definition -> ( DEFINE  ( sxp_defident sxp_lambdapatterns ) "
-            "[docstring] sxp_block )");
-  $7 = stripDocString($7);
-  shared_ptr<AST> iRetBlock =
-    AST::make(at_labeledBlock, $2.loc, 
-              AST::make(at_ident, LToken(tk_SxpIdent, "__return")), $7);
-  shared_ptr<AST> iLambda = AST::make(at_lambda, $2.loc, $5, iRetBlock);
-  iLambda->printVariant = pf_IMPLIED;
-  shared_ptr<AST> iP = AST::make(at_identPattern, $4->loc, $4);
-  $$ = AST::make(at_recdef, $2.loc, iP, iLambda);
-  $$->addChild(AST::make(at_constraints));
-};
-
 // PROCLAIM DEFINITION -- VALUES [6.2]
 blk_value_declaration: tk_DEF blk_defpattern blk_constraints blk_externals {
   SHOWPARSE("blk_value_declaration -> DEF blk_defpattern blk_constraints blk_externals");
@@ -1680,15 +1462,6 @@ blk_value_declaration: tk_DEF blk_defpattern blk_constraints blk_externals {
   $$->getID()->flags |= $4->flags;
   $$->getID()->externalName = $4->externalName;
 };
-
-// sxp_value_declaration: LP tk_PROCLAIM sxp_defident ':' sxp_type trn_optdocstring sxp_externals RP {
-//   SHOWPARSE("sxp_if_definition -> ( PROCLAIM sxp_defident : sxp_type trn_optdocstring sxp_externals )");
-//   $$ = AST::make(at_proclaim, $2.loc, $3, $5);
-//   $$->flags |= $7->flags;
-//   $$->getID()->flags |= $7->flags;
-//   $$->getID()->externalName = $7->externalName;
-//   $$->addChild(AST::make(at_constraints));
-// };
 
 // TODO: The second ident in import rule, and the ident in the provide rule
 //  should be restricted to
@@ -1733,16 +1506,6 @@ blk_import_definition: tk_IMPORT blk_ifident {
   $$ = AST::make(at_import, $1.loc, ifIdent);
 };
 
-// sxp_import_definition: LP tk_IMPORT sxp_ifident RP {
-//   SHOWPARSE("sxp_import_definition -> (IMPORT sxp_ifident)");
-//   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-//   if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
-//     std::string err = "Unable to import " + $3.str;
-//     lexer->ReportParseError($2.loc, err);
-//   }
-//   $$ = AST::make(at_import, $2.loc, ifIdent);
-// };
-
 blk_import_definition: tk_IMPORT blk_ifident blk_importList {
   SHOWPARSE("blk_import_definition -> IMPORT blk_ifident blk_importList;");
   shared_ptr<AST> ifIdent = AST::make(at_ifident, $2);
@@ -1753,17 +1516,6 @@ blk_import_definition: tk_IMPORT blk_ifident blk_importList {
   $$ = AST::make(at_import, $1.loc, ifIdent);
   $$->addChildrenFrom($3);
 };
-
-// sxp_import_definition: LP tk_IMPORT sxp_ifident sxp_importList RP {
-//   SHOWPARSE("sxp_import_definition -> (IMPORT sxp_ifident sxp_importList)");
-//   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-//   if (!UocInfo::importInterface(lexer->errStream, $3.loc, $3.str)) {
-//     std::string err = "Unable to import " + $3.str;
-//     lexer->ReportParseError($2.loc, err);
-//   }
-//   $$ = AST::make(at_import, $2.loc, ifIdent);
-//   $$->addChildrenFrom($4);
-// };
 
 blk_importList: blk_alias {
   SHOWPARSE("blk_importList -> blk_alias");
@@ -1787,29 +1539,6 @@ blk_alias: blk_ident '=' blk_ident {
   $$ = AST::make(at_ifsel, $1->loc, $1, $3);
 };
 
-// sxp_importList: sxp_alias {
-//   SHOWPARSE("sxp_importList -> sxp_alias");
-//   $$ = AST::make(at_Null, $1->loc, $1);
-// };
-// sxp_importList: sxp_importList sxp_alias {
-//   SHOWPARSE("sxp_importList -> sxp_importList sxp_alias");
-//   $$ = $1;
-//   $$->addChild($2);
-// };
-// 
-// sxp_alias: sxp_ident {
-//   SHOWPARSE("sxp_alias -> sxp_ident");
-//   // The two identifiers in this case are textually the same, but the
-//   // need to end up with distinct AST nodes, thus getDCopy().
-//   $$ = AST::make(at_ifsel, $1->loc, $1, $1->getDeepCopy());
-// };
-// sxp_alias: '(' sxp_ident tk_AS sxp_ident ')' {
-//   SHOWPARSE("sxp_alias -> ( sxp_ident AS sxp_ident )");
-// 
-//   $$ = AST::make(at_ifsel, $2->loc, $4, $2);
-// };
-
-
 // PROVIDE DEFINITION [8.3]
 blk_provide_definition: tk_PROVIDE blk_ifident blk_provideList {
   SHOWPARSE("blk_provide_definition -> PROVIDE blk_ifident blk_provideList;");
@@ -1829,30 +1558,6 @@ blk_provideList: blk_provideList ',' blk_ident {
   $$ = $1;
   $$->addChild($3);
 };
-
-// sxp_provide_definition: LP tk_PROVIDE sxp_ifident sxp_provideList RP {
-//   SHOWPARSE("sxp_provide_definition -> (PROVIDE sxp_ifident sxp_provideList)");
-//   shared_ptr<AST> ifIdent = AST::make(at_ifident, $3);
-//   UocInfo::importInterface(lexer->errStream, $3.loc, $3.str);
-//   $$ = AST::make(at_provide, $2.loc, ifIdent);
-//   $$->addChildrenFrom($4);
-// };
-// 
-// sxp_provideList: sxp_ident {
-//   SHOWPARSE("sxp_provideList -> sxp_ident");
-//   $$ = AST::make(at_Null, $1->loc, $1);
-// };
-// 
-// sxp_provideList: sxp_provideList sxp_ident {
-//   SHOWPARSE("sxp_provideList -> sxp_provideList sxp_ident");
-//   $$ = $1;
-//   $$->addChild($2);
-// };
-
-// definition: '(' tk_DEFTHM sxp_ident sxp_expr ')'  {
-//    SHOWPARSE("definition -> ( DEFTHM sxp_ident sxp_expr )");
-//    $$ = AST::make(at_defthm, $2.loc, $3, $4);
-// };
 
 blk_opt_declares: {
   SHOWPARSE("blk_opt_declares -> <empty>");
@@ -1880,42 +1585,6 @@ blk_declare: tk_DECLARE blk_decl {
   SHOWPARSE("blk_declare -> DECLARE blk_decl");
   $$ = $2;
 };
-
-// sxp_declares: {
-//   SHOWPARSE("sxp_declares -> <empty>");
-//   $$ = AST::make(at_declares);
-// };
-// sxp_declares: sxp_declares sxp_declare {
-//   SHOWPARSE("sxp_declares -> sxp_declares sxp_declare");
-//   $$ = $1;
-//   $$->addChildrenFrom($2);
-// };
-
-// sxp_declare: '(' tk_DECLARE sxp_decls ')' {
-//   SHOWPARSE("sxp_declare -> ( DECLARE sxp_decls )");
-//   $$ = $3;
-// };
-
-// sxp_decls: sxp_decl {
-//   SHOWPARSE("sxp_decls -> sxp_decl");
-//   $$ = AST::make(at_declares, $1->loc, $1);
-// };
-
-// sxp_decls: sxp_decls sxp_decl {
-//   SHOWPARSE("sxp_decls -> sxp_decls sxp_decl");
-//   $$ = $1;
-//   $$->addChild($2);
-// };
-
-// sxp_decl: '(' sxp_ident sxp_field_type ')' {
-//   SHOWPARSE("sxp_decl -> ( sxp_ident sxp_field_type )");
-//   $$ = AST::make(at_declare, $2->loc, $2, $3);
-// };
-
-// sxp_decl: sxp_ident {
-//   SHOWPARSE("sxp_decl -> sxp_ident");
-//   $$ = AST::make(at_declare, $1->loc, $1);
-// };
 
 // For tag type declaration.
 blk_decl: blk_ident tk_AS blk_field_type {
@@ -2266,16 +1935,6 @@ blk_primary_type: tk_VECTOR '(' blk_type ')' {
 
 }
 
-sxp_primary_type: primary_type {
-  SHOWPARSE("sxp_primary_type -> primary_type");
-  $$ = $1;
-}
-
-sxp_primary_type: sxp_useident  {   /* previously defined type */
-  SHOWPARSE("blk_primary_type -> sxp_useident");
-  $$ = $1;
-};
-
 blk_primary_type: blk_useident %prec prec_PreferShift {   /* previously defined type */
   SHOWPARSE("blk_primary_type -> blk_useident");
   $$ = $1;
@@ -2393,35 +2052,15 @@ primary_type: typevar  {
   $$ = $1;
 };
 
-sxp_type: sxp_primary_type {
-  SHOWPARSE("sxp_type -> primary_type");
-  $$ = $1;
-};
-
 // REF TYPES [3.4.1]             
 blk_postfix_type: blk_postfix_type tk_PTR %prec tk_PTR {
   SHOWPARSE("blk_postfix_type -> blk_postfix_type PTR");
   $$ = AST::make(at_boxedType, $2.loc, $1);
 };
 
-sxp_type: '(' tk_BOXED sxp_type ')' {
-  SHOWPARSE("sxp_type -> ( BOXED sxp_type )");
-  $$ = AST::make(at_boxedType, $2.loc, $3);
-};
-
-// VAL TYPES [3.4.2]
-sxp_type: '(' tk_UNBOXED sxp_type ')' {
-  SHOWPARSE("sxp_type -> ( UNBOXED sxp_type )");
-  $$ = AST::make(at_unboxedType, $2.loc, $3);
-};
-
 // FUNCTION TYPES [3.4.3]
 blk_type: blk_fntype {
   SHOWPARSE("blk_type -> blk_fntype");
-  $$ = $1;
-}
-sxp_type: sxp_fntype {
-  SHOWPARSE("sxp_type -> sxp_fntype");
   $$ = $1;
 }
 
@@ -2467,39 +2106,6 @@ blk_fntype: trn_fneffect tk_FN '(' blk_type_args_pl_byref ')' tk_FNARROW blk_typ
   SHOWPARSE("blk_fntype -> trn_fneffect FN ( blk_type_args_pl_byref ) -> blk_type )");
   $$ = AST::make(at_fn, $1->loc, $4, $7);
 };
-
-sxp_type_args: sxp_type  {
-  SHOWPARSE("sxp_type_args -> sxp_type");
-  $$ = AST::make(at_Null);
-  $$->addChild($1);
-};
-sxp_type_args: sxp_type_args sxp_type {
-  SHOWPARSE("sxp_type_args -> sxp_type_args sxp_type");
-  $$ = $1;
-  $1->addChild($2);
-};
-
-// Reworked by shap on 10/9/2008 to use arrow syntax
-sxp_fntype: '(' trn_fneffect tk_FN tk_FNARROW sxp_type ')' {
-  SHOWPARSE("sxp_fntype -> ( trn_fneffect FN -> sxp_type )");
-  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
-  $$ = AST::make(at_fn, $1.loc, fnargVec, $5);
-};
-//fntype: '(' trn_fneffect tk_FN '(' ')' sxp_type ')' {
-//  SHOWPARSE("sxp_fntype -> ( trn_fneffect FN () sxp_type )");
-//  shared_ptr<AST> fnargVec = AST::make(at_fnargVec, $4.loc);
-//  $$ = AST::make(at_fn, $1.loc, fnargVec, $6);
-//};
-
-// Reworked by shap on 10/9/2008 to use arrow syntax
-sxp_fntype: '(' trn_fneffect tk_FN sxp_type_args_pl_byref tk_FNARROW sxp_type ')'  {
-  SHOWPARSE("sxp_fntype -> ( trn_fneffect FN sxp_type_args_pl_byref -> sxp_type )");
-  $$ = AST::make(at_fn, $1.loc, $4, $6);
-};
-//fntype: '(' trn_fneffect tk_FN '(' sxp_type_args_pl_byref ')' sxp_type ')'  {
-//  SHOWPARSE("sxp_fntype -> ( trn_fneffect FN ( sxp_type_args_pl_byref ) sxp_type )");
-//  $$ = AST::make(at_fn, $1.loc, $5, $7);
-//};
 
 // METHOD TYPES [3.9]
 blk_method_type: trn_fneffect tk_METHOD '(' ')' tk_FNARROW blk_type {
@@ -2550,43 +2156,15 @@ blk_type_cpair: blk_type ',' blk_type_cpair {
   $$->printVariant = pf_IMPLIED;
 };
 
-sxp_type_cpair: sxp_type ',' sxp_type {
-  SHOWPARSE("sxp_type_cpair -> sxp_type ',' sxp_type");
-  $$ = AST::make(at_typeapp, $2.loc,
-                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
-                 $1, $3);
-  $$->printVariant = pf_IMPLIED;
-};
-sxp_type_cpair: sxp_type ',' sxp_type_cpair {
-  SHOWPARSE("sxp_type_cpair -> sxp_type ',' sxp_type_cpair");
-  $$ = AST::make(at_typeapp, $2.loc,
-                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
-                 $1, $3);
-  $$->printVariant = pf_IMPLIED;
-};
-
-sxp_type: '(' sxp_type_cpair ')' {
-  SHOWPARSE("sxp_type -> (sxp_type_cpair)");
-  $$ = $2;
-};
-
 // ARRAY TYPE [3.5.1]               
 blk_postfix_type: blk_postfix_type '[' natLit ']' %prec '[' {
   SHOWPARSE("blk_postfix_type -> blk_postfix_type '[' natLit ']'");
   $$ = AST::make(at_arrayType, $1->loc, $1, $3);
 };
-sxp_type: '(' tk_ARRAY sxp_type natLit ')'  {
-  SHOWPARSE("sxp_type -> ( ARRAY sxp_type natLit )");
-  $$ = AST::make(at_arrayType, $2.loc, $3, $4);
-};
 // VECTOR TYPE [3.5.2]             
 blk_postfix_type: blk_postfix_type '[' ']' %prec '[' {
   SHOWPARSE("blk_postfix_type -> blk_postfix_type '[' ']'");
   $$ = AST::make(at_vectorType, $1->loc, $1);
-};
-sxp_type: '(' tk_VECTOR sxp_type ')' {
-  SHOWPARSE("sxp_type -> (VECTOR sxp_type )");
-  $$ = AST::make(at_vectorType, $2.loc, $3);
 };
 
 // TYPE CONSTRUCTORS (typeapp)
@@ -2605,28 +2183,6 @@ blk_typeapp: blk_useident '(' blk_type_args ')' %prec '(' {
   $$ = AST::make(at_typeapp, $1->loc, $1);
   $$->addChildrenFrom($3);
 };
-
-sxp_type: sxp_typeapp {
-  SHOWPARSE("sxp_type -> sxp_typeapp");
-  $$ = $1;
-};
-
-sxp_typeapp: '(' sxp_useident sxp_type_args ')' {
-  SHOWPARSE("sxp_typeapp -> ( sxp_useident sxp_type_args )");
-  $$ = AST::make(at_typeapp, $2->loc, $2);
-  $$->addChildrenFrom($3);
-};
-
-// MUTABLE TYPE [3.7]            
-sxp_type: '(' tk_MUTABLE sxp_type ')' {
-  SHOWPARSE("sxp_type -> ( MUTABLE sxp_type )");
-  $$ = AST::make(at_mutableType, $2.loc, $3);
-};
-
-sxp_type: '(' tk_CONST sxp_type ')' {
-  SHOWPARSE("sxp_type -> ( CONST sxp_type )");
-  $$ = AST::make(at_constType, $2.loc, $3);
-  };
 
 // BITFIELD TYPE
 blk_bitfieldtype: any_int_type '(' natLit ')' {
@@ -2676,29 +2232,14 @@ blk_type_pl_byref: blk_type {
   $$ = $1;
 };
 
-sxp_type_pl_byref: sxp_type {
-  SHOWPARSE("sxp_type_pl_byref -> sxp_type");
-  $$ = $1;
-};
-
 blk_type_pl_byref: tk_BY_REF blk_type {
   SHOWPARSE("blk_type_pl_byref -> BY-REF blk_type");
   $$ = AST::make(at_byRefType, $1.loc, $2);
 };
 
-sxp_type_pl_byref: '(' tk_BY_REF sxp_type ')' {
-  SHOWPARSE("sxp_type_pl_byref -> ( BY-REF sxp_type )");
-  $$ = AST::make(at_byRefType, $2.loc, $3);
-};
-
 blk_type_pl_byref: tk_ARRAY_REF blk_type {
   SHOWPARSE("blk_type_pl_byref -> ARRAY-REF blk_type");
   $$ = AST::make(at_arrayRefType, $1.loc, $2);
-};
-
-sxp_type_pl_byref: '(' tk_ARRAY_REF sxp_type ')' {
-  SHOWPARSE("sxp_type_pl_byref -> ( ARRAY-REF sxp_type )");
-  $$ = AST::make(at_arrayRefType, $2.loc, $3);
 };
 
 blk_type_args_pl_byref: blk_type_pl_byref {
@@ -2712,24 +2253,9 @@ blk_type_args_pl_byref: blk_type_args_pl_byref ',' blk_type_pl_byref {
   $1->addChild($3);
 };
 
-sxp_type_args_pl_byref: sxp_type_pl_byref {
-  SHOWPARSE("sxp_type_args_pl_byref -> sxp_type_pl_byref");
-  $$ = AST::make(at_fnargVec);
-  $$->addChild($1);
-};
-sxp_type_args_pl_byref: sxp_type_args_pl_byref sxp_type_pl_byref {
-  SHOWPARSE("sxp_type_args_pl_byref -> sxp_type_args_pl_byref sxp_type_pl_byref");
-  $$ = $1;
-  $1->addChild($2);
-};
-
 // BINDING PATTERNS [5.1]
 blk_bindingpattern: blk_ident {
   SHOWPARSE("blk_bindingpattern -> blk_ident");
-  $$ = AST::make(at_identPattern, $1->loc, $1);
-};
-sxp_bindingpattern: sxp_ident {
-  SHOWPARSE("sxp_bindingpattern -> sxp_ident");
   $$ = AST::make(at_identPattern, $1->loc, $1);
 };
 
@@ -2737,15 +2263,6 @@ blk_bindingpattern: blk_ident ':' blk_type {
   SHOWPARSE("blk_bindingpattern -> blk_ident : blk_type");
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
 };
-sxp_bindingpattern: sxp_ident ':' sxp_type {
-  SHOWPARSE("sxp_bindingpattern -> sxp_ident : sxp_type");
-  $$ = AST::make(at_identPattern, $1->loc, $1, $3);
-};
-
-// sxp_bindingpattern: '(' tk_THE sxp_type sxp_ident ')' {
-//   SHOWPARSE("sxp_bindingpattern -> sxp_ident : sxp_type");
-//   $$ = AST::make(at_identPattern, $1.loc, $4, $3);
-// };
 
 // There are no sxp_defpattern sequences, because there is no top-level
 // pattern application
@@ -2758,19 +2275,6 @@ blk_defpattern: blk_defident ':' blk_type %prec ':' {
   SHOWPARSE("blk_defpattern -> blk_defident : blk_qual_type");
   $$ = AST::make(at_identPattern, $1->loc, $1, $3);
 };
-sxp_defpattern: sxp_defident {
-  SHOWPARSE("sxp_defpattern -> sxp_defident");
-  $$ = AST::make(at_identPattern, $1->loc, $1);
-};
-sxp_defpattern: sxp_defident ':' sxp_type {
-  SHOWPARSE("sxp_defpattern -> sxp_defident : sxp_qual_type");
-  $$ = AST::make(at_identPattern, $1->loc, $1, $3);
-};
-// sxp_defpattern: '(' tk_THE sxp_type sxp_defident ')' {
-//   SHOWPARSE("sxp_defpattern -> (THE sxp_qual_type sxp_defident)");
-//   $$ = AST::make(at_identPattern, $1.loc, $4, $3);
-// };
-
 
 /* Lambda Patterns -- with an additional by-ref annotation */
 blk_lambdapatterns: blk_lambdapattern {
@@ -2783,23 +2287,9 @@ blk_lambdapatterns: blk_lambdapatterns ',' blk_lambdapattern {
   $$ = $1;
   $$->addChild($3);
 };
-sxp_lambdapatterns: sxp_lambdapattern {
-  SHOWPARSE("sxp_lambdapatterns -> sxp_lambdapattern");
-  $$ = AST::make(at_argVec, $1->loc);
-  $$->addChild($1);
-};
-sxp_lambdapatterns: sxp_lambdapatterns sxp_lambdapattern {
-  SHOWPARSE("sxp_lambdapatterns -> sxp_lambdapatterns sxp_lambdapattern");
-  $$ = $1;
-  $$->addChild($2);
-};
 
 blk_lambdapattern: blk_ident {
   SHOWPARSE("blk_lambdapattern -> blk_ident");
-  $$ = AST::make(at_identPattern, $1->loc, $1);
-};
-sxp_lambdapattern: sxp_ident {
-  SHOWPARSE("sxp_lambdapattern -> sxp_ident");
   $$ = AST::make(at_identPattern, $1->loc, $1);
 };
 
@@ -2809,28 +2299,6 @@ blk_lambdapattern: blk_ident ':' blk_type_pl_byref {
   if ($3->astType == at_byRefType)
     $1->flags |= ARG_BYREF;
 };
-sxp_lambdapattern: sxp_ident ':' sxp_type_pl_byref {
-  SHOWPARSE("sxp_lambdapattern -> sxp_ident : sxp_type_pl_byref");
-  $$ = AST::make(at_identPattern, $1->loc, $1, $3);
-  if ($3->astType == at_byRefType)
-    $1->flags |= ARG_BYREF;
-};
-
-// sxp_lambdapattern: '(' tk_THE sxp_type sxp_ident ')' {
-//   SHOWPARSE("sxp_lambdapattern -> ( THE sxp_type sxp_ident ) ");
-//   $$ = AST::make(at_identPattern, $1.loc, $4, $3);
-// };
-
-// sxp_lambdapattern: '(' tk_THE '(' tk_BY_REF sxp_type ')' sxp_ident ')' {
-//   SHOWPARSE("sxp_lambdapattern -> ( THE ( BY-REF sxp_type ) sxp_ident )");
-//   $$ = AST::make(at_identPattern, $1.loc, $7, $5);
-//   $5->flags |= ARG_BYREF;
-// };
-
-// sxp_lambdapattern: '(' tk_THE '(' tk_ARRAY_REF sxp_type ')' sxp_ident ')' {
-//   SHOWPARSE("sxp_lambdapattern -> ( THE ( ARRAY-REF sxp_type ) sxp_ident )");
-//   $$ = AST::make(at_identPattern, $1.loc, $7, $5);
-// };
 
 // EXPRESSIONS [7]
 //
@@ -3094,33 +2562,6 @@ blk_expr_seq: blk_expr_seq ';' blk_value_definition {
   $$->addChild($3);
 };
 
-sxp_block: sxp_block_exprs {
-  SHOWPARSE("sxp_block -> sxp_block_exprs");
-  if ($1->children.size() == 1 && $1->child(0)->astType == at_begin)
-    $1 = $1->child(0);
-  $$ = $1;
-}
-sxp_block_exprs: sxp_expr {
-  SHOWPARSE("sxp_block_exprs -> sxp_expr");
-  $$ = AST::make(at_begin, $1->loc, $1);
-  $$->printVariant = pf_IMPLIED;
-};
-sxp_block_exprs: sxp_value_definition {
-  SHOWPARSE("sxp_block_exprs -> sxp_value_definition");
-  $$ = AST::make(at_begin, $1->loc, $1);
-  $$->printVariant = pf_IMPLIED;
-};
-sxp_block_exprs: sxp_block_exprs sxp_expr {
-  SHOWPARSE("sxp_block_exprs -> sxp_block_exprs sxp_expr");
-  $$ = $1;
-  $$->addChild($2);
-};
-sxp_block_exprs: sxp_block_exprs sxp_value_definition {
-  SHOWPARSE("sxp_block_exprs -> sxp_block_exprs sxp_value_definition");
-  $$ = $1;
-  $$->addChild($2);
-};
-
 blk_actual_params: {
   SHOWPARSE("blk_actual_params -> ");
   $$ = AST::make(at_Null);
@@ -3139,71 +2580,10 @@ blk_nonempty_params: blk_nonempty_params ',' blk_expr {
   $$->addChild($3);
 };
 
-sxp_actual_params: {
-  SHOWPARSE("sxp_actual_params -> ");
-  $$ = AST::make(at_Null);
-};
-sxp_actual_params: sxp_nonempty_params {
-  SHOWPARSE("sxp_actual_params -> sxp_nonempty_params");
-  $$ = $1;
-};
-sxp_nonempty_params: sxp_expr {
-  SHOWPARSE("sxp_nonempty_params -> sxp_expr");
-  $$ = AST::make(at_Null, $1->loc, $1);
-};
-sxp_nonempty_params: sxp_nonempty_params sxp_expr {
-  SHOWPARSE("sxp_nonempty_params -> sxp_nonempty_params sxp_expr");
-  $$ = $1;
-  $$->addChild($2);
-};
-
-// TYPE QUALIFIED EXPRESSIONS  [7.3]
-// Block syntax handles this with mixfix.
-
-sxp_expr: sxp_unqual_expr {
-  SHOWPARSE("sxp_expr -> sxp_unqual_expr");
-  $$ = $1;
-};
-sxp_expr: sxp_expr ':' sxp_type {
-  SHOWPARSE("sxp_expr -> sxp_expr : sxp_type");
-  $$ = AST::make(at_typeAnnotation, $1->loc, $1, $3);
-};
-// sxp_expr: sxp_the_expr {
-//   SHOWPARSE("sxp_expr -> sxp_the_expr");
-//   $$ = $1;
-// };
-
-// sxp_the_expr: '(' tk_THE sxp_type sxp_unqual_expr ')' {
-//   SHOWPARSE("sxp_the_expr -> ( THE sxp_type sxp_unqual_expr )");
-//   // Note: argument order swapped for historical reasons.
-//   $$ = AST::make(at_typeAnnotation, $2.loc, $4, $3);
-// };
-
-
-// SUSPENDED EXPRESSIONS
-sxp_expr: '(' tk_SUSPEND sxp_useident sxp_expr ')' {
-  SHOWPARSE("sxp_expr -> ( SUSPEND sxp_useident sxp_expr )");
-  $$ = AST::make(at_suspend, $2.loc, $3, $4);
-};
-
 // LITERALS  [7.1]
 blk_expr_primary: trn_literal {
   SHOWPARSE("blk_expr_primary -> Literal");
   $$ = $1;
-};
-sxp_unqual_expr: trn_literal {
-  SHOWPARSE("sxp_unqual_expr -> Literal");
-  $$ = $1;
-};
-
-sxp_unqual_expr: '(' tk_SIZEOF sxp_type ')' {
-  SHOWPARSE("sxp_unqual_expr -> (SIZEOF sxp_type)");
-  $$ = AST::make(at_sizeof, $2.loc, $3);
-};
-
-sxp_unqual_expr: '(' tk_BITSIZEOF sxp_type ')' {
-  SHOWPARSE("sxp_unqual_expr -> (BITSIZEOF sxp_type)");
-  $$ = AST::make(at_bitsizeof, $2.loc, $3);
 };
 
 // UNIT EXPRESSIONS   [7.4.1]
@@ -3211,17 +2591,13 @@ sxp_unqual_expr: '(' tk_BITSIZEOF sxp_type ')' {
 //   SHOWPARSE("blk_expr_primary -> ()");
 //   $$ = AST::make(at_unit, $1.loc);
 // };
-sxp_unqual_expr: '(' ')' {
-  SHOWPARSE("sxp_unqual_expr -> ()");
-  $$ = AST::make(at_unit, $1.loc);
-};
 
 // Expressions that involve locations:
 
 // IDENTIFIERS [7.2]
 /* This would actually have been
-sxp_unqual_expr: sxp_useident {
-  SHOWPARSE("sxp_unqual_expr -> sxp_useident");
+blk_expr_primary: blk_useident {
+  SHOWPARSE("blk_expr_primary -> blk_useident");
   $$ = $1;
 };
 but for the ambiguity with record (field) selection.
@@ -3229,10 +2605,6 @@ So, the burden is now passed to further stages */
 
 blk_expr_primary: blk_ident {
   SHOWPARSE("blk_expr_primary -> blk_ident");
-  $$ = $1;
-};
-sxp_unqual_expr: sxp_ident {
-  SHOWPARSE("sxp_unqual_expr -> sxp_ident");
   $$ = $1;
 };
 
@@ -3262,56 +2634,6 @@ sxp_unqual_expr: sxp_ident {
 // structure types from sxp_field names in any case, so those will
 // probably require argument declarations in any case.
 
-sxp_unqual_expr: sxp_unqual_expr '.' sxp_ident {
-  SHOWPARSE("sxp_unqual_expr -> sxp_unqual_expr . sxp_ident");
-  $$ = AST::make(at_select, $1->loc, $1, $3);
-};
-
-// No blk variant
-// sxp_unqual_expr: sxp_the_expr '.' sxp_ident {
-//   SHOWPARSE("sxp_unqual_expr -> sxp_the_expr . sxp_ident");
-//   $$ = AST::make(at_select, $1->loc, $1, $3);
-// };
-
-// No blk variant
-sxp_unqual_expr: '(' tk_MEMBER sxp_expr sxp_ident ')' {
-  SHOWPARSE("sxp_unqual_expr -> ( member sxp_expr sxp_ident )");
-  $$ = AST::make(at_select, $2.loc, $3, $4);
-};
-
-// NTH-REF [7.11.2]         
-sxp_unqual_expr: sxp_expr '[' sxp_expr ']' {
-  SHOWPARSE("sxp_unqual_expr -> sxp_expr [ sxp_expr ]");
-  $$ = AST::make(at_nth, $1->loc, $1, $3);
-};
-
-// DUP [7.17.1]
-sxp_unqual_expr: '(' tk_DUP sxp_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> ( DUP sxp_expr )");
-  $$ = AST::make(at_dup, $2.loc, $3);
-};
-
-// DEREF [7.17.2]               
-// Anybody else around here old enough to remember Pascal?
-// Here we are dereferencing values by wirth.
-
-// This has a conflict with a^b
-//blk_postfix_expr: blk_postfix_expr '^' {
-//  SHOWPARSE("blk_postfix_expr -> blk_postfix ^");
-//  $$ = AST::make(at_deref, $1->loc, $1);
-//  $$->printVariant = pf_IMPLIED;
-//};
-sxp_unqual_expr: sxp_expr '^' {
-  SHOWPARSE("sxp_unqual_expr -> sxp_expr ^");
-  $$ = AST::make(at_deref, $1->loc, $1);
-  $$->printVariant = pf_IMPLIED;
-};
-
-sxp_unqual_expr: '(' tk_DEREF sxp_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> ( DEREF sxp_expr )");
-  $$ = AST::make(at_deref, $2.loc, $3);
-};
-
 // INNER-REF
 // In the case of structures, the second "sxp_expression"
 // must be a label. This cannot be checked until
@@ -3337,60 +2659,6 @@ sxp_unqual_expr: '(' tk_DEREF sxp_expr ')' {
 //      In any case, this is an issue that we should certainly revisit
 //      before introducing mixfix.
 
-sxp_unqual_expr_cpair: sxp_expr ',' sxp_expr {
-  SHOWPARSE("sxp_unqual_expr_cpair -> sxp_expr ',' sxp_expr");
-  $$ = AST::make(at_apply, $2.loc,
-                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
-                 $1, $3);
-  $$->printVariant = pf_IMPLIED;
-};
-sxp_unqual_expr_cpair: sxp_expr ',' sxp_unqual_expr_cpair {
-  SHOWPARSE("sxp_unqual_expr_cpair -> sxp_expr ',' sxp_unqual_expr_cpair");
-  $$ = AST::make(at_apply, $2.loc,
-                 AST::make(at_ident, LToken(tk_PAIR, $2.loc, $2.endLoc, "pair")),
-                 $1, $3);
-  $$->printVariant = pf_IMPLIED;
-};
-
-// Following three productions provide experimental list support.
-sxp_unqual_expr: '(' sxp_unqual_expr_cpair ')' {
-  SHOWPARSE("sxp_unqual_expr -> ( sxp_unqual_expr_cpair )");
-  $$ = $2;
-};
-
-sxp_unqual_expr: '(' tk_MAKE_VECTOR sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> ( MAKE-VECTOR sxp_expr sxp_expr )");
-  $$ = AST::make(at_MakeVector, $2.loc, $3, $4);
-};
-
-// VECTORS [7.4.3]
-sxp_unqual_expr: '(' tk_VECTOR sxp_actual_params ')' {
-  // Zero-length vector is useless, but legal
-  SHOWPARSE("sxp_unqual_expr -> (VECTOR sxp_actual_params)");
-  $$ = $3;
-  $$->astType = at_vector;
-  $$->loc = $2.loc;
-};
-
-// ARRAYS [7.4.3]
-sxp_unqual_expr: '(' tk_ARRAY sxp_nonempty_params ')' {
-  // Zero-length vector is illegal
-  SHOWPARSE("sxp_unqual_expr -> (ARRAY sxp_nonempty_params)");
-  $$ = $3;
-  $$->astType = at_array;
-  $$->loc = $2.loc;
-};
-
-// BEGIN [7.5]
-sxp_unqual_expr: '(' tk_BEGIN sxp_block_exprs ')' {
-  // I use sxp_block_exprs here because sxp_block elides the begin
-  // form when there is only one element. sxp_block_exprs does not.
-  SHOWPARSE("sxp_unqual_expr -> ( BEGIN sxp_block_exprs )");
-  $$ = $3;
-  $$->loc = $2.loc;
-  $$->printVariant &= ~pf_IMPLIED;
-};
-
 // LABELS and LABELED EXIT [7.6]
 // Note that we do not want a generalized blk_ident in the first
 // position here, because that creates an ambiguity with primary
@@ -3415,11 +2683,6 @@ blk_expr_continue: tk_CONTINUE {
                  AST::make(at_unit, $1.loc));
 }
 
-sxp_unqual_expr: '(' tk_LABEL sxp_ident sxp_block ')' {
-  SHOWPARSE("sxp_unqual_expr -> (LABEL sxp_ident sxp_block)");
-  $$ = AST::make(at_labeledBlock, $2.loc, $3, $4);
-}
-
 blk_expr: blk_expr_from_return {
   SHOWPARSE("blk_expr -> blk_expr_from_return");
   $$ = $1;
@@ -3427,10 +2690,6 @@ blk_expr: blk_expr_from_return {
 blk_expr_from_return: tk_FROM blk_ident tk_RETURN blk_expr {
   SHOWPARSE("blk_expr_from_return -> FROM blk_ident RETURN blk_expr");
   $$ = AST::make(at_return_from, $1.loc, $2, $4);
-}
-sxp_unqual_expr: '(' tk_FROM sxp_ident tk_RETURN sxp_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> (RETURN sxp_ident FROM sxp_expr)");
-  $$ = AST::make(at_return_from, $2.loc, $3, $5);
 }
 
 // ARRAY-LENGTH [7.11.1]
@@ -3459,23 +2718,6 @@ blk_expr_lambda: tk_LAMBDA '(' blk_lambdapatterns ')' blk_expr {
   $$ = AST::make(at_lambda, $1.loc, $3, iRetBlock);
 };
 
-sxp_unqual_expr: '(' tk_LAMBDA '(' ')' sxp_block ')'  {
-  SHOWPARSE("lambda -> ( LAMBDA () sxp_block )");
-  shared_ptr<AST> argVec = AST::make(at_argVec, $3.loc);
-  shared_ptr<AST> iRetBlock =
-    AST::make(at_labeledBlock, $2.loc, 
-              AST::make(at_ident, LToken(tk_SxpIdent, "__return")), $5);
-  $$ = AST::make(at_lambda, $2.loc, argVec, iRetBlock);
-};
-
-sxp_unqual_expr: '(' tk_LAMBDA '(' sxp_lambdapatterns ')' sxp_block ')'  {
-  SHOWPARSE("lambda -> ( LAMBDA (sxp_lambdapatterns) sxp_block )");
-  shared_ptr<AST> iRetBlock =
-    AST::make(at_labeledBlock, $2.loc, 
-              AST::make(at_ident, LToken(tk_SxpIdent, "__return")), $6);
-  $$ = AST::make(at_lambda, $2.loc, $4, iRetBlock);
-};
-
 // RETURN [7.13]         
 blk_expr: blk_expr_return {
   SHOWPARSE("blk_expr -> blk_expr_return");
@@ -3486,18 +2728,6 @@ blk_expr_return: tk_RETURN blk_expr {
   $$ = AST::make(at_return_from, $1.loc,
                  AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $2);
 }
-sxp_unqual_expr: '(' tk_RETURN sxp_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> (RETURN sxp_expr)");
-  $$ = AST::make(at_return_from, $2.loc,
-                 AST::make(at_ident, LToken(tk_SxpIdent, "__return")), $3);
-}
-
-// APPLICATION [7.14]         
-sxp_unqual_expr: '(' sxp_expr sxp_actual_params ')' { /* apply to zero or more args */
-  SHOWPARSE("sxp_unqual_expr -> ( sxp_expr sxp_actual_params )");
-  $$ = AST::make(at_apply, $2->loc, $2);
-  $$->addChildrenFrom($3);
-};
 
 // IF [7.15.1]
 blk_expr: blk_expr_if_then_else {
@@ -3538,10 +2768,6 @@ blk_expr: tk_IF blk_expr tk_THEN ILCB blk_expr_seq OptRCB error {
   $$ = AST::make(at_if, $1.loc, $2, $5,
                  AST::make(at_unit, $1.loc));
 };
-sxp_unqual_expr: '(' tk_IF sxp_expr sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> (IF sxp_expr sxp_expr sxp_expr )");
-  $$ = AST::make(at_if, $2.loc, $3, $4, $5);
-};
 
 // WHEN [7.15.2]
 blk_expr: blk_expr_when {
@@ -3567,53 +2793,6 @@ blk_expr_unless: tk_UNLESS blk_expr tk_DO blk_expr {
   SHOWPARSE("blk_expr -> UNLESS blk_expr DO blk_expr");
   $$ = AST::make(at_unless, $1.loc, $2, $4);
 };
-sxp_unqual_expr: '(' tk_WHEN sxp_expr sxp_block ')' {
-  SHOWPARSE("sxp_unqual_expr -> (WHEN sxp_expr sxp_block)");
-  $$ = AST::make(at_when, $2.loc, $3, $4);
-};
-
-// NOT [7.15.3]
-// in the s-expression version this is just a procedure.
-
-// AND [7.15.4]                 
-sxp_unqual_expr: '(' tk_AND sxp_nonempty_params ')'  {
-  SHOWPARSE("sxp_unqual_expr -> ( AND sxp_nonempty_params )");
-  $$ = $3;
-  $$->loc = $2.loc;
-  $$->astType = at_and;
-};
-
-// OR [7.15.5]
-sxp_unqual_expr: '(' tk_OR sxp_nonempty_params ')'  {
-  SHOWPARSE("sxp_unqual_expr -> ( OR sxp_nonempty_params )");
-  $$ = $3;
-  $$->loc = $2.loc;
-  $$->astType = at_or;
-};
-
-// COND [7.15.6]          
-//HERE - need C-like switch mechanism
-sxp_unqual_expr: '(' tk_COND sxp_condcases sxp_otherwise ')'  {
-  SHOWPARSE("sxp_unqual_expr -> (COND  ( sxp_condcases sxp_otherwise ) ) ");
-  $4->astType = at_condelse;
-  $$ = AST::make(at_cond, $2.loc, $3, $4);
-};
-
-sxp_condcases: sxp_condcase {
-  SHOWPARSE("sxp_condcases -> sxp_condcase");
-  $$ = AST::make(at_cond_legs, $1->loc, $1);
-};
-
-sxp_condcases: sxp_condcases sxp_condcase {
-  SHOWPARSE("sxp_condcases -> sxp_condcases sxp_condcase");
-  $$ = $1;
-  $$->addChild($2);
-};
-
-sxp_condcase: '(' sxp_expr sxp_block ')'  {
-  SHOWPARSE("sxp_condcase -> ( sxp_expr sxp_block )");
-  $$ = AST::make(at_cond_leg, $1.loc, $2, $3);
-};
 
 // SET! [7.16]                
 blk_expr: blk_expr_mixfix tk_ASSIGN blk_expr %prec tk_ASSIGN {
@@ -3625,10 +2804,6 @@ blk_expr: blk_expr_mixfix tk_ASSIGN blk_expr %prec tk_ASSIGN {
    */
   SHOWPARSE("blk_assignment -> blk_expr_mixfix := blk_expr");
   $$ = AST::make(at_setbang, $2.loc, $1, $3);
-};
-sxp_unqual_expr: '(' tk_SET sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> ( SET! sxp_expr sxp_expr )");
-  $$ = AST::make(at_setbang, $2.loc, $3, $4);
 };
 
 // SWITCH
@@ -3664,31 +2839,6 @@ blk_expr_switch: tk_SWITCH ILCB blk_ident '=' blk_expr OptRCB blk_sw_legs blk_op
   }
 }
 
-sxp_unqual_expr: '(' tk_SWITCH sxp_ident sxp_expr sxp_sw_legs sxp_opt_otherwise ')' {
-  SHOWPARSE("sxp_unqual_expr -> ( SWITCH sxp_ident sxp_expr sxp_sw_legs sxp_opt_otherwise)");
-  $$ = AST::make(at_uswitch, $2.loc, $3, $4, $5, $6);
-  for (size_t c =0; c < $5->children.size(); c++) {
-    shared_ptr<AST> sw_leg = $5->child(c);
-    sw_leg->children.insert(sw_leg->children.begin(),
-                            $3->getDeepCopy());
-  }
-  if ($6->astType == at_otherwise) {
-    shared_ptr<AST> ow = $6;
-    ow->children.insert(ow->children.begin(),
-                        $3->getDeepCopy());
-  }
-};
-
-sxp_sw_legs: sxp_sw_leg {
-  SHOWPARSE("sxp_sw_legs -> sxp_sw_leg");
-  $$ = AST::make(at_usw_legs, $1->loc, $1);
-};
-sxp_sw_legs: sxp_sw_legs sxp_sw_leg {
-  SHOWPARSE("sxp_sw_legs -> sxp_sw_legs sxp_sw_leg");
-  $$ = $1;
-  $$->addChild($2);
-};
-
 blk_sw_legs: blk_sw_legs blk_sw_leg {
   SHOWPARSE("blk_sw_legs -> blk_sw_legs blk_sw_leg");
   $$ = $1;
@@ -3707,28 +2857,6 @@ blk_sw_leg: tk_CASE blk_expr_switch_matches tk_IN blk_iblock {
   $$ = AST::make(at_usw_leg, $1.loc, $4);
   $$->addChildrenFrom($2);
 }
-
-sxp_sw_leg: '(' sxp_switch_match sxp_block ')'  {
-  SHOWPARSE("sxp_sw_leg -> ( sxp_switch_match sxp_block )");
-  $$ = AST::make(at_usw_leg, $1.loc, $3, $2);
-};
-
-sxp_sw_leg: '(' '(' sxp_switch_matches ')' sxp_block ')'  {
-  SHOWPARSE("sxp_sw_leg -> ( ( sxp_switch_matches ) sxp_block )");
-  $$ = AST::make(at_usw_leg, $1.loc, $5);
-  $$->addChildrenFrom($3);
-};
-
-sxp_switch_matches: sxp_switch_match {
-  SHOWPARSE("sxp_switch_matches -> sxp_switch_match");
-  $$ = AST::make(at_Null, $1->loc, $1);
-};
-
-sxp_switch_matches: sxp_switch_matches sxp_switch_match {
-  SHOWPARSE("sxp_switch_matches -> sxp_switch_matches sxp_switch_match");
-  $$ = $1;
-  $$->addChild($2);
-};
 
 blk_expr_switch_matches: blk_expr_switch_match {
   SHOWPARSE("blk_expr_switch_matches -> blk_expr_switch_match");
@@ -3766,23 +2894,6 @@ blk_expr_switch_match: blk_ident '.' blk_ident '.' blk_ident {
   $$ = AST::make(at_select, $1->loc, usesel, $5);
 };
 
-sxp_switch_match: sxp_ident {
-  SHOWPARSE("sxp_switch_match -> sxp_ident");
-  $$ = $1;
-};
-
-sxp_switch_match: sxp_ident '.' sxp_ident {
-  SHOWPARSE("sxp_switch_match -> sxp_ident . sxp_ident"); 
-  $$ = AST::make(at_select, $1->loc, $1, $3);
-};
-
-sxp_switch_match: sxp_ident '.' sxp_ident '.' sxp_ident {
-  SHOWPARSE("sxp_switch_match -> sxp_ident '.' sxp_ident '.' sxp_ident");
-  shared_ptr<AST> usesel = AST::make(at_usesel, $1->loc, $1, $3); 
-  usesel->s = $1->s + "." + $3->s;
-  $$ = AST::make(at_select, $1->loc, usesel, $5);
-};
-
 // This is just like dangling ELSE...
 blk_opt_otherwise: blk_otherwise {
   SHOWPARSE("blk_opt_otherwise -> blk_otherwise");
@@ -3796,40 +2907,6 @@ blk_otherwise: tk_OTHERWISE blk_iblock %prec tk_OTHERWISE {
   SHOWPARSE("blk_otherwise -> OTHERWISE blk_expr");
   $$ = AST::make(at_otherwise, $1.loc, $2);
 };
-
-sxp_opt_otherwise: sxp_otherwise {
-  SHOWPARSE("sxp_opt_otherwise -> sxp_otherwise");
-  $$ = $1;
-};
-sxp_opt_otherwise: { //empty
-  SHOWPARSE("sxp_opt_otherwise -> Null");
-  $$ = AST::make(at_Null);
-};
-sxp_otherwise: '(' tk_OTHERWISE sxp_block')' {
-  SHOWPARSE("sxp_otherwise -> ( OTHERWISE sxp_block)");
-  $$ = AST::make(at_otherwise, $2.loc, $3);
-};
-
-/* // TYPECASE  [11]           
-sxp_unqual_expr: '(' tk_TYPECASE '(' typecase_legs ')' ')'  {
-  SHOWPARSE("sxp_unqual_expr -> ( typecase ( typecase_legs ) )");
-  $$ = $4;
-  $$->loc = $2.loc;
-};
-typecase_legs: typecase_leg {
-  SHOWPARSE("sxp_typecase_legs -> typecase_leg");
-  $$ = AST::make(at_typecase, $1->loc);
-  $$->addChild($1);
-};
-typecase_legs: typecase_legs typecase_leg {
-  SHOWPARSE("sxp_typecase_legs -> typecase_legs typecase_leg");
-  $$ = $1;
-  $$->addChild($2);
-};
-typecase_leg: '(' sxp_bindingpattern sxp_expr ')'  {
-  SHOWPARSE("sxp_typecase_leg -> ( Bindingpattern sxp_expr )");
-  $$ = AST::make(at_typecase_leg, $1.loc, $2, $3);
-  }; */
 
 // TRY/CATCH [7.19.1]
 blk_expr: blk_expr_try {
@@ -3884,34 +2961,6 @@ blk_expr_try: tk_TRY blk_iblock tk_CATCH blk_ident blk_otherwise {
 //  $$ = AST::make(at_kennedy_try, $1.loc, bindings, $4);
 //}
 
-sxp_unqual_expr: '(' tk_TRY sxp_expr '(' tk_CATCH  sxp_ident sxp_sw_legs sxp_opt_otherwise ')' ')'  {
-  SHOWPARSE("sxp_unqual_expr -> ( TRY sxp_expr ( CATCH sxp_ident sxp_sw_legs sxp_opt_otherwise) )");
-  $$ = AST::make(at_try, $2.loc, $3, $6, $7, $8);
-  for (size_t c =0; c < $7->children.size(); c++) {
-    shared_ptr<AST> sw_leg = $7->child(c);
-    sw_leg->children.insert(sw_leg->children.begin(),
-                            $6->getDeepCopy());
-  }
-  if ($8->astType == at_otherwise) {
-    shared_ptr<AST> ow = $8;
-    ow->children.insert(ow->children.begin(),
-                        $6->getDeepCopy());
-  }
-};
-// shap: empty switch legs permitted, but only if sxp_otherwise clause is present.
-//HERE
-sxp_unqual_expr: '(' tk_TRY sxp_expr '(' tk_CATCH sxp_ident sxp_otherwise ')' ')'  {
-  SHOWPARSE("sxp_unqual_expr -> ( TRY sxp_expr ( CATCH sxp_ident sxp_otherwise) )");
-  $$ = AST::make(at_try, $2.loc, $3, $6,
-                 AST::make(at_usw_legs, $7->loc), $7);
-
-  assert ($7->astType == at_otherwise);
-
-  shared_ptr<AST> ow = $7;
-  ow->children.insert(ow->children.begin(),
-                      $6->getDeepCopy());
-};
-
 // THROW  [7.19.2]              
 blk_expr: blk_expr_throw {
   SHOWPARSE("blk_expr -> blk_expr_throw");
@@ -3921,18 +2970,6 @@ blk_expr_throw: tk_THROW blk_expr {
   SHOWPARSE("blk_expr_throw -> THROW blk_expr");
   $$ = AST::make(at_throw, $1.loc, $2);
 }
-
-sxp_unqual_expr: '(' tk_THROW sxp_expr ')' {
-  SHOWPARSE("sxp_unqual_expr -> ( THROW sxp_expr )");
-  $$ = AST::make(at_throw, $2.loc, $3);
-};
-
-// let / letrec forms
-
-sxp_unqual_expr: sxp_let_eform {
-  SHOWPARSE("sxp_unqual_expr -> sxp_let_eform");
-  $$ = $1;
-};
 
 // LET [5.3.1]                 
 blk_expr: blk_expr_let {
@@ -3960,27 +2997,6 @@ blk_letbindings: blk_letbindings SC blk_letbinding {
   $$->addChild($3);
 };
 
-sxp_let_eform: '(' tk_LET '(' sxp_letbindings ')' sxp_block ')' {
-  SHOWPARSE("sxp_unqual_expr -> (LET (sxp_letbindings) sxp_block)");
-  $6->astType = at_begin;
-  $6->printVariant = pf_IMPLIED;
-  $$ = AST::make(at_let, $2.loc, $4, $6);
-  $$->addChild(AST::make(at_constraints));
-};
-sxp_letbindings: sxp_letbinding {
-  SHOWPARSE("sxp_letbindings -> sxp_letbinding");
-  $$ = AST::make(at_letbindings, $1->loc, $1);
-};
-sxp_letbindings: sxp_letbindings sxp_letbinding {
-  SHOWPARSE("sxp_letbindings -> sxp_letbindings sxp_letbinding");
-  $$ = $1;
-  $$->addChild($2);
-};
-sxp_letbinding: '(' sxp_bindingpattern sxp_expr ')' {
-  SHOWPARSE("sxp_letbinding -> ( sxp_bindingpattern sxp_expr )");
-  $$ = AST::make(at_letbinding, $2->loc, $2, $3);
-};
-
 // LETREC [5.3.2]              
 blk_expr: blk_expr_letrec {
   SHOWPARSE("blk_expr -> blk_expr_letrec");
@@ -3995,17 +3011,6 @@ blk_expr_letrec: tk_LETREC ILCB blk_letbindings OptRCB tk_IN blk_iblock {
 
   $$ = AST::make(at_letrec, $1.loc, lbs, $6, AST::make(at_constraints));
 }
-sxp_let_eform: '(' tk_LETREC '(' sxp_letbindings ')' sxp_block ')' {
-  SHOWPARSE("sxp_unqual_expr -> (LETREC (letbindings) sxp_block)");
-  $6->astType = at_begin;
-  $6->printVariant = pf_IMPLIED;
-  shared_ptr<AST> lbs = $4;
-  for (size_t c=0; c < lbs->children.size(); c++)
-    lbs->child(c)->flags |= LB_REC_BIND;
- 
-  $$ = AST::make(at_letrec, $2.loc, $4, $6);
-  $$->addChild(AST::make(at_constraints));
-};
 
 // FIX: Need to reconcile this with until e do { ... }, where we need
 // the semicolon to be inserted at start of statement. The problem
@@ -4063,57 +3068,6 @@ blk_expr_loopbinding: blk_bindingpattern '=' blk_expr tk_THEN blk_iblock {
   $$ = AST::make(at_loopbinding, $1->loc, $1, $3, $5);
 };
 
-sxp_unqual_expr: '(' tk_LOOP '(' sxp_loopbindings ')' sxp_looptest sxp_block ')' {
-  SHOWPARSE("sxp_unqual_expr -> (DO (dobindings) sxp_looptest sxp_block)");
-
-  // The body is executed for side effects. We need to know its result
-  // type so that the CONTINUE block will be properly typed. Since we
-  // are only running the body for side effects, force the result sxp_type
-  // to be unit by appending a unit sxp_constructor at the end of the
-  // expression sequence:
-  $7->addChild(AST::make(at_unit, $7->loc));
-
-  shared_ptr<AST> iContinueBlock =
-    AST::make(at_labeledBlock, $2.loc,
-              AST::make(at_ident, LToken(tk_SxpIdent, "__continue")),
-              $7);
-  $$ = AST::make(at_loop, $2.loc, $4, $6, iContinueBlock);
-};
-
-
-sxp_loopbindings: {
-  SHOWPARSE("sxp_loopbindings -> <empty>");
-  $$ = AST::make(at_loopbindings);
-};
-sxp_loopbindings: sxp_nonempty_loopbindings {
-  SHOWPARSE("sxp_loopbindings -> sxp_nonempty_loopbindings");
-  $$ = $1;
-};
-sxp_nonempty_loopbindings: sxp_loopbinding {
-  SHOWPARSE("sxp_nonempty_loopbindings -> sxp_loopbinding");
-  $$ = AST::make(at_loopbindings, $1->loc, $1);
-};
-sxp_nonempty_loopbindings: sxp_nonempty_loopbindings sxp_loopbinding {
-  SHOWPARSE("sxp_nonempty_loopbindings -> sxp_nonempty_loopbindings sxp_loopbinding");
-  $$ = $1;
-  $$->addChild($2);
-};
-sxp_loopbinding: '(' sxp_bindingpattern sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_loopbinding -> ( sxp_bindingpattern sxp_expr sxp_expr )");
-  $$ = AST::make(at_loopbinding, $2->loc, $2, $3, $4);
-};
-sxp_looptest: '(' sxp_expr sxp_expr ')' {
-  SHOWPARSE("sxp_loopbinding -> ( sxp_expr sxp_expr )");
-  $$ = AST::make(at_looptest, $2->loc, $2, $3); 
-};
-
-sxp_unqual_expr: '(' tk_CONTINUE ')' {
-  SHOWPARSE("sxp_unqual_expr -> (CONTINUE)");
-  $$ = AST::make(at_return_from, $2.loc,
-                 AST::make(at_ident, LToken(tk_SxpIdent, "__continue")),
-                 AST::make(at_unit, $2.loc));
-}
-
 /* Literals and Variables */
 // BOOLEAN LITERALS [2.4.1]
 trn_literal: boolLit {
@@ -4153,16 +3107,6 @@ blk_exident: tk_ReservedWord {
   $$ = AST::make(at_ident, $1);
 };
 
-// sxp_exident: tk_SxpIdent {
-//   SHOWPARSE("sxp_exident -> <Ident " + $1.str + ">");
-//   $$ = AST::make(at_ident, $1);
-// };
-
-// sxp_exident: tk_SxpReservedWord {
-//   SHOWPARSE("sxp_exident -> <Reserved " + $1.str + ">");
-//   $$ = AST::make(at_ident, $1);
-// };
-
 // IDENTIFIERS [2.2]
 blk_ident: tk_BlkIdent {
   SHOWPARSE("blk_ident -> <Ident " + $1.str + ">");
@@ -4189,28 +3133,6 @@ blk_ident: tk_ReservedWord {
   $$ = AST::make(at_ident, $1);
 };
 
-sxp_ident: tk_EQUALS {
-  SHOWPARSE("sxp_ident -> <Ident " + $1.str + ">");
-  $$ = AST::make(at_ident, $1);
-};
-sxp_ident: '=' {
-  SHOWPARSE("sxp_ident -> <Ident " + $1.str + ">");
-  $$ = AST::make(at_ident, $1);
-};
-
-sxp_ident: tk_SxpIdent {
-  SHOWPARSE("sxp_ident -> <Ident " + $1.str + ">");
-  $$ = AST::make(at_ident, $1);
-};
-
-sxp_ident: tk_SxpReservedWord {
-  SHOWPARSE("sxp_ident -> <RESERVED=" + $1.str + ">");
-  cerr << $1.loc.asString() << ": The token \"" << $1.str
-       << "\" is reserved for future use.\n";
-  lexer->num_errors++;
-  $$ = AST::make(at_ident, $1);
-};
-
 blk_useident: blk_ident %prec PreferShift {
   SHOWPARSE("blk_useident -> blk_ident");
   $$ = $1;
@@ -4223,43 +3145,8 @@ blk_useident: blk_useident '.' blk_ident %prec '.' {
   $$ = usesel;
 };
 
-sxp_useident: sxp_ident {
-  SHOWPARSE("sxp_useident -> sxp_ident");
-  $$ = $1;
-};
-
-sxp_useident: sxp_useident '.' sxp_ident {
-  SHOWPARSE("sxp_useident -> sxp_useident . sxp_ident");
-  shared_ptr<AST> usesel = AST::make(at_usesel, $2.loc, $1, $3); 
-  usesel->s = $1->s + "." + $3->s;
-  $$ = usesel;
-};
-
-// sxp_useident: sxp_ident '.' sxp_ident '.' sxp_ident {
-//   SHOWPARSE("sxp_useident -> sxp_ident . sxp_ident . sxp_ident");
-// 
-//  shared_ptr<AST> lhs = AST::make(at_usesel, $2.loc, $1, $3);
-//   lhs->s = $1->s + "." + $3->s;
-// 
-//   shared_ptr<AST> usesel = AST::make(at_usesel, $4.loc, lhs, $5); 
-//   usesel->s = lhs->s + "." + $5->s;
-//   $$ = usesel;
-//};
-
-//sxp_defident: sxp_ident {
-//  SHOWPARSE("sxp_defident -> sxp_ident ");
-//  $1->flags |= (ID_IS_GLOBAL);
-//  $$ = $1;
-//};
-
 blk_defident: blk_useident {
   SHOWPARSE("blk_defident -> blk_useident");
-  $1->flags |= (ID_IS_GLOBAL);
-  $$ = $1;
-};
-
-sxp_defident: sxp_useident {
-  SHOWPARSE("sxp_defident -> sxp_useident");
   $1->flags |= (ID_IS_GLOBAL);
   $$ = $1;
 };
@@ -4391,24 +3278,6 @@ IsILCB: '{' {
 //  lexer->showNextError = false;
 //  $$ = tok;
 //}
-
-// TRANSITIONAL SUPPORT FOR MIXED-MODE PARSING
-LP: '(' {
-  SHOWPARSE("LP -> '('");
-  lexer->lispParenDepth++;
-  lexer->currentLang |= TransitionLexer::lf_sexpr;
-  $$ = $1;
-}
-
-RP: ')' {
-  SHOWPARSE("RP -> ')'");
-  lexer->lispParenDepth--;
-  assert(lexer->lispParenDepth >= 0);
-  if (lexer->lispParenDepth == 0) {
-    lexer->currentLang &= ~TransitionLexer::lf_sexpr;
-  }
-  $$ = $1;
-} 
 
 SC: {
   SHOWPARSE("SC -> ");

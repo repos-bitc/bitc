@@ -160,21 +160,7 @@ TransitionLexer::KeyWord::KeyWord(const char *_nm, LangFlags _whichLang, int _to
 {
   nm = _nm;
   whichLang = _whichLang;
-
-  sexprTokValue = (_whichLang & (lf_sexpr|lf_version)) ? _tokValue : tk_SxpIdent;
-  blockTokValue = (_whichLang & (lf_block|lf_version)) ? _tokValue : tk_BlkIdent;
-
-  if (sexprTokValue == tk_ReservedWord)
-    sexprTokValue = tk_SxpReservedWord;
-}
-
-TransitionLexer::KeyWord::KeyWord(const char *_nm, LangFlags _whichLang, 
-                                  int _sexprTokValue, int _blockTokValue)
-{
-  nm = _nm;
-  whichLang = _whichLang;
-  sexprTokValue = _sexprTokValue;
-  blockTokValue = _blockTokValue;
+  tokValue = _tokValue;
 }
 
 /// @brief Whether keyword table has been sorted.
@@ -190,137 +176,137 @@ TransitionLexer::KeyWord::KeyWord(const char *_nm, LangFlags _whichLang,
 static bool keywords_sorted = false;
 
 struct TransitionLexer::KeyWord TransitionLexer::keywords[] = {
-  TransitionLexer::KeyWord( "=",                lf_transition,        '=' ),
+  TransitionLexer::KeyWord( "=",                lf_block,        '=' ),
 //  TransitionLexer::KeyWord( "!=",               lf_block,             tk_NOTEQUALS ),
-  TransitionLexer::KeyWord( "->",               lf_transition,        tk_FNARROW ),
-  TransitionLexer::KeyWord( "==",               lf_transition,        tk_EQUALS ),
-  TransitionLexer::KeyWord( "and",              lf_transition,        tk_AND ),
-  TransitionLexer::KeyWord( "apply",            lf_transition,        tk_APPLY ),
-  TransitionLexer::KeyWord( "array",            lf_transition,        tk_ARRAY ),
-  TransitionLexer::KeyWord( "ArrayRef",         lf_transition,        tk_ARRAY_REF ),
-  TransitionLexer::KeyWord( "as",               lf_transition,        tk_AS ),
-  TransitionLexer::KeyWord( "assert",           lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "begin",            lf_transition,        tk_BEGIN ),
-  TransitionLexer::KeyWord( "bitc",             lf_version,           tk_BITC ),
-  TransitionLexer::KeyWord( "bitfield",         lf_transition,        tk_BITFIELD ),
-  TransitionLexer::KeyWord( "bitsizeof",        lf_transition,        tk_BITSIZEOF ),
-//  TransitionLexer::KeyWord( "block",            lf_transition,        tk_BLOCK ),
-  TransitionLexer::KeyWord( "bool",             lf_transition,        tk_BOOL ),
-  TransitionLexer::KeyWord( "boxed",            lf_transition,        tk_BOXED ),
-  TransitionLexer::KeyWord( "break",            lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "ByRef",            lf_transition,        tk_BY_REF ),
-  TransitionLexer::KeyWord( "case",             lf_transition,        tk_CASE ),
-  TransitionLexer::KeyWord( "catch",            lf_transition,        tk_CATCH ),
-  TransitionLexer::KeyWord( "char",             lf_transition,        tk_CHAR ),
-  TransitionLexer::KeyWord( "check",            lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "closed",           lf_transition,        tk_CLOSED ),
-  TransitionLexer::KeyWord( "coindset",         lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "cond",             lf_transition,        tk_COND ),
-  TransitionLexer::KeyWord( "const",            lf_transition,        tk_CONST ),
-  TransitionLexer::KeyWord( "constrain",        lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "continue",         lf_transition,        tk_CONTINUE ),
-  TransitionLexer::KeyWord( "declare",          lf_transition,        tk_DECLARE ),
-  TransitionLexer::KeyWord( "deep-const",       lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "def",              lf_transition,        tk_DEF ),
-  TransitionLexer::KeyWord( "defequiv",         lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "definvariant",     lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "defrefine",        lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "deftheory",        lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "defthm",           lf_transition,        tk_DEFTHM ),
-  TransitionLexer::KeyWord( "defvariant",       lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "deref",            lf_transition,        tk_DEREF ),
-  TransitionLexer::KeyWord( "disable",          lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "do",               lf_transition,        tk_DO ),
-  TransitionLexer::KeyWord( "do*",              lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "double",           lf_transition,        tk_DOUBLE ),
-  TransitionLexer::KeyWord( "dup",              lf_transition,        tk_DUP ),
-  TransitionLexer::KeyWord( "else",             lf_transition,        tk_ELSE ),
-  TransitionLexer::KeyWord( "enable",           lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "exception",        lf_transition,        tk_EXCEPTION ),
-  TransitionLexer::KeyWord( "external",         lf_transition,        tk_EXTERNAL ),
-  TransitionLexer::KeyWord( "false",            lf_transition,        tk_FALSE ),
-  TransitionLexer::KeyWord( "fill",             lf_transition,        tk_FILL ),
-  TransitionLexer::KeyWord( "float",            lf_transition,        tk_FLOAT ),
-  TransitionLexer::KeyWord( "fn",               lf_transition,        tk_FN ),
-  TransitionLexer::KeyWord( "forall",           lf_transition,        tk_FORALL ),
-  TransitionLexer::KeyWord( "from",             lf_transition,        tk_FROM ),
-//  TransitionLexer::KeyWord( "giving",           lf_transition,        tk_GIVING ),
-  TransitionLexer::KeyWord( "if",               lf_transition,        tk_IF ),
-  TransitionLexer::KeyWord( "import",           lf_transition,        tk_IMPORT ),
-  TransitionLexer::KeyWord( "import!",          lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "impure",           lf_transition,        tk_IMPURE ),
-  TransitionLexer::KeyWord( "in",               lf_transition,        tk_IN ),
-  TransitionLexer::KeyWord( "indset",           lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "InnerRef",         lf_transition,        tk_INNER_REF ),
-  TransitionLexer::KeyWord( "instance",         lf_transition,        tk_INSTANCE ),
-  TransitionLexer::KeyWord( "int16",            lf_transition,        tk_INT16 ),
-  TransitionLexer::KeyWord( "int32",            lf_transition,        tk_INT32 ),
-  TransitionLexer::KeyWord( "int64",            lf_transition,        tk_INT64 ),
-  TransitionLexer::KeyWord( "int8",             lf_transition,        tk_INT8 ),
-  TransitionLexer::KeyWord( "interface",        lf_transition,        tk_INTERFACE ),
-  TransitionLexer::KeyWord( "is",               lf_transition,        tk_IS ),
-  TransitionLexer::KeyWord( "label",            lf_transition,        tk_LABEL ),
-  TransitionLexer::KeyWord( "lambda",           lf_transition,        tk_LAMBDA ),
-  TransitionLexer::KeyWord( "let",              lf_transition,        tk_LET ),
-  TransitionLexer::KeyWord( "let*",             lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "letrec",           lf_transition,        tk_LETREC ),
-  TransitionLexer::KeyWord( "location",         lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "loop",             lf_transition,        tk_LOOP ),
-  TransitionLexer::KeyWord( "MakeVector",       lf_transition,        tk_MAKE_VECTOR ),
-  TransitionLexer::KeyWord( "member",           lf_transition,        tk_MEMBER ),   /* REDUNDANT */
-  TransitionLexer::KeyWord( "method",           lf_transition,        tk_METHOD ),
-  TransitionLexer::KeyWord( "mixfix",           lf_transition,        tk_MIXFIX ),
-  TransitionLexer::KeyWord( "module",           lf_transition,        tk_MODULE ),
-  TransitionLexer::KeyWord( "mutable",          lf_transition,        tk_MUTABLE ),
-  TransitionLexer::KeyWord( "namespace",        lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "object",           lf_transition,        tk_OBJECT ),
-  TransitionLexer::KeyWord( "opaque",           lf_transition,        tk_OPAQUE ),
-  TransitionLexer::KeyWord( "or",               lf_transition,        tk_OR ),
-  TransitionLexer::KeyWord( "otherwise",        lf_transition,        tk_OTHERWISE ),
-//   TransitionLexer::KeyWord( "proclaim",         lf_transition,        tk_PROCLAIM ),
-  TransitionLexer::KeyWord( "provide",          lf_transition,        tk_PROVIDE ),
-  TransitionLexer::KeyWord( "provide!",         lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "pure",             lf_transition,        tk_PURE ),
-  TransitionLexer::KeyWord( "quad",             lf_transition,        tk_QUAD ),
-  TransitionLexer::KeyWord( "read-only",        lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "reference",        lf_transition,        tk_PTR ),
-  TransitionLexer::KeyWord( "repr",             lf_transition,        tk_REPR ),
-  TransitionLexer::KeyWord( "require",          lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "reserved",         lf_transition,        tk_RESERVED ),
-  TransitionLexer::KeyWord( "return",           lf_transition,        tk_RETURN ),
-  TransitionLexer::KeyWord( "sensory",          lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "set!",             lf_transition,        tk_SET ),
-  TransitionLexer::KeyWord( "sizeof",           lf_transition,        tk_SIZEOF ),
-  TransitionLexer::KeyWord( "string",           lf_transition,        tk_STRING ),
-  TransitionLexer::KeyWord( "struct",           lf_transition,        tk_STRUCT ),
-  TransitionLexer::KeyWord( "super",            lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "suspend",          lf_transition,        tk_SUSPEND ),  
-  TransitionLexer::KeyWord( "switch",           lf_transition,        tk_SWITCH ),
-  TransitionLexer::KeyWord( "tag",              lf_transition,        tk_TAG ),
-//  TransitionLexer::KeyWord( "the",              lf_transition,        tk_THE ),
-  TransitionLexer::KeyWord( "then",             lf_transition,        tk_THEN ),
-  TransitionLexer::KeyWord( "throw",            lf_transition,        tk_THROW ),
-  TransitionLexer::KeyWord( "trait",            lf_transition,        tk_TRAIT ),
-  TransitionLexer::KeyWord( "true",             lf_transition,        tk_TRUE ),
-  TransitionLexer::KeyWord( "try",              lf_transition,        tk_TRY ),
-  TransitionLexer::KeyWord( "tycon",            lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "tyfn",             lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "typecase",         lf_transition,        tk_TYPECASE ),
-  TransitionLexer::KeyWord( "uint16",           lf_transition,        tk_UINT16 ),
-  TransitionLexer::KeyWord( "uint32",           lf_transition,        tk_UINT32 ),
-  TransitionLexer::KeyWord( "uint64",           lf_transition,        tk_UINT64 ),
-  TransitionLexer::KeyWord( "uint8",            lf_transition,        tk_UINT8 ),
-  TransitionLexer::KeyWord( "unboxed",          lf_transition,        tk_UNBOXED ),
-  TransitionLexer::KeyWord( "union",            lf_transition,        tk_UNION ),
-  TransitionLexer::KeyWord( "unless",           lf_transition,        tk_UNLESS ),
-  TransitionLexer::KeyWord( "until",            lf_transition,        tk_UNTIL ),
-  TransitionLexer::KeyWord( "using",            lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "value-at",         lf_transition,        tk_ReservedWord ),
-  TransitionLexer::KeyWord( "vector",           lf_transition,        tk_VECTOR ),
-  TransitionLexer::KeyWord( "version",          lf_version,           tk_VERSION ),
-  TransitionLexer::KeyWord( "when",             lf_transition,        tk_WHEN ),
-  TransitionLexer::KeyWord( "where",            lf_transition,        tk_WHERE ),
-  TransitionLexer::KeyWord( "word",             lf_transition,        tk_WORD )
+  TransitionLexer::KeyWord( "->",               lf_block,        tk_FNARROW ),
+  TransitionLexer::KeyWord( "==",               lf_block,        tk_EQUALS ),
+  TransitionLexer::KeyWord( "and",              lf_block,        tk_AND ),
+  TransitionLexer::KeyWord( "apply",            lf_block,        tk_APPLY ),
+  TransitionLexer::KeyWord( "array",            lf_block,        tk_ARRAY ),
+  TransitionLexer::KeyWord( "ArrayRef",         lf_block,        tk_ARRAY_REF ),
+  TransitionLexer::KeyWord( "as",               lf_block,        tk_AS ),
+  TransitionLexer::KeyWord( "assert",           lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "begin",            lf_block,        tk_BEGIN ),
+  TransitionLexer::KeyWord( "bitc",             lf_version,      tk_BITC ),
+  TransitionLexer::KeyWord( "bitfield",         lf_block,        tk_BITFIELD ),
+  TransitionLexer::KeyWord( "bitsizeof",        lf_block,        tk_BITSIZEOF ),
+//  TransitionLexer::KeyWord( "block",            lf_block,        tk_BLOCK ),
+  TransitionLexer::KeyWord( "bool",             lf_block,        tk_BOOL ),
+  TransitionLexer::KeyWord( "boxed",            lf_block,        tk_BOXED ),
+  TransitionLexer::KeyWord( "break",            lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "ByRef",            lf_block,        tk_BY_REF ),
+  TransitionLexer::KeyWord( "case",             lf_block,        tk_CASE ),
+  TransitionLexer::KeyWord( "catch",            lf_block,        tk_CATCH ),
+  TransitionLexer::KeyWord( "char",             lf_block,        tk_CHAR ),
+  TransitionLexer::KeyWord( "check",            lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "closed",           lf_block,        tk_CLOSED ),
+  TransitionLexer::KeyWord( "coindset",         lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "cond",             lf_block,        tk_COND ),
+  TransitionLexer::KeyWord( "const",            lf_block,        tk_CONST ),
+  TransitionLexer::KeyWord( "constrain",        lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "continue",         lf_block,        tk_CONTINUE ),
+  TransitionLexer::KeyWord( "declare",          lf_block,        tk_DECLARE ),
+  TransitionLexer::KeyWord( "deep-const",       lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "def",              lf_block,        tk_DEF ),
+  TransitionLexer::KeyWord( "defequiv",         lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "definvariant",     lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "defrefine",        lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "deftheory",        lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "defthm",           lf_block,        tk_DEFTHM ),
+  TransitionLexer::KeyWord( "defvariant",       lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "deref",            lf_block,        tk_DEREF ),
+  TransitionLexer::KeyWord( "disable",          lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "do",               lf_block,        tk_DO ),
+  TransitionLexer::KeyWord( "do*",              lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "double",           lf_block,        tk_DOUBLE ),
+  TransitionLexer::KeyWord( "dup",              lf_block,        tk_DUP ),
+  TransitionLexer::KeyWord( "else",             lf_block,        tk_ELSE ),
+  TransitionLexer::KeyWord( "enable",           lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "exception",        lf_block,        tk_EXCEPTION ),
+  TransitionLexer::KeyWord( "external",         lf_block,        tk_EXTERNAL ),
+  TransitionLexer::KeyWord( "false",            lf_block,        tk_FALSE ),
+  TransitionLexer::KeyWord( "fill",             lf_block,        tk_FILL ),
+  TransitionLexer::KeyWord( "float",            lf_block,        tk_FLOAT ),
+  TransitionLexer::KeyWord( "fn",               lf_block,        tk_FN ),
+  TransitionLexer::KeyWord( "forall",           lf_block,        tk_FORALL ),
+  TransitionLexer::KeyWord( "from",             lf_block,        tk_FROM ),
+//  TransitionLexer::KeyWord( "giving",           lf_block,        tk_GIVING ),
+  TransitionLexer::KeyWord( "if",               lf_block,        tk_IF ),
+  TransitionLexer::KeyWord( "import",           lf_block,        tk_IMPORT ),
+  TransitionLexer::KeyWord( "import!",          lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "impure",           lf_block,        tk_IMPURE ),
+  TransitionLexer::KeyWord( "in",               lf_block,        tk_IN ),
+  TransitionLexer::KeyWord( "indset",           lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "InnerRef",         lf_block,        tk_INNER_REF ),
+  TransitionLexer::KeyWord( "instance",         lf_block,        tk_INSTANCE ),
+  TransitionLexer::KeyWord( "int16",            lf_block,        tk_INT16 ),
+  TransitionLexer::KeyWord( "int32",            lf_block,        tk_INT32 ),
+  TransitionLexer::KeyWord( "int64",            lf_block,        tk_INT64 ),
+  TransitionLexer::KeyWord( "int8",             lf_block,        tk_INT8 ),
+  TransitionLexer::KeyWord( "interface",        lf_block,        tk_INTERFACE ),
+  TransitionLexer::KeyWord( "is",               lf_block,        tk_IS ),
+  TransitionLexer::KeyWord( "label",            lf_block,        tk_LABEL ),
+  TransitionLexer::KeyWord( "lambda",           lf_block,        tk_LAMBDA ),
+  TransitionLexer::KeyWord( "let",              lf_block,        tk_LET ),
+  TransitionLexer::KeyWord( "let*",             lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "letrec",           lf_block,        tk_LETREC ),
+  TransitionLexer::KeyWord( "location",         lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "loop",             lf_block,        tk_LOOP ),
+  TransitionLexer::KeyWord( "MakeVector",       lf_block,        tk_MAKE_VECTOR ),
+  TransitionLexer::KeyWord( "member",           lf_block,        tk_MEMBER ),   /* REDUNDANT */
+  TransitionLexer::KeyWord( "method",           lf_block,        tk_METHOD ),
+  TransitionLexer::KeyWord( "mixfix",           lf_block,        tk_MIXFIX ),
+  TransitionLexer::KeyWord( "module",           lf_block,        tk_MODULE ),
+  TransitionLexer::KeyWord( "mutable",          lf_block,        tk_MUTABLE ),
+  TransitionLexer::KeyWord( "namespace",        lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "object",           lf_block,        tk_OBJECT ),
+  TransitionLexer::KeyWord( "opaque",           lf_block,        tk_OPAQUE ),
+  TransitionLexer::KeyWord( "or",               lf_block,        tk_OR ),
+  TransitionLexer::KeyWord( "otherwise",        lf_block,        tk_OTHERWISE ),
+//   TransitionLexer::KeyWord( "proclaim",         lf_block,        tk_PROCLAIM ),
+  TransitionLexer::KeyWord( "provide",          lf_block,        tk_PROVIDE ),
+  TransitionLexer::KeyWord( "provide!",         lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "pure",             lf_block,        tk_PURE ),
+  TransitionLexer::KeyWord( "quad",             lf_block,        tk_QUAD ),
+  TransitionLexer::KeyWord( "read-only",        lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "reference",        lf_block,        tk_PTR ),
+  TransitionLexer::KeyWord( "repr",             lf_block,        tk_REPR ),
+  TransitionLexer::KeyWord( "require",          lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "reserved",         lf_block,        tk_RESERVED ),
+  TransitionLexer::KeyWord( "return",           lf_block,        tk_RETURN ),
+  TransitionLexer::KeyWord( "sensory",          lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "set!",             lf_block,        tk_SET ),
+  TransitionLexer::KeyWord( "sizeof",           lf_block,        tk_SIZEOF ),
+  TransitionLexer::KeyWord( "string",           lf_block,        tk_STRING ),
+  TransitionLexer::KeyWord( "struct",           lf_block,        tk_STRUCT ),
+  TransitionLexer::KeyWord( "super",            lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "suspend",          lf_block,        tk_SUSPEND ),  
+  TransitionLexer::KeyWord( "switch",           lf_block,        tk_SWITCH ),
+  TransitionLexer::KeyWord( "tag",              lf_block,        tk_TAG ),
+//  TransitionLexer::KeyWord( "the",              lf_block,        tk_THE ),
+  TransitionLexer::KeyWord( "then",             lf_block,        tk_THEN ),
+  TransitionLexer::KeyWord( "throw",            lf_block,        tk_THROW ),
+  TransitionLexer::KeyWord( "trait",            lf_block,        tk_TRAIT ),
+  TransitionLexer::KeyWord( "true",             lf_block,        tk_TRUE ),
+  TransitionLexer::KeyWord( "try",              lf_block,        tk_TRY ),
+  TransitionLexer::KeyWord( "tycon",            lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "tyfn",             lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "typecase",         lf_block,        tk_TYPECASE ),
+  TransitionLexer::KeyWord( "uint16",           lf_block,        tk_UINT16 ),
+  TransitionLexer::KeyWord( "uint32",           lf_block,        tk_UINT32 ),
+  TransitionLexer::KeyWord( "uint64",           lf_block,        tk_UINT64 ),
+  TransitionLexer::KeyWord( "uint8",            lf_block,        tk_UINT8 ),
+  TransitionLexer::KeyWord( "unboxed",          lf_block,        tk_UNBOXED ),
+  TransitionLexer::KeyWord( "union",            lf_block,        tk_UNION ),
+  TransitionLexer::KeyWord( "unless",           lf_block,        tk_UNLESS ),
+  TransitionLexer::KeyWord( "until",            lf_block,        tk_UNTIL ),
+  TransitionLexer::KeyWord( "using",            lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "value-at",         lf_block,        tk_ReservedWord ),
+  TransitionLexer::KeyWord( "vector",           lf_block,        tk_VECTOR ),
+  TransitionLexer::KeyWord( "version",          lf_version,      tk_VERSION ),
+  TransitionLexer::KeyWord( "when",             lf_block,        tk_WHEN ),
+  TransitionLexer::KeyWord( "where",            lf_block,        tk_WHERE ),
+  TransitionLexer::KeyWord( "word",             lf_block,        tk_WORD )
 };
 
 static int
@@ -337,17 +323,17 @@ TransitionLexer::kwCheck(const char *s, int identType)
 {
   if (ifIdentMode) {
     if (!valid_ifident_start(*s))
-      return (currentLang & lf_sexpr) ? tk_SxpReservedWord : tk_ReservedWord;
+      return tk_ReservedWord;
 
     for (++s; *s; s++) {
       if (!valid_ifident_continue(*s))
-        return (currentLang & lf_sexpr) ? tk_SxpReservedWord : tk_ReservedWord;
+        return tk_ReservedWord;
     }
 
-    return (currentLang & lf_sexpr) ? tk_SxpIdent : tk_BlkIdent;
+    return tk_BlkIdent;
   }
 
-  KeyWord key = KeyWord(s, lf_transition, 0);
+  KeyWord key = KeyWord(s, lf_block, 0);
   KeyWord *entry = 
     (KeyWord *)bsearch(&key, keywords, // &OK
                        sizeof(keywords)/sizeof(keywords[0]), 
@@ -362,7 +348,7 @@ TransitionLexer::kwCheck(const char *s, int identType)
     if (currentLang & entry->whichLang) {
       currentLang &= ~LangFlags(lf_version);
 
-      return (currentLang & lf_sexpr) ? entry->sexprTokValue : entry->blockTokValue;
+      return entry->tokValue;
     }
   }
 
@@ -371,19 +357,13 @@ TransitionLexer::kwCheck(const char *s, int identType)
   // Things starting with "__":
   if (s[0] == '_' && s[1] == '_') {
     if (!isRuntimeUoc)
-      return (currentLang & lf_sexpr) ? tk_SxpReservedWord : tk_ReservedWord;
+      return tk_ReservedWord;
   }
 
   // Things starting with "def" are reserved:
   if (s[0] == 'd' && s[1] == 'e' && s[2] == 'f')
-    return (currentLang & lf_sexpr) ? tk_SxpReservedWord : tk_ReservedWord;
+    return tk_ReservedWord;
 
-  // Things starting with "#" are reserved:
-  if (s[0] == '#')
-    return (currentLang & lf_sexpr) ? tk_SxpReservedWord : tk_ReservedWord;
-
-  if (currentLang & lf_sexpr) 
-    return tk_SxpIdent;
   else return identType;
 }
 
@@ -430,7 +410,6 @@ TransitionLexer::TransitionLexer(std::ostream& _err, std::istream& _in,
   // Don't accept block syntax keywords until we see the new version syntax,
   // which is accepted under lf_version
   currentLang = lf_block | lf_version;
-  lispParenDepth = 0;
   num_errors = 0;
   isRuntimeUoc = false;
   ifIdentMode = false;
@@ -585,7 +564,6 @@ TransitionLexer::showToken(std::ostream& errStream, const LToken& tok)
     errStream << " (" << tok.str << ")";
     break;
   case tk_BlkIdent:
-  case tk_SxpIdent:
   case tk_NegativeInt:
   case tk_Nat:
   case tk_Float:
@@ -868,13 +846,6 @@ LToken
 TransitionLexer::getNextToken()
 {
   LToken tok = havePushbackToken() ? popToken() : getNextInputToken();
-
-  // The transitional syntax requires curly brace insertion at start
-  // and end of file, but otherwise we don't want to do layout
-  // processing when we are handling the S-expression syntax.
-  if ((currentLang & lf_sexpr) &&
-      (tok.tokType != EOF))
-    return tok;
 
   LexLoc startLoc = here;
   LexLoc endLoc = here;
@@ -1321,27 +1292,6 @@ TransitionLexer::getNextInputToken()
     // Leading '-' no longer requires special handling now that we are
     // getting rid of the S-expression syntax. Unary negation is
     // handled in the parser in the new syntax.
-
-    // Hyphen requires special handling. If it is followed by a digit
-    // then it is the beginning of a numeric literal, else it is part
-    // of an identifier.
-  case '-':
-
-    // We now handle unary negate at the expression level in the block
-    // syntax:
-    if ((currentLang & lf_sexpr) == 0) {
-      goto identifier_or_operator;
-    }
-
-    c = getChar();
-
-    if (LitValue::digitValue(c, 10) < 0) {
-      ungetChar(c);
-      c = '-';
-      goto identifier_or_operator;
-    }
-
-    /* ELSE fall through to digit processing */
   case '0':
   case '1':
   case '2':
