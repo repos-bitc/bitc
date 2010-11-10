@@ -98,6 +98,9 @@
 /// construct?
 /// </li>
 ///
+/// <li>
+/// Update the language specification.
+/// </li>
 /// </ol>
 ///
 /// <h1>During Self-Host</h1>
