@@ -42,12 +42,12 @@ module repr_test is
   import bitc.stdlib as stdlib
 
   unboxed repr theRepr is
-    Ct1 is
+    Ct1 {
       i : int32
       j : bool
-    where i == 0
+    } where i == 0
 
-    Ct2 is
+    Ct2 {
       i : int32
       k : int32
-    where i == 1
+    } where i == 1
