@@ -43,7 +43,8 @@ module trait_test is
 
   closed trait mumble('a, 'b) {}
 
-  trait MyOrd('a) forall Eq('a)
+  where Eq('a)
+  trait MyOrd('a) 
   is
     _*<_ : fn('a, 'a) -> bool
     _*>_ : fn('a, 'a) -> bool

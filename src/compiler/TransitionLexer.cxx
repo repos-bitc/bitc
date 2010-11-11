@@ -1011,7 +1011,6 @@ TransitionLexer::getNextToken()
                           tok.tokType == tk_UNTIL ||
                           tok.tokType == tk_IN ||
                           tok.tokType == tk_IS ||
-                          tok.tokType == tk_WHERE ||
                           tok.tokType == tk_DO ||
                           false);
 

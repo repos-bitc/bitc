@@ -60,16 +60,16 @@ interface bitc.prelude {
 
   // Type class describing all types 'a that can receive a copy from
   // type 'b. This is NOT symmetric. For example:
-  //   (forall ((LiteralUnitType int32 'a))
-  //     (CopyFromTo 'a 'b)
-  //     but NOT (CopyFromTo 'b 'a))
+  //   LiteralUnitType(int32, 'a) =>
+  //     CopyFromTo('a,'b)
+  //     but NOT CopyFromTo('b,'a)
   closed trait CopyFromTo('a, 'b) {}
 
   // Type class relating two types 'a, 'b such that they are
   // compatible under binding, assignment, and argument passing. This
   // relation is symmetric.
   //
-  // (CopyCompat 'a 'b) => (CopyFromTo 'a 'b) AND (copy-from-to 'b 'a)
+  // CopyCompat('a,'b) => CopyFromTo('a,'b) AND CopyFromTo('b,'a)
   closed trait CopyCompat('a, 'b) {}
 
   // Type class identifying the set of types for which a literal
@@ -93,7 +93,8 @@ interface bitc.prelude {
     some { value : 'a }
   }
 
-  unboxed union nullable('a) forall RefTypes('a) {
+  where RefTypes('a)
+  unboxed union nullable('a) {
       null
       not_null { ptr: 'a }
   }
@@ -213,7 +214,8 @@ interface bitc.prelude {
   // TYPE CLASS FOR INTEGER LITERALS
   ///////////////////////////////////////////////////////////
 
-  closed trait IntLit('a) forall LiteralType('a) {}
+  where LiteralType('a)
+  closed trait IntLit('a) {}
 
   instance IntLit(word)
   instance IntLit( int8)
@@ -228,20 +230,25 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPE CLASS FOR FLOATING POINT LITERALS
   ///////////////////////////////////////////////////////////
-  closed trait FloatLit('a) forall LiteralType('a) {}
+  where LiteralType('a) 
+  closed trait FloatLit('a) {}
 
   instance FloatLit(float)
   instance FloatLit(double)
   instance FloatLit(quad)  
 
-  closed trait Unsigned('a) forall IntLit('a) {}
+  where IntLit('a)
+  closed trait Unsigned('a) {}
+
   instance Unsigned(word)
   instance Unsigned(uint8)
   instance Unsigned(uint16)
   instance Unsigned(uint32)
   instance Unsigned(uint64)
 
-  closed trait Signed('a) forall IntLit('a) {}
+  where IntLit('a) 
+  closed trait Signed('a) {}
+
   instance Signed( int8)
   instance Signed( int16)
   instance Signed( int32)
@@ -262,7 +269,8 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING ORDERING
   ///////////////////////////////////////////////////////////
-  trait Ord('a) forall Eq('a) {
+  where Eq('a) 
+  trait Ord('a) {
     _<_  : fn('a, 'a) -> bool
     _>_  : fn('a, 'a) -> bool
     _<=_ : fn('a, 'a) -> bool
@@ -278,7 +286,8 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING (FOUR-FUNCTION) ARITHMETIC
   ///////////////////////////////////////////////////////////
-  trait Arith('a) forall Ord('a) {
+  where Ord('a) 
+  trait Arith('a) {
     _+_ : fn('a, 'a) -> 'a
     _-_ : fn('a, 'a) -> 'a
     _*_ : fn('a, 'a) -> 'a
@@ -307,7 +316,8 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING INTEGER MODULUS ARITHMETIC
   ///////////////////////////////////////////////////////////
-  trait IntArith('a) forall Arith('a), IntLit('a) {
+  where Arith('a), IntLit('a) 
+  trait IntArith('a) {
     _%_ : fn('a, 'a) -> 'a
   }
 
@@ -317,7 +327,8 @@ interface bitc.prelude {
   ///////////////////////////////////////////////////////////
   // TYPES ADMITTING BITWISE ARITHMETIC
   ///////////////////////////////////////////////////////////
-  trait Bitwise('a) forall Unsigned('a) {
+  where Unsigned('a) 
+  trait Bitwise('a) {
       bit_and  : fn('a, 'a)   -> 'a   // Bitwise AND
       bit_or   : fn('a, 'a)   -> 'a   // Bitwise OR
       bit_not  : fn('a)       -> 'a   // One's Complement

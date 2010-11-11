@@ -42,8 +42,8 @@ provide bitc.main main
 trait EQL('a)
 is === : fn('a, 'a) -> bool
 
+where EQL('a)
 trait ORD('a)
-  forall EQL('a)
 is <<== : fn('a,'a) -> bool
 
 //(instance (EQL 'a) ==)

@@ -62,24 +62,23 @@ module mixed_types is
     a : 'a
     f : float
     
-// This causes an assert (in either syntax) because the
-// ast->tvarLB pointer for the type variable is NULL.
-// I'm guessing this occurs for the same reason that the
-// FORALL never gets built above.
-  //(forall ((Eq 'a))
-  //   (defstruct (constrained 'a) :ref))
-
+  // This causes an assert (in either syntax) because the
+  // ast->tvarLB pointer for the type variable is NULL.
+  // I'm guessing this occurs for the same reason that the
+  // FORALL never gets built above.
+  //
+  // where Eq('a)
   // boxed struct constrained('a)
-  //   forall Eq('a)
 
-  boxed struct constrained('a) forall Eq('a) is
+  where Eq('a)
+  boxed struct constrained('a) is
     a : 'a
     f : float
     
   boxed struct forward is
     c : char
 
-//  boxed union uboxedpoly('a)
+  //  boxed union uboxedpoly('a)
 
   boxed union uboxedpoly('a) is
     ucon0
@@ -91,9 +90,10 @@ module mixed_types is
     f
     g { i:int32 }
 
+  // where Eq('a)
   // boxed union uconstrained('a)
-  //   forall Eq('a)
 
-  boxed union uconstrained('a) forall Eq('a) is
+  where Eq('a)
+  boxed union uconstrained('a) is
     empty
     full { a : 'a }

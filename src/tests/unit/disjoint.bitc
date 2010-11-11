@@ -46,8 +46,8 @@ def FUN(x:'a, y:'a) = true
 trait ABC('a)
 is FN: fn('a, 'a) -> bool
 
+where IntLit('a)
 instance ABC('a)
-  forall IntLit('a)
 is FN = FUN
 
 // must not work

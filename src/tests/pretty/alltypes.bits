@@ -62,8 +62,8 @@ module alltypes_test is {
     f : float
   };
 
+  where Eq('a)
   boxed struct Sapp('a)
-    forall Eq('a)
   is {
     i : int32
     f : float

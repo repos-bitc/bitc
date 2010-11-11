@@ -316,10 +316,12 @@ matched form is matched as sub-expression 1.")
   '(
     "as"
     "boxed"
+    "closed" 
     "const" 
     "continue"
     "def"
     "exception"
+    "forall"
     "from"
     "import"
     "instance"

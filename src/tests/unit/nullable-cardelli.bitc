@@ -52,8 +52,8 @@ is en11
    ptr1 is p : boxed(int32)
 
 // Constrained Reference type
+where RefTypes('a)
 unboxed union un_ct_ref('a)
-  forall RefTypes('a)
 is en21
    en22
    ptr2 is p:'a

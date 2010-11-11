@@ -37,13 +37,13 @@
 
 bitc version 0.11
 
+where CopyCompat('a, 'b)
 def abc(x:'a, y:'b)
-  forall CopyCompat('a, 'b)
 in
   ()
 
+where CopyCompat(boxed('a), boxed('a))
 def fgh(x: 'a, y: 'b)
-  forall CopyCompat(boxed('a), boxed('a))
 in
   ()
 

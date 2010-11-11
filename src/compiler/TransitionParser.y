@@ -692,8 +692,8 @@ blk_constraints: {
   $$ = AST::make(at_constraints);
 }
 
-blk_constraints: tk_FORALL blk_constraint_seq {
-  SHOWPARSE("blk_constraints -> FORALL blk_constraint_seq");
+blk_constraints: tk_WHERE blk_constraint_seq SC {
+  SHOWPARSE("blk_constraints -> FORALL blk_constraint_seq SC");
   $$ = $2;
 }
 
@@ -749,25 +749,25 @@ blk_ptype_name: blk_defident '(' blk_tvlist ')' %prec '(' {
 };
 
 // STRUCTURE TYPES [3.6.1]         
-blk_type_definition: blk_val tk_STRUCT blk_ptype_name blk_constraints blk_opt_declares IsILCB blk_fields_and_methods IRCB {
-  SHOWPARSE("blk_type_definition -> blk_val STRUCT blk_ptype_name blk_constraints "
+blk_type_definition: blk_constraints blk_val tk_STRUCT blk_ptype_name blk_opt_declares IsILCB blk_fields_and_methods IRCB {
+  SHOWPARSE("blk_type_definition -> blk_constraints blk_val STRUCT blk_ptype_name "
             "blk_declares { blk_fields }");
-  $$ = AST::make(at_defstruct, $2.loc, $3->child(0), $3->child(1), $1,
-                 $5, $7, $4);
+  $$ = AST::make(at_defstruct, $3.loc, $4->child(0), $4->child(1), $2,
+                 $5, $7, $1);
   $$->child(0)->defForm = $$;
 };
 
 // UNION TYPES [3.6.2]              
-blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints blk_opt_declares IsILCB blk_constructors IRCB {
-  SHOWPARSE("blk_type_definition -> blk_val UNION blk_ptype_name blk_constraints "
+blk_type_definition: blk_constraints blk_val tk_UNION blk_ptype_name blk_opt_declares IsILCB blk_constructors IRCB {
+  SHOWPARSE("blk_type_definition -> blk_constraints blk_val UNION blk_ptype_name "
             "trn_optdocstring blk_opt_declares { blk_constructors }");
-  $$ = AST::make(at_defunion, $2.loc,
-                 $3->child(0),   /* ident */
-                 $3->child(1),   /* tvlist */
-                 $1,             /* category */
+  $$ = AST::make(at_defunion, $3.loc,
+                 $4->child(0),   /* ident */
+                 $4->child(1),   /* tvlist */
+                 $2,             /* category */
                  $5,             /* declares */
                  $7,             /* constructors */
-                 $4);            /* constraints */
+                 $1);            /* constraints */
   $$->child(0)->defForm = $$;
 }
 
@@ -847,13 +847,17 @@ blk_type_definition: blk_val tk_UNION blk_ptype_name blk_constraints blk_opt_dec
 /* }; */
 
 // REPR TYPES
-blk_type_definition: blk_val tk_REPR blk_defident blk_opt_declares IsILCB blk_repr_constructors IRCB {
-  SHOWPARSE("blk_type_definition -> blk_val REPR blk_defident "
+blk_type_definition: blk_constraints blk_val tk_REPR blk_defident blk_opt_declares IsILCB blk_repr_constructors IRCB {
+  SHOWPARSE("blk_type_definition -> blk_constraints blk_val REPR blk_defident "
             "blk_opt_declares { blk_repr_constructors }");
-  $$ = AST::make(at_defrepr, $2.loc, $3, 
+  if ($1->children.size() != 0) {
+    std::string s = ": Error: Repr declarations cannot be quantified.";
+    lexer->ReportParseError($1->loc, s);
+  }
+  $$ = AST::make(at_defrepr, $3.loc, $4,
                  AST::make(at_tvlist), /* empty tvlist */
-                 $1, $4, $6,
-                 AST::make(at_constraints)); /* empty constraints */
+                 $2, $5, $7,
+                 $1); /* empty constraints */
   $$->child(0)->defForm = $$;
 }
 
@@ -918,30 +922,30 @@ blk_externals: tk_EXTERNAL blk_exident {
 };
 
 // OBJECT TYPES [3.6.1]         
-blk_type_definition: tk_OBJECT blk_ptype_name blk_constraints blk_opt_declares IsILCB blk_methods_only IRCB  {
-  SHOWPARSE("blk_type_definition -> OBJECT blk_ptype_name blk_constraints "
+blk_type_definition: blk_constraints tk_OBJECT blk_ptype_name blk_opt_declares IsILCB blk_methods_only IRCB  {
+  SHOWPARSE("blk_type_definition -> blk_constraints OBJECT blk_ptype_name "
             "blk_opt_declares blk_methods_only )");
 
   // For the moment, all objects are value types:
   shared_ptr<AST> valCat = 
     AST::make(at_unboxedCat, LToken(tk_UNBOXED, "unboxed"));
 
-  $$ = AST::make(at_defobject, $1.loc, $2->child(0), $2->child(1),
+  $$ = AST::make(at_defobject, $2.loc, $3->child(0), $3->child(1),
                  valCat,
-                 $4, $6, $3);
+                 $4, $6, $1);
   $$->child(0)->defForm = $$;
 };
 
 // STRUCTURE DECLARATIONS
-blk_type_decl: blk_val tk_STRUCT blk_ptype_name blk_constraints blk_externals {
-  SHOWPARSE("blk_type_decl -> blk_val STRUCT blk_ptype_name blk_constraints blk_externals '");
-  $$ = AST::make(at_declstruct, $2.loc, 
-                 $3->child(0),  /* ident */
-                 $3->child(1),  /* tvlist */
-                 $1,            /* category */
+blk_type_decl: blk_constraints blk_val tk_STRUCT blk_ptype_name blk_externals {
+  SHOWPARSE("blk_type_decl -> blk_constraints blk_val STRUCT blk_ptype_name blk_externals '");
+  $$ = AST::make(at_declstruct, $3.loc, 
+                 $4->child(0),  /* ident */
+                 $4->child(1),  /* tvlist */
+                 $2,            /* category */
                  AST::make(at_declares), /* empty declares */
                  AST::make(at_fields), /* empty fields */
-                 $4);                  /* constraints */
+                 $1);                  /* constraints */
   $$->child(0)->defForm = $$;
   $$->flags |= $5->flags;
   $$->getID()->flags |= $5->flags;
@@ -949,15 +953,15 @@ blk_type_decl: blk_val tk_STRUCT blk_ptype_name blk_constraints blk_externals {
 };
 
 // UNION DECLARATIONS
-blk_type_decl: blk_val tk_UNION blk_ptype_name blk_constraints blk_externals {
-  SHOWPARSE("blk_type_decl -> blk_val UNION blk_ptype_name blk_externals");
-  $$ = AST::make(at_declunion, $2.loc, 
-                 $3->child(0),  /* ident */
-                 $3->child(1),  /* tvlist */
-                 $1,            /* category */
+blk_type_decl: blk_constraints blk_val tk_UNION blk_ptype_name blk_externals {
+  SHOWPARSE("blk_type_decl -> blk_constraints blk_val UNION blk_ptype_name blk_externals");
+  $$ = AST::make(at_declunion, $3.loc, 
+                 $4->child(0),  /* ident */
+                 $4->child(1),  /* tvlist */
+                 $2,            /* category */
                  AST::make(at_declares), /* empty declares */
                  AST::make(at_constructors), /* empty constructors */
-                 $4);                        /* constraints */
+                 $1);                        /* constraints */
   $$->child(0)->defForm = $$;
   $$->flags |= $5->flags;
   $$->getID()->flags |= $5->flags;
@@ -965,18 +969,23 @@ blk_type_decl: blk_val tk_UNION blk_ptype_name blk_constraints blk_externals {
 };
 
 // REPR DECLARATIONS
-blk_type_decl: blk_val tk_REPR blk_defident blk_externals {
+blk_type_decl: blk_constraints blk_val tk_REPR blk_defident blk_externals {
   SHOWPARSE("blk_type_decl -> blk_val REPR blk_defident blk_externals )");
-  $$ = AST::make(at_declrepr, $2.loc, $3, 
+  if ($1->children.size() != 0) {
+    std::string s = ": Error: Repr declarations cannot be quantified.";
+    lexer->ReportParseError($1->loc, s);
+  }
+
+  $$ = AST::make(at_declrepr, $3.loc, $4, 
                  AST::make(at_tvlist), /* empty tvlist */
-                 $1,                   /* category */
+                 $2,                   /* category */
                  AST::make(at_declares), /* empty declares */
                  AST::make(at_reprctrs), /* empty constructors */
-                 AST::make(at_constraints)); /* empty constraints */
+                 $1); /* empty constraints */
   $$->child(0)->defForm = $$;
-  $$->flags |= $4->flags;
-  $$->getID()->flags |= $4->flags;
-  $$->getID()->externalName = $4->externalName;
+  $$->flags |= $5->flags;
+  $$->getID()->flags |= $5->flags;
+  $$->getID()->externalName = $5->externalName;
 };
 
 // CATEGORIES
@@ -1018,40 +1027,48 @@ blk_openclosed: tk_CLOSED {
 };
 
 // EXCEPTION DEFINITION [3.10]
-blk_type_definition: blk_optval tk_EXCEPTION blk_ident {
-  SHOWPARSE("blk_type_definition -> optval EXCEPTION blk_ident");
-  $3->flags |= ID_IS_GLOBAL;
-  $$ = AST::make(at_defexception, $2.loc, 
-                 $3,            /* ident */
+blk_type_definition: blk_constraints blk_optval tk_EXCEPTION blk_ident {
+  SHOWPARSE("blk_type_definition -> blk_constraints optval EXCEPTION blk_ident");
+  if ($1->children.size() != 0) {
+    std::string s = ": Error: Exception declarations cannot be quantified.";
+    lexer->ReportParseError($1->loc, s);
+  }
+  $4->flags |= ID_IS_GLOBAL;
+  $$ = AST::make(at_defexception, $3.loc, 
+                 $4,            /* ident */
                  AST::make(at_tvlist), /* empty tvlist */
-                 $1,                   /* category */
+                 $2,                   /* category */
                  AST::make(at_declares), /* empty declares */
                  AST::make(at_fields), /* empty fields */
-                 AST::make(at_constraints)); /* empty constraints */
+                 $1); /* empty constraints */
   $$->child(0)->defForm = $$;
 };
 
-blk_type_definition: blk_optval tk_EXCEPTION blk_ident IsILCB blk_fields IRCB {
-  SHOWPARSE("blk_type_definition -> exception blk_ident IS { blk_fields }");
-  $3->flags |= ID_IS_GLOBAL;
-  $$ = AST::make(at_defexception, $2.loc, 
-                 $3,
+blk_type_definition: blk_constraints blk_optval tk_EXCEPTION blk_ident IsILCB blk_fields IRCB {
+  SHOWPARSE("blk_type_definition -> blk_constraints exception blk_ident IS { blk_fields }");
+  if ($1->children.size() != 0) {
+    std::string s = ": Error: Exception declarations cannot be quantified.";
+    lexer->ReportParseError($1->loc, s);
+  }
+  $4->flags |= ID_IS_GLOBAL;
+  $$ = AST::make(at_defexception, $3.loc, 
+                 $4,
                  AST::make(at_tvlist), /* empty tvlist */
-                 $1,                   /* category */
+                 $2,                   /* category */
                  AST::make(at_declares), /* empty declares */
-                 $5,                     /* fields */
-                 AST::make(at_constraints)); /* empty constraints */
+                 $6,                     /* fields */
+                 $1); /* empty constraints */
   $$->child(0)->defForm = $$;
 };
 
 // TYPE CLASSES [4]
 // TYPE CLASS DEFINITION [4.1]
 
-blk_tc_definition: blk_openclosed tk_TRAIT blk_ptype_name blk_constraints blk_tc_decls IsILCB blk_method_decls IRCB {
-  SHOWPARSE("blk_tc_definition -> blk_openclosed TRAIT blk_ptype_name "
-            "blk_constraints blk_tc_decls blk_method_decls)");
-  $$ = AST::make(at_deftypeclass, $2.loc, $3->child(0),
-                 $3->child(1), $5, $1, $7, $4);
+blk_tc_definition: blk_constraints blk_openclosed tk_TRAIT blk_ptype_name blk_tc_decls IsILCB blk_method_decls IRCB {
+  SHOWPARSE("blk_tc_definition -> blk_constraints blk_openclosed TRAIT blk_ptype_name "
+            "blk_tc_decls blk_method_decls)");
+  $$ = AST::make(at_deftypeclass, $3.loc, $4->child(0),
+                 $4->child(1), $5, $2, $7, $1);
   $$->child(0)->defForm = $$;
 };
 
@@ -1098,14 +1115,14 @@ blk_method_decl: blk_ident ':' blk_fntype {
 };
 
 // TYPE CLASS INSTANTIATIONS [4.2]
-blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints {
-  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints)");
-  $$ = AST::make(at_definstance, $1.loc, $2,
-                 AST::make(at_tcmethods, $1.loc), $3);
+blk_ti_definition: blk_constraints tk_INSTANCE blk_constraint {
+  SHOWPARSE("blk_ti_definition -> blk_constraints INSTANCE blk_constraint)");
+  $$ = AST::make(at_definstance, $2.loc, $3,
+                 AST::make(at_tcmethods, $2.loc), $1);
 };
-blk_ti_definition: tk_INSTANCE blk_constraint blk_constraints IsILCB blk_method_bindings IRCB {
-  SHOWPARSE("blk_ti_definition -> INSTANCE blk_constraint blk_constraints IS { blk_method_bindings }");
-  $$ = AST::make(at_definstance, $1.loc, $2, $5, $3);
+blk_ti_definition: blk_constraints tk_INSTANCE blk_constraint IsILCB blk_method_bindings IRCB {
+  SHOWPARSE("blk_ti_definition -> blk_constraints INSTANCE blk_constraint IS { blk_method_bindings }");
+  $$ = AST::make(at_definstance, $2.loc, $3, $5, $1);
 };
 
 blk_method_bindings: blk_method_binding {
@@ -1130,33 +1147,32 @@ blk_method_binding: blk_ident '=' blk_expr {
 //  $$ = AST::make(at_define, $1.loc, $2, $5, $3);
 //};
 
-blk_value_definition: tk_DEF blk_defpattern blk_constraints '=' blk_expr {
-  SHOWPARSE("blk_value_definition -> DEF blk_defpattern blk_constraints = blk_expr");
-  $$ = AST::make(at_define, $1.loc, $2, $5, $3);
+blk_value_definition: blk_constraints tk_DEF blk_defpattern '=' blk_expr {
+  SHOWPARSE("blk_value_definition -> blk_constraints DEF blk_defpattern = blk_expr");
+  $$ = AST::make(at_define, $2.loc, $3, $5, $1);
 };
-blk_value_definition: tk_DEF blk_defident '(' ')' blk_constraints blk_fndef_tail {
-  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints blk_expr");
-  // $5 = stripDocString($5);
+blk_value_definition: blk_constraints tk_DEF blk_defident '(' ')' blk_fndef_tail {
+  SHOWPARSE("blk_value_definition -> blk_constraints DEF blk_defident () blk_expr");
   shared_ptr<AST> iRetBlock =
-    AST::make(at_labeledBlock, $1.loc, 
+    AST::make(at_labeledBlock, $2.loc, 
               AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $6);
   shared_ptr<AST> iLambda =
-    AST::make(at_lambda, $1.loc, AST::make(at_argVec, $3.loc), iRetBlock);
+    AST::make(at_lambda, $2.loc, AST::make(at_argVec, $4.loc), iRetBlock);
   iLambda->printVariant = pf_IMPLIED;
-  shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
-  $$ = AST::make(at_recdef, $1.loc, iP, iLambda, $5);
+  shared_ptr<AST> iP = AST::make(at_identPattern, $3->loc, $3);
+  $$ = AST::make(at_recdef, $2.loc, iP, iLambda, $1);
 }
 
-blk_value_definition: tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_constraints blk_fndef_tail {
-  SHOWPARSE("blk_value_definition -> DEF  blk_defident () blk_constraints blk_expr");
+blk_value_definition: blk_constraints tk_DEF blk_defident '(' blk_lambdapatterns ')' blk_fndef_tail {
+  SHOWPARSE("blk_value_definition -> blk_constraints DEF blk_defident () blk_expr");
   // $5 = stripDocString($5);
   shared_ptr<AST> iRetBlock =
-    AST::make(at_labeledBlock, $1.loc, 
+    AST::make(at_labeledBlock, $2.loc, 
               AST::make(at_ident, LToken(tk_BlkIdent, "__return")), $7);
-  shared_ptr<AST> iLambda = AST::make(at_lambda, $1.loc, $4, iRetBlock);
+  shared_ptr<AST> iLambda = AST::make(at_lambda, $2.loc, $5, iRetBlock);
   iLambda->printVariant = pf_IMPLIED;
-  shared_ptr<AST> iP = AST::make(at_identPattern, $2->loc, $2);
-  $$ = AST::make(at_recdef, $1.loc, iP, iLambda, $6);
+  shared_ptr<AST> iP = AST::make(at_identPattern, $3->loc, $3);
+  $$ = AST::make(at_recdef, $2.loc, iP, iLambda, $1);
 }
 
 blk_fndef_tail: '=' blk_expr {
@@ -1169,18 +1185,18 @@ blk_fndef_tail: tk_IN blk_iblock {
 }
 
 // PROCLAIM DEFINITION -- VALUES [6.2]
-blk_value_declaration: tk_DEF blk_defpattern blk_constraints blk_externals {
-  SHOWPARSE("blk_value_declaration -> DEF blk_defpattern blk_constraints blk_externals");
+blk_value_declaration: blk_constraints tk_DEF blk_defpattern blk_externals {
+  SHOWPARSE("blk_value_declaration -> blk_constraints DEF blk_defpattern blk_externals");
 
   // I had to use blk_defpattern above to eliminate a reduce/reduce
   // conflict, but in a declaration we require the type to be present
-  if ($2->children.size() == 1)
-    lexer->ReportParseError($2->loc, "Declaration forms require a type");
+  if ($3->children.size() == 1)
+    lexer->ReportParseError($3->loc, "Declaration forms require a type");
 
-  shared_ptr<AST> declIdent = $2->child(0);
-  shared_ptr<AST> declType = $2->child(1);
+  shared_ptr<AST> declIdent = $3->child(0);
+  shared_ptr<AST> declType = $3->child(1);
 
-  $$ = AST::make(at_proclaim, $1.loc, declIdent, declType, $3);
+  $$ = AST::make(at_proclaim, $2.loc, declIdent, declType, $1);
   $$->flags |= $4->flags;
   $$->getID()->flags |= $4->flags;
   $$->getID()->externalName = $4->externalName;

@@ -37,9 +37,8 @@
 
 bitc version 0.11
 
-def charEQ:fn (boxed('a)) -> bool
-  forall CopyCompat('a, char) =
-  lambda (x) true
+where CopyCompat('a, char)
+def charEQ:fn (boxed('a)) -> bool = lambda (x) true
 
 import bitc.main as main
 provide bitc.main main

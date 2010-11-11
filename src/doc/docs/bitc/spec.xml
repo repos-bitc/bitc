@@ -1100,10 +1100,12 @@ a b c /*
                 <li>
                   <p>
                     If the offset of the token is <em>equal to</em>
-                    the current sequence offset, is not a semicolon
-                    (';'), and the most recently returned token was
-                    not a semicolon, a semicolon is automatically
-                    inserted.
+                    the current sequence offset, the token is not a
+                    semicolon (';'), and the most recently returned
+                    token was not a semicolon, a semicolon is
+                    automatically inserted. <em>Qualifications to this
+                    rule are needed concerning the current and
+                    immediately preceding token.</em>
                   </p>
                 </li>
               </ul>

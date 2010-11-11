@@ -138,7 +138,7 @@ blk_pp_constraints(INOstream& out, shared_ptr<const AST> constraints,
   if (constraints->children.size() == 0)
     return;
 
-  out << endl << "forall";
+  out << endl << "where";
   doChildren(blk_BitcP, out, constraints, 0, " ", ", ", showTypes);
 }
 #endif
@@ -289,12 +289,12 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       shared_ptr<AST> methods = ast->child(4);
       shared_ptr<AST> constraints = ast->child(5);
 
+      doChildren(blk_BitcP, out, constraints, 0, "where ", ", ", "\n", flags);
       blk_BitcP(out, openclosed, flags);
       out << ast->atKwd() << " ";
       blk_BitcP(out, ident, flags);
       doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", flags);
       out.more();
-      doChildren(blk_BitcP, out, constraints, 0, "\nforall ", ", ", "", flags);
       //      blk_BitcP(out, tcdecls, flags);
       out.less();
 
@@ -318,12 +318,9 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       shared_ptr<AST> methods = ast->child(1);
       shared_ptr<AST> constraints = ast->child(2);
 
+      doChildren(blk_BitcP, out, constraints, 0, "where ", ", ", "\n", flags);
       out << ast->atKwd() << " ";
       blk_BitcP(out, tapp, flags);
-
-      out.more();
-      doChildren(blk_BitcP, out, constraints, 0, "\nforall ", ", ", "", flags);
-      out.less();
 
       if (methods->children.size()) {
         out << "\nis ";
@@ -352,6 +349,8 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       shared_ptr<AST> fc = ast->child(4);
       shared_ptr<AST> constraints = ast->child(5);
 
+      doChildren(blk_BitcP, out, constraints, 0, "where ", ", ", "\n", flags);
+
       blk_BitcP(out, category, flags);
 
       // Careful! Reprs are transformed into unions by the reprSimp
@@ -364,7 +363,6 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", flags);
 
       out.more();
-      doChildren(blk_BitcP, out, constraints, 0, "\nforall ", ", ", "", flags);
       doChildren(blk_BitcP, out, declares, 0, "\n", "\n", "", flags);
       out.less();
 
@@ -460,6 +458,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       shared_ptr<AST> category = ast->child(2);
       shared_ptr<AST> constraints = ast->child(5);
 
+      doChildren(blk_BitcP, out, constraints, 0, "where ", ",", "\n", flags);
       blk_BitcP(out, category, flags);
       if (ast->flags & UNION_IS_REPR)
         out << "repr ";
@@ -469,7 +468,6 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       doChildren(blk_BitcP, out, tvlist, 0, "(", ", ", ")", flags);
 
       out.more();
-      doChildren(blk_BitcP, out, constraints, 0, "\nforall ", ",", "", flags);
       if (ident->flags & DEF_IS_EXTERNAL) {
         out << "\nexternal";
         if (ident->externalName.size())
@@ -487,13 +485,13 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       shared_ptr<AST> proc_type = ast->child(1);
       shared_ptr<AST> constraints = ast->child(2);
 
+      doChildren(blk_BitcP, out, constraints, 0, "where ", ",", "\n", flags);
       out << " " << ast->atKwd() << " ";
       blk_BitcP(out, ident, flags);
       out << " : ";
       blk_BitcP(out, proc_type, flags);
 
       out.more();
-      doChildren(blk_BitcP, out, constraints, 0, "\nforall ", ",", "", flags);
 
       if (ident->flags & DEF_IS_EXTERNAL) {
         out << "\nexternal";
@@ -663,6 +661,7 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       shared_ptr<AST> iLambda = ast->child(1);
       shared_ptr<AST> constraints = ast->child(2);
 
+      doChildren(blk_BitcP, out, constraints, 0, "where ", ", ", "\n", flags);
       out << ast->atKwd() << " ";
 
       // Procedure name:
@@ -676,7 +675,6 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       else
         out << "()";
 
-      doChildren(blk_BitcP, out, constraints, 0, "\nforall ", ", ", "", flags);
       out << " = " ;
 
       out.more();
@@ -711,12 +709,12 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       shared_ptr<AST> expr = ast->child(1);
       shared_ptr<AST> constraints = ast->child(2);
 
+      doChildren(blk_BitcP, out, constraints, 0, "where ", ", ", "\n", flags);
+
       out << ast->atKwd() << " ";
 
-      // Procedure name:
+      // Identifier:
       blk_BitcP(out, identPattern, flags);
-
-      doChildren(blk_BitcP, out, constraints, 0, "\nforall ", ", ", "\n ", flags);
 
       out << " = " ;
       blk_BitcP(out, expr, flags);

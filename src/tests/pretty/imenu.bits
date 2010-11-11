@@ -67,10 +67,11 @@ module struct_test is
      a : 'a
      f : float
 
+   where Eq('a)
    boxed struct constrained('a)
-     forall Eq('a)
 
-   boxed struct constrained('a) forall Eq('a) is
+   where Eq('a)
+   boxed struct constrained('a) is
      a : 'a
      f : float
 
