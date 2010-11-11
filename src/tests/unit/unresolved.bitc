@@ -42,6 +42,6 @@ provide bitc.main main
 
 def main.main(argv: string[])
 in
-  0:int32 + 4 
+  (0:int32) + 4 
 
   0:int32

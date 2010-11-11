@@ -42,12 +42,12 @@ provide bitc.main main
 
 def main.main(argv: string[])
 in
-  0:int32 + 4
-  0:int32 + 4 * 5
-  6 * 0:int32 + 4
+  (0:int32) + 4
+  (0:int32) + 4 * 5
+  6 * (0:int32) + 4
   // 0:int32 + 5 7
 
-  6 ** 0:int32 * 1 + 4
-  6 ** 0:int32 + 1 * 4
+  6 ** (0:int32) * 1 + 4
+  6 ** (0:int32) + 1 * 4
 
   0:int32

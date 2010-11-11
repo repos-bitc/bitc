@@ -47,14 +47,14 @@ def fact(x) = if x == i0 then i1 else x * fact(x - 1)
 
 def main.main(argvec : string[])
 in
-  0:int8 == 0:int8
-    && 0:int16 == 0:int16
-    && 0:int32 == 0:int32
-    && 0:int64 == 0:int64
-    && 0:uint8 == 0:uint8
-    && 0:uint16 == 0:uint16
-    && 0:uint32 == 0:uint32
-    && 0:uint64 == 0:uint64
+  (0:int8) == (0:int8)
+    && (0:int16) == (0:int16)
+    && (0:int32) == (0:int32)
+    && (0:int64) == (0:int64)
+    && (0:uint8) == (0:uint8)
+    && (0:uint16) == (0:uint16)
+    && (0:uint32) == (0:uint32)
+    && (0:uint64) == (0:uint64)
     && 'a' == 'a'
     && true == true
     && "abc" == "abc"
@@ -62,8 +62,8 @@ in
     && "abc" < "abc"
     && "abc" >= "abc"
     && "abc" <= "abc"
-    && 0:int32 > 0:int32
-    && 0:int32 < 0:int32
-    && 0:int32 >= 0:int32
-    && 0:int32 <= 0:int32
+    && (0:int32) > (0:int32)
+    && (0:int32) < (0:int32)
+    && (0:int32) >= (0:int32)
+    && (0:int32) <= (0:int32)
   0:int32

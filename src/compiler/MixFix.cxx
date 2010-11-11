@@ -794,10 +794,7 @@ reduce(INOstream& errStream, MixInput& shunt, MixRulePtr rule)
   shared_ptr<AST> fnName = 
     AST::make(at_ident, LToken(tk_BlkIdent, rule->name));
 
-  if (rule->name == "_:#t_") {
-    result = AST::make(at_typeAnnotation, shunt[0].ast->loc);
-  }
-  else if (rule->sc == msc_expr) {
+  if (rule->sc == msc_expr) {
     result = AST::make(at_apply, shunt[0].ast->loc, fnName);
   }
   else if (rule->sc == msc_type) {
@@ -1158,8 +1155,6 @@ MixRulePtr MixRules[] =  {
 
   // list convenience syntax:
   MixRule::make(msc_expr, "[_]",  128, assoc_none),
-
-  MixRule::make(msc_expr, "_:#t_", 128, assoc_none),
 
   // Kind matching is not yet implemented:
   // MixRule::make(msc_type, "_:#k_", 129, assoc_none),

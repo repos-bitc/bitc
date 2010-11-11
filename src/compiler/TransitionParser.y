@@ -366,6 +366,7 @@ static unsigned VersionMinor(const std::string s)
 // all sides.
 %type <ast> blk_expr_primary
 %type <ast> blk_expr_apply
+
 %type <ast> blk_expr
 
 %type <ast> blk_expr_mixfix blk_mixfix_elem
@@ -1946,11 +1947,6 @@ blk_mixfix_elem: '.' blk_ident {
   $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1), $2);
 };
 
-blk_mixfix_elem: ':' blk_type {
-  SHOWPARSE("blk_mixfix_elem -> ':' blk_type");
-  $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1), $2);
-}
-
 blk_mixfix_arglist: blk_expr {
   SHOWPARSE("blk_mixfix_arglist -> blk_expr");
   $$ = AST::make(at_mixfix, $1->loc, $1);
@@ -1963,6 +1959,8 @@ blk_mixfix_arglist: blk_mixfix_arglist ',' blk_expr {
   $$->addChild(AST::make(at_mixfix, $3->loc, $3));
 }
 
+// Note that an arglist can be a singleton expression, so this
+// subsumes fully parenthesized expressions:
 blk_mixfix_elem: '(' blk_mixfix_arglist ')' {
   SHOWPARSE("blk_mixfix_elem -> ( blk_mixfix_arglist )");
   $$ = AST::make(at_mixfix, $1.loc, AST::make(at_ident, $1));
@@ -1989,6 +1987,10 @@ blk_mixfix_elem: '[' blk_mixfix_arglist ']' {
 blk_expr: blk_expr_mixfix %prec prec_PreferShift {
   SHOWPARSE("blk_expr -> blk_expr_mixfix");
   $$ = $1;
+}
+blk_expr: blk_expr_mixfix ':' blk_type {
+  SHOWPARSE("blk_expr -> blk_expr_mixfix : blk_type");
+  $$ = AST::make(at_typeAnnotation, $2.loc, $1, $3);
 }
 
 blk_iblock: ILCB IRCB {

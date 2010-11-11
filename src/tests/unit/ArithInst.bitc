@@ -41,4 +41,4 @@ provide bitc.main main
 
 def main.main(argvec: string[])
 in
-  if 1:int32 == 1 then 0 else 1:int32
+  if (1:int32) == 1 then 0 else 1:int32
