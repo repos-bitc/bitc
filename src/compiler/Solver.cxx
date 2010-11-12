@@ -549,21 +549,23 @@ handleEquPreds(std::ostream &errStream, shared_ptr<Trail> trail,
 
 
 /**********************************************************
-                   THE Constraint solver 
+                   The Constraint solver 
 
     The input is a set of constraints, which the solver tries to solve
     based on pre-defined rules or known instances. It returns the set
     of residual constraints that:
       -- are known to be solvable
-      -- do not constain only concrete types
+      -- do not constrain only concrete types
  
     The predicate solver is a unification based algorthm
     here are the steps to follow:
-    1) Handle special prediactes like ref-types as though apropriate
+
+    1) Handle special predicates like ref-types as though apropriate
        instances are present. 
 
     2) Handle the polymorphic constraint as a special case: 
        If we find a constraint
+
           2.a) c = *(m, t, t1) then Unify(t = t1), c is satisfied
           2.b) c = *(p, t, t1) | Immutable(t1), then c is satisfied
           2.c) c = *(k, t, t1) | mutable(t1), then k = m
