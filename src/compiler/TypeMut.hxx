@@ -46,9 +46,9 @@
 #include "AST.hxx"
 #include "Type.hxx"
  
-/* Different options for creating type records. Thsese helper
+/* Different options for creating type records. These helper
    functions are in place so that all maybe-records are created at one
-   place. Some functions exist so that we cah flip copy behavious in
+   place. Some functions exist so that we can flip copy behaviors in
    some cases easily */
 
  
