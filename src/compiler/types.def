@@ -89,7 +89,7 @@ DEFTYPE(vector,    false,  false,  false, false, true,  false,  false)
 DEFTYPE(ref,       false,  true,   false, false, true,  false,  false)
 // by-ref is not actually used as a type. It is only present to qualify
 // at_byreftype since all ASTs must have a type. Since by-ref types
-// can only appear within argvecs, the my-ref-ness is marked on the
+// can only appear within argvecs, the by-ref-ness is marked on the
 // component-flags of ty_fnArgvec, and the ty_byref wrapper is
 // discarded henceforth.
 DEFTYPE(byref,     false,  true,   false, false, true,  false,  false)
@@ -103,7 +103,7 @@ DEFTYPE(exn,       false,  false,  false, false, true,  false,  false)
 DEFTYPE(dummy,     false,  false,  false, false, false, false,  false)
 DEFTYPE(field,     false,  false,  true,  false, false, false,  false)
 
-// The following are constraints, stricttly speaking, but are types at
+// The following, strictly speaking, are constraints, but are types at
 // the next level.
 DEFTYPE(typeclass, false,  false,  false, false, false, false,  false)
 // Meta polymorphic constraint (MPC)
