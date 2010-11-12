@@ -784,7 +784,7 @@ public:
   static unsigned long long astCount;
 
  public:
-  /// @bug This is a temporary expedient until I can start/end
+  /// @bug This is a temporary expedient until I get start/end
   /// location handling put in to the parser.
   AST_LOCATION_TYPE endLoc() { return loc; }
 
