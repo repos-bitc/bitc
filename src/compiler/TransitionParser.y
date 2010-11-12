@@ -1273,6 +1273,11 @@ blk_constructor: blk_ident { /* simple constructor */
   $1->flags |= (ID_IS_GLOBAL);
   $$ = AST::make(at_constructor, $1->loc, $1);
 };
+// This is possible without conflict, but we aren't doing it yet:
+//blk_constructor: blk_ident ':' blk_field_type { /* common field */
+//  SHOWPARSE("blk_constructor -> blk_ident");
+//  $$ = AST::make(at_field, $1->loc, $1, $3);
+//};
 blk_constructor: blk_ident IsILCB blk_fields IRCB { /* compound constructor */
   SHOWPARSE("blk_constructor ->  blk_ident { blk_fields }");
   $1->flags |= (ID_IS_GLOBAL);
