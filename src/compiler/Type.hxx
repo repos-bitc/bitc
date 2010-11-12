@@ -586,7 +586,7 @@ public:
   // Is the type known to be Immutable upto function boundary?
   bool isDeepImmut();
   // Does this type contain variables only within functions or on the
-  // lhs of a matybe type?
+  // lhs of a maybe type?
   bool isConcretizable();
   // Does this type contain variables only within functions,
   // references or on the lhs of a matybe type?
