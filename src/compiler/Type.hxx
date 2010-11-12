@@ -589,7 +589,7 @@ public:
   // lhs of a maybe type?
   bool isConcretizable();
   // Does this type contain variables only within functions,
-  // references or on the lhs of a matybe type?
+  // references or on the lhs of a maybe type?
   bool isShallowConcretizable();
 
   // Normalize a type in-place. The following normalizations are
