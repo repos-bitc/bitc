@@ -1109,6 +1109,10 @@ blk_fndef_tail: tk_IN blk_iblock {
   SHOWPARSE("blk_fndef_tail -> IN blk_iblock");
   $$ = $2;
 }
+blk_fndef_tail: '{' blk_expr_seq '}' {
+  SHOWPARSE("blk_fndef_tail -> '{' blk_expr_seq '}'");
+  $$ = $2;
+}
 
 // PROCLAIM DEFINITION -- VALUES [6.2]
 blk_value_declaration: blk_constraints tk_DEF blk_defpattern blk_externals {
@@ -2020,16 +2024,6 @@ blk_expr_seq: blk_value_definition {
   SHOWPARSE("blk_expr_seq -> blk_value_definition");
   $$ = AST::make(at_begin, $1->loc, $1);
 };
-/*blk_expr_seq: blk_expr_seq blk_expr {
-  SHOWPARSE("blk_expr_seq -> blk_expr_seq blk_expr");
-  $$ = $1;
-  $$->addChild($2);
-};
-blk_expr_seq: blk_expr_seq SC blk_value_definition {
-  SHOWPARSE("blk_expr_seq -> blk_expr_seq SC blk_value_definition");
-  $$ = $1;
-  $$->addChild($3);
-  };*/
 blk_expr_seq: blk_expr_seq ';' blk_expr {
   SHOWPARSE("blk_expr_seq -> blk_expr_seq ; blk_expr");
   $$ = $1;
