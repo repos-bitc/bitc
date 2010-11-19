@@ -2606,7 +2606,7 @@ blk_ident: tk_ReservedWord {
   $$ = AST::make(at_ident, $1);
 };
 
-blk_useident: blk_ident %prec PreferShift {
+blk_useident: blk_ident %prec prec_PreferShift {
   SHOWPARSE("blk_useident -> blk_ident");
   $$ = $1;
 };
