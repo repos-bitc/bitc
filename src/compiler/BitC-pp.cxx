@@ -1027,13 +1027,18 @@ blk_BitcP(INOstream& out, shared_ptr <const AST> ast, PrettyPrintFlags flags)
       break;
     }
 
-  case at_letGather:
+#if dbg_flags != 0
+  case at_letGather:            // DEBUG ONLY
+  case at_fields:               // DEBUG_ONLY
     {
-      std::cerr << "blk_BitcP() should never be asked to print an internal node of type "
-                << ast->tagName() << std::endl;
-      assert(false);
+      out << ast->atKwd() << " { ";
+      out.indentToHere();
+      doChildren(blk_BitcP, out, ast, 0, "", ";\n", "\n}", flags);
+      break;      
     }
+#endif
 
+    // CATCH-ALL:
   default:
     {
       std::cerr << "blk_BitcP() needs support for AST type " 
