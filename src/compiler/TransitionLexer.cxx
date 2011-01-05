@@ -430,42 +430,42 @@ TransitionLexer::getChar()
 
   utf[0] = inStream.get();
   c = utf[0];
-  if (utf[0] == EOF)
+  if (inStream.eof())
     return EOF;
 
   if (c <= 127)
     goto done;
 
   utf[1] = inStream.get();
-  if (utf[1] == EOF)
+  if (inStream.eof())
     return EOF;
 
   if (c <= 223)
     goto done;
 
   utf[2] = inStream.get();
-  if (utf[2] == EOF)
+  if (inStream.eof())
     return EOF;
 
   if (c <= 239)
     goto done;
 
   utf[3] = inStream.get();
-  if (utf[3] == EOF)
+  if (inStream.eof())
     return EOF;
 
   if (c <= 247)
     goto done;
  
   utf[4] = inStream.get();
-  if (utf[4] == EOF)
+  if (inStream.eof())
     return EOF;
 
   if (c <= 251)
     goto done;
 
   utf[5] = inStream.get();
-  if (utf[5] == EOF)
+  if (inStream.eof())
     return EOF;
 
  done:
