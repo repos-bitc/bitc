@@ -99,6 +99,7 @@ namespace sherpa {
       default:
 	{
 	  offset++;
+          break;
 	}
       }
     }
