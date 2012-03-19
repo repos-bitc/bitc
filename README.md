@@ -2,9 +2,13 @@
 
 Download:  http://bitc-lang.org/download/
 
-Pull from Mercurial repo:
+Update from main Mercurial repo:
 
-    hg clone http://dev.eros-os.com/hg/bitc
+    git-hg clone http://dev.eros-os.com/hg/bitc
+
+    or
+
+    git-hg pull http://dev.eros-os.com/hg/bitc
 
 Build:
 
