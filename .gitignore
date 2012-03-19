@@ -1,0 +1,106 @@
+# begin section managed by etckeeper (do not edit this section by hand)
+
+# # ignore extension-less files (compiled filter)
+# #############################
+*
+!*.*
+
+# new and old versions of conffiles, stored by dpkg
+*.dpkg-*
+
+# mount(8) records system state here, no need to store these
+blkid.tab
+blkid.tab.old
+
+# some other files in /etc that typically do not need to be tracked
+nologin
+ld.so.cache
+mtab
+.pwd.lock
+network/run
+adjtime
+lvm/cache
+
+# editor temp files
+*~
+.*.sw?
+.sw?
+#*#
+DEADJOE
+
+# end section managed by etckeeper
+
+# ######################################## #
+# # http://help.github.com/ignore-files/ # #
+# ######################################## #
+
+# Compiled source #
+# ###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.a
+*.dat
+*.dep
+*.hmap
+*.hi
+*.out
+
+# # Packages #
+# ############
+# # it's better to unpack these files and commit the raw source
+# # git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# # Logs and databases #
+# ######################
+*.log
+*.sql
+*.sqlite
+
+# # OS generated files #
+# ######################
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+.DS_Store
+
+# # Haskell #
+# ###########
+cabal-dev
+dist
+.static-cache
+static/tmp
+.sqlite3
+
+# # Private #
+# ###########
+.ssh
+ssh
+id_rsa
+id_dsa
+identity
+.gitconfig
+.gitconfig*
+
+# # Misc #
+# ########
+build
+*.pbxuser
+*.mode2v3
+*.mode1v3
+*.perspective
+*.perspectivev3
+.oh-my-zsh
+
